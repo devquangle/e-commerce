@@ -1,14 +1,12 @@
 
 import './App.css'
+import Container from './components/Container'
+import UserLayout from './layouts/UserLayout'
 
 function App() {
 
   return (
-    <>
-      <div className="min-h-screen">
-        Tailwind is working!
-      </div>
-    </>
+     <UserLayout/>
   )
 }
 
