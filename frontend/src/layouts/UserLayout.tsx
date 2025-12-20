@@ -1,14 +1,17 @@
-import React from 'react'
-import Header from '../components/layout/user/Header'
-import Footer from '../components/layout/user/footer'
+import Header from '@/components/common/Header'
+import Footer from '@/components/common/Footer'
+import { Outlet } from 'react-router-dom'
 
-function UserLayout() {
-   return (
-    <div>
+export default function UserLayout() {
+  return (
+    <div className="min-h-screen flex flex-col bg-slate-50">
       <Header />
-      <Footer/>
-    </div >
+
+      <main className="flex-1">
+        <Outlet />
+      </main>
+      <Footer />
+    </div>
   )
 }
 
-export default UserLayout
