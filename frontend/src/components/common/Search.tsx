@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 export default function Search() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
+
   return (
-    <div className="flex items-center gap-2 flex-1 justify-end px-2">
+    <div className="flex items-center gap-2 flex-1 justify-end">
       <input
         type="text"
         placeholder="Tìm kiếm sách..."
@@ -22,8 +23,8 @@ export default function Search() {
         `}
       />
       <button
-        type="button"
-        className="h-9 w-9 shrink-0 rounded-full border flex items-center justify-center"
+       
+        className="h-9 w-9 shrink-0 rounded-full border flex items-center justify-center cursor-pointer"
         onClick={() => setIsSearchOpen((prev) => !prev)}
         aria-label="Tìm kiếm"
       >

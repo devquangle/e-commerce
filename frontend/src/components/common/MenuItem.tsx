@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom"
 
 const menuItems = [
     {
@@ -22,13 +23,11 @@ const menuItems = [
         path: "/products"
     },
 
-     {
+    {
         id: 5,
         label: "Blogs",
         path: "/products"
     },
-
-
 ]
 
 export default function MenuItem({ className = "" }) {
@@ -36,14 +35,14 @@ export default function MenuItem({ className = "" }) {
         <ul className={className}>
             {
                 menuItems.map((item) => (
-                    <li key={item.id}>
-                        <a href="">
+
+                    <li key={item.id} >
+                        <Link to={item.path} className="hover:text-indigo-500">
                             {item.label}
-                        </a>
+                        </Link>
                     </li>
                 ))
             }
-
         </ul>
     )
 }

@@ -74,7 +74,7 @@ function Home() {
                     <p className="mt-2 text-xs text-slate-600">Tiết kiệm lên đến 30%</p>
                   </div>
                   <div className="mt-4 flex items-end justify-between">
-    <div>
+                    <div>
                       <p className="text-xs text-slate-500">Giá chỉ từ</p>
                       <p className="text-lg font-bold text-indigo-600">249.000₫</p>
                     </div>
