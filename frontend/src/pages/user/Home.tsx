@@ -35,7 +35,7 @@ function Home() {
   return (
     <div className="pb-12">
       {/* HERO */}
-      <section className="bg-gradient-to-r from-indigo-50 via-white to-amber-50">
+      <section className="bg-linear-to-r from-indigo-50 via-white to-amber-50">
         <Container className="px-4 md:px-8 py-10 md:py-16">
           <div className="grid gap-10 md:grid-cols-2 md:items-center">
             <div>
@@ -63,7 +63,7 @@ function Home() {
             </div>
 
             <div className="relative">
-              <div className="absolute -inset-4 rounded-3xl bg-gradient-to-tr from-indigo-100 via-white to-amber-100 blur-lg opacity-70" />
+              <div className="absolute -inset-4 rounded-3xl bg-linear-to-tr from-indigo-100 via-white to-amber-100 blur-lg opacity-70" />
               <div className="relative grid grid-cols-3 gap-3 rounded-3xl bg-white p-4 shadow-lg">
                 <div className="col-span-2 flex flex-col justify-between rounded-2xl bg-indigo-50 p-4">
                   <div>
@@ -147,7 +147,7 @@ function Home() {
                 key={book.id}
                 className="group flex flex-col overflow-hidden rounded-2xl bg-white border border-slate-100 shadow-sm hover:-translate-y-1 hover:shadow-md transition"
               >
-                <div className="aspect-[3/4] bg-slate-100" />
+                <div className="aspect-3/4 bg-slate-100" />
 
                 <div className="flex flex-1 flex-col p-3 sm:p-4">
                   <div className="mb-1 flex items-center justify-between gap-2">
