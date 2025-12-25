@@ -1,5 +1,6 @@
 import Container from '@/components/Container'
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   return (
@@ -78,24 +79,7 @@ export default function Login() {
               </div>
 
             </div>
-            {/* Ghi nhớ & Quên mật khẩu */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember"
-                  type="checkbox"
-                  className="w-4 h-4 text-blue-500 rounded focus:ring-blue-500"
-                />
-                <label htmlFor="remember" className="ml-2 text-sm font-medium text-gray-500 select-none">
-                  Nhớ mật khẩu?
-                </label>
-              </div>
-
-              <a href="#" className="text-sm text-blue-500 hover:text-blue-500">
-                Quên mật khẩu?
-              </a>
-            </div>
-
+        
             {/* Login button */}
             <button
               className="
@@ -128,17 +112,19 @@ export default function Login() {
 
               Continue with Google
             </button>
-            <div className='flex justify-center items-center'>
-              <p className="text-sm text-gray-600 ">
-                Chưa có tài khoản?{" "}
-                <a
-                  href="#"
-                  className="font-medium text-blue-600 hover:text-blue-700"
-                >
+            <div className="flex justify-between text-sm mt-4">
+              <Link to={"/forgot-password"} className="text-blue-600 hover:underline">
+                Quên mật khẩu?
+              </Link>
+
+              <span className="text-gray-600">
+                Chưa có tài khoản? {" "}
+                <Link to={"/register"} className="text-blue-600 font-medium hover:underline">
                   Đăng ký ngay
-                </a>
-              </p>
+                </Link>
+              </span>
             </div>
+
 
           </div>
 
