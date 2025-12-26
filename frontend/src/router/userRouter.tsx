@@ -2,6 +2,7 @@ import Login from "@/pages/auth/Login";
 import Home from "@/pages/user/Home";
 import { Navigate } from "react-router-dom";
 import Register from './../pages/auth/Register';
+import Products from "@/pages/user/Products";
 
 const userRouter = [
     {
@@ -19,6 +20,10 @@ const userRouter = [
      {
         path: "/register",
         element: <Register />,
+    },
+     {
+        path: "/products",
+        element: <Products />,
     },
 ];
 

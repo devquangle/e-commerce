@@ -1,35 +1,39 @@
+import ProductCard from '@/components/common/ProductCard'
 import Container from '@/components/Container'
+import type { Product } from '@/types/Product';
 
-const featuredBooks = [
-  {
+
+
+const products: Product[] = [
+   {
     id: 1,
-    title: 'Atomic Habits',
-    author: 'James Clear',
-    price: '189.000₫',
-    badge: 'Bán chạy',
-  },
-  {
-    id: 2,
-    title: 'Dám Nghĩ Lớn',
-    author: 'David J. Schwartz',
-    price: '159.000₫',
-    badge: 'Gợi ý cho bạn',
-  },
-  {
-    id: 3,
-    title: 'Nhà Giả Kim',
-    author: 'Paulo Coelho',
-    price: '129.000₫',
-    badge: 'Kinh điển',
-  },
-  {
-    id: 4,
-    title: 'Totto-chan Bên Cửa Sổ',
-    author: 'Tetsuko Kuroyanagi',
-    price: '145.000₫',
-    badge: 'Thiếu nhi',
-  },
-] as const
+    title: 'Naruto Tập 1',
+    price: 25000,
+    originalPrice: 35000,
+    author: ['Masashi Kishimoto'],
+    coverUrl: 'https://picsum.photos/300/400?random=1',
+    publishedAt: '2025-01-01',
+    soldCount: 1520,
+    rating: 4.8,
+    reviewCount: 320,
+    isFeatured: true
+},
+    {
+      id: 2,
+    title: 'Naruto Tập 1',
+    price: 25000,
+    originalPrice: 35000,
+    author: ['Masashi Kishimoto'],
+    coverUrl: 'https://picsum.photos/300/400?random=1',
+    publishedAt: '2025-01-01',
+    soldCount: 1520,
+    rating: 4.8,
+    reviewCount: 320,
+    isFeatured: true
+    }
+];
+
+
 
 function Home() {
   return (
@@ -142,35 +146,11 @@ function Home() {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {featuredBooks.map((book) => (
-              <article
-                key={book.id}
-                className="group flex flex-col overflow-hidden rounded-2xl bg-white border border-slate-100 shadow-sm hover:-translate-y-1 hover:shadow-md transition"
-              >
-                <div className="aspect-3/4 bg-slate-100" />
-
-                <div className="flex flex-1 flex-col p-3 sm:p-4">
-                  <div className="mb-1 flex items-center justify-between gap-2">
-                    <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
-                      {book.badge}
-                    </span>
-                    <span className="text-xs text-amber-500">★ 4.8</span>
-                  </div>
-
-                  <h3 className="text-sm font-semibold text-slate-900 line-clamp-2 group-hover:text-indigo-600">
-                    {book.title}
-                  </h3>
-                  <p className="mt-1 text-xs text-slate-500">{book.author}</p>
-
-                  <div className="mt-3 flex items-center justify-between">
-                    <p className="text-sm font-bold text-indigo-600">{book.price}</p>
-                    <button className="rounded-full border border-slate-200 px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50">
-                      Thêm vào giỏ
-                    </button>
-                  </div>
-                </div>
-              </article>
+            {products.map((product) => (
+                <ProductCard key={product.id} product={product} />
             ))}
+
+         
           </div>
         </Container>
       </section>
