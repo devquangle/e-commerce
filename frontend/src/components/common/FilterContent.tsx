@@ -22,6 +22,7 @@ const authors = [
   "Dale Carnegie",
   "J.K Rowling",
   "Paulo Coelho",
+  "Haruki Murakami",
   "Dan Brown",
   "Yuval Noah Harari",
 ];
