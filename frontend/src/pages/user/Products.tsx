@@ -22,7 +22,7 @@ const products: Product[] = [
   },
   {
     id: 2,
-    title: 'Naruto Tập 1',
+    title: 'Naruto Tập 1 ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp',
     price: 25000,
     originalPrice: 35000,
     author: ['Masashi Kishimoto'],
@@ -47,6 +47,19 @@ const products: Product[] = [
   }, {
     id: 4,
     title: 'Naruto Tập 1',
+    price: 25000,
+    originalPrice: 35000,
+    author: ['Masashi Kishimoto'],
+    coverUrl: 'https://picsum.photos/300/400?random=1',
+    publishedAt: '2025-01-01',
+    soldCount: 1520,
+    rating: 4.8,
+    reviewCount: 320,
+    isFeatured: true
+  },
+  {
+    id: 5,
+    title: 'Naruto Tập 1 ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp',
     price: 25000,
     originalPrice: 35000,
     author: ['Masashi Kishimoto'],
@@ -94,7 +107,7 @@ export default function Products() {
 
         {/* PRODUCTS */}
         <main className="w-full lg:w-3/4">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 items-stretch">
             {products.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}

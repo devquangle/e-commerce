@@ -5,7 +5,7 @@ import type { Product } from '@/types/Product';
 
 
 const products: Product[] = [
-   {
+  {
     id: 1,
     title: 'Naruto Tập 1',
     price: 25000,
@@ -17,9 +17,9 @@ const products: Product[] = [
     rating: 4.8,
     reviewCount: 320,
     isFeatured: true
-},
-    {
-      id: 2,
+  },
+  {
+    id: 2,
     title: 'Naruto Tập 1',
     price: 25000,
     originalPrice: 35000,
@@ -30,7 +30,7 @@ const products: Product[] = [
     rating: 4.8,
     reviewCount: 320,
     isFeatured: true
-    }
+  }
 ];
 
 
@@ -145,12 +145,10 @@ function Home() {
             </a>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 items-stretch">
             {products.map((product) => (
-                <ProductCard key={product.id} product={product} />
+              <ProductCard key={product.id} product={product} />
             ))}
-
-         
           </div>
         </Container>
       </section>
