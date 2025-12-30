@@ -30,6 +30,66 @@ const products: Product[] = [
     rating: 4.8,
     reviewCount: 320,
     isFeatured: true
+  },{
+    id: 3,
+    title: 'Naruto Tập 1',
+    price: 25000,
+    originalPrice: 35000,
+    author: ['Masashi Kishimoto'],
+    coverUrl: 'https://picsum.photos/300/400?random=1',
+    publishedAt: '2025-01-01',
+    soldCount: 1520,
+    rating: 4.8,
+    reviewCount: 320,
+    isFeatured: true
+  },{
+    id: 4,
+    title: 'Naruto Tập 1',
+    price: 25000,
+    originalPrice: 35000,
+    author: ['Masashi Kishimoto'],
+    coverUrl: 'https://picsum.photos/300/400?random=1',
+    publishedAt: '2025-01-01',
+    soldCount: 1520,
+    rating: 4.8,
+    reviewCount: 320,
+    isFeatured: true
+  },{
+    id: 5,
+    title: 'Naruto Tập 1',
+    price: 25000,
+    originalPrice: 35000,
+    author: ['Masashi Kishimoto'],
+    coverUrl: 'https://picsum.photos/300/400?random=1',
+    publishedAt: '2025-01-01',
+    soldCount: 1520,
+    rating: 4.8,
+    reviewCount: 320,
+    isFeatured: true
+  },{
+    id: 6,
+    title: 'Naruto Tập 1',
+    price: 25000,
+    originalPrice: 35000,
+    author: ['Masashi Kishimoto'],
+    coverUrl: 'https://picsum.photos/300/400?random=1',
+    publishedAt: '2025-01-01',
+    soldCount: 1520,
+    rating: 4.8,
+    reviewCount: 320,
+    isFeatured: true
+  },{
+    id: 7,
+    title: 'Naruto Tập 1',
+    price: 25000,
+    originalPrice: 35000,
+    author: ['Masashi Kishimoto'],
+    coverUrl: 'https://picsum.photos/300/400?random=1',
+    publishedAt: '2025-01-01',
+    soldCount: 1520,
+    rating: 4.8,
+    reviewCount: 320,
+    isFeatured: true
   }
 ];
 
@@ -145,7 +205,7 @@ function Home() {
             </a>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 items-stretch">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 items-stretch">
             {products.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
