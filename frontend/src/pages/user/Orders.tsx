@@ -8,6 +8,7 @@ type Order = {
   total: number;
   status: "Đang xử lý" | "Đang giao" | "Hoàn thành" | "Đã hủy";
   paymentMethod: "Tiền mặt" | "Ví điện tử" | "Thẻ tín dụng";
+  paymentStatus: "Chưa thanh toán" | "Đã thanh toán";
   date: string; // YYYY-MM-DD
 };
 
@@ -25,6 +26,7 @@ export default function Orders() {
       total: 250000,
       status: "Hoàn thành",
       paymentMethod: "Tiền mặt",
+      paymentStatus: "Chưa thanh toán",
       date: "2025-12-01",
     },
     {
@@ -35,7 +37,19 @@ export default function Orders() {
       total: 520000,
       status: "Đang giao",
       paymentMethod: "Ví điện tử",
+      paymentStatus: "Chưa thanh toán",
       date: "2025-12-15",
+    },
+    {
+      id: 3,
+      fullname: "Nguyen Van A",
+      phone: "0901234567",
+      address: "123 Đường ABC, Quận 1, TP.HCM",
+      total: 250000,
+      status: "Đang xử lý",
+      paymentMethod: "Tiền mặt",
+      paymentStatus: "Chưa thanh toán",
+      date: "2025-12-01",
     },
   ];
 
@@ -90,8 +104,8 @@ export default function Orders() {
           <button
             onClick={() => setStatusFilter(null)}
             className={`px-3 py-1 text-sm rounded ${statusFilter === null
-                ? "bg-blue-500 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              ? "bg-blue-500 text-white"
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
           >
             Tất cả
@@ -104,8 +118,8 @@ export default function Orders() {
                   setStatusFilter(statusFilter === status ? null : status)
                 }
                 className={`px-3 py-1 text-sm rounded ${statusFilter === status
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
               >
                 {status}
@@ -120,58 +134,79 @@ export default function Orders() {
         {filteredOrders.map((order) => (
           <div
             key={order.id}
-            className="border rounded-lg p-3 shadow-sm hover:shadow-md bg-white flex flex-col md:flex-row justify-between items-start md:items-center"
+            className="rounded-xl shadow-sm hover:shadow-md bg-white p-4 space-y-4"
           >
-            {/* Thông tin người nhận + ngày */}
-            <div className="flex flex-1 justify-between w-full md:w-auto md:space-x-6 p-3">
-              <div className="flex-1 space-y-1 text-sm">
-                <p className="font-medium text-gray-800">{order.fullname}</p>
-                <p className="text-gray-600">{order.phone}</p>
-                <p className="text-gray-600">{order.address}</p>
-                <p className="text-gray-500 text-xs">Ngày đặt: {formatDate(order.date)}</p>
+            {/* Header */}
+            <div className="flex justify-between items-start m-0">
+              <div className="text-sm space-y-0.5">
+                <p className="font-medium text-gray-800">{order.fullname} - Ngày đặt: {formatDate(order.date)}</p>
               </div>
 
-              {/* Thông tin đơn hàng */}
-              <div className="flex flex-col justify-between mt-2 md:mt-0 space-y-0.5 text-sm text-gray-700">
-                <p>
-                  <span className="font-medium">Tổng tiền:</span>{" "}
-                  {order.total.toLocaleString("vi-VN")}₫
-                </p>
-                <p>
-                  <span className="font-medium">Trạng thái:</span>{" "}
-                  <span
-                    className={`p-2${order.status === "Hoàn thành"
-                        ? "bg-green-100 text-green-700"
-                        : order.status === "Đang giao"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : order.status === "Đang xử lý"
-                            ? "bg-blue-100 text-blue-700"
-                            : "bg-red-100 text-red-700"
-                      }`}
-                  >
-                    {order.status}
-                  </span>
-                </p>
+              <span
+                className={`px-2 py-1 rounded text-xs font-medium ${order.status === "Hoàn thành"
+                    ? "bg-green-100 text-green-700"
+                    : order.status === "Đang giao"
+                      ? "bg-yellow-100 text-yellow-700"
+                      : order.status === "Đang xử lý"
+                        ? "bg-blue-100 text-blue-700"
+                        : "bg-red-100 text-red-700"
+                  }`}
+              >
+                {order.status}
+              </span>
+            </div>
+
+            {/* Body */}
+            <div className="grid md:grid-cols-2 gap-3 text-sm bg-gray-50 rounded-lg m-0 ">
+              <div className="space-y-1">
+                <p className="text-gray-500">{order.phone}</p>
+                <p className="text-gray-600">{order.address}</p>
+              </div>
+
+              <div className="space-y-1">
                 <p>
                   <span className="font-medium">Thanh toán:</span>{" "}
                   {order.paymentMethod}
                 </p>
+                <p>
+                  <span className="font-medium">Trạng thái:</span>{" "}
+                  <span
+                    className={`px-2 py-0.5 rounded text-xs ${order.paymentStatus === "Đã thanh toán"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-orange-100 text-orange-700"
+                      }`}
+                  >
+                    {order.paymentStatus}
+                  </span>
+                </p>
               </div>
             </div>
 
-            {/* Action */}
-            <div className="flex flex-col gap-2">
-              <button className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600">
-                Mua lại
-              </button>
-              <button className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600">
-                Chi tiết
-              </button>
-              <button className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600">
-                Huỷ đơn
-              </button>
+            {/* Footer */}
+            <div className="flex flex-wrap justify-between items-center gap-3 pt-1">
+              <p className="font-semibold text-gray-800">
+                Tổng tiền: {order.total.toLocaleString("vi-VN")}₫
+              </p>
+
+              <div className="flex gap-2 flex-wrap">
+                <button className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600">
+                  Chi tiết
+                </button>
+
+                <button className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200">
+                  Mua lại
+                </button>
+
+                {order.status === "Đang xử lý" && (
+                  <button className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600">
+                    Huỷ đơn
+                  </button>
+                )}
+              </div>
             </div>
           </div>
+
+
         ))}
 
         {filteredOrders.length === 0 && (
