@@ -40,12 +40,13 @@ export default function Header() {
               </button>
               <div className="absolute top-full right-0 pt-2 z-50 opacity-0 invisible translate-y-2 transition group-hover:opacity-100 group-hover:visible group-hover:translate-y-0">
                 <div className="w-56 bg-white border rounded-lg shadow-lg ">
-                  <ul className="py-2 text-md ">
-                    <li><Link to="" className="px-4 py-2">Thông tin cá nhân</Link></li>
+                  <ul className="p-2 text-md">
+                    <li><Link to={"/account"} className="px-4 py-2 hover:text-blue-500">Thông tin cá nhân</Link></li>
+                      <li><Link to="" className="px-4 py-2 hover:text-blue-500">Đơn hàng</Link></li>
                     <li className="border-t my-1" />
-                    <li><Link to="" className="px-4 py-2">Đăng xuất</Link></li>
-                    <li><Link to="" className="px-4 py-2">Đăng nhập</Link></li>
-                    <li><Link to="" className="px-4 py-2">Đăng ký</Link></li>
+                    <li><Link to="" className="px-4 py-2 hover:text-blue-500">Đăng xuất</Link></li>
+                    <li><Link to={"/login"} className="px-4 py-2 hover:text-blue-500">Đăng nhập</Link></li>
+                    <li><Link to={"/register"} className="px-4 py-2 hover:text-blue-500">Đăng ký</Link></li>
                   </ul>
                 </div>
               </div>

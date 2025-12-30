@@ -7,13 +7,23 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<UserLayout />}>
-          {userRouter.map((route, index) => (
+         <Route element={<UserLayout />}>
+          {userRouter.map((route) => (
             <Route
-              key={index}
+              key={route.path}
               path={route.path}
               element={route.element}
-            />
+            >
+              {/* Nếu route có children, map vào ở đây */}
+              {route.children?.map((child) => (
+                <Route
+                  key={child.path || "index"}
+                  index={child.index}
+                  path={child.path}
+                  element={child.element}
+                />
+              ))}
+            </Route>
           ))}
         </Route>
       </Routes>
