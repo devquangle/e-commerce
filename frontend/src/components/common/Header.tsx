@@ -7,7 +7,18 @@ import { useState } from "react";
 import Logo from "./Logo";
 import MobileDrawer from './MobileDrawer';
 
+type MenuAccount = {
+  id: number,
+  lable: string,
+  path: string
+}
 
+const menuItems: MenuAccount[] = [
+  { id: 1, lable: "Đăng nhập", path: "/login" },
+  { id: 2, lable: "Đăng ký", path: "/register" },
+  { id: 3, lable: "Thông tin cá nhân", path: "/account/profile" },
+  { id: 4, lable: "Đơn hàng", path: "/account/orders" },
+]
 
 export default function Header() {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
@@ -41,12 +52,10 @@ export default function Header() {
               <div className="absolute top-full right-0 pt-2 z-50 opacity-0 invisible translate-y-2 transition group-hover:opacity-100 group-hover:visible group-hover:translate-y-0">
                 <div className="w-56 bg-white border rounded-lg shadow-lg ">
                   <ul className="p-2 text-md">
-                    <li><Link to={"/account"} className="px-4 py-2 hover:text-blue-500">Thông tin cá nhân</Link></li>
-                      <li><Link to="" className="px-4 py-2 hover:text-blue-500">Đơn hàng</Link></li>
-                    <li className="border-t my-1" />
-                    <li><Link to="" className="px-4 py-2 hover:text-blue-500">Đăng xuất</Link></li>
-                    <li><Link to={"/login"} className="px-4 py-2 hover:text-blue-500">Đăng nhập</Link></li>
-                    <li><Link to={"/register"} className="px-4 py-2 hover:text-blue-500">Đăng ký</Link></li>
+                    {menuItems.map((item) => (
+                      <li key={item.id} className="w-full p-2  hover:bg-gray-100 hover:text-blue-500"><Link to={item.path} className="px-4 py-2">{item?.lable}</Link></li>
+                    ))}
+                   
                   </ul>
                 </div>
               </div>

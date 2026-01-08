@@ -12,8 +12,12 @@ export default function Profile() {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row">
-     
+   <div className="flex-1 p-2">
+       <h2 className="text-xl  font-semibold text-gray-800 mb-4">
+        Tài khoản của tôi
+      </h2>
+     <div className="flex flex-col lg:flex-row">
+    
       <div className="flex-1">
         <form className="space-y-5 p-2">
           <div>
@@ -35,7 +39,7 @@ export default function Profile() {
               id="email"
               placeholder="user@example.com"
               className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
-              
+
             />
           </div>
 
@@ -67,13 +71,14 @@ export default function Profile() {
         </form>
       </div>
 
-    
+
       <div className="flex flex-col items-center lg:w-1/3 space-y-4 p-4">
         <img
           src={avatar || "/images/default-avatar.png"}
           alt="avatar"
           className="w-32 h-32 rounded-full border object-cover"
         />
+
         <label className="cursor-pointer text-blue-500 hover:underline">
           Thay đổi ảnh
           <input
@@ -87,8 +92,10 @@ export default function Profile() {
         <button className="w-full lg:w-auto px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
           Đổi mật khẩu
         </button>
+        
       </div>
-    </div>
 
+    </div>
+   </div>
   );
 }

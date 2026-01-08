@@ -10,6 +10,7 @@ import Profile from "@/pages/auth/Profile";
 
 import Address from "@/pages/user/Address";
 import Favorites from "@/pages/user/Favorites";
+import OrderDetails from "@/pages/user/OrderDetails";
 
 const userRouter = [
     {
@@ -47,6 +48,10 @@ const userRouter = [
             {
                 path: "orders",
                 element: <Orders />,
+            },
+            {
+                path: "order/:id",
+                element: <OrderDetails />,
             },
             {
                 path: "address",

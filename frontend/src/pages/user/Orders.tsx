@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 type Order = {
   id: number;
@@ -77,7 +77,7 @@ export default function Orders() {
 
   return (
     <div className="flex-1 p-2">
-      <h2 className="text-xl lg:text-2xl font-semibold text-gray-800 mb-4">
+      <h2 className="text-xl  font-semibold text-gray-800 mb-4">
         Danh sách đơn hàng
       </h2>
 

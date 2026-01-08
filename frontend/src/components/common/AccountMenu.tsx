@@ -10,12 +10,12 @@ type AccountMenuItem = {
     id: number,
     label: string,
     path: string,
-    icon?: string,
+
 
 }
 
 const menus: AccountMenuItem[] = [
-    {id: 1, label: 'Hồ sơ', path: '/account/profile', icon: ``},
+    { id: 1, label: 'Hồ sơ', path: '/account/profile' },
     { id: 2, label: 'Đơn hàng', path: '/account/orders' },
     { id: 3, label: 'Địa chỉ', path: '/account/address' },
     { id: 4, label: 'Yêu thích', path: '/account/favorites' },
@@ -26,7 +26,7 @@ export default function AccountMenu({
     variant = 'sidebar',
 }: AccountMenuProps) {
     return (
-        <nav className="space-y-2">
+        <nav className="space-y-2 my-2">
 
 
             {variant === 'sidebar' && (
@@ -47,19 +47,12 @@ export default function AccountMenu({
                 {menus.map((item) => (
                     <li
                         key={item.path}
-                        className="rounded-lg hover:bg-gray-100"
+                        className="rounded-lg px-1 lg:px-3 hover:bg-gray-100 m-0"
                     >
                         <Link
                             to={item.path}
-                            className="flex items-center gap-3 w-full px-3 py-2 text-sm text-gray-600"
+                            className="flex justify-between items-center gap-3 w-full p-1 lg:p-3 text-sm text-gray-600 hover:text-blue-500"
                         >
-                            {/* Icon – desktop */}
-                            <span className="hidden lg:block">
-                                <svg className="w-6 h-6 text-blue-500" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M4 4h16v16H4z" />
-                                </svg>
-                            </span>
-
                             {item.label}
                         </Link>
                     </li>

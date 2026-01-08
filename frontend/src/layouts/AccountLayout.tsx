@@ -5,7 +5,7 @@ import { Outlet } from 'react-router-dom';
 export default function AccountLayout() {
 
     return (
-        <Container className="p-4 md:p-8">
+        <Container className="p-2 lg:p-4">
             <AccountMenu
                 variant="mobile"
                 className="flex lg:hidden gap-2 overflow-x-auto py-2"
