@@ -11,6 +11,7 @@ import Profile from "@/pages/auth/Profile";
 import Address from "@/pages/user/Address";
 import Favorites from "@/pages/user/Favorites";
 import OrderDetails from "@/pages/user/OrderDetails";
+import Carts from "@/pages/user/Carts";
 
 const userRouter = [
     {
@@ -32,6 +33,10 @@ const userRouter = [
     {
         path: "/products",
         element: <Products />,
+    },
+    {
+        path: "/carts",
+        element: <Carts />
     },
     {
         path: "/account",
