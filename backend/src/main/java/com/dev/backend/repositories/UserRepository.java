@@ -12,8 +12,7 @@ import com.dev.backend.entities.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
 
-    @Query("SELECT u FROM User u JOIN FETCH u.roles WHERE u.email = :email")
-    Optional<User> findByEmailWithRoles(@Param("email") String email);
+ 
 
     Optional<User> findByEmail(String email);
 

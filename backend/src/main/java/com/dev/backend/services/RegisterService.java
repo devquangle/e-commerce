@@ -19,7 +19,7 @@ public class RegisterService {
     @Autowired
     private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    public User dangky(RegisterBean registerBean) {
+    public User register(RegisterBean registerBean) {
         User re = new User();
 
         if (userService.existsByEmail(registerBean.getEmail())) {
@@ -41,4 +41,7 @@ public class RegisterService {
 
         return saved;
     }
+
+
+   
 }

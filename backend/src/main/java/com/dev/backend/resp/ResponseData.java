@@ -13,6 +13,6 @@ public class ResponseData {
     private boolean success;
     private String message;
     private Object data;
-    private LocalDateTime timestamp= LocalDateTime.now();
+    private LocalDateTime timestamp = LocalDateTime.now();
     
 }

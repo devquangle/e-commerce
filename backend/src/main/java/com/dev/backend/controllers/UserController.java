@@ -6,36 +6,27 @@ import com.dev.backend.beans.RegisterBean;
 import com.dev.backend.entities.User;
 import com.dev.backend.resp.ResponseData;
 import com.dev.backend.services.RegisterService;
+import com.dev.backend.ultils.ResponseUtil;
 
-import java.time.LocalDateTime;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
+@RequiredArgsConstructor
 public class UserController {
 
-    @Autowired
-    private RegisterService registerService;
+    private final RegisterService registerService;
 
     @PostMapping("/register")
-    public ResponseEntity<ResponseData> dangky(@RequestBody RegisterBean registerBean) {
-        ResponseData rp = new ResponseData();
-        try {
-            User u = registerService.dangky(registerBean);
-            rp.setSuccess(true);
-            rp.setMessage("pass");
-            rp.setData(u);
+    public ResponseEntity<ResponseData> register(@RequestBody RegisterBean registerBean) {
 
-            return ResponseEntity.ok(rp);
+        try {
+            User u = registerService.register(registerBean);
+            return ResponseUtil.success("register success", u);
         } catch (Exception e) {
-            rp.setSuccess(false);
-            rp.setMessage("Lỗi " + e.getMessage());
-            rp.setData(null);
-            rp.setTimestamp(LocalDateTime.now());
-            return ResponseEntity.badRequest().body(rp);
+            return ResponseUtil.error(e.getMessage(), null);
         }
     }
 
