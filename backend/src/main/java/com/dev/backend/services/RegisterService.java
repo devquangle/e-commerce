@@ -28,7 +28,6 @@ public class RegisterService {
         if (!registerBean.getPassword().equals(registerBean.getConfirmPassword())) {
             throw new IllegalArgumentException("Mật khẩu không khớp");
         }
-        re.setPhone(registerBean.getPhone());
         re.setEmail(registerBean.getEmail());
         re.setFullName(registerBean.getFullName());
         re.setPassword(passwordEncoder.encode(registerBean.getPassword()));

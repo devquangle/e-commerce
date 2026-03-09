@@ -17,11 +17,9 @@ import io.jsonwebtoken.security.Keys;
 @Component
 public class JwtUtil {
 
-    private static final String BASE64_SECRET_KEY =
-            "IUhuQQpG1l3gA5aFf9SjfjRau2WiXYDIORDGWkggqNBIv4aGb5";
+    private static final String BASE64_SECRET_KEY = "IUhuQQpG1l3gA5aFf9SjfjRau2WiXYDIORDGWkggqNBIv4aGb5";
 
-    private final SecretKey SIGNING_KEY =
-            Keys.hmacShaKeyFor(Base64.getDecoder().decode(BASE64_SECRET_KEY));
+    private final SecretKey SIGNING_KEY = Keys.hmacShaKeyFor(Base64.getDecoder().decode(BASE64_SECRET_KEY));
 
     private static final long EXPIRATION_TIME = 1000L * 60 * 60 * 24 * 7;
     private static final long EXPIRATION_TIME_RESETPASSWORD = 1000L * 60 * 15;
@@ -37,8 +35,8 @@ public class JwtUtil {
                     .setIssuedAt(new Date())
                     .setExpiration(new Date(System.currentTimeMillis()
                             + (TYPEJWT_LOGIN.equals(typeJWT)
-                            ? EXPIRATION_TIME
-                            : EXPIRATION_TIME_RESETPASSWORD)))
+                                    ? EXPIRATION_TIME
+                                    : EXPIRATION_TIME_RESETPASSWORD)))
                     .signWith(SIGNING_KEY, SignatureAlgorithm.HS256)
                     .compact();
         } catch (Exception e) {
@@ -47,14 +45,24 @@ public class JwtUtil {
         }
     }
 
-    // ✅ EXTRACT USER ID
     public String extractUserId(String token) {
+        if (token == null) {
+            return null;
+        }
         return parseClaims(token).getSubject();
     }
 
-    
     public List<String> extractRoles(String token) {
-        return parseClaims(token).get("roles", List.class);
+
+        List<?> roles = parseClaims(token).get("roles", List.class);
+
+        if (roles == null) {
+            return List.of();
+        }
+
+        return roles.stream()
+                .map(Object::toString)
+                .toList();
     }
 
     public String extractTypeJWT(String token) {

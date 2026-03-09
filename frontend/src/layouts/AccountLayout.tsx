@@ -1,11 +1,11 @@
-import AccountMenu from '@/components/common/AccountMenu'
+import AccountMenu from '@/components/user/AccountMenu'
 import Container from '@/components/Container'
 import { Outlet } from 'react-router-dom';
 
 export default function AccountLayout() {
 
     return (
-        <Container className="p-2 lg:p-4">
+        <Container className="max-w-7xl p-2 lg:p-4">
             <AccountMenu
                 variant="mobile"
                 className="flex lg:hidden gap-2 overflow-x-auto py-2"

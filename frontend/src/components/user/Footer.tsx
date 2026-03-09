@@ -1,10 +1,9 @@
-import React from 'react'
 import Container from '../Container'
 
 export default function Footer() {
   return (
     <footer className="bg-white py-6 sm:py-4 lg:py-8 border-t">
-      <Container className="px-4 md:px-8">
+      <Container className="max-w-7xl px-4 md:px-8">
         <div className="mb-12 grid grid-cols-2 gap-8 md:grid-cols-4 lg:grid-cols-6 lg:gap-10">
           <div className="col-span-full lg:col-span-2">
             <div className="mb-4 lg:-mt-2">
@@ -86,9 +85,9 @@ export default function Footer() {
                 </svg>
               </a>
             </div>
-              </div>
+          </div>
 
-              <div>
+          <div>
             <div className="mb-4 font-bold uppercase tracking-widest text-gray-800">Danh mục</div>
 
             <nav className="flex flex-col gap-3 text-sm">
@@ -152,12 +151,8 @@ export default function Footer() {
               <p>Hotline: 1900 9999</p>
               <p>Email: support@bookstore.vn</p>
               <p>Địa chỉ: 123 Đường Sách, Quận 1, TP.HCM</p>
-              </div>
-              </div>
+            </div>
           </div>
-
-        <div className="border-t pt-6 text-center text-xs sm:text-sm text-gray-400">
-          © {new Date().getFullYear()} BookStore. All rights reserved.
         </div>
       </Container>
     </footer>

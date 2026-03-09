@@ -2,12 +2,14 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./App.css";
 import UserLayout from "./layouts/UserLayout";
 import userRouter from "./router/userRouter";
+import AdminLayout from "./layouts/AdminLayout";
+import adminRouter from './router/adminRouter';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-         <Route element={<UserLayout />}>
+        <Route element={<UserLayout />}>
           {userRouter.map((route) => (
             <Route
               key={route.path}
@@ -24,6 +26,13 @@ function App() {
                 />
               ))}
             </Route>
+          ))}
+        </Route>
+        <Route element={<AdminLayout />}>
+          {adminRouter.map((route) => (
+            <Route key={route.path}
+              path={route.path}
+              element={route.element}></Route>
           ))}
         </Route>
       </Routes>

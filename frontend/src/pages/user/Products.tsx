@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Container from '@/components/Container'
-import FilterContent from "@/components/common/FilterContent";
-import ProductCard from '@/components/common/ProductCard'
+import FilterContent from "@/components/user/FilterContent";
+import ProductCard from '@/components/user/ProductCard'
 import type { Product } from '@/types/Product';
 
 
@@ -77,7 +77,7 @@ export default function Products() {
   const [openFilter, setOpenFilter] = useState(false);
 
   return (
-    <Container className="p-4 md:p-8">
+    <Container className="max-w-7xl p-4 md:p-8">
 
       {/* HEADER MOBILE */}
       <div className="flex justify-between items-center mb-4 lg:hidden">

@@ -1,11 +1,11 @@
 
 import { Link } from "react-router-dom"
 import Container from "../Container"
-import MenuItem from "./MenuItem"
-import Search from "./Search"
+
 import { useState } from "react";
-import Logo from "./Logo";
-import MobileDrawer from './MobileDrawer';
+import Logo from "../user/Logo";
+import Search from "../user/Search";
+import MobileDrawer from "../user/MobileDrawer";
 
 type MenuAccount = {
   id: number,
@@ -25,10 +25,10 @@ export default function Header() {
   const [isMobileAccountOpen, setIsMobileAccountOpen] = useState(false);
   return (
     <header className="sticky top-0 z-30 border-b bg-white/80 backdrop-blur">
-      <Container className="px-4 md:px-8">
+      <Container className="">
         <nav className="flex justify-between items-center h-15 gap-2">
           <Logo />
-          <MenuItem className="hidden lg:flex items-center gap-5 text-md" />
+       
           <Search />
           <div className="flex items-center">
             {/* icon cart */}

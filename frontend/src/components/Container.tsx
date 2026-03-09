@@ -8,7 +8,7 @@ interface Props{
 
 function Container({children,className=""}:Props) {
   return (
-    <div className={`mx-auto w-full max-w-7xl ${className}`}>{children}</div>
+    <div className={`mx-auto w-full ${className}`}>{children}</div>
   )
 }
 

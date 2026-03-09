@@ -1,15 +1,16 @@
-package com.dev.backend.beans;
+package com.dev.backend.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
-@NoArgsConstructor
 @Data
-public class RegisterBean {
+@NoArgsConstructor
+public class UserDTO {
     private String fullName;
     private String email;
-    private String password;
-    private String confirmPassword;
+    private String phone;
+    private String street;
+    private String image;
 }

@@ -1,4 +1,4 @@
-import ProductCard from '@/components/common/ProductCard'
+import ProductCard from '@/components/user/ProductCard'
 import Container from '@/components/Container'
 import type { Product } from '@/types/Product';
 
@@ -30,7 +30,7 @@ const products: Product[] = [
     rating: 4.8,
     reviewCount: 320,
     isFeatured: true
-  },{
+  }, {
     id: 3,
     title: 'Naruto Tập 1',
     price: 25000,
@@ -42,7 +42,7 @@ const products: Product[] = [
     rating: 4.8,
     reviewCount: 320,
     isFeatured: true
-  },{
+  }, {
     id: 4,
     title: 'Naruto Tập 1',
     price: 25000,
@@ -54,7 +54,7 @@ const products: Product[] = [
     rating: 4.8,
     reviewCount: 320,
     isFeatured: true
-  },{
+  }, {
     id: 5,
     title: 'Naruto Tập 1',
     price: 25000,
@@ -66,7 +66,7 @@ const products: Product[] = [
     rating: 4.8,
     reviewCount: 320,
     isFeatured: true
-  },{
+  }, {
     id: 6,
     title: 'Naruto Tập 1',
     price: 25000,
@@ -78,7 +78,7 @@ const products: Product[] = [
     rating: 4.8,
     reviewCount: 320,
     isFeatured: true
-  },{
+  }, {
     id: 7,
     title: 'Naruto Tập 1',
     price: 25000,
@@ -97,10 +97,9 @@ const products: Product[] = [
 
 function Home() {
   return (
-    <div className="pb-12">
-      {/* HERO */}
-      <section className="bg-linear-to-r from-indigo-50 via-white to-amber-50">
-        <Container className="px-4 md:px-8 py-10 md:py-16">
+    <div className="py-12">
+      <Container className='max-w-7xl px-4 md:px-8'>
+        <section className="bg-linear-to-r from-indigo-50 via-white to-amber-50 p-10">
           <div className="grid gap-10 md:grid-cols-2 md:items-center">
             <div>
               <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-indigo-500">
@@ -125,7 +124,6 @@ function Home() {
                 <span className="text-xs text-slate-500">Giao nhanh trong 2 giờ tại nội thành</span>
               </div>
             </div>
-
             <div className="relative">
               <div className="absolute -inset-4 rounded-3xl bg-linear-to-tr from-indigo-100 via-white to-amber-100 blur-lg opacity-70" />
               <div className="relative grid grid-cols-3 gap-3 rounded-3xl bg-white p-4 shadow-lg">
@@ -161,12 +159,10 @@ function Home() {
               </div>
             </div>
           </div>
-        </Container>
-      </section>
+        </section>
 
-      {/* CATEGORIES */}
-      <section className="mt-10">
-        <Container className="px-4 md:px-8">
+        {/* CATEGORIES */}
+        <section className="mt-10">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg sm:text-xl font-semibold text-slate-900">Khám phá theo thể loại</h2>
             <a href="#" className="text-xs sm:text-sm font-medium text-indigo-600 hover:text-indigo-500">
@@ -192,12 +188,9 @@ function Home() {
               <p className="mt-1 text-xs text-slate-500">Truyện tranh, truyện cổ tích, sách thiếu nhi song ngữ...</p>
             </div>
           </div>
-        </Container>
-      </section>
+        </section>
 
-      {/* FEATURED BOOKS */}
-      <section className="mt-10">
-        <Container className="px-4 md:px-8">
+        <section className="mt-10">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg sm:text-xl font-semibold text-slate-900">Sách nổi bật</h2>
             <a href="#" className="text-xs sm:text-sm font-medium text-indigo-600 hover:text-indigo-500">
@@ -210,8 +203,15 @@ function Home() {
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
-        </Container>
-      </section>
+        </section>
+      </Container>
+      {/* HERO */}
+
+
+
+
+      {/* FEATURED BOOKS */}
+
     </div>
   )
 }

@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequiredArgsConstructor
-public class UserController {
+public class RegisterController {
 
     private final RegisterService registerService;
 

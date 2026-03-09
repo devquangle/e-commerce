@@ -17,7 +17,7 @@ export default function Search() {
             focus:ring-2 focus:ring-blue-500
           ${
             isSearchOpen
-              ? "w-full max-w-[500px] px-4 py-2 opacity-100"
+              ? "w-full max-w-125 px-4 py-2 opacity-100"
               : "w-0 px-0 py-0 opacity-0 border-0"
           }
         `}
