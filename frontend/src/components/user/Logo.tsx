@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 export default function Logo() {
     return (
         <div className="_logo flex items-center">
-            <Link to="/home" className="flex justify-center items-center gap-2  text-xl font-bold text-indigo-500">
+            <Link to="" className="flex justify-center items-center gap-2  text-xl font-bold text-indigo-500">
                 <svg
                     width="32"
                     height="32"
