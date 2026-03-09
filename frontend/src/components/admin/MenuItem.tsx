@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { Link } from "react-router-dom"
 
 const menuItems = [
@@ -114,13 +115,25 @@ const menuItems = [
     {
         id: 11,
         label: "Thống kê",
-        path: "/analytics",
         icon: (
             <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M3 3h2v14H3V3zm6 4h2v10H9V7zm6-4h2v14h-2V3z" />
             </svg>
-        )
+        ),
+        children: [
+            {
+                id: 111,
+                label: "Doanh thu",
+                path: "/analytics/revenue"
+            },
+            {
+                id: 112,
+                label: "Sách bán chạy",
+                path: "/analytics/best-sellers"
+            }
+        ]
     },
+
 
     {
         id: 12,
@@ -135,19 +148,66 @@ const menuItems = [
 ]
 
 export default function MenuItem({ className = "" }) {
+
+    const [openMenu, setOpenMenu] = useState<number | null>(null)
+
+    const toggleMenu = (id: number) => {
+        setOpenMenu(openMenu === id ? null : id)
+    }
+
     return (
         <ul className={className}>
-            {
-                menuItems.map((item) => (
+            {menuItems.map((item) => (
+                <li key={item.id}>
 
-                    <li key={item.id} >
-                        <Link to={item.path} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 hover:text-indigo-500">
+                    {item.children ? (
+                        <>
+                            <button
+                                onClick={() => toggleMenu(item.id)}
+                                className="flex justify-between items-center gap-3 w-full p-2 rounded-lg hover:bg-gray-100 hover:text-indigo-500"
+                            >
+                                <div className="flex justify-between items-center gap-3">  
+                                    {item.icon}
+                                    {item.label}
+                                </div>
+                                <svg
+                                    className={`h-4 w-4 transition ${openMenu ? "rotate-180" : ""}`}
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                >
+                                    <path d="M6 9l6 6 6-6" />
+                                </svg>
+                            </button>
+
+                            {openMenu === item.id && (
+                                <ul className="ml-8 mt-1 space-y-1">
+                                    {item.children.map((child) => (
+                                        <li key={child.id}>
+                                            <Link
+                                                to={child.path}
+                                                className="block p-2 text-sm text-gray-600 hover:text-indigo-500"
+                                            >
+                                                {child.label}
+                                            </Link>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </>
+                    ) : (
+                        <Link
+                            to={item.path}
+                            className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 hover:text-indigo-500"
+                        >
                             {item.icon}
                             {item.label}
                         </Link>
-                    </li>
-                ))
-            }
+                    )}
+
+                </li>
+            ))}
         </ul>
     )
 }

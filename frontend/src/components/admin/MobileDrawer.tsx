@@ -29,7 +29,7 @@ function MobileDrawer({
                 className={`fixed top-0 left-0 h-screen w-64 bg-white z-40 transform transition lg:hidden
         ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
             >
-                <div className="flex h-15 items-center justify-between p-4 border-b">
+                <div className="flex h-16 items-center justify-between p-4 border-b">
                     <Logo />
                     <button className="cursor-pointer" onClick={onClose}>
                         <svg

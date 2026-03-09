@@ -16,7 +16,6 @@ function App() {
               path={route.path}
               element={route.element}
             >
-              {/* Nếu route có children, map vào ở đây */}
               {route.children?.map((child) => (
                 <Route
                   key={child.path || "index"}
@@ -28,7 +27,7 @@ function App() {
             </Route>
           ))}
         </Route>
-        <Route element={<AdminLayout />}>
+        <Route path="admin" element={<AdminLayout />}>
           {adminRouter.map((route) => (
             <Route key={route.path}
               path={route.path}

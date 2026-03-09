@@ -9,15 +9,15 @@ import MobileDrawer from "./MobileDrawer";
 
 type MenuAccount = {
     id: number,
-    lable: string,
+    label: string,
     path: string
 }
 
 const menuItems: MenuAccount[] = [
-    { id: 1, lable: "Đăng nhập", path: "/login" },
-    { id: 2, lable: "Đăng ký", path: "/register" },
-    { id: 3, lable: "Thông tin cá nhân", path: "/account/profile" },
-    { id: 4, lable: "Đơn hàng", path: "/account/orders" },
+    { id: 1, label: "Đăng nhập", path: "/login" },
+    { id: 2, label: "Đăng ký", path: "/register" },
+    { id: 3, label: "Thông tin cá nhân", path: "/account/profile" },
+    { id: 4, label: "Đơn hàng", path: "/account/orders" },
 ]
 
 export default function Header() {
@@ -26,7 +26,7 @@ export default function Header() {
     return (
         <header className="sticky top-0 z-30 border-b bg-white/80 backdrop-blur">
             <Container className="px-4 md:px-8">
-                <nav className="flex justify-between items-center h-15 gap-2">
+                <nav className="flex justify-between items-center h-16 gap-2">
                     <Logo />
 
                     <Search />
@@ -35,7 +35,13 @@ export default function Header() {
                         {/* icon menu */}
                         <button className="lg:hidden cursor-pointer" onClick={() => setIsMobileNavOpen(true)}>
                             <svg className="w-8 h-8 text-indigo-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 24 24">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 6H6m12 4H6m12 4H6m12 4H6" />
+                                <path
+                                    stroke="currentColor"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    d="M18 6H6m12 4H6m12 4H6m12 4H6"
+                                />
                             </svg>
                         </button>
 
@@ -48,7 +54,11 @@ export default function Header() {
                                 <div className="w-56 bg-white border rounded-lg shadow-lg ">
                                     <ul className="p-2 text-md">
                                         {menuItems.map((item) => (
-                                            <li key={item.id} className="w-full p-2  hover:bg-gray-100 hover:text-blue-500"><Link to={item.path} className="px-4 py-2">{item?.lable}</Link></li>
+                                            <li key={item.id} className="w-full p-2  hover:bg-gray-100 hover:text-blue-500">
+                                                <Link to={item.path} className="px-4 py-2">
+                                                    {item.label}
+                                                </Link>
+                                            </li>
                                         ))}
 
                                     </ul>
