@@ -2,7 +2,7 @@ import { useState } from "react";
 import Container from '@/components/Container'
 import FilterContent from "@/components/user/FilterContent";
 import ProductCard from '@/components/user/ProductCard'
-import type { Product } from '@/types/Product';
+import type { Product } from '@/types/product';
 
 
 
