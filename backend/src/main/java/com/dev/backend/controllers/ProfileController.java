@@ -12,19 +12,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 
-
 @RestController
 @RequiredArgsConstructor
 public class ProfileController {
     private final UserService userService;
-    @GetMapping("/auth")
-    public ResponseEntity<ResponseData> profile(@RequestHeader("Authorization") String token) {
-      try {
 
-          return ResponseUtil.success("get user success", userService.getUserDTO(token));
-      } catch (Exception e) {
-         return ResponseUtil.error("register success", null);
-      }
+    @GetMapping("/auth/me")
+    public ResponseEntity<ResponseData> profile(@RequestHeader("Authorization") String token) {
+        try {
+
+            return ResponseUtil.success("get user success", userService.getUserDTO(token));
+        } catch (Exception e) {
+            return ResponseUtil.error("register success", null);
+        }
     }
-    
+
 }

@@ -1,12 +1,12 @@
-import { useEffect, useState, type ReactNode } from "react";
-
-import type { User } from "@/types/user";
+import api from "@/config/api";
 import { AuthContext } from "@/context/auth-context";
-
-interface Props {
-  children: ReactNode;
-}
-
+import type { User } from "@/types/user";
+import { getToken, removeToken, setToken } from "@/utils/cookieUtil";
+import { useEffect, useState } from "react";
+import { set } from "react-hook-form";
+type Props = {
+  children: React.ReactNode;
+};
 export const AuthProvider = ({ children }: Props) => {
 
   const [userInfo, setUserInfo] = useState<User | null>(null);
@@ -18,7 +18,8 @@ export const AuthProvider = ({ children }: Props) => {
   }, []);
 
   const initAuth = async () => {
-    const token = localStorage.getItem("token");
+
+    const token = getToken();
 
     if (!token) {
       setIsInitialized(true);
@@ -26,41 +27,40 @@ export const AuthProvider = ({ children }: Props) => {
     }
 
     try {
-      const res = await fetch("/api/auth/me", {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
 
-      if (res.ok) {
-        const user = await res.json();
-        setUserInfo(user);
-        setIsAuthenticated(true);
-      }
+      const res = await api.get("/auth/me");
+      console.log("Auth init response:", res.data);
+
+      setUserInfo(res.data.data);
+      setIsAuthenticated(true);
+      console.log("User info:", res.data.data);
+
+    } catch {
+
+      removeToken();
+
     } finally {
+
       setIsInitialized(true);
+
     }
   };
 
   const login = async (token: string) => {
-    localStorage.setItem("token", token);
+     setToken(token);
+    const res = await api.get("/auth/me");
 
-    const res = await fetch("/api/auth/me", {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-
-    const user = await res.json();
-
-    setUserInfo(user);
+    setUserInfo(res.data.data);
     setIsAuthenticated(true);
+
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
+
+    removeToken();
     setUserInfo(null);
     setIsAuthenticated(false);
+
   };
 
   const hasRole = (role: string) => {

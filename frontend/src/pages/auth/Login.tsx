@@ -1,14 +1,55 @@
 import Container from '@/components/Container'
+import { useAuth } from '@/context/useAuth';
+import authService from '@/services/AuthService';
+import type { LoginForm } from '@/types/login';
+import { setToken } from '@/utils/cookieUtil';
+import toastUtil from '@/utils/toastUtil';
+import axios from 'axios';
+
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+
 import { Link } from 'react-router-dom';
+
 export default function Login() {
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>();
   const [showPassword, setShowPassword] = useState(false);
+  const auth = useAuth();
+
+  const onSubmit = async (data: LoginForm) => {
+
+    try {
+      const res = await authService.login({
+        email: data.email,
+        password: data.password
+      });
+      const token = res.data?.accessToken;
+
+      if (!token) throw new Error("Token không tồn tại");
+      // setToken(token);
+      console.log("Login response:", token);
+      toastUtil.success(res.data.data?.message || "Đăng nhập thành công");
+      toastUtil.loading("Đang chuyển hướng...");
+      await auth.login(token);
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        console.log(error.response?.data.message);
+        toastUtil.error(error.response?.data.message || "Đăng nhập thất bại");
+      } else {
+        toastUtil.error("Đăng nhập thất bại");
+      }
+
+
+    }
+
+  };
+
   return (
     <Container className="px-4 md:px-8">
       <div className="flex justify-center items-center min-h-[80vh] py-4">
-        <form className="w-full max-w-md rounded-xl border">
+        <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-md rounded-xl border space-y-4">
 
-          <div className="flex flex-col gap-5 p-6 md:p-8">
+          <div className="flex flex-col gap-3 p-6 md:p-8">
 
             {/* Title */}
             <div className="text-center">
@@ -22,22 +63,28 @@ export default function Login() {
 
 
             {/* Email */}
-            <div>
-              <label htmlFor='email' className="mb-1 block text-sm font-medium text-gray-700">
+            <div className="space-y-1">
+              <label htmlFor="email" className="text-sm font-medium text-gray-700">
                 Email
               </label>
+
               <input
+                id="email"
                 type="email"
-                name="email"
-                id='email'
                 placeholder="you@example.com"
-                className="
-                w-full rounded-lg border border-gray-300 bg-gray-50
-                px-4 py-2 text-gray-800
-                focus:border-blue-500 focus:ring-2 focus:ring-blue-200
-                outline-none transition
-              "
+                {...register("email", {
+                  required: "Email là bắt buộc",
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: "Email không hợp lệ"
+                  }
+                })}
+                className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
               />
+
+              <p className="text-red-600 text-sm min-h-5">
+                {errors.email?.message}
+              </p>
             </div>
 
             {/* Password */}
@@ -49,9 +96,13 @@ export default function Login() {
                 <input
                   type={showPassword ? "text" : "password"}
                   id="password"
-                  name="password"
+
                   placeholder="••••••••"
-                  className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition pr-10"
+                  className="w-full rounded-lg border  px-4 py-2 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition pr-10"
+
+                  {...register("password", {
+                    required: "Mật khẩu là bắt buộc",
+                  })}
                 />
 
                 {/* Button con mắt */}
@@ -63,25 +114,31 @@ export default function Login() {
                   {showPassword ? (
                     // Mắt đóng
                     <svg className="w-6 h-6 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.933 13.909A4.357 4.357 0 0 1 3 12c0-1 4-6 9-6m7.6 3.8A5.068 5.068 0 0 1 21 12c0 1-3 6-9 6-.314 0-.62-.014-.918-.04M5 19 19 5m-4 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                      <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3.933 13.909A4.357 4.357 0 0 1 3 12c0-1 4-6 9-6m7.6 3.8A5.068 5.068 0 0 1 21 12c0 1-3 6-9 6-.314 0-.62-.014-.918-.04M5 19 19 5m-4 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                     </svg>
 
 
                   ) : (
                     // Mắt mở
                     <svg className="w-6 h-6 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                      <path stroke="currentColor" stroke-width="2" d="M21 12c0 1.2-4.03 6-9 6s-9-4.8-9-6c0-1.2 4.03-6 9-6s9 4.8 9 6Z" />
-                      <path stroke="currentColor" stroke-width="2" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                      <path stroke="currentColor" strokeWidth="2" d="M21 12c0 1.2-4.03 6-9 6s-9-4.8-9-6c0-1.2 4.03-6 9-6s9 4.8 9 6Z" />
+                      <path stroke="currentColor" strokeWidth="2" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                     </svg>
 
                   )}
                 </button>
               </div>
+              <p className="text-red-600 text-sm  min-h-5">
+                {errors.password?.message}
+              </p>
 
             </div>
-        
+
+
             {/* Login button */}
             <button
+              type='submit'
+
               className="
               mt-2 rounded-lg bg-blue-600 py-3
               text-sm font-semibold text-white

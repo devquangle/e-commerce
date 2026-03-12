@@ -8,7 +8,10 @@ import com.dev.backend.entities.User;
 public class UserMapper {
     public UserDTO toDTO(User user) {
         UserDTO userDTO = new UserDTO(user.getFullName(), user.getEmail(), user.getPhone(), user.getStreet(),
-                user.getImage());
+                user.getImage(), 
+                user.getUserRoles().stream()
+                        .map(ur -> ur.getRole().getName())
+                        .toList());
         return userDTO;
     }
 }

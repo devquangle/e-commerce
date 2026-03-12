@@ -12,6 +12,7 @@ import Address from "@/pages/user/Address";
 import Favorites from "@/pages/user/Favorites";
 import OrderDetails from "@/pages/user/OrderDetails";
 import Carts from "@/pages/user/Carts";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 
 const userRouter = [
@@ -41,7 +42,10 @@ const userRouter = [
     },
     {
         path: "/account",
-        element: <AccountLayout />,
+        element: 
+        <ProtectedRoute requiredRoles={["user"]}>
+            <AccountLayout />
+        </ProtectedRoute>,
         children: [
             {
                 index: true,

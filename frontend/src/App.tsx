@@ -3,19 +3,22 @@ import "./App.css";
 import UserLayout from "./layouts/UserLayout";
 import userRouter from "./router/userRouter";
 import AdminLayout from "./layouts/AdminLayout";
-import adminRouter from './router/adminRouter';
+import adminRouter from "./router/adminRouter";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   return (
     <BrowserRouter>
+      <Toaster
+        position="top-right"
+        containerStyle={{
+          top: 60,
+        }}
+      />
       <Routes>
         <Route element={<UserLayout />}>
           {userRouter.map((route) => (
-            <Route
-              key={route.path}
-              path={route.path}
-              element={route.element}
-            >
+            <Route key={route.path} path={route.path} element={route.element}>
               {route.children?.map((child) => (
                 <Route
                   key={child.path || "index"}
@@ -29,9 +32,11 @@ function App() {
         </Route>
         <Route path="admin" element={<AdminLayout />}>
           {adminRouter.map((route) => (
-            <Route key={route.path}
+            <Route
+              key={route.path}
               path={route.path}
-              element={route.element}></Route>
+              element={route.element}
+            ></Route>
           ))}
         </Route>
       </Routes>
