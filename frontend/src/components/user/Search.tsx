@@ -24,7 +24,7 @@ export default function Search() {
       />
       <button
        
-        className="h-9 w-9 shrink-0 rounded-full border flex items-center justify-center cursor-pointer"
+        className="hidden lg:flex h-9 w-9 shrink-0 rounded-full  border  items-center justify-center cursor-pointer"
         onClick={() => setIsSearchOpen((prev) => !prev)}
         aria-label="Tìm kiếm"
       >
