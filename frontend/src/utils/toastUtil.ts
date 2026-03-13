@@ -7,10 +7,11 @@ const baseStyle = {
 };
 
 const toastUtil = {
-
   success(message: string) {
     toast.success(message, {
+      duration: 1500,
       style: {
+        
         ...baseStyle,
         background: "#16a34a",
         color: "#fff",
@@ -20,6 +21,7 @@ const toastUtil = {
 
   error(message: string) {
     toast.error(message, {
+      duration: 1500,
       style: {
         ...baseStyle,
         background: "#dc2626",
@@ -30,6 +32,7 @@ const toastUtil = {
 
   loading(message: string) {
     return toast.loading(message, {
+      duration: 1500,
       style: {
         ...baseStyle,
         background: "#2563eb",
@@ -37,7 +40,6 @@ const toastUtil = {
       },
     });
   },
-
 };
 
 export default toastUtil;

@@ -1,10 +1,9 @@
 import Cookies from "js-cookie";
 
-const TOKEN_KEY = "JWT_TOKEN";
 
 // lưu token
-export const setToken = (token: string) => {
-  Cookies.set(TOKEN_KEY, token, {
+export const setToken = (name:string,value: string) => {
+  Cookies.set(name, value, {
     expires: 7,
     sameSite: "Lax",
     path: "/"
@@ -12,12 +11,12 @@ export const setToken = (token: string) => {
 };
 
 // lấy token
-export const getToken = (): string | undefined => {
-  return Cookies.get(TOKEN_KEY);
+export const getToken = (tokenKey: string): string | undefined => {
+  return Cookies.get(tokenKey);
 };
 
 // xóa token
-export const removeToken = () => {
-  Cookies.remove(TOKEN_KEY, { path: "/" });
+export const removeToken = (tokenKey: string) => {
+  Cookies.remove(tokenKey, { path: "/" });
 };
 

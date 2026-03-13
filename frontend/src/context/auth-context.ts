@@ -6,7 +6,7 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   isInitialized: boolean;
 
-  login: (token: string) => Promise<void>;
+  login: (token: string) => Promise<User | null>;
   logout: () => void;
   hasRole: (role: string) => boolean;
 }

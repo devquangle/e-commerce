@@ -1,7 +1,5 @@
 package com.dev.backend.services;
 
-import java.util.List;
-
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 

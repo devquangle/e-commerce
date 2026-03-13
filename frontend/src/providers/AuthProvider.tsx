@@ -3,7 +3,6 @@ import { AuthContext } from "@/context/auth-context";
 import type { User } from "@/types/user";
 import { getToken, removeToken, setToken } from "@/utils/cookieUtil";
 import { useEffect, useState } from "react";
-import { set } from "react-hook-form";
 type Props = {
   children: React.ReactNode;
 };
@@ -19,7 +18,8 @@ export const AuthProvider = ({ children }: Props) => {
 
   const initAuth = async () => {
 
-    const token = getToken();
+    const token = getToken("JWT_TOKEN");
+    console.log("Auth init token:", token);
 
     if (!token) {
       setIsInitialized(true);
@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }: Props) => {
 
     } catch {
 
-      removeToken();
+      removeToken("JWT_TOKEN");
 
     } finally {
 
@@ -47,17 +47,22 @@ export const AuthProvider = ({ children }: Props) => {
   };
 
   const login = async (token: string) => {
-     setToken(token);
+
+    setToken("JWT_TOKEN", token);
+
     const res = await api.get("/auth/me");
 
-    setUserInfo(res.data.data);
+    const user = res.data.data;
+
+    setUserInfo(user);
     setIsAuthenticated(true);
 
+    return userInfo;
   };
 
   const logout = () => {
 
-    removeToken();
+    removeToken("JWT_TOKEN");
     setUserInfo(null);
     setIsAuthenticated(false);
 

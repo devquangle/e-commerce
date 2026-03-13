@@ -1,21 +1,21 @@
 import Container from '@/components/Container'
 import { useAuth } from '@/context/useAuth';
-import authService from '@/services/AuthService';
+import authService from '@/services/authService';
+
 import type { LoginForm } from '@/types/login';
-import { setToken } from '@/utils/cookieUtil';
 import toastUtil from '@/utils/toastUtil';
 import axios from 'axios';
 
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function Login() {
   const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>();
   const [showPassword, setShowPassword] = useState(false);
   const auth = useAuth();
-
+  const navigate = useNavigate();
   const onSubmit = async (data: LoginForm) => {
 
     try {
@@ -24,13 +24,21 @@ export default function Login() {
         password: data.password
       });
       const token = res.data?.accessToken;
-
       if (!token) throw new Error("Token không tồn tại");
-      // setToken(token);
+
+
       console.log("Login response:", token);
       toastUtil.success(res.data.data?.message || "Đăng nhập thành công");
+
+      const user = await auth.login(token);
+
+      if (user?.roles?.includes("ROLE_USER")) {
+        navigate("/home");
+      } else {
+        navigate("/admin");
+      }
+
       toastUtil.loading("Đang chuyển hướng...");
-      await auth.login(token);
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         console.log(error.response?.data.message);

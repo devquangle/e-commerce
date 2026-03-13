@@ -28,15 +28,13 @@ public class User {
     private String email;
     @Column(nullable = false)
     private String password;
-    @Column(length = 10)
+    @Column(length = 10,unique = true)
     private String phone;
     private String street;
     private String image;
-    private int failCount;
     private LocalDateTime createAt = LocalDateTime.now();
     private LocalDateTime updateAt;
-    private LocalDateTime lockAt;
-    private boolean active;
+    private boolean active = true;
 
     @OneToMany(mappedBy = "user")
     private List<UserRole> userRoles = new ArrayList<>();
