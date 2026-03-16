@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dev.backend.resp.ResponseData;
 import com.dev.backend.services.UserService;
-import com.dev.backend.ultils.ResponseUtil;
+import com.dev.backend.utils.ResponseUtil;
 
 import lombok.RequiredArgsConstructor;
 

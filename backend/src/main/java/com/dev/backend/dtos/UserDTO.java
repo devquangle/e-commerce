@@ -14,6 +14,7 @@ public class UserDTO {
     private String email;
     private String phone;
     private String street;
+    private String code;
     private String image;
     private List<String> roles;
 

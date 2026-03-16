@@ -38,14 +38,14 @@ export const menuGroups: MenuGroup[] = [
     {
       id: 21,
       label: "Sản phẩm",
-      path: "/products",
+      path: "/admin/products",
       icon: Package,
       role: [Role.ADMIN, Role.PRODUCT_MANAGER]
     },
     {
       id: 22,
       label: "Thể loại",
-      path: "/categories",
+      path: "/admin/genres",
       icon: FolderTree,
       role: [Role.ADMIN, Role.PRODUCT_MANAGER]
     },
@@ -59,14 +59,14 @@ export const menuGroups: MenuGroup[] = [
     {
       id: 31,
       label: "Đơn hàng",
-      path: "/orders",
+      path: "/admin/orders",
       icon: ShoppingCart,
       role: [Role.ADMIN, Role.ORDER_MANAGER]
     },
     {
       id: 32,
       label: "Đánh giá",
-      path: "/reviews",
+      path: "/admin/reviews",
       icon: Star,
       role: [Role.ADMIN, Role.ORDER_MANAGER]
     }
@@ -80,14 +80,14 @@ export const menuGroups: MenuGroup[] = [
     {
       id: 41,
       label: "Giảm giá",
-      path: "/promotions",
+      path: "/admin/promotions",
       icon: Megaphone,
       role: [Role.ADMIN, Role.PROMOTION_MANAGER]
     },
     {
       id: 42,
       label: "Banner",
-      path: "/banners",
+      path: "/admin/banners",
       icon: Image,
       role: [Role.ADMIN, Role.CONTENT_MANAGER]
     }
@@ -101,7 +101,7 @@ export const menuGroups: MenuGroup[] = [
     {
       id: 51,
       label: "Chat",
-      path: "/chats",
+      path: "/admin/chats",
       icon: MessageCircle,
       role: [Role.ADMIN, Role.SUPPORT]
     },
@@ -115,14 +115,14 @@ export const menuGroups: MenuGroup[] = [
     {
       id: 61,
       label: "Doanh thu",
-      path: "/analytics/revenue",
+      path: "/admin/analytics/revenue",
       icon: BarChart3,
       role: [Role.ADMIN, Role.ACCOUNTANT]
     },
     {
       id: 62,
       label: "Sách bán chạy",
-      path: "/analytics/best-sellers",
+      path: "/admin/analytics/best-sellers",
       icon: Flame,
       role: [Role.ADMIN, Role.ACCOUNTANT]
     }
@@ -136,7 +136,7 @@ export const menuGroups: MenuGroup[] = [
     {
       id: 71,
       label: "Tài khoản",
-      path: "/users",
+      path: "/admin/users",
       icon: Users,
       role: [Role.ADMIN]
     }

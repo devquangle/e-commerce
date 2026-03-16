@@ -12,11 +12,12 @@ import com.dev.backend.entities.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
 
- 
-
     Optional<User> findByEmail(String email);
 
     @Query("SELECT COUNT(u)>0 FROM User u WHERE u.email = :email")
     boolean checkEmail(@Param("email") String email);
+
+    @Query("SELECT COUNT(u)>0 FROM User u WHERE u.code = :code")
+    boolean existsByCode(@Param("code") String code);
 
 }

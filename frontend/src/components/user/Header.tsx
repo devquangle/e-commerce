@@ -33,7 +33,10 @@ export default function Header() {
     { id: 3, label: "Đăng xuất", action: () => setOpen(true) },
   ];
   const menuItems = (isInitialized && userInfo) ? userMenu : guestMenu;
-
+    const user_code = () => {
+        const username = (isInitialized && userInfo?.code) ? userInfo.code : "Account";
+        return username;
+    }
   return (
     <>
       <header className="sticky  top-0 z-30 border-b bg-white/80 backdrop-blur ">
@@ -70,7 +73,7 @@ export default function Header() {
                   />
 
                   <span className="max-w-sx truncate block">
-                    {isInitialized && userInfo?.email ? userInfo.email : "Account"}
+                    {user_code()}
                   </span>
                 </button>
 

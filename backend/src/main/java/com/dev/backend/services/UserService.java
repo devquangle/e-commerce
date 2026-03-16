@@ -46,6 +46,9 @@ public class UserService {
         return getUserById(Integer.valueOf(jwtUtil.extractUserId(id)));
     }
 
+    public boolean existsByCode(String code) {
+        return userRepository.existsByCode(code);
+    }
     public UserDTO getUserDTO(String token) {
         return userMapper.toDTO(getUserLogin(token));
     }

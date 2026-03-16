@@ -1,23 +1,23 @@
 package com.dev.backend.services;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.dev.backend.beans.RegisterBean;
 import com.dev.backend.entities.User;
 import com.dev.backend.entities.UserRole;
+import com.dev.backend.utils.GenerateCode;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class RegisterService {
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private UserRoleService userRoleService;
-    @Autowired
-    private RoleService roleService;
-    @Autowired
-    private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+    private final UserService userService;
+    private final UserRoleService userRoleService;
+    private final RoleService roleService;
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public User register(RegisterBean registerBean) {
         User re = new User();
@@ -28,9 +28,14 @@ public class RegisterService {
         if (!registerBean.getPassword().equals(registerBean.getConfirmPassword())) {
             throw new IllegalArgumentException("Mật khẩu không khớp");
         }
+        String generatedCode = GenerateCode.generateCode(10);
+        if (userService.existsByCode(generatedCode)) {
+            throw new IllegalArgumentException("Code đã được sử dụng");
+        }
         re.setEmail(registerBean.getEmail());
         re.setFullName(registerBean.getFullName());
         re.setPassword(passwordEncoder.encode(registerBean.getPassword()));
+        re.setCode(generatedCode);
         User saved = userService.save(re);
 
         UserRole userRole = new UserRole();
@@ -41,6 +46,4 @@ public class RegisterService {
         return saved;
     }
 
-
-   
 }

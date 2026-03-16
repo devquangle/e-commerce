@@ -30,6 +30,8 @@ public class User {
     private String password;
     @Column(length = 10,unique = true)
     private String phone;
+    @Column(unique = true)
+    private String code;
     private String street;
     private String image;
     private LocalDateTime createAt = LocalDateTime.now();

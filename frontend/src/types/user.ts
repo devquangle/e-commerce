@@ -5,6 +5,7 @@ export interface User {
   email: string;
   phone: string;
   street: string;
+  code: string;
   roles: RoleType[];
   image: string;
 }

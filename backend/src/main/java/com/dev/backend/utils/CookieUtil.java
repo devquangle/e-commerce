@@ -1,4 +1,4 @@
-package com.dev.backend.ultils;
+package com.dev.backend.utils;
 
 
 import jakarta.servlet.http.Cookie;

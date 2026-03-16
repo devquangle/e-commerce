@@ -4,6 +4,7 @@ import type { User } from "@/types/user";
 import { hasRoleAccess, type RoleType } from "@/types/role";
 import { getToken, removeToken, setToken } from "@/utils/cookieUtil";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 type Props = {
   children: React.ReactNode;
@@ -14,7 +15,6 @@ export const AuthProvider = ({ children }: Props) => {
   const [userInfo, setUserInfo] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
-
   useEffect(() => {
     initAuth();
   }, []);
@@ -67,7 +67,8 @@ export const AuthProvider = ({ children }: Props) => {
     removeToken("JWT_TOKEN");
     setUserInfo(null);
     setIsAuthenticated(false);
-
+    setIsInitialized(true);
+   
   };
 
 const hasRole = (requiredRole: RoleType) => {

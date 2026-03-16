@@ -7,8 +7,8 @@ import com.dev.backend.entities.User;
 import com.dev.backend.resp.ResponseData;
 import com.dev.backend.security.jwt.JwtUtil;
 import com.dev.backend.services.LoginService;
-import com.dev.backend.ultils.CookieUtil;
-import com.dev.backend.ultils.ResponseUtil;
+import com.dev.backend.utils.CookieUtil;
+import com.dev.backend.utils.ResponseUtil;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

@@ -6,7 +6,7 @@ import com.dev.backend.beans.RegisterBean;
 import com.dev.backend.entities.User;
 import com.dev.backend.resp.ResponseData;
 import com.dev.backend.services.RegisterService;
-import com.dev.backend.ultils.ResponseUtil;
+import com.dev.backend.utils.ResponseUtil;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
