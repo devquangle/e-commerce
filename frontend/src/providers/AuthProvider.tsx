@@ -1,11 +1,14 @@
-import api from "@/config/api";
+import api from "@/configs/api";
 import { AuthContext } from "@/context/auth-context";
 import type { User } from "@/types/user";
+import { hasRoleAccess, type RoleType } from "@/types/role";
 import { getToken, removeToken, setToken } from "@/utils/cookieUtil";
 import { useEffect, useState } from "react";
+
 type Props = {
   children: React.ReactNode;
 };
+
 export const AuthProvider = ({ children }: Props) => {
 
   const [userInfo, setUserInfo] = useState<User | null>(null);
@@ -19,7 +22,6 @@ export const AuthProvider = ({ children }: Props) => {
   const initAuth = async () => {
 
     const token = getToken("JWT_TOKEN");
-    console.log("Auth init token:", token);
 
     if (!token) {
       setIsInitialized(true);
@@ -29,11 +31,11 @@ export const AuthProvider = ({ children }: Props) => {
     try {
 
       const res = await api.get("/auth/me");
-      console.log("Auth init response:", res.data);
 
-      setUserInfo(res.data.data);
+      const user = res.data.data;
+
+      setUserInfo(user);
       setIsAuthenticated(true);
-      console.log("User info:", res.data.data);
 
     } catch {
 
@@ -57,7 +59,7 @@ export const AuthProvider = ({ children }: Props) => {
     setUserInfo(user);
     setIsAuthenticated(true);
 
-    return userInfo;
+    return user;
   };
 
   const logout = () => {
@@ -68,9 +70,10 @@ export const AuthProvider = ({ children }: Props) => {
 
   };
 
-  const hasRole = (role: string) => {
-    return userInfo?.roles?.includes(role) ?? false;
-  };
+const hasRole = (requiredRole: RoleType) => {
+  const userRoles = userInfo?.roles ?? [];
+  return hasRoleAccess(userRoles, requiredRole);
+};
 
   return (
     <AuthContext.Provider
@@ -80,7 +83,7 @@ export const AuthProvider = ({ children }: Props) => {
         isInitialized,
         login,
         logout,
-        hasRole
+        hasRole,
       }}
     >
       {children}

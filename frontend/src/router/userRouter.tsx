@@ -13,6 +13,7 @@ import Favorites from "@/pages/user/Favorites";
 import OrderDetails from "@/pages/user/OrderDetails";
 import Carts from "@/pages/user/Carts";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { Role } from "@/types/role";
 
 
 const userRouter = [
@@ -43,7 +44,7 @@ const userRouter = [
     {
         path: "/account",
         element: 
-        <ProtectedRoute requiredRoles={["user"]}>
+        <ProtectedRoute requiredRoles={[Role.USER]}>
             <AccountLayout />
         </ProtectedRoute>,
         children: [

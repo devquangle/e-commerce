@@ -50,8 +50,7 @@ public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
 
-        AuthenticationManagerBuilder builder =
-                http.getSharedObject(AuthenticationManagerBuilder.class);
+        AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
 
         builder
                 .userDetailsService(customUserDetailsService)
@@ -63,12 +62,13 @@ public class SecurityConfig {
     @Bean
     public RoleHierarchy roleHierarchy() {
         return RoleHierarchyImpl.fromHierarchy("""
-            ROLE_SUPER_ADMIN > ROLE_ADMIN
-            ROLE_ADMIN > ROLE_STAFF
-            ROLE_STAFF > ROLE_PROMOTION
-            ROLE_STAFF > ROLE_SUPPORT
-            ROLE_STAFF > ROLE_ACCOUNTANT
-        """);
+                    ROLE_ADMIN > ROLE_PRODUCT_MANAGER
+                    ROLE_ADMIN > ROLE_ORDER_MANAGER
+                    ROLE_ADMIN > ROLE_PROMOTION_MANAGER
+                    ROLE_ADMIN > ROLE_SUPPORT
+                    ROLE_ADMIN > ROLE_ACCOUNTANT
+                    ROLE_ADMIN > ROLE_CONTENT_MANAGER
+                """);
     }
 
     @Bean
@@ -80,14 +80,13 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
                     config.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
-                    config.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","OPTIONS"));
+                    config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                     config.setAllowedHeaders(Arrays.asList("*"));
                     config.setAllowCredentials(true);
                     return config;
                 }))
 
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests(req -> req
                         .requestMatchers(PUBLIC_URLS).permitAll()
@@ -95,12 +94,9 @@ public class SecurityConfig {
                         .requestMatchers("/staff/**").hasRole("STAFF")
                         .requestMatchers("/accounting/**").hasRole("ACCOUNTANT")
                         .requestMatchers("/user/**").hasRole("USER")
-                        .anyRequest().authenticated()
-                )
+                        .anyRequest().authenticated())
 
-                .exceptionHandling(ex ->
-                        ex.accessDeniedHandler(customAccessDeniedHandler)
-                )
+                .exceptionHandling(ex -> ex.accessDeniedHandler(customAccessDeniedHandler))
 
                 .addFilterBefore(jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class);

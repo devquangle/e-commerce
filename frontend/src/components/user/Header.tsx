@@ -12,25 +12,27 @@ import Modal from "../Modal";
 type MenuAccount = {
   id: number,
   label: string,
-  path: string,
-  active?: boolean
+  path?: string,
+  action?: () => void
 }
 
 const guestMenu: MenuAccount[] = [
-  { id: 1, label: "Đăng nhập", path: "/login", active: false },
-  { id: 2, label: "Đăng ký", path: "/register", active: false },
+  { id: 1, label: "Đăng nhập", path: "/login" },
+  { id: 2, label: "Đăng ký", path: "/register" },
 ];
 
-const userMenu: MenuAccount[] = [
-  { id: 1, label: "Thông tin cá nhân", path: "/account/profile", active: false },
-  { id: 2, label: "Đơn hàng", path: "/account/orders", active: false },
-];
+
 export default function Header() {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [openAccount, setOpenAccount] = useState(false);
   const [open, setOpen] = useState(false);
-  const { isAuthenticated, userInfo } = useAuth();
-  const menuItems = isAuthenticated ? userMenu : guestMenu;
+  const { isInitialized, userInfo, logout } = useAuth();
+  const userMenu: MenuAccount[] = [
+    { id: 1, label: "Thông tin cá nhân", path: "/account/profile" },
+    { id: 2, label: "Đơn hàng", path: "/account/orders" },
+    { id: 3, label: "Đăng xuất", action: () => setOpen(true) },
+  ];
+  const menuItems = (isInitialized && userInfo) ? userMenu : guestMenu;
 
   return (
     <>
@@ -68,45 +70,28 @@ export default function Header() {
                   />
 
                   <span className="max-w-sx truncate block">
-                    {userInfo?.email ? userInfo.email : "Account"}
+                    {isInitialized && userInfo?.email ? userInfo.email : "Account"}
                   </span>
                 </button>
 
                 <div
                   className={`absolute top-full right-0 pt-2 z-50 transition-all duration-200 origin-top-right
-    ${openAccount
+                    ${openAccount
                       ? "opacity-100 scale-100 translate-y-0"
                       : "opacity-0 scale-95 -translate-y-1 pointer-events-none"}
-    `}
+                    `}
                 >
                   <div className="w-56 bg-white border rounded-lg shadow-lg">
                     <ul className="p-2 text-md">
                       {menuItems.map((item) => (
-                        <li
-                          key={item.id}
-                          className="w-full p-2 hover:bg-gray-100 hover:text-blue-500  "
-                        >
-                          <Link to={item.path} className="block w-full px-4">
-                            {item.label}
-                          </Link>
+                        <li key={item.id} className="px-4 py-2 rounded hover:bg-gray-100">
+                          {item.path ? (
+                            <Link className="block w-full hover:text-indigo-500" to={item.path}>{item.label}</Link>
+                          ) : (
+                            <button className="hover:text-red-500" onClick={item.action}>{item.label}</button>
+                          )}
                         </li>
                       ))}
-                      {isAuthenticated && (
-                        <li
-                          onClick={() => {
-                            setOpenAccount(false)
-                            setOpen(true)
-                          }}
-                          className="w-full p-2 hover:bg-gray-100 hover:text-red-500"
-                        >
-                          <div
-
-                            className="px-4 cursor-pointer"
-                          >
-                            Đăng xuất
-                          </div>
-                        </li>
-                      )}
                     </ul>
                   </div>
                 </div>
@@ -124,7 +109,11 @@ export default function Header() {
         isOpen={open}
         onClose={() => setOpen(false)}
         onConfirm={() => {
-          setOpen(false)
+          {
+            setOpen(false);
+            logout();
+          }
+
         }}
         title="Xác nhận đăng xuất"
         content="Bạn sẽ cần đăng nhập lại để tiếp tục sử dụng?"

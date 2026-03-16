@@ -25,8 +25,8 @@ export default function Header() {
     const [isMobileAccountOpen, setIsMobileAccountOpen] = useState(false);
     return (
         <header className="sticky top-0 z-30 border-b bg-white/80 backdrop-blur">
-            <Container className="px-4 md:px-8">
-                <nav className="flex justify-between items-center h-16 gap-2">
+            <Container className="px-2 md:px-4">
+                <nav className="flex justify-between items-center h-15 gap-2">
                     <Logo />
 
                     <Search />

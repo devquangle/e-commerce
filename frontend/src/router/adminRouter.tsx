@@ -1,10 +1,11 @@
+import Dashboard from "@/pages/admin/Dashboard";
 
 
 
 const adminRouter = [
     {
         path :"/admin/dashboard",
-        element: null
+        element: <Dashboard />
     }
 ]
 

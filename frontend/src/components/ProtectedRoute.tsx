@@ -1,21 +1,20 @@
 import { useAuth } from "@/context/useAuth";
 import { Navigate, useLocation } from "react-router-dom";
-
+import type { RoleType } from "@/types/role";
 interface Props {
   children: React.ReactNode;
-  requiredRoles?: string[];
+  requiredRoles?: RoleType[];
 }
 
 const ProtectedRoute = ({ requiredRoles = [], children }: Props) => {
+
   const { isAuthenticated, isInitialized, hasRole } = useAuth();
   const location = useLocation();
 
-  // auth chưa load
   if (!isInitialized) {
     return null;
   }
 
-  // chưa login
   if (!isAuthenticated) {
     return (
       <Navigate
@@ -26,7 +25,6 @@ const ProtectedRoute = ({ requiredRoles = [], children }: Props) => {
     );
   }
 
-  // check role
   const hasRequiredRole =
     requiredRoles.length === 0 ||
     requiredRoles.some((role) => hasRole(role));

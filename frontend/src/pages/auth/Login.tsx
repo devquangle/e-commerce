@@ -31,7 +31,7 @@ export default function Login() {
       toastUtil.success(res.data.data?.message || "Đăng nhập thành công");
 
       const user = await auth.login(token);
-
+      console.log("User info:", user);
       if (user?.roles?.includes("ROLE_USER")) {
         navigate("/home");
       } else {

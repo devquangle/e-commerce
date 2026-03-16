@@ -1,213 +1,94 @@
+import { menuGroups } from "@/configs/admin.menu"
+import { useAuth } from "@/context/useAuth"
+import type { RoleType } from "@/types/role"
+import { NavLink } from "react-router-dom"
 import { useState } from "react"
-import { Link } from "react-router-dom"
+import { ChevronDown } from "lucide-react"
 
-const menuItems = [
-    {
-        id: 1,
-        label: "Dashboard",
-        path: "/dashboard",
-        icon: (
-            <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M3 3h6v6H3V3zm8 0h6v6h-6V3zM3 11h6v6H3v-6zm8 0h6v6h-6v-6z" />
-            </svg>
+export default function MenuItem() {
+
+  const { userInfo } = useAuth()
+  const roles = userInfo?.roles || []
+
+  const [openGroup, setOpenGroup] = useState<number | null>(null)
+
+  const hasAccess = (menuRoles?: RoleType[]) =>
+    !menuRoles || menuRoles.some(r => roles.includes(r))
+
+  const toggleGroup = (id: number, length: number) => {
+    if (length <= 1) return
+    setOpenGroup(openGroup === id ? null : id)
+  }
+
+  return (
+
+    <ul className="space-y-3">
+
+      {menuGroups.map(group => {
+
+        const items = group.children.filter(i => hasAccess(i.role))
+        if (!items.length) return null
+
+        return (
+
+          <li key={group.id}>
+            <button
+              onClick={() => toggleGroup(group.id, items.length)}
+              className="flex w-full items-center justify-between px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-900 hover:text-indigo-600 transition-colors"
+            >
+              <span className="flex-1 text-left">{group.label}</span>
+
+              {items.length > 1 && (
+                <ChevronDown
+                  size={14}
+                  className={`ml-1 text-slate-700 transition-transform duration-200 ${
+                    openGroup === group.id ? "rotate-180" : ""
+                  }`}
+                />
+              )}
+            </button>
+
+            {(items.length === 1 || openGroup === group.id) && (
+              <ul className="mt-1 space-y-1">
+                {items.map(item => {
+                  const Icon = item.icon
+
+                  return (
+                    <li key={item.id}>
+                      <NavLink
+                        to={item.path!}
+                        className={({ isActive }) =>
+                          [
+                            "group flex items-center gap-3 px-3 py-2 text-sm rounded-lg border border-transparent transition-colors",
+                            "hover:bg-slate-100 hover:text-indigo-600",
+                            isActive
+                              ? "bg-indigo-50 text-indigo-600 border-indigo-100"
+                              : "text-slate-900",
+                          ].join(" ")
+                        }
+                      >
+                        {Icon && (
+                          <Icon
+                            size={18}
+                            className="text-slate-800 group-hover:text-indigo-600"
+                          />
+                        )}
+
+                        <span className="flex-1 truncate">{item.label}</span>
+                      </NavLink>
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+
+          </li>
+
         )
-    },
 
-    {
-        id: 2,
-        label: "Sản phẩm",
-        path: "/products",
-        icon: (
-            <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M4 3h12l-1 14H5L4 3z" />
-            </svg>
-        )
-    },
+      })}
 
-    {
-        id: 3,
-        label: "Thể loại",
-        path: "/categories",
-        icon: (
-            <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M3 4h6v6H3V4zm8 0h6v6h-6V4zM3 12h6v6H3v-6zm8 0h6v6h-6v-6z" />
-            </svg>
-        )
-    },
+    </ul>
 
-    {
-        id: 4,
-        label: "Kho hàng",
-        path: "/inventory",
-        icon: (
-            <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M2 6l8-4 8 4v10H2V6zm3 2v6h10V8H5z" />
-            </svg>
-        )
-    },
-
-    {
-        id: 5,
-        label: "Đơn hàng",
-        path: "/orders",
-        icon: (
-            <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M6 2h8l4 6v10H2V8l4-6z" />
-            </svg>
-        )
-    },
-
-    {
-        id: 6,
-        label: "Giảm giá",
-        path: "/promotions",
-        icon: (
-            <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M17.707 9.293l-7-7A1 1 0 0010 2H3a1 1 0 00-1 1v7a1 1 0 00.293.707l7 7a1 1 0 001.414 0l7-7a1 1 0 000-1.414z" />
-            </svg>
-        )
-    },
-
-    {
-        id: 7,
-        label: "Banner",
-        path: "/banners",
-        icon: (
-            <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M2 3h16v10H2V3zm3 12h10v2H5v-2z" />
-            </svg>
-        )
-    },
-
-    {
-        id: 8,
-        label: "Chat",
-        path: "/chats",
-        icon: (
-            <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M2 3h16v10H5l-3 3V3z" />
-            </svg>
-        )
-    },
-
-    {
-        id: 9,
-        label: "Đánh giá",
-        path: "/reviews",
-        icon: (
-            <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M10 15l-5.878 3.09L5.64 11.545 1 7.91l6.061-.545L10 2l2.939 5.364L19 7.91l-4.64 3.636 1.518 6.545z" />
-            </svg>
-        )
-    },
-
-    {
-        id: 10,
-        label: "Khách hàng",
-        path: "/customers",
-        icon: (
-            <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M10 10a4 4 0 100-8 4 4 0 000 8zm-7 8a7 7 0 0114 0H3z" />
-            </svg>
-        )
-    },
-
-    {
-        id: 11,
-        label: "Thống kê",
-        icon: (
-            <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M3 3h2v14H3V3zm6 4h2v10H9V7zm6-4h2v14h-2V3z" />
-            </svg>
-        ),
-        children: [
-            {
-                id: 111,
-                label: "Doanh thu",
-                path: "/analytics/revenue"
-            },
-            {
-                id: 112,
-                label: "Sách bán chạy",
-                path: "/analytics/best-sellers"
-            }
-        ]
-    },
-
-
-    {
-        id: 12,
-        label: "Tài khoản admin",
-        path: "/users",
-        icon: (
-            <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M10 10a4 4 0 100-8 4 4 0 000 8zm-6 8a6 6 0 1112 0H4z" />
-            </svg>
-        )
-    }
-]
-
-export default function MenuItem({ className = "" }) {
-
-    const [openMenu, setOpenMenu] = useState<number | null>(null)
-
-    const toggleMenu = (id: number) => {
-        setOpenMenu(openMenu === id ? null : id)
-    }
-
-    return (
-        <ul className={className}>
-            {menuItems.map((item) => (
-                <li key={item.id}>
-
-                    {item.children ? (
-                        <>
-                            <button
-                                onClick={() => toggleMenu(item.id)}
-                                className="flex justify-between items-center gap-3 w-full p-2 rounded-lg hover:bg-gray-100 hover:text-indigo-500"
-                            >
-                                <div className="flex justify-between items-center gap-3">  
-                                    {item.icon}
-                                    {item.label}
-                                </div>
-                                <svg
-                                    className={`h-4 w-4 transition ${openMenu ? "rotate-180" : ""}`}
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                >
-                                    <path d="M6 9l6 6 6-6" />
-                                </svg>
-                            </button>
-
-                            {openMenu === item.id && (
-                                <ul className="ml-8 mt-1 space-y-1">
-                                    {item.children.map((child) => (
-                                        <li key={child.id}>
-                                            <Link
-                                                to={child.path}
-                                                className="block p-2 text-sm text-gray-600 hover:text-indigo-500"
-                                            >
-                                                {child.label}
-                                            </Link>
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
-                        </>
-                    ) : (
-                        <Link
-                            to={item.path}
-                            className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 hover:text-indigo-500"
-                        >
-                            {item.icon}
-                            {item.label}
-                        </Link>
-                    )}
-
-                </li>
-            ))}
-        </ul>
-    )
+  )
 }
