@@ -28,7 +28,7 @@ public class LoginImpl implements LoginService {
             throw new IllegalArgumentException("Tài khoản hoặc mật khẩu không đúng");
         }
 
-        // 2. Lấy roles & permissions
+  
         List<String> roles = user.getUserRoles().stream()
                 .map(ur -> ur.getRole().getName())
                 .distinct()
@@ -40,11 +40,10 @@ public class LoginImpl implements LoginService {
                 .distinct()
                 .toList();
 
-        // 3. Tạo JWT
+       
         String accessToken = jwtUtil.generateAccessToken(user.getId(), roles, permissions);
         String refreshToken = jwtUtil.generateRefreshToken(user.getId());
 
-        // 4. Thêm refreshToken vào cookie
         CookieUtil.addCookie(response, "refreshToken", refreshToken);
         Map<String, String> data = Map.of("accessToken", accessToken);
 

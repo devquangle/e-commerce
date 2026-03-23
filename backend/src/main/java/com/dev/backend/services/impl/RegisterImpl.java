@@ -1,0 +1,62 @@
+package com.dev.backend.services.impl;
+
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import com.dev.backend.beans.RegisterBean;
+import com.dev.backend.entities.User;
+import com.dev.backend.entities.UserRole;
+import com.dev.backend.enums.RoleName;
+import com.dev.backend.services.RegisterService;
+import com.dev.backend.services.RoleService;
+import com.dev.backend.services.UserRoleService;
+import com.dev.backend.services.UserService;
+import com.dev.backend.utils.GenerateCode;
+
+import lombok.RequiredArgsConstructor;
+
+@Service
+@RequiredArgsConstructor
+public class RegisterImpl implements RegisterService {
+    private final UserService userService;
+    private final UserRoleService userRoleService;
+    private final RoleService roleService;
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+    @Override
+    public User register(RegisterBean registerBean, String role) {
+        User re = new User();
+
+        if (userService.existsByEmail(registerBean.getEmail())) {
+            throw new IllegalArgumentException("Email đã được sử dụng");
+        }
+        if (!registerBean.getPassword().equals(registerBean.getConfirmPassword())) {
+            throw new IllegalArgumentException("Mật khẩu không khớp");
+        }
+        String generatedCode;
+        do {
+            generatedCode = GenerateCode.generateCode(10);
+        } while (userService.existsByCode(generatedCode));
+        re.setCode(generatedCode);
+        re.setEmail(registerBean.getEmail());
+        re.setFullName(registerBean.getFullName());
+        re.setPassword(passwordEncoder.encode(registerBean.getPassword()));
+        re.setCode(generatedCode);
+        User saved = userService.save(re);
+        UserRole userRole = new UserRole();
+        userRole.setUser(saved);
+        userRole.setRole(roleService.findByName(RoleName.CUSTOMER.name()));
+        userRoleService.save(userRole);
+
+        return saved;
+    }
+
+    @Override
+    public void setUp() {
+        RegisterBean customer = new RegisterBean("customer", "customer@gmail.com", "123456", "123456");
+        RegisterBean super_admin = new RegisterBean("super_admin", "superadmin@gmail.com", "123456", "123456");
+        register(customer, RoleName.CUSTOMER.name());
+        register(super_admin, RoleName.SUPER_ADMIN.name());
+
+    }
+}
