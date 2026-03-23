@@ -36,19 +36,20 @@ public class JwtUtil {
     // GENERATE TOKEN
     // =====================================================
 
-    public String generateAccessToken(int userId, List<String> roles) {
-        return generateToken(userId, roles, TYPE_LOGIN, ACCESS_TOKEN_EXPIRATION);
+    public String generateAccessToken(int userId, List<String> roles, List<String> permissions) {
+        return generateToken(userId, roles, permissions, TYPE_LOGIN, ACCESS_TOKEN_EXPIRATION);
     }
 
     public String generateRefreshToken(int userId) {
-        return generateToken(userId, null, TYPE_REFRESH, REFRESH_TOKEN_EXPIRATION);
+        return generateToken(userId, null, null, TYPE_REFRESH, REFRESH_TOKEN_EXPIRATION);
     }
 
     public String generateResetPasswordToken(int userId) {
-        return generateToken(userId, null, TYPE_RESET, RESET_PASSWORD_EXPIRATION);
+        return generateToken(userId, null, null, TYPE_RESET, RESET_PASSWORD_EXPIRATION);
     }
 
-    private String generateToken(int userId, List<String> roles, String type, long expiration) {
+    private String generateToken(int userId, List<String> roles, List<String> permissions, String type,
+            long expiration) {
 
         var builder = Jwts.builder()
                 .setSubject(String.valueOf(userId))
@@ -59,6 +60,10 @@ public class JwtUtil {
 
         if (roles != null) {
             builder.claim("roles", roles);
+        }
+
+        if (permissions != null) {
+            builder.claim("permissions", permissions);
         }
 
         return builder.compact();
@@ -123,6 +128,19 @@ public class JwtUtil {
 
     public boolean validateRefreshToken(String token, int userId) {
         return validateToken(token, userId, TYPE_REFRESH);
+    }
+
+    public List<String> extractPermissions(String token) {
+
+        List<?> permissions = parseClaims(token).get("permissions", List.class);
+
+        if (permissions == null) {
+            return List.of();
+        }
+
+        return permissions.stream()
+                .map(Object::toString)
+                .toList();
     }
 
     private Claims parseClaims(String token) {

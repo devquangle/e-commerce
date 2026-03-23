@@ -21,9 +21,9 @@ public class ProfileController {
     public ResponseEntity<ResponseData> profile(@RequestHeader("Authorization") String token) {
         try {
 
-            return ResponseUtil.success("get user success", userService.getUserDTO(token));
+            return ResponseUtil.success("get user success", userService.userDTO(token));
         } catch (Exception e) {
-            return ResponseUtil.error("register success", null);
+            return ResponseUtil.error("profile error"+e.getMessage(), null);
         }
     }
 

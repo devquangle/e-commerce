@@ -1,4 +1,5 @@
 import type { RoleType } from "./role";
+import type {PermissionType } from './permission';
 
 export interface User {
   fullName: string;
@@ -7,5 +8,6 @@ export interface User {
   street: string;
   code: string;
   roles: RoleType[];
+  Permissions: PermissionType[];
   image: string;
 }

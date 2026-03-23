@@ -1,32 +1,11 @@
 package com.dev.backend.services;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Service;
-
 import com.dev.backend.beans.LoginBean;
+import jakarta.servlet.http.HttpServletResponse;
 
-import com.dev.backend.entities.User;
+import java.util.Map;
 
-import lombok.RequiredArgsConstructor;
+public interface LoginService {
 
-@Service
-@RequiredArgsConstructor
-public class LoginService {
-
-    private final UserService userService;
-
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-
-    public User login(LoginBean loginBean) {
-
-        User user = userService.findUserByEmail(loginBean.getEmail());
-
-        if (user == null || !passwordEncoder.matches(loginBean.getPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("Tài khoản hoặc mật khẩu không đúng");
-        }
-     
-
-        return user;
-    }
-
+    Map<String, String> login(LoginBean loginBean, HttpServletResponse response);
 }

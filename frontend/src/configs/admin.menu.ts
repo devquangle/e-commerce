@@ -26,7 +26,7 @@ export const menuGroups: MenuGroup[] = [
       label: "Dashboard",
       path: "/admin/dashboard",
       icon: LayoutDashboard,
-      role: [Role.ADMIN]
+      role:  [Role.SUPER_ADMIN, Role.ADMIN]
     }
   ]
 },
@@ -40,14 +40,14 @@ export const menuGroups: MenuGroup[] = [
       label: "Sản phẩm",
       path: "/admin/products",
       icon: Package,
-      role: [Role.ADMIN, Role.PRODUCT_MANAGER]
+      role: [Role.SUPER_ADMIN, Role.ADMIN, Role.PRODUCT_MANAGER]
     },
     {
       id: 22,
       label: "Thể loại",
       path: "/admin/genres",
       icon: FolderTree,
-      role: [Role.ADMIN, Role.PRODUCT_MANAGER]
+      role: [Role.SUPER_ADMIN, Role.ADMIN, Role.PRODUCT_MANAGER]
     },
   ]
 },
@@ -61,14 +61,14 @@ export const menuGroups: MenuGroup[] = [
       label: "Đơn hàng",
       path: "/admin/orders",
       icon: ShoppingCart,
-      role: [Role.ADMIN, Role.ORDER_MANAGER]
+      role: [Role.SUPER_ADMIN, Role.ADMIN, Role.ORDER_MANAGER]
     },
     {
       id: 32,
       label: "Đánh giá",
       path: "/admin/reviews",
       icon: Star,
-      role: [Role.ADMIN, Role.ORDER_MANAGER]
+      role: [Role.SUPER_ADMIN, Role.ADMIN, Role.ORDER_MANAGER]
     }
   ]
 },
@@ -82,14 +82,14 @@ export const menuGroups: MenuGroup[] = [
       label: "Giảm giá",
       path: "/admin/promotions",
       icon: Megaphone,
-      role: [Role.ADMIN, Role.PROMOTION_MANAGER]
+      role: [Role.SUPER_ADMIN, Role.ADMIN, Role.PROMOTION_MANAGER]
     },
     {
       id: 42,
       label: "Banner",
       path: "/admin/banners",
       icon: Image,
-      role: [Role.ADMIN, Role.CONTENT_MANAGER]
+      role: [Role.SUPER_ADMIN, Role.ADMIN, Role.CONTENT_MANAGER]
     }
   ]
 },
@@ -103,7 +103,7 @@ export const menuGroups: MenuGroup[] = [
       label: "Chat",
       path: "/admin/chats",
       icon: MessageCircle,
-      role: [Role.ADMIN, Role.SUPPORT]
+      role: [Role.SUPER_ADMIN, Role.ADMIN, Role.SUPPORT]
     },
   ]
 },
@@ -117,14 +117,14 @@ export const menuGroups: MenuGroup[] = [
       label: "Doanh thu",
       path: "/admin/analytics/revenue",
       icon: BarChart3,
-      role: [Role.ADMIN, Role.ACCOUNTANT]
+      role: [Role.SUPER_ADMIN, Role.ADMIN, Role.ACCOUNTANT]
     },
     {
       id: 62,
       label: "Sách bán chạy",
       path: "/admin/analytics/best-sellers",
       icon: Flame,
-      role: [Role.ADMIN, Role.ACCOUNTANT]
+      role: [Role.SUPER_ADMIN, Role.ADMIN, Role.ACCOUNTANT]
     }
   ]
 },
@@ -138,7 +138,7 @@ export const menuGroups: MenuGroup[] = [
       label: "Tài khoản",
       path: "/admin/users",
       icon: Users,
-      role: [Role.ADMIN]
+      role: [Role.SUPER_ADMIN, Role.ADMIN]
     }
   ]
 }

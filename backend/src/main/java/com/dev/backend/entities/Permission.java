@@ -2,8 +2,15 @@ package com.dev.backend.entities;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import com.dev.backend.enums.ActionType;
+import com.dev.backend.enums.Module;
+
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -17,22 +24,20 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @Entity
-@Table(name = "roles")
-public class Role {
-
+@Table(name = "permissions")
+public class Permission {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
-    @Column(nullable = false, unique = true)
-    private String name;
-
+    @Column(unique = true)
+    private String code;
     private String description;
+    @Enumerated(EnumType.STRING)
+    private Module module;
+    @Enumerated(EnumType.STRING)
+    private ActionType actionType;
 
-    @OneToMany(mappedBy = "role")
-    private List<UserRole> userRoles = new ArrayList<>();
-
-    @OneToMany(mappedBy = "role")
+    @OneToMany(mappedBy = "permission")
     private List<RolePermission> rolePermissions = new ArrayList<>();
 
 }

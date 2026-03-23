@@ -10,6 +10,8 @@ import com.dev.backend.repositories.UserRepository;
 import com.dev.backend.security.jwt.JwtUtil;
 
 import lombok.RequiredArgsConstructor;
+import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +25,9 @@ public class UserService {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("user "));
     }
+    public boolean isEmpty(){
+        return userRepository.count()==0;
+    }
 
     public boolean existsByEmail(String email) {
         return userRepository.checkEmail(email);
@@ -34,7 +39,7 @@ public class UserService {
     }
 
     public User getUserByEmail(String email) {
-        return userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        return userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("Tài khoản hoặc mật khẩu không đúng"));
     }
 
     public User save(User user) {
@@ -53,4 +58,64 @@ public class UserService {
         return userMapper.toDTO(getUserLogin(token));
     }
 
+    public UserDTO getUserDTOById(String authHeader) {
+        String token = authHeader.substring(7);
+        Integer id=Integer.valueOf(jwtUtil.extractUserId(token));
+        User user =getUserById(id);
+
+        // Lấy roles
+        List<String> roles = user.getUserRoles().stream()
+                .map(ur -> ur.getRole().getName())
+                .distinct()
+                .toList();
+
+        // Lấy permissions
+        List<String> permissions = user.getUserRoles().stream()
+                .flatMap(ur -> ur.getRole().getRolePermissions().stream())
+                .map(rp -> rp.getPermission().getCode())
+                .distinct()
+                .toList();
+
+        UserDTO dto = new UserDTO();
+        dto.setFullName(user.getFullName());
+        dto.setEmail(user.getEmail());
+        dto.setPhone(user.getPhone());
+        dto.setStreet(user.getStreet());
+        dto.setCode(user.getCode());
+        dto.setImage(user.getImage());
+        dto.setRoles(roles);
+        dto.setPermissions(permissions);
+
+        return dto;
+    }
+
+
+    public UserDTO userDTO(String authHeader) {
+        String token = authHeader.substring(7);
+        Integer id=Integer.valueOf(jwtUtil.extractUserId(token));
+        List<UserDTO> rows = userRepository.findUserDTOById(id);
+        if (rows.isEmpty()) {
+            throw new IllegalArgumentException("User not found");
+        }
+
+        UserDTO first = rows.get(0);
+
+        // Gom roles và permissions
+        List<String> roles = rows.stream()
+                .map(UserDTO::getRoles)
+                .flatMap(List::stream)
+                .distinct()
+                .toList();
+
+        List<String> permissions = rows.stream()
+                .map(UserDTO::getPermissions)
+                .flatMap(List::stream)
+                .distinct()
+                .toList();
+
+        first.setRoles(roles);
+        first.setPermissions(permissions);
+
+        return first;
+    }
 }
