@@ -16,7 +16,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-public class LoginImpl implements LoginService {
+public class LoginServiceImpl implements LoginService {
     private final UserService userService;
     private final JwtUtil jwtUtil;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();

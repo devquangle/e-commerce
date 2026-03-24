@@ -1,10 +1,7 @@
 package com.dev.backend.dtos;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import java.util.Set;
 import lombok.*;
-
 @AllArgsConstructor
 @Getter
 @Setter
@@ -16,19 +13,7 @@ public class UserDTO {
     private String street;
     private String code;
     private String image;
-    private List<String> roles = new ArrayList<>();
-    private List<String> permissions = new ArrayList<>();
-
-    public UserDTO(String fullName, String email, String phone, String street, String code, String image,
-                   String role, String permission) {
-        this.fullName = fullName;
-        this.email = email;
-        this.phone = phone;
-        this.street = street;
-        this.code = code;
-        this.image = image;
-        this.roles = role != null ? List.of(role) : List.of();
-        this.permissions = permission != null ? List.of(permission) : List.of();
-    }
+    private Set<String> roles;
+    private Set<String> permissions;
 
 }

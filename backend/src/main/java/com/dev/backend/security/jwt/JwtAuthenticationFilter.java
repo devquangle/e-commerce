@@ -47,7 +47,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String token = authHeader.substring(7);
                 try {
 
-                        User user=userService.getUserLogin(token);
+                        String userIdStr = jwtUtil.extractUserId(token);
+                        Integer userId = Integer.parseInt(userIdStr);
+                        User user=userService.getUserById(userId);
 
                         // 2. Validate token trước
                         if (!jwtUtil.validateToken(token,user.getId(),"LOGIN")) {
@@ -85,7 +87,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         response.getWriter().write(
                                 objectMapper.writeValueAsString(
                                         new ResponseData(false,
-                                                "Token không hợp lệ hoặc hết hạn",
+                                                "Token không hợp lệ hoặc hết hạn "+ e.getMessage(),
                                                 null,
                                                 LocalDateTime.now())
                                 )

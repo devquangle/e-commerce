@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class RegisterImpl implements RegisterService {
+public class RegisterServiceImpl implements RegisterService {
     private final UserService userService;
     private final UserRoleService userRoleService;
     private final RoleService roleService;
@@ -42,7 +42,7 @@ public class RegisterImpl implements RegisterService {
         re.setFullName(registerBean.getFullName());
         re.setPassword(passwordEncoder.encode(registerBean.getPassword()));
         re.setCode(generatedCode);
-        User saved = userService.save(re);
+        User saved = userService.saveUser(re);
         UserRole userRole = new UserRole();
         userRole.setUser(saved);
         userRole.setRole(roleService.findByName(RoleName.CUSTOMER.name()));
