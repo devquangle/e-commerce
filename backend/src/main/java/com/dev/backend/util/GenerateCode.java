@@ -1,4 +1,4 @@
-package com.dev.backend.utils;
+package com.dev.backend.util;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;

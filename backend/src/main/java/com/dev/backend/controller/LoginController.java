@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.dev.backend.bean.LoginBean;
 import com.dev.backend.resp.ResponseData;
 import com.dev.backend.service.LoginService;
-import com.dev.backend.utils.ResponseUtil;
+import com.dev.backend.util.ResponseUtil;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;

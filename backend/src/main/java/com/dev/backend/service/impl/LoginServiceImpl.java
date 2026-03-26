@@ -5,7 +5,8 @@ import com.dev.backend.entity.User;
 import com.dev.backend.security.jwt.JwtUtil;
 import com.dev.backend.service.LoginService;
 import com.dev.backend.service.UserService;
-import com.dev.backend.utils.CookieUtil;
+import com.dev.backend.util.CookieUtil;
+
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

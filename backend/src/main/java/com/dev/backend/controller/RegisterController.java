@@ -7,7 +7,7 @@ import com.dev.backend.entity.User;
 import com.dev.backend.constant.RoleName;
 import com.dev.backend.resp.ResponseData;
 import com.dev.backend.service.RegisterService;
-import com.dev.backend.utils.ResponseUtil;
+import com.dev.backend.util.ResponseUtil;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

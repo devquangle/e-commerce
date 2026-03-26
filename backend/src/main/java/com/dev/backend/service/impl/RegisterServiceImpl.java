@@ -11,7 +11,7 @@ import com.dev.backend.service.RegisterService;
 import com.dev.backend.service.RoleService;
 import com.dev.backend.service.UserRoleService;
 import com.dev.backend.service.UserService;
-import com.dev.backend.utils.GenerateCode;
+import com.dev.backend.util.GenerateCode;
 
 import lombok.RequiredArgsConstructor;
 

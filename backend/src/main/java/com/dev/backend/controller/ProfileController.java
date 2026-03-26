@@ -3,7 +3,8 @@ package com.dev.backend.controller;
 import com.dev.backend.dto.UserDTO;
 import com.dev.backend.resp.ResponseData;
 import com.dev.backend.security.CustomUserDetails;
-import com.dev.backend.utils.ResponseUtil;
+import com.dev.backend.util.ResponseUtil;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
