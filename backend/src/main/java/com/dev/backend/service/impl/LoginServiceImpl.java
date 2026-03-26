@@ -1,11 +1,10 @@
 package com.dev.backend.service.impl;
 
 import com.dev.backend.bean.LoginBean;
-import com.dev.backend.dto.UserAuthoritiesDTO;
-import com.dev.backend.entity.User;
+import com.dev.backend.dto.UserRP;
 import com.dev.backend.security.jwt.JwtUtil;
+import com.dev.backend.service.AuthService;
 import com.dev.backend.service.LoginService;
-import com.dev.backend.service.UserService;
 import com.dev.backend.util.CookieUtil;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -15,35 +14,47 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class LoginServiceImpl implements LoginService {
-    private final UserService userService;
+    private final AuthService authService;
     private final JwtUtil jwtUtil;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Override
     public Map<String, String> login(LoginBean loginBean, HttpServletResponse response) {
-        User user = userService.getUserByEmail(loginBean.getEmail());
-        if (user == null || !passwordEncoder.matches(loginBean.getPassword(), user.getPassword())) {
+        List<UserRP> userRPs = authService.getUserRPByEmail(loginBean.getEmail());
+
+        UserRP user = userRPs.getFirst();
+
+        if (!passwordEncoder.matches(loginBean.getPassword(), user.password())) {
             throw new IllegalArgumentException("Tài khoản hoặc mật khẩu không đúng");
         }
-        log.info("User login"+user.getEmail());
+        log.info("User login" + user.email());
 
-        UserAuthoritiesDTO authorities = userService.getUserAuthoritiesByEmail(loginBean.getEmail());
-        List<String> roles = authorities.roles().stream().toList();
-        List<String> permissions = authorities.permissions().stream().toList();
+        Set<String> roles = userRPs.stream()
+                .map(UserRP::roleName)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        Set<String> permissions = userRPs.stream()
+                .map(UserRP::permissionCode)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
 
-        String accessToken = jwtUtil.generateAccessToken(user.getId(), roles, permissions);
-        String refreshToken = jwtUtil.generateRefreshToken(user.getId());
+        String accessToken = jwtUtil.generateAccessToken(user.id(), new ArrayList<>(roles),
+        new ArrayList<>(permissions));
+        String refreshToken = jwtUtil.generateRefreshToken(user.id());
 
         CookieUtil.addCookie(response, "refreshToken", refreshToken);
         Map<String, String> data = Map.of("accessToken", accessToken);
-
-
 
         return data;
     }

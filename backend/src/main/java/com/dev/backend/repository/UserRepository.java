@@ -1,6 +1,5 @@
 package com.dev.backend.repository;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -10,8 +9,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.dev.backend.entity.User;
-import com.dev.backend.dto.UserAuthorityProjection;
-import com.dev.backend.dto.UserWithAuthorityProjection;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
@@ -73,43 +70,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @Query("SELECT u FROM User u WHERE u.id = :id")
     Optional<User> findBasicById(@Param("id") Integer id);
 
-    @Query("""
-            SELECT r.name AS roleName, p.code AS permissionCode
-            FROM User u
-            LEFT JOIN u.userRoles ur
-            LEFT JOIN ur.role r
-            LEFT JOIN r.rolePermissions rp
-            LEFT JOIN rp.permission p
-            WHERE u.id = :id
-            """)
-    List<UserAuthorityProjection> findAuthorityProjectionByUserId(@Param("id") Integer id);
-
-    @Query("""
-            SELECT r.name AS roleName, p.code AS permissionCode
-            FROM User u
-            LEFT JOIN u.userRoles ur
-            LEFT JOIN ur.role r
-            LEFT JOIN r.rolePermissions rp
-            LEFT JOIN rp.permission p
-            WHERE u.email = :email
-            """)
-    List<UserAuthorityProjection> findAuthorityProjectionByEmail(@Param("email") String email);
-
-    @Query("""
-            SELECT u.id AS userId,
-                   u.fullName AS fullName,
-                   u.email AS email,
-                   u.code AS code,
-                   u.image AS image,
-                   r.name AS roleName,
-                   p.code AS permissionCode
-            FROM User u
-            LEFT JOIN u.userRoles ur
-            LEFT JOIN ur.role r
-            LEFT JOIN r.rolePermissions rp
-            LEFT JOIN rp.permission p
-            WHERE u.id = :id
-            """)
-    List<UserWithAuthorityProjection> findUserWithAuthoritiesProjectionById(@Param("id") Integer id);
+    
 
 }
