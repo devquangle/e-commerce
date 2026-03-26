@@ -1,13 +1,13 @@
 export const Role = {
-  SUPER_ADMIN: "ROLE_SUPER_ADMIN",
-  ADMIN: "ROLE_ADMIN",
-  PRODUCT_MANAGER: "ROLE_PRODUCT_MANAGER",
-  ORDER_MANAGER: "ROLE_ORDER_MANAGER",
-  PROMOTION_MANAGER: "ROLE_PROMOTION_MANAGER",
-  SUPPORT: "ROLE_SUPPORT",
-  ACCOUNTANT: "ROLE_ACCOUNTANT",
-  CONTENT_MANAGER: "ROLE_CONTENT_MANAGER",
-  USER: "ROLE_USER",
+  SUPER_ADMIN: "SUPER_ADMIN",
+  ADMIN: "ADMIN",
+  PRODUCT_MANAGER: "PRODUCT_MANAGER",
+  ORDER_MANAGER: "ORDER_MANAGER",
+  PROMOTION_MANAGER: "PROMOTION_MANAGER",
+  SUPPORT: "SUPPORT",
+  ACCOUNTANT: "ACCOUNTANT",
+  CONTENT_MANAGER: "CONTENT_MANAGER",
+  CUSTOMER: "CUSTOMER",
 } as const;
 
 export type RoleType = (typeof Role)[keyof typeof Role];
@@ -38,7 +38,7 @@ export const roleHierarchy: Record<RoleType, RoleType[]> = {/* role hierarchy */
   [Role.SUPPORT]: [],
   [Role.ACCOUNTANT]: [],
   [Role.CONTENT_MANAGER]: [],
-  [Role.USER]: [],
+  [Role.CUSTOMER]: [],
 };
 
 /* check role access */

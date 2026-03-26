@@ -4,7 +4,6 @@ import type { User } from "@/types/user";
 import { hasRoleAccess, type RoleType } from "@/types/role";
 import { getToken, removeToken, setToken } from "@/utils/cookieUtil";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 type Props = {
   children: React.ReactNode;

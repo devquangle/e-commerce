@@ -44,7 +44,7 @@ const userRouter = [
     {
         path: "/account",
         element: 
-        <ProtectedRoute requiredRoles={[Role.USER]}>
+        <ProtectedRoute requiredRoles={[Role.CUSTOMER]}>
             <AccountLayout />
         </ProtectedRoute>,
         children: [

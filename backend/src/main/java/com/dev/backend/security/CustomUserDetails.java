@@ -1,9 +1,10 @@
 package com.dev.backend.security;
 
-import com.dev.backend.entities.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import com.dev.backend.entity.User;
 
 import java.util.Collection;
 import java.util.Set;

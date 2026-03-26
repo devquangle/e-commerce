@@ -12,7 +12,7 @@ import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 
 export default function Login() {
-  const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>();
+  const { register, handleSubmit,setError, formState: { errors } } = useForm<LoginForm>();
   const [showPassword, setShowPassword] = useState(false);
   const auth = useAuth();
   const navigate = useNavigate();
@@ -32,7 +32,7 @@ export default function Login() {
 
       const user = await auth.login(token);
       console.log("User info:", user);
-      if (user?.roles?.includes("ROLE_USER")) {
+      if (user?.roles?.includes("CUSTOMER")) {
         navigate("/home");
       } else {
         navigate("/admin");
@@ -41,6 +41,16 @@ export default function Login() {
       toastUtil.loading("Đang chuyển hướng...");
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
+        if (error.response?.data?.data) {
+            const fieldErrors = error.response.data.data;
+            for (const field in fieldErrors) {
+              setError(field as keyof LoginForm, {
+                type: "server",
+                message: fieldErrors[field]
+              });
+            }
+          return ;
+        }
         console.log(error.response?.data.message);
         toastUtil.error(error.response?.data.message || "Đăng nhập thất bại");
       } else {
