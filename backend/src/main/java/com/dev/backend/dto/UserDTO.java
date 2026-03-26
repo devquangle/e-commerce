@@ -3,8 +3,8 @@ package com.dev.backend.dto;
 import java.util.Set;
 import lombok.*;
 @AllArgsConstructor
-@Getter
-@Setter
+@Builder
+@Data
 @NoArgsConstructor
 public class UserDTO {
     private String fullName;

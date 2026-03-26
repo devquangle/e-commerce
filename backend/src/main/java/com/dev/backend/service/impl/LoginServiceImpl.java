@@ -1,6 +1,7 @@
 package com.dev.backend.service.impl;
 
 import com.dev.backend.bean.LoginBean;
+import com.dev.backend.dto.UserAuthoritiesDTO;
 import com.dev.backend.entity.User;
 import com.dev.backend.security.jwt.JwtUtil;
 import com.dev.backend.service.LoginService;
@@ -30,20 +31,12 @@ public class LoginServiceImpl implements LoginService {
         if (user == null || !passwordEncoder.matches(loginBean.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException("Tài khoản hoặc mật khẩu không đúng");
         }
+        log.info("User login"+user.getEmail());
 
-  
-        List<String> roles = user.getUserRoles().stream()
-                .map(ur -> ur.getRole().getName())
-                .distinct()
-                .toList();
+        UserAuthoritiesDTO authorities = userService.getUserAuthoritiesByEmail(loginBean.getEmail());
+        List<String> roles = authorities.roles().stream().toList();
+        List<String> permissions = authorities.permissions().stream().toList();
 
-        List<String> permissions = user.getUserRoles().stream()
-                .flatMap(ur -> ur.getRole().getRolePermissions().stream())
-                .map(rp -> rp.getPermission().getCode())
-                .distinct()
-                .toList();
-
-       
         String accessToken = jwtUtil.generateAccessToken(user.getId(), roles, permissions);
         String refreshToken = jwtUtil.generateRefreshToken(user.getId());
 

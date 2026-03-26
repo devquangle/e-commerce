@@ -13,6 +13,7 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -38,6 +39,8 @@ public class User {
     private LocalDateTime updateAt;
     private boolean active = true;
 
+    // Giảm N+1 khi khởi tạo collection trong luồng lấy role/permission qua nhiều tầng.
+    @BatchSize(size = 50)
     @OneToMany(mappedBy = "user")
     private List<UserRole> userRoles = new ArrayList<>();
 
@@ -45,7 +48,7 @@ public class User {
     private List<Address> addresses = new ArrayList<>();;
 
     @OneToMany(mappedBy = "user")
-    private List<CartItem> cartItems = new ArrayList<>();;
+    private List<CartItem> cartItems = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
     private List<Order> orders = new ArrayList<>();;

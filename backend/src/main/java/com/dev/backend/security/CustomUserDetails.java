@@ -1,5 +1,6 @@
 package com.dev.backend.security;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -7,57 +8,79 @@ import org.springframework.security.core.userdetails.UserDetails;
 import com.dev.backend.entity.User;
 
 import java.util.Collection;
-import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CustomUserDetails implements UserDetails {
-
-    private final String email;
-    private final String password;
-    private final boolean active;
-
-    private final String fullName;
-    private final String phone;
-    private final String street;
-    private final String image;
-
-    private final Set<GrantedAuthority> authorities;
+    private User user;
+    private Collection<? extends GrantedAuthority> authorities;
 
     public CustomUserDetails(User user) {
-        this.email    = user.getEmail();
-        this.password = user.getPassword();
-        this.active   = user.isActive();
+        this.user = user;
+    }
 
-        this.fullName = user.getFullName();
-        this.phone    = user.getPhone();
-        this.street   = user.getStreet();
-        this.image    = user.getImage();
-        this.authorities = user.getUserRoles().stream()
-            .flatMap(userRole -> {
-                var role = userRole.getRole();
-                Set<GrantedAuthority> auths = role.getRolePermissions().stream()
-                    .map(rp -> (GrantedAuthority) new SimpleGrantedAuthority(rp.getPermission().getCode()))
-                    .collect(Collectors.toSet());
+    public CustomUserDetails(User user, Collection<? extends GrantedAuthority> authorities) {
+        this.user = user;
+        this.authorities = authorities;
+    }
 
-                auths.add(new SimpleGrantedAuthority("ROLE_" + role.getName()));
-                return auths.stream();
-            })
-            .collect(Collectors.toSet());
+    public User getUser() {
+        return user;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities; 
+        if (authorities != null) {
+            return authorities;
+        }
+
+        // Fallback: tính trực tiếp từ entity (chỉ dùng khi caller chưa truyền authorities).
+        return user.getUserRoles().stream()
+                .flatMap(ur -> {
+                    Stream<String> roleStream = Stream.of("ROLE_" + ur.getRole().getName());
+                    Stream<String> permissionStream = ur.getRole().getRolePermissions().stream()
+                            .map(rp -> rp.getPermission().getCode());
+                    return Stream.concat(roleStream, permissionStream);
+                })
+                .distinct()
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
     }
 
-    @Override public String getPassword()  { return password; }
-    @Override public String getUsername()  { return email; }
-    @Override public boolean isEnabled()   { return active; }
+    @Override
+    public @Nullable String getPassword() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-    // ✅ Expose flat fields — NO User entity reference stored
-    public String getFullName() { return fullName; }
-    public String getPhone()    { return phone; }
-    public String getStreet()   { return street; }
-    public String getImage()    { return image; }
-    public String getEmail()    { return email; }
+    @Override
+    public String getUsername() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        // TODO Auto-generated method stub
+        return UserDetails.super.isAccountNonExpired();
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        // TODO Auto-generated method stub
+        return UserDetails.super.isAccountNonLocked();
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        // TODO Auto-generated method stub
+        return UserDetails.super.isCredentialsNonExpired();
+    }
+
+    @Override
+    public boolean isEnabled() {
+        // TODO Auto-generated method stub
+        return UserDetails.super.isEnabled();
+    }
+
 }

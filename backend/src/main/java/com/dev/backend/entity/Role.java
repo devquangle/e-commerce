@@ -10,12 +10,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-
+import lombok.Setter;
+import org.hibernate.annotations.BatchSize;
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "roles")
 public class Role {
@@ -32,6 +34,7 @@ public class Role {
     @OneToMany(mappedBy = "role")
     private List<UserRole> userRoles = new ArrayList<>();
 
+    @BatchSize(size = 50)
     @OneToMany(mappedBy = "role")
     private List<RolePermission> rolePermissions = new ArrayList<>();
 

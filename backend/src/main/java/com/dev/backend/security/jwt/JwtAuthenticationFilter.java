@@ -1,43 +1,43 @@
 package com.dev.backend.security.jwt;
 
-import lombok.RequiredArgsConstructor;
-import tools.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.time.LocalDateTime;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.dev.backend.resp.ResponseData;
+import com.dev.backend.security.CustomUserDetailsService;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import tools.jackson.databind.ObjectMapper;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final ObjectMapper objectMapper;
+    private final CustomUserDetailsService customUserDetailsService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain chain)
+            HttpServletResponse response,
+            FilterChain chain)
             throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
 
-        // 1. Không có token → bỏ qua
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             chain.doFilter(request, response);
             return;
@@ -46,48 +46,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = authHeader.substring(7);
 
         try {
-            String userId = jwtUtil.extractUserId(token);
 
-            if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            if (jwtUtil.validateAccessToken(token) &&
+                    SecurityContextHolder.getContext().getAuthentication() == null) {
 
-                // 2. Validate token
-                if (!jwtUtil.validateAccessToken(token)) {
-                    throw new RuntimeException("Invalid token");
+                String userId = jwtUtil.extractUserId(token);
+
+                UserDetails userDetails = customUserDetailsService.loadUserByUsername(userId);
+                      
+                if (userDetails != null) {
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities());
+
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
-
-                // 3. Lấy roles + permissions từ token
-                List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-
-                authorities.addAll(
-                        jwtUtil.extractRoles(token)
-                                .stream()
-                                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-                                .toList()
-                );
-
-                authorities.addAll(
-                        jwtUtil.extractPermissions(token)
-                                .stream()
-                                .map(SimpleGrantedAuthority::new)
-                                .toList()
-                );
-
-                // 4. Set Authentication (KHÔNG DB)
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(
-                                userId,
-                                null,
-                                authorities
-                        );
-
-                authentication.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request)
-                );
-
-                SecurityContextHolder.getContext().setAuthentication(authentication);
             }
 
         } catch (Exception e) {
+            log.error("JWT error", e);
+
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json;charset=UTF-8");
 
@@ -96,9 +76,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             new ResponseData(false,
                                     "Token không hợp lệ hoặc hết hạn",
                                     null,
-                                    LocalDateTime.now())
-                    )
-            );
+                                    LocalDateTime.now())));
             return;
         }
 
