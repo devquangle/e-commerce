@@ -1,9 +1,10 @@
 import Container from '@/components/Container'
+import Loading from '@/components/Loading';
 import { useAuth } from '@/context/useAuth';
 import authService from '@/services/authService';
 
 import type { LoginForm } from '@/types/login';
-import toastUtil from '@/utils/toastUtil';
+import { showErrorToast, showSuccessToast } from '@/utils/toastUtil';
 import axios from 'axios';
 
 import { useState } from 'react';
@@ -12,201 +13,211 @@ import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 
 export default function Login() {
-  const { register, handleSubmit,setError, formState: { errors } } = useForm<LoginForm>();
+  const { register, handleSubmit, setError, formState: { errors } } = useForm<LoginForm>();
+  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const auth = useAuth();
   const navigate = useNavigate();
   const onSubmit = async (data: LoginForm) => {
+    const minLoadingTime = 800; // ms
+    const startTime = Date.now();
+
+    setIsLoading(true);
 
     try {
-      const res = await authService.login({
-        email: data.email,
-        password: data.password
-      });
-      const token = res.data?.accessToken;
-      if (!token) throw new Error("Token không tồn tại");
+      // 1. Gọi API Login
+      const loginRes = await authService.login(data);
+      const token = loginRes.data?.accessToken;
 
+      if (!token) throw new Error("Phản hồi từ hệ thống không hợp lệ.");
 
-      console.log("Login response:", token);
-      toastUtil.success(res.data.data?.message || "Đăng nhập thành công");
-
+      // 2. Lưu thông tin User
       const user = await auth.login(token);
-      console.log("User info:", user);
-      if (user?.roles?.includes("CUSTOMER")) {
-        navigate("/home");
-      } else {
-        navigate("/admin");
-      }
 
-      toastUtil.loading("Đang chuyển hướng...");
+      // 3. Success toast
+      showSuccessToast(loginRes.data?.message || "Đăng nhập thành công!");
+
+      // 4. Delay tối thiểu để spinner hiển thị đủ lâu
+      const elapsed = Date.now() - startTime;
+      if (elapsed < minLoadingTime) await new Promise(r => setTimeout(r, minLoadingTime - elapsed));
+
+      // 5. Điều hướng
+      const targetPath = user?.roles?.includes("CUSTOMER") ? "/home" : "/admin";
+      navigate(targetPath);
+
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
-        if (error.response?.data?.data) {
-            const fieldErrors = error.response.data.data;
-            for (const field in fieldErrors) {
-              setError(field as keyof LoginForm, {
-                type: "server",
-                message: fieldErrors[field]
-              });
-            }
-          return ;
+        const serverData = error.response?.data;
+
+        // Lỗi validation theo field
+        if (serverData?.data && typeof serverData.data === "object") {
+          Object.entries(serverData.data).forEach(([field, message]) => {
+            setError(field as keyof LoginForm, {
+              type: "server",
+              message: message as string,
+            });
+          });
+          return;
         }
-        console.log(error.response?.data.message);
-        toastUtil.error(error.response?.data.message || "Đăng nhập thất bại");
+
+        showErrorToast(serverData?.message || "Thông tin đăng nhập không chính xác");
       } else {
-        toastUtil.error("Đăng nhập thất bại");
+        showErrorToast("Không thể kết nối đến máy chủ");
       }
-
-
+    } finally {
+      setIsLoading(false);
     }
-
   };
-
   return (
-    <Container className="px-4 md:px-8">
-      <div className="flex justify-center items-center min-h-[80vh] py-4">
-        <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-md rounded-xl border space-y-4">
+    <>
+      {isLoading && <Loading />}
+      <Container className="px-4 md:px-8">
 
-          <div className="flex flex-col gap-3 p-6 md:p-8">
+        <div className="flex justify-center items-center min-h-[80vh] py-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-md rounded-xl border space-y-4">
 
-            {/* Title */}
-            <div className="text-center">
-              <h1 className="text-2xl font-bold text-blue-700">
-                Đăng nhập BookStore
-              </h1>
-              <p className="mt-1 text-sm text-gray-500 py-2">
-                Chào mừng bạn trở lại! Vui lòng đăng nhập vào tài khoản của bạn
-              </p>
-            </div>
+            <div className="flex flex-col gap-3 p-6 md:p-8">
+
+              {/* Title */}
+              <div className="text-center">
+                <h1 className="text-2xl font-bold text-blue-700">
+                  Đăng nhập BookStore
+                </h1>
+                <p className="mt-1 text-sm text-gray-500 py-2">
+                  Chào mừng bạn trở lại! Vui lòng đăng nhập vào tài khoản của bạn
+                </p>
+              </div>
 
 
-            {/* Email */}
-            <div className="space-y-1">
-              <label htmlFor="email" className="text-sm font-medium text-gray-700">
-                Email
-              </label>
+              {/* Email */}
+              <div className="space-y-1">
+                <label htmlFor="email" className="text-sm font-medium text-gray-700">
+                  Email
+                </label>
 
-              <input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                {...register("email", {
-                  required: "Email là bắt buộc",
-                  pattern: {
-                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message: "Email không hợp lệ"
-                  }
-                })}
-                className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
-              />
-
-              <p className="text-red-600 text-sm min-h-5">
-                {errors.email?.message}
-              </p>
-            </div>
-
-            {/* Password */}
-            <div className="flex flex-col">
-              <label htmlFor="password" className="mb-1 block text-sm font-medium text-gray-700">
-                Mật khẩu
-              </label>
-              <div className='relative flex items-center w-full rounded-lg border border-gray-300 bg-gray-50 focus-within:ring-2 focus-within:ring-blue-200 focus-within:border-blue-500'>
                 <input
-                  type={showPassword ? "text" : "password"}
-                  id="password"
-
-                  placeholder="••••••••"
-                  className="w-full rounded-lg border  px-4 py-2 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition pr-10"
-
-                  {...register("password", {
-                    required: "Mật khẩu là bắt buộc",
+                  id="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  {...register("email", {
+                    required: "Email là bắt buộc",
+                    pattern: {
+                      value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                      message: "Email không hợp lệ"
+                    }
                   })}
+                  className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
                 />
 
-                {/* Button con mắt */}
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showPassword ? (
-                    // Mắt đóng
-                    <svg className="w-6 h-6 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                      <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3.933 13.909A4.357 4.357 0 0 1 3 12c0-1 4-6 9-6m7.6 3.8A5.068 5.068 0 0 1 21 12c0 1-3 6-9 6-.314 0-.62-.014-.918-.04M5 19 19 5m-4 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                    </svg>
-
-
-                  ) : (
-                    // Mắt mở
-                    <svg className="w-6 h-6 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                      <path stroke="currentColor" strokeWidth="2" d="M21 12c0 1.2-4.03 6-9 6s-9-4.8-9-6c0-1.2 4.03-6 9-6s9 4.8 9 6Z" />
-                      <path stroke="currentColor" strokeWidth="2" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                    </svg>
-
-                  )}
-                </button>
+                <p className="text-red-600 text-sm min-h-5">
+                  {errors.email?.message}
+                </p>
               </div>
-              <p className="text-red-600 text-sm  min-h-5">
-                {errors.password?.message}
-              </p>
 
-            </div>
+              {/* Password */}
+              <div className="flex flex-col">
+                <label htmlFor="password" className="mb-1 block text-sm font-medium text-gray-700">
+                  Mật khẩu
+                </label>
+                <div className='relative flex items-center w-full rounded-lg border border-gray-300 bg-gray-50 focus-within:ring-2 focus-within:ring-blue-200 focus-within:border-blue-500'>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+
+                    placeholder="••••••••"
+                    className="w-full rounded-lg border  px-4 py-2 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition pr-10"
+
+                    {...register("password", {
+                      required: "Mật khẩu là bắt buộc",
+                    })}
+                  />
+
+                  {/* Button con mắt */}
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showPassword ? (
+                      // Mắt đóng
+                      <svg className="w-6 h-6 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3.933 13.909A4.357 4.357 0 0 1 3 12c0-1 4-6 9-6m7.6 3.8A5.068 5.068 0 0 1 21 12c0 1-3 6-9 6-.314 0-.62-.014-.918-.04M5 19 19 5m-4 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                      </svg>
 
 
-            {/* Login button */}
-            <button
-              type='submit'
+                    ) : (
+                      // Mắt mở
+                      <svg className="w-6 h-6 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" strokeWidth="2" d="M21 12c0 1.2-4.03 6-9 6s-9-4.8-9-6c0-1.2 4.03-6 9-6s9 4.8 9 6Z" />
+                        <path stroke="currentColor" strokeWidth="2" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                      </svg>
 
-              className="
+                    )}
+                  </button>
+                </div>
+                <p className="text-red-600 text-sm  min-h-5">
+                  {errors.password?.message}
+                </p>
+
+              </div>
+
+
+              {/* Login button */}
+              <button
+                type='submit'
+
+                className="
               mt-2 rounded-lg bg-blue-600 py-3
               text-sm font-semibold text-white
               hover:bg-blue-700
               focus:ring-2 focus:ring-blue-300
               transition
             "
-            >
-              Đăng nhập
-            </button>
+              >
+                Đăng nhập
+              </button>
 
-            {/* Divider */}
-            <div className="relative flex items-center justify-center">
-              <span className="absolute inset-x-0 h-px bg-gray-200"></span>
-              <span className="relative bg-white px-3 text-sm text-gray-400">
-                Hoặc
-              </span>
-            </div>
+              {/* Divider */}
+              <div className="relative flex items-center justify-center">
+                <span className="absolute inset-x-0 h-px bg-gray-200"></span>
+                <span className="relative bg-white px-3 text-sm text-gray-400">
+                  Hoặc
+                </span>
+              </div>
 
-            {/* Google login */}
-            <button className="flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-8 py-3 text-center text-sm font-semibold text-gray-800 outline-none ring-gray-300 transition duration-100 hover:bg-gray-100 focus-visible:ring active:bg-gray-200 md:text-base">
-              <svg className="h-5 w-5 shrink-0" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M23.7449 12.27C23.7449 11.48 23.6749 10.73 23.5549 10H12.2549V14.51H18.7249C18.4349 15.99 17.5849 17.24 16.3249 18.09V21.09H20.1849C22.4449 19 23.7449 15.92 23.7449 12.27Z" fill="#4285F4" />
-                <path d="M12.2549 24C15.4949 24 18.2049 22.92 20.1849 21.09L16.3249 18.09C15.2449 18.81 13.8749 19.25 12.2549 19.25C9.12492 19.25 6.47492 17.14 5.52492 14.29H1.54492V17.38C3.51492 21.3 7.56492 24 12.2549 24Z" fill="#34A853" />
-                <path d="M5.52488 14.29C5.27488 13.57 5.14488 12.8 5.14488 12C5.14488 11.2 5.28488 10.43 5.52488 9.71V6.62H1.54488C0.724882 8.24 0.254883 10.06 0.254883 12C0.254883 13.94 0.724882 15.76 1.54488 17.38L5.52488 14.29Z" fill="#FBBC05" />
-                <path d="M12.2549 4.75C14.0249 4.75 15.6049 5.36 16.8549 6.55L20.2749 3.13C18.2049 1.19 15.4949 0 12.2549 0C7.56492 0 3.51492 2.7 1.54492 6.62L5.52492 9.71C6.47492 6.86 9.12492 4.75 12.2549 4.75Z" fill="#EA4335" />
-              </svg>
+              {/* Google login */}
+              <button className="flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-8 py-3 text-center text-sm font-semibold text-gray-800 outline-none ring-gray-300 transition duration-100 hover:bg-gray-100 focus-visible:ring active:bg-gray-200 md:text-base">
+                <svg className="h-5 w-5 shrink-0" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M23.7449 12.27C23.7449 11.48 23.6749 10.73 23.5549 10H12.2549V14.51H18.7249C18.4349 15.99 17.5849 17.24 16.3249 18.09V21.09H20.1849C22.4449 19 23.7449 15.92 23.7449 12.27Z" fill="#4285F4" />
+                  <path d="M12.2549 24C15.4949 24 18.2049 22.92 20.1849 21.09L16.3249 18.09C15.2449 18.81 13.8749 19.25 12.2549 19.25C9.12492 19.25 6.47492 17.14 5.52492 14.29H1.54492V17.38C3.51492 21.3 7.56492 24 12.2549 24Z" fill="#34A853" />
+                  <path d="M5.52488 14.29C5.27488 13.57 5.14488 12.8 5.14488 12C5.14488 11.2 5.28488 10.43 5.52488 9.71V6.62H1.54488C0.724882 8.24 0.254883 10.06 0.254883 12C0.254883 13.94 0.724882 15.76 1.54488 17.38L5.52488 14.29Z" fill="#FBBC05" />
+                  <path d="M12.2549 4.75C14.0249 4.75 15.6049 5.36 16.8549 6.55L20.2749 3.13C18.2049 1.19 15.4949 0 12.2549 0C7.56492 0 3.51492 2.7 1.54492 6.62L5.52492 9.71C6.47492 6.86 9.12492 4.75 12.2549 4.75Z" fill="#EA4335" />
+                </svg>
 
-              Continue with Google
-            </button>
-            <div className="flex justify-between text-sm mt-4">
-              <Link to={"/forgot-password"} className="text-blue-600 hover:underline">
-                Quên mật khẩu?
-              </Link>
-
-              <span className="text-gray-600">
-                Chưa có tài khoản? {" "}
-                <Link to={"/register"} className="text-blue-600 font-medium hover:underline">
-                  Đăng ký ngay
+                Continue with Google
+              </button>
+              <div className="flex justify-between text-sm mt-4">
+                <Link to={"/forgot-password"} className="text-blue-600 hover:underline">
+                  Quên mật khẩu?
                 </Link>
-              </span>
+
+                <span className="text-gray-600">
+                  Chưa có tài khoản? {" "}
+                  <Link to={"/register"} className="text-blue-600 font-medium hover:underline">
+                    Đăng ký ngay
+                  </Link>
+                </span>
+              </div>
+
+
             </div>
 
 
-          </div>
+          </form>
+        </div>
+      </Container>
 
-
-        </form>
-      </div>
-    </Container>
+    </>
 
   )
 }

@@ -4,17 +4,12 @@ import UserLayout from "./layouts/UserLayout";
 import userRouter from "./router/userRouter";
 import AdminLayout from "./layouts/AdminLayout";
 import adminRouter from "./router/adminRouter";
-import { Toaster } from "react-hot-toast";
+import { ToastContainer }  from 'react-toastify';
 
 function App() {
   return (
     <BrowserRouter>
-      <Toaster
-        position="top-right"
-        containerStyle={{
-          top: 60,
-        }}
-      />
+     <ToastContainer/> 
       <Routes>
         <Route element={<UserLayout />}>
           {userRouter.map((route) => (
