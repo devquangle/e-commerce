@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 
 import com.dev.backend.dto.UserRP;
 import com.dev.backend.repository.AuthRepository;
+import com.dev.backend.exception.NotFoundException;
+import com.dev.backend.exception.UnauthorizedException;
 import com.dev.backend.service.AuthService;
 
 import lombok.RequiredArgsConstructor;
@@ -17,19 +19,13 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public List<UserRP> getUserRPById(Integer id) {
-        List<UserRP> userRPs = authRepository.findUserRPById(id);
-        if (userRPs == null || userRPs.isEmpty()) {
-            throw new IllegalArgumentException("Tài khoản hoặc mật khẩu không đúng");
-        }
+        List<UserRP> userRPs = authRepository.findUserRPById(id);      
         return userRPs;
     }
 
     @Override
     public List<UserRP> getUserRPByEmail(String email) {
-        List<UserRP> userRPs = authRepository.findUserRPByEmail(email);
-        if (userRPs == null || userRPs.isEmpty()) {
-            throw new IllegalArgumentException("Tài khoản hoặc mật khẩu không đúng");
-        }
+        List<UserRP> userRPs = authRepository.findUserRPByEmail(email);     
         return userRPs;
     }
 

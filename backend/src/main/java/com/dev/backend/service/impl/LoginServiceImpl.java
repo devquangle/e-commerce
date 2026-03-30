@@ -2,6 +2,7 @@ package com.dev.backend.service.impl;
 
 import com.dev.backend.bean.LoginBean;
 import com.dev.backend.dto.UserRP;
+import com.dev.backend.exception.UnauthorizedException;
 import com.dev.backend.security.jwt.JwtUtil;
 import com.dev.backend.service.AuthService;
 import com.dev.backend.service.LoginService;
@@ -36,7 +37,7 @@ public class LoginServiceImpl implements LoginService {
         UserRP user = userRPs.getFirst();
 
         if (!passwordEncoder.matches(loginBean.getPassword(), user.password())) {
-            throw new IllegalArgumentException("Tài khoản hoặc mật khẩu không đúng");
+            throw new UnauthorizedException("Tài khoản hoặc mật khẩu không đúng");
         }
         log.info("User login" + user.email());
 

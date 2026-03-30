@@ -26,7 +26,6 @@ public class CustomUserDetailsService implements UserDetailsService {
                 Integer userId = Integer.parseInt(useId);
                 List<UserRP> userRPs = authService.getUserRPById(userId);
                 UserRP userRP = userRPs.getFirst();
-
                 Set<SimpleGrantedAuthority> grantedAuthorities = userRPs.stream()
                                 .flatMap(rp -> {
                                         Stream<SimpleGrantedAuthority> roleStream = rp.roleName() != null

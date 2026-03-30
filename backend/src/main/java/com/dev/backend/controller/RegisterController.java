@@ -6,8 +6,8 @@ import com.dev.backend.bean.RegisterBean;
 import com.dev.backend.entity.User;
 import com.dev.backend.constant.RoleName;
 import com.dev.backend.resp.ResponseData;
+import com.dev.backend.resp.ResponseUtil;
 import com.dev.backend.service.RegisterService;
-import com.dev.backend.util.ResponseUtil;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +27,7 @@ public class RegisterController {
             User u = registerService.register(registerBean, RoleName.CUSTOMER.name());
             return ResponseUtil.success("register success", u);
         } catch (Exception e) {
-            return ResponseUtil.error(e.getMessage(), null);
+            throw new RuntimeException("Lỗi hệ thống", e);
         }
     }
 
