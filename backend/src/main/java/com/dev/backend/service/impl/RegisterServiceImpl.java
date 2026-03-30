@@ -25,12 +25,11 @@ import lombok.RequiredArgsConstructor;
 public class RegisterServiceImpl implements RegisterService {
     private final UserService userService;
     private final RoleService roleService;
-    private final JwtUtil jwtUtil;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Transactional
     @Override
-    public Map<String, String> register(RegisterBean registerBean, String role) {
+    public User register(RegisterBean registerBean, String role) {
         User re = new User();
 
         DuplicateFieldException errors = new DuplicateFieldException(new HashMap<>());
@@ -61,7 +60,7 @@ public class RegisterServiceImpl implements RegisterService {
         User saved = userService.saveUser(re);
         
  
-        return null;
+        return saved;
     }
 
     @Override
