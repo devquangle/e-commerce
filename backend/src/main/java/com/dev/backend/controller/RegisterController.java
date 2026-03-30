@@ -9,6 +9,7 @@ import com.dev.backend.resp.ResponseData;
 import com.dev.backend.resp.ResponseUtil;
 import com.dev.backend.service.RegisterService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,14 +22,16 @@ public class RegisterController {
     private final RegisterService registerService;
 
     @PostMapping("/register")
-    public ResponseEntity<ResponseData> register(@RequestBody RegisterBean registerBean) {
+    public ResponseEntity<ResponseData> register(@RequestBody @Valid RegisterBean registerBean) {
 
-        try {
-            User u = registerService.register(registerBean, RoleName.CUSTOMER.name());
-            return ResponseUtil.success("register success", u);
-        } catch (Exception e) {
-            throw new RuntimeException("Lỗi hệ thống", e);
+        User user = registerService.register(registerBean, RoleName.CUSTOMER.name());
+        if (user != null) {
+            // tạo token để kích hoạt tài khoản
+            // Gửi email kích hoạt tài khoản
+            // Trả về thông báo thành công
+
         }
+        return ResponseUtil.success("Đăng ký thành công vui lòng kiểm tra email để kích hoạt tài khoản", null);
     }
 
 }

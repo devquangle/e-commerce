@@ -12,9 +12,6 @@ public interface UserService {
 
     User getUserById(Integer id);
 
-    User getUserDetailById(Integer id);
-
-    
 
     boolean existsByEmail(String email);
 
@@ -23,5 +20,9 @@ public interface UserService {
     boolean existsByCode(String code);
 
     boolean isEmpty();
+
+    void processLoginFail(Integer id);
+
+    void resetFailedAttempts(Integer id);
 
 }

@@ -19,5 +19,7 @@ public class ResponseData {
     private Object data;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Builder.Default
     private LocalDateTime timestamp = LocalDateTime.now();
+
 }

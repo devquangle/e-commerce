@@ -1,10 +1,11 @@
 package com.dev.backend.service.impl;
 
+import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
 
-
 import com.dev.backend.entity.User;
+import com.dev.backend.exception.NotFoundException;
 import com.dev.backend.repository.UserRepository;
 import com.dev.backend.service.UserService;
 
@@ -35,7 +36,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUserById(Integer id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + id));
+                .orElseThrow(() -> new NotFoundException("User not found with id: " + id));
     }
 
     @Override
@@ -58,12 +59,28 @@ public class UserServiceImpl implements UserService {
         return userRepository.existsByCode(code);
     }
 
+   
+
     @Override
-    public User getUserDetailById(Integer id) {
-        return userRepository.findBasicById(id)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + id));
+    public void processLoginFail(Integer id) {
+        User user = getUserById(id);
+        int failedAttempt = user.getFailedAttempt();
+        user.setFailedAttempt(failedAttempt + 1);
+        if (failedAttempt >= 5) {
+            user.setAccountNonLocked(false);
+            user.setLockTime(LocalDateTime.now());
+        }
+        saveUser(user);
+
     }
 
-   
+    @Override
+    public void resetFailedAttempts(Integer id) {
+        User user = getUserById(id);
+        user.setFailedAttempt(0);
+        user.setLockTime(null);
+        user.setAccountNonLocked(true);
+        saveUser(user);
+    }
 
 }

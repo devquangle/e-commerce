@@ -6,8 +6,6 @@ import org.springframework.stereotype.Service;
 
 import com.dev.backend.dto.UserRP;
 import com.dev.backend.repository.AuthRepository;
-import com.dev.backend.exception.NotFoundException;
-import com.dev.backend.exception.UnauthorizedException;
 import com.dev.backend.service.AuthService;
 
 import lombok.RequiredArgsConstructor;

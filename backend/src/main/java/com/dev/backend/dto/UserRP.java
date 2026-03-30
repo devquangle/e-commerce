@@ -9,6 +9,8 @@ public record UserRP(
                 String code,
                 String street,
                 String image,
+                boolean enabled,
+                boolean accountNonLocked,
                 String roleName,
                 String permissionCode) {
 }

@@ -1,11 +1,15 @@
 // AppException.java
 package com.dev.backend.exception;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@Getter @AllArgsConstructor
+@Getter 
 public class AppException extends RuntimeException {
     private final int code;
-    private final String message;
+
+    public AppException(int code, String message) {
+        super(message); 
+        this.code = code;
+    }
+    
 }

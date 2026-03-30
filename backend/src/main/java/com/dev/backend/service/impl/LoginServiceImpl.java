@@ -34,11 +34,21 @@ public class LoginServiceImpl implements LoginService {
     public Map<String, String> login(LoginBean loginBean, HttpServletResponse response) {
         List<UserRP> userRPs = authService.getUserRPByEmail(loginBean.getEmail());
 
+        if (userRPs == null || userRPs.isEmpty()) {
+            throw new UnauthorizedException("Tài khoản hoặc mật khẩu không đúng");
+        }
         UserRP user = userRPs.getFirst();
 
+        if (!user.enabled()) {
+            throw new UnauthorizedException("Tài khoản chưa được kích hoạt");
+        }
+        if (!user.accountNonLocked()) {
+            throw new UnauthorizedException("Tài khoản đã bị khóa");
+        }
         if (!passwordEncoder.matches(loginBean.getPassword(), user.password())) {
             throw new UnauthorizedException("Tài khoản hoặc mật khẩu không đúng");
         }
+
         log.info("User login" + user.email());
 
         Set<String> roles = userRPs.stream()
@@ -51,7 +61,7 @@ public class LoginServiceImpl implements LoginService {
                 .collect(Collectors.toSet());
 
         String accessToken = jwtUtil.generateAccessToken(user.id(), new ArrayList<>(roles),
-        new ArrayList<>(permissions));
+                new ArrayList<>(permissions));
         String refreshToken = jwtUtil.generateRefreshToken(user.id());
 
         CookieUtil.addCookie(response, "refreshToken", refreshToken);

@@ -29,7 +29,7 @@ public class User {
     private String email;
     @Column(nullable = false)
     private String password;
-    @Column(length = 10,unique = true)
+    @Column(length = 10, unique = true)
     private String phone;
     @Column(unique = true)
     private String code;
@@ -37,9 +37,12 @@ public class User {
     private String image;
     private LocalDateTime createAt = LocalDateTime.now();
     private LocalDateTime updateAt;
-    private boolean active = true;
-
-    // Giảm N+1 khi khởi tạo collection trong luồng lấy role/permission qua nhiều tầng.
+    private boolean enabled ;
+    private boolean accountNonLocked = true;
+    private int failedAttempt = 0;
+    private LocalDateTime lockTime;
+    // Giảm N+1 khi khởi tạo collection trong luồng lấy role/permission qua nhiều
+    // tầng.
     @BatchSize(size = 50)
     @OneToMany(mappedBy = "user")
     private List<UserRole> userRoles = new ArrayList<>();
