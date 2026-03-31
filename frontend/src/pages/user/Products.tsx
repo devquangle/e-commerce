@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Container from '@/components/Container'
+import Container from '@/components/common/Container'
 import FilterContent from "@/components/user/FilterContent";
 import ProductCard from '@/components/user/ProductCard'
 import type { Product } from '@/types/product';

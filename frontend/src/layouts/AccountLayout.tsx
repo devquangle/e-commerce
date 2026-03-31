@@ -1,5 +1,5 @@
 import AccountMenu from '@/components/user/AccountMenu'
-import Container from '@/components/Container'
+import Container from '@/components/common/Container'
 import { Outlet } from 'react-router-dom';
 
 export default function AccountLayout() {

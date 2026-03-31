@@ -1,12 +1,11 @@
 import Cookies from "js-cookie";
 
-
 // lưu token
-export const setToken = (name:string,value: string) => {
+export const setToken = (name: string, value: string) => {
   Cookies.set(name, value, {
     expires: 7,
     sameSite: "Lax",
-    path: "/"
+    path: "/",
   });
 };
 
@@ -19,4 +18,3 @@ export const getToken = (tokenKey: string): string | undefined => {
 export const removeToken = (tokenKey: string) => {
   Cookies.remove(tokenKey, { path: "/" });
 };
-

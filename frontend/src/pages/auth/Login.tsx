@@ -1,5 +1,5 @@
-import Container from '@/components/Container'
-import Loading from '@/components/Loading';
+import Container from '@/components/common/Container'
+import Loading from '@/components/common/Loading';
 import { useAuth } from '@/context/useAuth';
 import authService from '@/services/authService';
 

@@ -1,5 +1,5 @@
 
-import Container from '@/components/Container'
+import Container from '@/components/common/Container'
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 export default function Register() {

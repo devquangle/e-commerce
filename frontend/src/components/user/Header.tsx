@@ -1,13 +1,13 @@
 
 import { Link } from "react-router-dom"
-import Container from "../Container"
+import Container from "../common/Container"
 import MenuItem from "./MenuItem"
 import Search from "./Search"
 import { useState } from "react";
 import Logo from "./Logo";
 import MobileDrawer from './MobileDrawer';
 import { useAuth } from "@/context/useAuth";
-import Modal from "../Modal";
+import Modal from "../common/Modal";
 
 type MenuAccount = {
   id: number,

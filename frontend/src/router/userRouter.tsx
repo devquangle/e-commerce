@@ -12,7 +12,7 @@ import Address from "@/pages/user/Address";
 import Favorites from "@/pages/user/Favorites";
 import OrderDetails from "@/pages/user/OrderDetails";
 import Carts from "@/pages/user/Carts";
-import ProtectedRoute from "@/components/ProtectedRoute";
+import ProtectedRoute from "@/components/common/ProtectedRoute";
 import { Role } from "@/types/role";
 
 
