@@ -1,4 +1,6 @@
 import Container from '@/components/common/Container'
+import InputField from '@/components/common/InputField';
+import InputPassword from '@/components/common/InputPassword';
 import Loading from '@/components/common/Loading';
 import { useAuth } from '@/context/useAuth';
 import authService from '@/services/authService';
@@ -15,7 +17,6 @@ import { Link, useNavigate } from 'react-router-dom';
 export default function Login() {
   const { register, handleSubmit, setError, formState: { errors } } = useForm<LoginForm>();
   const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const auth = useAuth();
   const navigate = useNavigate();
   const onSubmit = async (data: LoginForm) => {
@@ -88,78 +89,39 @@ export default function Login() {
                 </p>
               </div>
 
+              <InputField label="Email" name="email" type="email"
+                placeholder="you@example.com"
+                register={register}
+                rules={{
+                  required: "Email là bắt buộc",
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: "Email không hợp lệ"
+                  }
+                }}
+                error={errors?.email}
+              />
+              <InputPassword label="Mật khẩu" name="password"
+                register={register}
+                rules={{
+                  required: "Mật khẩu là bắt buộc",
+                  // minLength: {
+                  //   value: 8,
+                  //   message: "Mật khẩu tối thiểu 8 ký tự"
+                  // },
+                  // pattern: {
+                  //   value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+                  //   message: "Phải có: chữ thường, chữ hoa, số, ký tự đặc biệt"
+                  // }
+                }}
 
-              {/* Email */}
-              <div className="space-y-1">
-                <label htmlFor="email" className="text-sm font-medium text-gray-700">
-                  Email
-                </label>
-
-                <input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  {...register("email", {
-                    required: "Email là bắt buộc",
-                    pattern: {
-                      value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                      message: "Email không hợp lệ"
-                    }
-                  })}
-                  className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
-                />
-
-                <p className="text-red-600 text-sm min-h-5">
-                  {errors.email?.message}
-                </p>
-              </div>
-
-              {/* Password */}
-              <div className="flex flex-col">
-                <label htmlFor="password" className="mb-1 block text-sm font-medium text-gray-700">
-                  Mật khẩu
-                </label>
-                <div className='relative flex items-center w-full rounded-lg border border-gray-300 bg-gray-50 focus-within:ring-2 focus-within:ring-blue-200 focus-within:border-blue-500'>
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    id="password"
-
-                    placeholder="••••••••"
-                    className="w-full rounded-lg border  px-4 py-2 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition pr-10"
-
-                    {...register("password", {
-                      required: "Mật khẩu là bắt buộc",
-                    })}
-                  />
-
-                  {/* Button con mắt */}
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    {showPassword ? (
-                      // Mắt đóng
-                      <svg className="w-6 h-6 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3.933 13.909A4.357 4.357 0 0 1 3 12c0-1 4-6 9-6m7.6 3.8A5.068 5.068 0 0 1 21 12c0 1-3 6-9 6-.314 0-.62-.014-.918-.04M5 19 19 5m-4 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                      </svg>
+                error={errors?.password}
+              />
 
 
-                    ) : (
-                      // Mắt mở
-                      <svg className="w-6 h-6 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" strokeWidth="2" d="M21 12c0 1.2-4.03 6-9 6s-9-4.8-9-6c0-1.2 4.03-6 9-6s9 4.8 9 6Z" />
-                        <path stroke="currentColor" strokeWidth="2" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                      </svg>
 
-                    )}
-                  </button>
-                </div>
-                <p className="text-red-600 text-sm  min-h-5">
-                  {errors.password?.message}
-                </p>
 
-              </div>
+
 
 
               {/* Login button */}
@@ -167,6 +129,7 @@ export default function Login() {
                 type='submit'
 
                 className="
+                hover:cursor-pointer
               mt-2 rounded-lg bg-blue-600 py-3
               text-sm font-semibold text-white
               hover:bg-blue-700

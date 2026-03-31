@@ -12,6 +12,7 @@ public interface UserService {
 
     User getUserById(Integer id);
 
+    User getUserByToken(String token);
 
     boolean existsByEmail(String email);
 

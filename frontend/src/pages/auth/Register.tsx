@@ -175,7 +175,7 @@ export default function Register() {
                                     to={"/login"}
                                     className="font-medium text-blue-600 hover:underline"
                                 >
-                                     Đăng nhập ngay
+                                    Đăng nhập ngay
                                 </Link>
                             </span>
                         </div>

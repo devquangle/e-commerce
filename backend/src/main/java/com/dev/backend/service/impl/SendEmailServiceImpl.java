@@ -8,6 +8,7 @@ import com.dev.backend.service.SendEmailService;
 
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+
 @Service
 @RequiredArgsConstructor
 public class SendEmailServiceImpl implements SendEmailService {
@@ -33,7 +34,7 @@ public class SendEmailServiceImpl implements SendEmailService {
     }
 
     public String content(String token) {
-        String verifyLink = "";
+        String verifyLink = "http://localhost:5173/verify_email?verifyToken=" + token;
         return """
                     <!DOCTYPE html>
                     <html>
@@ -91,7 +92,7 @@ public class SendEmailServiceImpl implements SendEmailService {
 
                             <a class='btn' href='%s'>Xác thực tài khoản</a>
 
-                           
+
                             <p>Liên kết sẽ hết hạn sau <strong>15 phút</strong>.</p>
 
                             <p>Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email.</p>

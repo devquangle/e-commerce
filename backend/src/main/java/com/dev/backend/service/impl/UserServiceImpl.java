@@ -4,9 +4,11 @@ import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
 
+import com.dev.backend.constant.JwtType;
 import com.dev.backend.entity.User;
 import com.dev.backend.exception.NotFoundException;
 import com.dev.backend.repository.UserRepository;
+import com.dev.backend.security.jwt.JwtUtil;
 import com.dev.backend.service.UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final JwtUtil jwtUtil;
 
     @Override
     public boolean existsByEmail(String email) {
@@ -40,6 +43,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User getUserByToken(String token) {
+        String userId = jwtUtil.extractUserId(token);
+        if (userId == null || !jwtUtil.isValid(token, JwtType.ACCESS)) {
+            throw new NotFoundException("User not found with token: " + token);
+        }
+        Integer id;
+        try {
+            id = Integer.parseInt(userId);
+        } catch (NumberFormatException e) {
+            throw new NotFoundException("Invalid user ID in token: " + token);
+        }
+        return getUserById(id);
+
+    }
+
+    @Override
     public boolean isEmpty() {
         return userRepository.count() == 0;
     }
@@ -58,8 +77,6 @@ public class UserServiceImpl implements UserService {
     public boolean existsByCode(String code) {
         return userRepository.existsByCode(code);
     }
-
-   
 
     @Override
     public void processLoginFail(Integer id) {
