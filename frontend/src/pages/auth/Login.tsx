@@ -36,7 +36,7 @@ export default function Login() {
       const user = await auth.login(token);
 
       // 3. Success toast
-      showSuccessToast(loginRes.data?.message || "Đăng nhập thành công!");
+      showSuccessToast(loginRes?.message || "Đăng nhập thành công!");
 
       // 4. Delay tối thiểu để spinner hiển thị đủ lâu
       const elapsed = Date.now() - startTime;

@@ -4,7 +4,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dev.backend.bean.RegisterBean;
 import com.dev.backend.entity.User;
-import com.dev.backend.constant.JwtType;
 import com.dev.backend.constant.RoleName;
 import com.dev.backend.resp.ResponseData;
 import com.dev.backend.resp.ResponseUtil;

@@ -39,9 +39,9 @@ export default function InputPassword<T extends FieldValues>({
       {/* Input wrapper */}
       <div
         className={`relative flex items-center rounded-lg border bg-gray-50 transition
-        ${error
-            ? "border-red-400 focus-within:ring-red-200"
-            : "border-gray-300 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-200"
+  ${error
+            ? "border-red-400 focus-within:ring-2 focus-within:ring-red-200"
+            : "border-gray-300 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-200 hover:border-gray-400"
           }`}
       >
         {/* Input */}
