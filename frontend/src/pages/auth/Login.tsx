@@ -1,6 +1,5 @@
 import Container from '@/components/common/Container'
 import InputField from '@/components/common/InputField';
-import InputPassword from '@/components/common/InputPassword';
 import Loading from '@/components/common/Loading';
 import { useAuth } from '@/context/useAuth';
 import authService from '@/services/authService';
@@ -101,7 +100,7 @@ export default function Login() {
                 }}
                 error={errors?.email}
               />
-              <InputPassword label="Mật khẩu" name="password"
+              <InputField label="Mật khẩu" name="password" type='password'
                 register={register}
                 rules={{
                   required: "Mật khẩu là bắt buộc",

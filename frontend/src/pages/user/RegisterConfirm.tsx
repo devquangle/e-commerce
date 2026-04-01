@@ -1,95 +1,127 @@
 import Container from "@/components/common/Container";
-import { showSuccessToast } from "@/utils/toastUtil";
+import { showErrorToast, showSuccessToast } from "@/utils/toastUtil";
 import axios from "axios";
-import { useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function RegisterConfirm() {
   const navigate = useNavigate();
-  const verifyToken = new URLSearchParams(window.location.search).get("verifyToken");
+  const hasCalled = useRef(false);
+
+  const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
+  const [isResending, setIsResending] = useState(false);
+
+  const getToken = () =>
+    new URLSearchParams(window.location.search).get("verifyToken");
 
   useEffect(() => {
-    const checkToken = async () => {
-      try {
-        if (!verifyToken) {
-          navigate("/home");
-          return;
-        }
+    if (hasCalled.current) return;
+    hasCalled.current = true;
 
-        const res = await axios.get(`http://localhost:8080/register?verifyToken=${verifyToken}`);
-        if (res.status === 200) {
-          showSuccessToast(res.data?.message || "Xác thực tài khoản thành công!");
+    const checkToken = async () => {
+      const verifyToken = getToken();
+      if (!verifyToken) {
+        navigate("/home");
+        return;
+      }
+
+      try {
+        const res = await axios.get(
+          `http://localhost:8080/register?verifyToken=${verifyToken}`
+        );
+
+        if (res.data.success) {
+          setStatus("success");
+          showSuccessToast(res.data.message || "Xác thực tài khoản thành công!");
+          setTimeout(() => navigate("/login"), 2000);
+        } else {
+          setStatus("error");
+          showErrorToast(res.data.message || "Xác thực tài khoản không thành công!");
         }
       } catch (error: unknown) {
+        setStatus("error");
         if (axios.isAxiosError(error)) {
           const serverData = error.response?.data;
-          showSuccessToast(serverData?.message || "Xác thực tài khoản không thành công!");
-        } else {
-          showSuccessToast("Không thể kết nối đến máy chủ");
+          showErrorToast(serverData?.message || "Xác thực tài khoản không thành công!");
         }
-
-        console.error("Error in effect:", error);
       }
     };
 
     checkToken();
-  }, [navigate, verifyToken]);
+  }, [navigate]);
+
+  const handleResendEmail = async () => {
+    const verifyToken = getToken();
+    if (!verifyToken) return;
+
+    try {
+      setIsResending(true);
+      const res = await axios.get(
+        `http://localhost:8080/resend-email?verifyToken=${verifyToken}`
+      );
+
+      if (res.data.success) {
+        showSuccessToast(res.data.message || "Đã gửi lại email xác thực!");
+      } else {
+        showErrorToast(res.data.message || "Gửi lại email thất bại!");
+      }
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        const serverData = error.response?.data;
+        showErrorToast(serverData?.message || "Lỗi khi gửi lại email xác thực!");
+      }
+    } finally {
+      setIsResending(false);
+    }
+  };
 
   return (
     <div className="bg-linear-to-br from-slate-50 via-white to-blue-50">
       <Container className="px-4 md:px-8">
         <div className="flex min-h-[80vh] items-center justify-center py-6">
           <div className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg">
-            <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-blue-100 blur-2xl" />
-            <div className="absolute -left-24 -bottom-24 h-64 w-64 rounded-full bg-indigo-100 blur-2xl" />
-
             <div className="relative p-6 md:p-8">
               <div className="flex items-start gap-4">
                 <div className="mt-0.5 flex h-12 w-12 items-center justify-center rounded-xl border border-blue-200 bg-blue-50 text-blue-700">
-                  <svg
-                    className="h-6 w-6 animate-spin text-blue-700"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d="M21 12a9 9 0 1 1-2.64-6.36"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-                  </svg>
+                  {status === "loading" && (
+                    <svg className="h-6 w-6 animate-spin" viewBox="0 0 24 24">
+                      <path
+                        d="M21 12a9 9 0 1 1-2.64-6.36"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  )}
+                  {status === "success" && <span className="text-green-600">✓</span>}
+                  {status === "error" && <span className="text-red-600">✕</span>}
                 </div>
 
                 <div className="flex-1">
                   <h1 className="text-xl font-bold text-slate-900">Xác nhận đăng ký</h1>
                   <p className="mt-1 text-sm text-slate-600">
-                    Đang xác nhận tài khoản của bạn...
+                    {status === "loading" && "Đang xác nhận tài khoản..."}
+                    {status === "success" && "Xác thực thành công! Đang chuyển hướng..."}
+                    {status === "error" && "Xác thực tài khoản không thành công"}
                   </p>
                 </div>
               </div>
 
-              <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <Link
-                  to="/login"
-                  className="inline-flex w-full items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 hover:bg-slate-50 sm:w-auto"
-                >
-                  Đi tới trang đăng nhập
-                </Link>
-
-                <button
-                  type="button"
-                  onClick={() => navigate("/login")}
-                  className="inline-flex w-full sm:w-auto items-center justify-center rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-300 transition"
-                >
-                  Đăng nhập ngay
-                </button>
+              <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-between">
+                {status !== "loading" && (
+                  <button
+                    onClick={status === "error" ? handleResendEmail : () => navigate("/login")}
+                    disabled={isResending && status === "error"}
+                    className={`inline-flex w-full sm:w-auto items-center justify-center rounded-lg px-4 py-2.5 text-sm font-semibold text-white ${status === "success" ? "bg-blue-600 hover:bg-blue-700" : "bg-red-600 disabled:opacity-50"
+                      }`}
+                  >
+                    {status === "success" ? "Đăng nhập ngay" : isResending ? "Đang gửi..." : "Gửi lại email"}
+                  </button>
+                )}
               </div>
 
-              <p className="mt-5 text-xs text-slate-500 leading-relaxed">
-                Nếu bạn không thấy trang này hoặc email bị trễ, hãy kiểm tra lại hộp
-                thư đến/Spam và thử lại sau vài phút.
+              <p className="mt-5 text-xs text-slate-500">
+                Nếu bạn không thấy email, hãy kiểm tra Spam hoặc thử lại.
               </p>
             </div>
           </div>

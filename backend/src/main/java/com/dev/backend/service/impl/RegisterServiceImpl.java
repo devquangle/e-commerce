@@ -6,14 +6,20 @@ import org.springframework.stereotype.Service;
 import com.dev.backend.bean.RegisterBean;
 import com.dev.backend.entity.User;
 import com.dev.backend.entity.UserRole;
+import com.dev.backend.exception.BadRequestException;
 import com.dev.backend.exception.DuplicateFieldException;
+import com.dev.backend.exception.UnauthorizedException;
 import com.dev.backend.security.jwt.JwtUtil;
 import com.dev.backend.constant.JwtType;
 import com.dev.backend.constant.RoleName;
 import com.dev.backend.service.RegisterService;
 import com.dev.backend.service.RoleService;
+import com.dev.backend.service.SendEmailService;
+import com.dev.backend.service.UserRoleService;
 import com.dev.backend.service.UserService;
 import com.dev.backend.util.GenerateCode;
+
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -22,8 +28,10 @@ import lombok.RequiredArgsConstructor;
 public class RegisterServiceImpl implements RegisterService {
     private final UserService userService;
     private final RoleService roleService;
+    private final UserRoleService userRoleService;
     private final JwtUtil jwtUtil;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final SendEmailService sendEmailService;
 
     @Transactional
     @Override
@@ -32,7 +40,7 @@ public class RegisterServiceImpl implements RegisterService {
 
         DuplicateFieldException errors = new DuplicateFieldException(new HashMap<>());
         if (userService.existsByEmail(registerBean.getEmail())) {
-           errors.addError("email", "Email đã được sử dụng");
+            errors.addError("email", "Email đã được sử dụng");
         }
         if (!registerBean.getPassword().equals(registerBean.getConfirmPassword())) {
             errors.addError("confirmPassword", "Mật khẩu không khớp nhau");
@@ -53,24 +61,58 @@ public class RegisterServiceImpl implements RegisterService {
         re.setPassword(passwordEncoder.encode(registerBean.getPassword()));
         re.setCode(generatedCode);
 
-        re.getUserRoles().add(new UserRole(null, re, roleService.findByName(role)));
-
         User saved = userService.saveUser(re);
-        
- 
+        UserRole ur = new UserRole();
+        ur.setUser(saved);
+        ur.setRole(roleService.findByName(role));
+        userRoleService.save(ur);
         return saved;
     }
+
     @Override
-    public boolean verifyRegister(String token) {
+    public void verifyRegister(String token) {
         if (!jwtUtil.isValid(token, JwtType.VERIFY_EMAIL)) {
-            return false;
+            throw new BadRequestException("Token không hợp lệ hoặc đã hết hạn");
         }
         String userId = jwtUtil.extractUserId(token);
         Integer id = Integer.parseInt(userId);
         User user = userService.getUserById(id);
+        if (user.isEnabled()) {
+            throw new UnauthorizedException("Tài khoản đã được ký hoạt");
+        }
         user.setEnabled(true);
         userService.saveUser(user);
-        return true;
+    }
+
+  
+
+    @Override
+    public void handleTokenForResend(String token) {
+        String userId;
+
+        try {
+            // Token còn hạn
+            userId = jwtUtil.extractUserId(token);
+        } catch (ExpiredJwtException ex) {
+            // Token hết hạn → lấy userId từ claims
+            userId = ex.getClaims().getSubject();
+        }
+
+        Integer id = Integer.parseInt(userId);
+        User user = userService.getUserById(id);
+
+        if (user.isEnabled()) {
+            throw new UnauthorizedException("Tài khoản đã được kích hoạt");
+        }
+
+        // Tạo token mới
+        String newToken = jwtUtil.generateVerifyToken(user.getId());
+
+        // Gửi email lại
+        sendEmailService.sendEmailRegister(
+                user.getEmail(),
+                "Cảm ơn bạn đã đăng ký, vui lòng kích hoạt tài khoản",
+                newToken);
     }
 
     @Override

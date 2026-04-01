@@ -27,6 +27,12 @@ public class RegisterController {
     private final JwtUtil jwtUtil;
     private final SendEmailService sendEmailService;
 
+    @GetMapping("/resend-email")
+    public ResponseEntity<ResponseData> get_verify_email(@RequestParam String verifyToken) {
+        registerService.handleTokenForResend(verifyToken);
+        return ResponseUtil.success("Đã gửi lại email xác thực", null);
+    }
+
     @GetMapping("/register")
     public ResponseEntity<ResponseData> get_register(@RequestParam String verifyToken) {
         registerService.verifyRegister(verifyToken);

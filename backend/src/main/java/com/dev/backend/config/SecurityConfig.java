@@ -34,6 +34,7 @@ public class SecurityConfig {
             "/login",
             "/logout",
             "/register",
+            "/resend-email",
             "/home/**",
             "/products",
             "/genre/list",

@@ -111,6 +111,31 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* Ghi đè màu nền Autofill của trình duyệt */
+/* Trị lỗi mất bo góc và đổi màu khi chọn gợi ý Autofill */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  /* 1. Giữ màu nền xanh nhạt */
+  -webkit-box-shadow: 0 0 0px 1000px #edf2f9 inset !important;
+  
+  /* 2. Giữ màu chữ */
+  -webkit-text-fill-color: #1f2937 !important;
+  
+  /* 3. QUAN TRỌNG: Ép trình duyệt giữ bo góc */
+  border-radius: 12px !important; /* Thay đổi số 12px cho khớp với rounded-xl của bạn */
+  
+  /* 4. Tránh bị vỡ transition */
+  transition: background-color 5000s ease-in-out 0s;
+}
+/* Ẩn icon mặc định của trình duyệt trong ô password (nếu có) */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}
+
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

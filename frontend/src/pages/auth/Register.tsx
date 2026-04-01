@@ -1,7 +1,6 @@
 
 import Container from '@/components/common/Container'
 import InputField from '@/components/common/InputField';
-import InputPassword from '@/components/common/InputPassword';
 import Loading from '@/components/common/Loading';
 import authService from '@/services/authService';
 import type { RegisterFrom } from '@/types/register';
@@ -96,14 +95,14 @@ export default function Register() {
                             />
 
                             {/* Password */}
-                            <InputPassword label="Mật khẩu" name="password"
+                            <InputField label="Mật khẩu" name="password" type='password'
                                 register={register}
                                 rules={{
                                     required: "Mật khẩu là bắt buộc",
                                 }}
                                 error={errors?.password}
                             />
-                            <InputPassword label="Xác nhận mật khẩu" name="confirmPassword"
+                            <InputField label="Xác nhận mật khẩu" name="confirmPassword" type="password"
                                 register={register}
                                 rules={{
                                     required: "Mật khẩu là bắt buộc",

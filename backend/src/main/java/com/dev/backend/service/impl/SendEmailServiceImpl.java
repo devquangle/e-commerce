@@ -88,12 +88,12 @@ public class SendEmailServiceImpl implements SendEmailService {
 
                             <p>Cảm ơn bạn đã đăng ký tài khoản.</p>
 
-                            <p>Vui lòng nhấn vào nút bên dưới để xác thực email của bạn:</p>
+                            <p>Vui lòng nhấn vào nút bên dưới để xác thực tài khoản của bạn:</p>
 
                             <a class='btn' href='%s'>Xác thực tài khoản</a>
 
 
-                            <p>Liên kết sẽ hết hạn sau <strong>15 phút</strong>.</p>
+                            <p>Liên kết sẽ hết hạn sau <strong>5 phút</strong>.</p>
 
                             <p>Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email.</p>
 

@@ -1,3 +1,4 @@
+import InputField from "@/components/common/InputField";
 import { useAuth } from "@/context/useAuth";
 import type { ProfileForm } from "@/types/profile";
 import { useState } from "react";
@@ -21,7 +22,7 @@ export default function Profile() {
   });
 
   const [isLoading, setIsLoading] = useState(false);
-  const [avatar, setAvatar] = useState<string>(userInfo?.avatarUrl || "/images/default-avatar.png");
+  const [avatar, setAvatar] = useState<string>(userInfo?.image || "/images/default-avatar.png");
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,89 +87,55 @@ export default function Profile() {
             className="space-y-2 p-2"
             onSubmit={handleSubmit(onSubmit)}
           >
-            {/* Full Name */}
-            <div className="space-y-1 mb-3">
-              <label htmlFor="fullName" className="text-sm font-medium text-gray-700">
-                Họ và tên
-              </label>
-              <input
-                id="fullName"
-                type="text"
-                {...register("fullName", {
-                  required: "Họ và tên không được để trống",
-                  pattern: {
-                    value: /^[a-zA-ZÀ-ỹ\s]+$/,
-                    message: "Họ và tên không hợp lệ",
-                  },
-                })}
-                className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
-              />
-              {errors.fullName && (
-                <span className="text-red-500 text-[13px] mt-1 ml-1 animate-in fade-in duration-200">
-                  {errors.fullName.message}
-                </span>
-              )}
-            </div>
+            <InputField label="Họ và tên" name="fullName" type="text" 
+              placeholder="Họ và tên"
+              register={register}
+              rules={{
+                required: "Họ và tên là bắt buộc",
+                // pattern: {
+                //     value: /^[a-zA-ZÀ-ỹ\s]+$/,
+                // 
+                // }
+              }}
+              error={errors?.fullName}
+            />
 
-            {/* Email */}
-            <div className="space-y-1">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                placeholder="user@example.com"
-                {...register("email", {
-                  required: "Email không được để trống",
-                  pattern: {
-                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message: "Email không hợp lệ",
-                  },
-                })}
-                className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
-              />
-              <p className="text-red-600 text-sm min-h-5">{errors.email?.message}</p>
-            </div>
+            <InputField label="Email" name="email" type="email"
+              placeholder="you@gmail.com"
+              register={register}
+              rules={{
+                required: "Email là bắt buộc",
+                pattern: {
+                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                  message: "Email không hợp lệ"
+                }
+              }}
+              error={errors?.email}
+            />
 
-            {/* Phone */}
-            <div className="space-y-1">
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                Số điện thoại
-              </label>
-              <input
-                type="tel"
-                id="phone"
-                placeholder="0901234567"
-                {...register("phone", {
-                  required: "Số điện thoại không được để trống",
-                  pattern: {
-                    value: /^[0-9]{9,11}$/,
-                    message: "Số điện thoại không hợp lệ",
-                  },
-                })}
-                className="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
-              />
-              <p className="text-red-600 text-sm min-h-5">{errors.phone?.message}</p>
-            </div>
+            <InputField label="Số điện thoại" name="phone" type="text"
+              placeholder="0123456789"
+              register={register}
+              rules={{
+                required: "Số điện thoại là bắt buộc",
+                pattern: {
+                  value: /^[0-9]{10}$/,
+                  message: "Số điện thoại không hợp lệ"
+                }
+              }}
+              error={errors?.phone}
+            />
 
-            {/* Street */}
-            <div className="space-y-1">
-              <label htmlFor="street" className="block text-sm font-medium text-gray-700">
-                Địa chỉ
-              </label>
-              <input
-                type="text"
-                id="street"
-                placeholder="123 Đường ABC, Quận 1, TP.HCM"
-                {...register("street", {
-                  required: "Địa chỉ không được để trống",
-                  minLength: { value: 3, message: "Địa chỉ quá ngắn" },
-                })}
-                className="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
-              />
-              <p className="text-red-600 text-sm min-h-6 warp-break-words">{errors.street?.message}</p>
-            </div>
+            <InputField label="Địa chỉ" name="street" type="text"
+              placeholder="Địa chỉ"
+              register={register}
+              rules={{
+                required: "Địa chỉ là bắt buộc",
+              }}
+              error={errors?.street}
+            />
+
+
 
             {/* Submit */}
             <button
