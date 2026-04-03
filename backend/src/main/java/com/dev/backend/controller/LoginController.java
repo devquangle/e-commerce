@@ -24,7 +24,8 @@ public class LoginController {
     private final LoginService loginService;
 
     @PostMapping("/login")
-    public ResponseEntity<ResponseData> login(HttpServletResponse response, @RequestBody @Valid LoginBean loginBean) {
+    public ResponseEntity<ResponseData<Map<String, String>>> login(HttpServletResponse response,
+            @RequestBody @Valid LoginBean loginBean) {
 
         Map<String, String> data = loginService.login(loginBean, response);
         return ResponseUtil.success("Đăng nhập thành công", data);

@@ -2,6 +2,7 @@ package com.dev.backend.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 
+import com.dev.backend.bean.JwtBean;
 import com.dev.backend.bean.RegisterBean;
 import com.dev.backend.entity.User;
 import com.dev.backend.constant.RoleName;
@@ -14,10 +15,8 @@ import com.dev.backend.service.SendEmailService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,20 +26,20 @@ public class RegisterController {
     private final JwtUtil jwtUtil;
     private final SendEmailService sendEmailService;
 
-    @GetMapping("/resend-email")
-    public ResponseEntity<ResponseData> get_verify_email(@RequestParam String verifyToken) {
-        registerService.handleTokenForResend(verifyToken);
+    @PostMapping("/resend-verify-register")
+    public ResponseEntity<ResponseData<Object>> get_verify_email(@RequestBody @Valid JwtBean jwtBean) {
+        registerService.handleTokenForResend(jwtBean.getToken());
         return ResponseUtil.success("Đã gửi lại email xác thực", null);
     }
 
-    @GetMapping("/register")
-    public ResponseEntity<ResponseData> get_register(@RequestParam String verifyToken) {
-        registerService.verifyRegister(verifyToken);
+    @PostMapping("/verify-register")
+    public ResponseEntity<ResponseData<Object>> get_register(@RequestBody @Valid JwtBean jwtBean) {
+        registerService.verifyRegister(jwtBean.getToken());
         return ResponseUtil.success("Xác thực thành công", null);
     }
 
     @PostMapping("/register")
-    public ResponseEntity<ResponseData> post_register(@RequestBody @Valid RegisterBean registerBean) {
+    public ResponseEntity<ResponseData<Object>> post_register(@RequestBody @Valid RegisterBean registerBean) {
 
         User user = registerService.register(registerBean, RoleName.CUSTOMER.name());
         if (user != null) {

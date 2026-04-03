@@ -22,7 +22,7 @@ import java.util.Set;
 public class ProfileController {
 
     @GetMapping("/auth/me")
-    public ResponseEntity<ResponseData> get_profile(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<ResponseData<Object>> get_profile(@AuthenticationPrincipal CustomUserDetails userDetails) {
         if (userDetails == null) {
             throw new UnauthorizedException("User chưa đăng nhập");
         }
@@ -54,7 +54,7 @@ public class ProfileController {
     }
 
     @PutMapping("/auth/me")
-    public ResponseEntity<ResponseData> post_profile() {
+    public ResponseEntity<ResponseData<Object>> post_profile() {
         return null;
     }
 

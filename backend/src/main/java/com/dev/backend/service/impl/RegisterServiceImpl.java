@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import com.dev.backend.bean.RegisterBean;
 import com.dev.backend.entity.User;
 import com.dev.backend.entity.UserRole;
-import com.dev.backend.exception.BadRequestException;
+import com.dev.backend.exception.AppException;
 import com.dev.backend.exception.DuplicateFieldException;
 import com.dev.backend.exception.UnauthorizedException;
 import com.dev.backend.security.jwt.JwtUtil;
@@ -72,7 +72,7 @@ public class RegisterServiceImpl implements RegisterService {
     @Override
     public void verifyRegister(String token) {
         if (!jwtUtil.isValid(token, JwtType.VERIFY_EMAIL)) {
-            throw new BadRequestException("Token không hợp lệ hoặc đã hết hạn");
+            throw new AppException(404, "Token không hợp lệ","JWT_INVALID");
         }
         String userId = jwtUtil.extractUserId(token);
         Integer id = Integer.parseInt(userId);
@@ -83,8 +83,6 @@ public class RegisterServiceImpl implements RegisterService {
         user.setEnabled(true);
         userService.saveUser(user);
     }
-
-  
 
     @Override
     public void handleTokenForResend(String token) {

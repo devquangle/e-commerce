@@ -24,7 +24,6 @@ export default function Register() {
             if (axios.isAxiosError(error)) {
                 const serverData = error.response?.data;
 
-                // Lỗi validation theo field
                 if (serverData?.data && typeof serverData.data === "object") {
                     Object.entries(serverData.data).forEach(([field, message]) => {
                         setError(field as keyof RegisterFrom, {
@@ -34,8 +33,8 @@ export default function Register() {
                     });
                     return;
                 }
+                showErrorToast(serverData?.message || "Đăng ký thất bại");
 
-                showErrorToast(serverData?.message || "Thông tin đăng nhập không chính xác");
             } else {
                 showErrorToast("Không thể kết nối đến máy chủ");
             }

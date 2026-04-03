@@ -1,74 +1,61 @@
 import Container from "@/components/common/Container";
+import type { ResponseData } from "@/types/response-data";
 import { showErrorToast, showSuccessToast } from "@/utils/toastUtil";
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+
 
 export default function RegisterConfirm() {
   const navigate = useNavigate();
-  const hasCalled = useRef(false);
+  const [searchParams] = useSearchParams();
+  const verifyToken = searchParams.get("verifyToken");
 
+  const hasCalled = useRef(false);
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [isResending, setIsResending] = useState(false);
 
-  const getToken = () =>
-    new URLSearchParams(window.location.search).get("verifyToken");
-
   useEffect(() => {
-    if (hasCalled.current) return;
+    if (hasCalled.current || !verifyToken) {
+      if (!verifyToken) navigate("/home");
+      return;
+    };
     hasCalled.current = true;
 
     const checkToken = async () => {
-      const verifyToken = getToken();
-      if (!verifyToken) {
-        navigate("/home");
-        return;
-      }
-
       try {
-        const res = await axios.get(
-          `http://localhost:8080/register?verifyToken=${verifyToken}`
+        const res = await axios.post<ResponseData>(`http://localhost:8080/verify-register`,
+          { token: verifyToken }
         );
 
-        if (res.data.success) {
-          setStatus("success");
-          showSuccessToast(res.data.message || "Xác thực tài khoản thành công!");
-          setTimeout(() => navigate("/login"), 2000);
-        } else {
-          setStatus("error");
-          showErrorToast(res.data.message || "Xác thực tài khoản không thành công!");
-        }
+        setStatus("success");
+        showSuccessToast(res.data.message || "Xác thực tài khoản thành công!");
       } catch (error: unknown) {
         setStatus("error");
+
         if (axios.isAxiosError(error)) {
-          const serverData = error.response?.data;
-          showErrorToast(serverData?.message || "Xác thực tài khoản không thành công!");
+          showErrorToast(error.response?.data?.message || "Xác thực thất bại");
+        } else {
+          showErrorToast("Có lỗi không xác định");
         }
+
       }
     };
 
     checkToken();
-  }, [navigate]);
+  }, [verifyToken, navigate]);
 
   const handleResendEmail = async () => {
-    const verifyToken = getToken();
-    if (!verifyToken) return;
-
     try {
       setIsResending(true);
-      const res = await axios.get(
-        `http://localhost:8080/resend-email?verifyToken=${verifyToken}`
+      const res = await axios.post(`http://localhost:8080/resend-verify-register`,
+        { token: verifyToken }
       );
-
-      if (res.data.success) {
-        showSuccessToast(res.data.message || "Đã gửi lại email xác thực!");
-      } else {
-        showErrorToast(res.data.message || "Gửi lại email thất bại!");
-      }
+      showSuccessToast(res.data.message || "Đã gửi lại email xác thực!");
     } catch (error: unknown) {
+
       if (axios.isAxiosError(error)) {
-        const serverData = error.response?.data;
-        showErrorToast(serverData?.message || "Lỗi khi gửi lại email xác thực!");
+        showErrorToast(error.response?.data?.message || "Lỗi khi gửi lại email!");
       }
     } finally {
       setIsResending(false);
@@ -79,50 +66,45 @@ export default function RegisterConfirm() {
     <div className="bg-linear-to-br from-slate-50 via-white to-blue-50">
       <Container className="px-4 md:px-8">
         <div className="flex min-h-[80vh] items-center justify-center py-6">
-          <div className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg">
-            <div className="relative p-6 md:p-8">
-              <div className="flex items-start gap-4">
-                <div className="mt-0.5 flex h-12 w-12 items-center justify-center rounded-xl border border-blue-200 bg-blue-50 text-blue-700">
-                  {status === "loading" && (
-                    <svg className="h-6 w-6 animate-spin" viewBox="0 0 24 24">
-                      <path
-                        d="M21 12a9 9 0 1 1-2.64-6.36"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                  )}
-                  {status === "success" && <span className="text-green-600">✓</span>}
-                  {status === "error" && <span className="text-red-600">✕</span>}
-                </div>
-
-                <div className="flex-1">
-                  <h1 className="text-xl font-bold text-slate-900">Xác nhận đăng ký</h1>
-                  <p className="mt-1 text-sm text-slate-600">
-                    {status === "loading" && "Đang xác nhận tài khoản..."}
-                    {status === "success" && "Xác thực thành công! Đang chuyển hướng..."}
-                    {status === "error" && "Xác thực tài khoản không thành công"}
-                  </p>
-                </div>
+          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-8 shadow-lg">
+            <div className="flex flex-col items-center text-center">
+              {/* Icon thay đổi theo trạng thái */}
+              <div className={`mb-4 flex h-16 w-16 items-center justify-center rounded-full border-2 
+                ${status === "success" ? "border-green-100 bg-green-50 text-green-600" :
+                  status === "loading" ? "border-blue-100 bg-blue-50 text-blue-600" : "border-red-100 bg-red-50 text-red-600"}`}>
+                {status === "loading" ? <svg className="h-8 w-8 animate-spin" viewBox="0 0 24 24">...</svg> :
+                  status === "success" ? "✓" : "✕"}
               </div>
 
-              <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-between">
-                {status !== "loading" && (
-                  <button
-                    onClick={status === "error" ? handleResendEmail : () => navigate("/login")}
-                    disabled={isResending && status === "error"}
-                    className={`inline-flex w-full sm:w-auto items-center justify-center rounded-lg px-4 py-2.5 text-sm font-semibold text-white ${status === "success" ? "bg-blue-600 hover:bg-blue-700" : "bg-red-600 disabled:opacity-50"
-                      }`}
-                  >
-                    {status === "success" ? "Đăng nhập ngay" : isResending ? "Đang gửi..." : "Gửi lại email"}
+              <h1 className="text-2xl font-bold text-slate-900">
+                {status === "success" ? "Tuyệt vời!" : "Xác nhận đăng ký"}
+              </h1>
+
+              <p className="mt-2 text-slate-600">
+                {status === "loading" && "Chúng tôi đang kiểm tra thông tin tài khoản của bạn..."}
+                {status === "success" && "Tài khoản của bạn đã sẵn sàng. Chào mừng bạn đến với Bookstore!"}
+                {status === "error" && "Có lỗi xảy ra hoặc liên kết không hợp lệ."}
+              </p>
+
+              <div className="mt-8 w-full">
+                {status === "success" && (
+                  <button onClick={() => navigate("/login")} className="w-full rounded-lg bg-blue-600 py-3 font-semibold text-white hover:bg-blue-700">
+                    Đăng nhập ngay
                   </button>
                 )}
-              </div>
 
-              <p className="mt-5 text-xs text-slate-500">
-                Nếu bạn không thấy email, hãy kiểm tra Spam hoặc thử lại.
-              </p>
+                {status === "error" && (
+                  <button
+                    disabled={isResending}
+                    onClick={handleResendEmail}
+                    className="w-full rounded-lg bg-red-600 py-3 font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+                  >
+                    {isResending ? "Đang gửi lại..." : "Gửi lại email xác thực"}
+                  </button>
+                )}
+
+
+              </div>
             </div>
           </div>
         </div>

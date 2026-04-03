@@ -13,10 +13,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ResponseData {
+public class ResponseData<T> {
     private boolean success;
     private String message;
-    private Object data;
+    private T data;
+    
+    private Integer code;
+    private String error;
+    private String path;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Builder.Default

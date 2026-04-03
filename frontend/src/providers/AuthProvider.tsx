@@ -1,4 +1,4 @@
-import api from "@/configs/api";
+import {api} from "@/configs/api";
 import { AuthContext } from "@/context/auth-context";
 import type { User } from "@/types/user";
 import { hasRoleAccess, type RoleType } from "@/types/role";
@@ -29,9 +29,7 @@ export const AuthProvider = ({ children }: Props) => {
 
     try {
 
-      const res = await api.get("/auth/me");
-
-      const user = res.data.data;
+      const user = await api.get<User>("/auth/me");
 
       setUserInfo(user);
       setIsAuthenticated(true);
@@ -51,9 +49,7 @@ export const AuthProvider = ({ children }: Props) => {
 
     setToken("JWT_TOKEN", token);
 
-    const res = await api.get("/auth/me");
-
-    const user = res.data.data;
+    const user = await api.get<User>("/auth/me");
 
     setUserInfo(user);
     setIsAuthenticated(true);

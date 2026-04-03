@@ -5,8 +5,8 @@ import { useAuth } from '@/context/useAuth';
 import authService from '@/services/authService';
 
 import type { LoginForm } from '@/types/login';
+import { getErrorMessage } from '@/utils/error';
 import { showErrorToast, showSuccessToast } from '@/utils/toastUtil';
-import axios from 'axios';
 
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -14,7 +14,7 @@ import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 
 export default function Login() {
-  const { register, handleSubmit, setError, formState: { errors } } = useForm<LoginForm>();
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>();
   const [isLoading, setIsLoading] = useState(false);
   const auth = useAuth();
   const navigate = useNavigate();
@@ -25,9 +25,10 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      // 1. Gọi API Login
+      // 1. Gọi API Login (interceptor trả về Map accessToken từ body.data)
       const loginRes = await authService.login(data);
-      const token = loginRes.data?.accessToken;
+
+      const token = loginRes?.accessToken;
 
       if (!token) throw new Error("Phản hồi từ hệ thống không hợp lệ.");
 
@@ -35,7 +36,7 @@ export default function Login() {
       const user = await auth.login(token);
 
       // 3. Success toast
-      showSuccessToast(loginRes?.message || "Đăng nhập thành công!");
+      showSuccessToast("Đăng nhập thành công!");
 
       // 4. Delay tối thiểu để spinner hiển thị đủ lâu
       const elapsed = Date.now() - startTime;
@@ -46,24 +47,8 @@ export default function Login() {
       navigate(targetPath);
 
     } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        const serverData = error.response?.data;
-
-        // Lỗi validation theo field
-        if (serverData?.data && typeof serverData.data === "object") {
-          Object.entries(serverData.data).forEach(([field, message]) => {
-            setError(field as keyof LoginForm, {
-              type: "server",
-              message: message as string,
-            });
-          });
-          return;
-        }
-
-        showErrorToast(serverData?.message || "Thông tin đăng nhập không chính xác");
-      } else {
-        showErrorToast("Không thể kết nối đến máy chủ");
-      }
+      // Map lỗi field từ backend
+      showErrorToast(getErrorMessage(error)); // Toast lỗi chung
     } finally {
       setIsLoading(false);
     }
