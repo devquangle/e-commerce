@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.dev.backend.bean.ProfileBean;
 import com.dev.backend.constant.JwtType;
@@ -106,16 +107,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDTO updateProfile(ProfileBean profileBean, CustomUserDetails userDetails) {
+    public UserDTO updateProfile(ProfileBean profileBean, CustomUserDetails userDetails, MultipartFile image) {
         User user = userDetails.getUser();
 
         validateUnique(profileBean, user);
-        
+
         user.setFullName(profileBean.getFullName());
         user.setEmail(profileBean.getEmail());
         user.setPhone(profileBean.getPhone());
         user.setStreet(profileBean.getStreet());
-        user.setImage(null);
+        if (image.isEmpty()) {
+            user.setImage(image.getOriginalFilename());
+
+        }
         user.setUpdateAt(LocalDateTime.now());
         saveUser(user);
 

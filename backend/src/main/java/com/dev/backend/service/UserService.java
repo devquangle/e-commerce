@@ -1,5 +1,7 @@
 package com.dev.backend.service;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import com.dev.backend.bean.ProfileBean;
 import com.dev.backend.dto.UserDTO;
 import com.dev.backend.entity.User;
@@ -31,7 +33,7 @@ public interface UserService {
 
 
 
-    UserDTO updateProfile(ProfileBean profileBean, CustomUserDetails userDetails);
+    UserDTO updateProfile(ProfileBean profileBean, CustomUserDetails userDetails,MultipartFile image);
 
     void validateUnique(ProfileBean profileBean, User user);
 

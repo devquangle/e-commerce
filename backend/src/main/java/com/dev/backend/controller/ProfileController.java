@@ -7,14 +7,17 @@ import com.dev.backend.resp.ResponseData;
 import com.dev.backend.resp.ResponseUtil;
 import com.dev.backend.exception.UnauthorizedException;
 import com.dev.backend.security.CustomUserDetails;
+import com.dev.backend.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -22,6 +25,8 @@ import java.util.Set;
 @RestController
 @RequiredArgsConstructor
 public class ProfileController {
+
+    private final UserService userService;
 
     @GetMapping("/auth/me")
     public ResponseEntity<ResponseData<Object>> get_profile(@AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -52,16 +57,16 @@ public class ProfileController {
                 .permissions(permissions)
                 .build();
 
-        return ResponseUtil.success("Get user success", userDTO);
+        return ResponseUtil.success("Lấy thông tin người dùng thành công", userDTO);
     }
 
-    @PutMapping("/auth/me")
-    public ResponseEntity<ResponseData<Object>> post_profile( @RequestBody ProfileBean profileBean,
-           @AuthenticationPrincipal CustomUserDetails userDetails){
+    @PostMapping("/auth/me")
+    public ResponseEntity<ResponseData<Object>> post_profile(@RequestPart("profile") ProfileBean profileBean,
+            @RequestPart(value = "image", required = false) MultipartFile image,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        UserDTO userDTO = userService.updateProfile(profileBean, userDetails);
 
-
-                
-        return null;
+        return ResponseUtil.success("Cập nhật hồ sơ thành công", userDTO);
     }
 
 }

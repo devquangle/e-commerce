@@ -1,31 +1,42 @@
-import type { ResponseData } from "@/types/response-data";
-import type { FieldValues, UseFormSetError, Path } from "react-hook-form";
+import axios from "axios";
+import type { FieldValues, Path, UseFormSetError } from "react-hook-form";
+import { getErrorMessage } from "./error";
 
-export const mapServerErrors = <TForm extends FieldValues>(
+/**
+ * Chuyển lỗi server thành lỗi form và set lên react-hook-form
+ * @param error AxiosError từ server
+ * @param setError hàm setError từ useForm
+ * @param showErrorToast hàm hiển thị toast (tùy chọn)
+ */
+export function mapServerErrors<T extends FieldValues>(
   error: unknown,
-  setError: UseFormSetError<TForm>
-) => {
-  if (!error || typeof error !== "object") {
-    console.warn("mapServerErrors nhận lỗi không phải object:", error);
-    return;
-  }
+  setError: UseFormSetError<T>,
+  showErrorToast?: (msg: string) => void,
+) {
+  if (axios.isAxiosError(error)) {
+    const serverData = error.response?.data;
 
-  const err = error as ResponseData<Record<string, string>>;
-
-  if (!err.data || typeof err.data !== "object") {
-    console.warn("mapServerErrors không tìm thấy data trong lỗi:", error);
-    return;
-  }
-
-  Object.entries(err.data).forEach(([field, message]) => {
-    if (typeof message !== "string") {
-      console.warn(`Giá trị message cho field ${field} không phải string:`, message);
+    // Nếu server trả về object lỗi theo field
+    if (
+      serverData &&
+      typeof serverData === "object" &&
+      "data" in serverData &&
+      serverData.data &&
+      typeof serverData.data === "object"
+    ) {
+      Object.entries(serverData.data).forEach(([field, message]) => {
+        setError(field as Path<T>, {
+          type: "server",
+          message: String(message),
+        });
+      });
       return;
     }
 
-    setError(field as Path<TForm>, {
-      type: "server",
-      message,
-    });
-  });
-};
+    // Nếu không có object lỗi, show toast
+    showErrorToast?.(getErrorMessage(error));
+  } else {
+    // Lỗi không phải Axios, show toast
+    showErrorToast?.(getErrorMessage(error));
+  }
+}

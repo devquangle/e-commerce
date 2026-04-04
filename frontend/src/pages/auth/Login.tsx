@@ -6,6 +6,7 @@ import authService from '@/services/authService';
 
 import type { LoginForm } from '@/types/login';
 import { getErrorMessage } from '@/utils/error';
+import { mapServerErrors } from '@/utils/mapServerErrors';
 import { showErrorToast, showSuccessToast } from '@/utils/toastUtil';
 
 import { useState } from 'react';
@@ -14,11 +15,11 @@ import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 
 export default function Login() {
-  const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>();
+  const { register, handleSubmit,setError, formState: { errors } } = useForm<LoginForm>();
   const [isLoading, setIsLoading] = useState(false);
   const auth = useAuth();
   const navigate = useNavigate();
-  const onSubmit = async (data: LoginForm) => {
+  const onSubmit = async (requestData: LoginForm) => {
     const minLoadingTime = 800; // ms
     const startTime = Date.now();
 
@@ -26,9 +27,16 @@ export default function Login() {
 
     try {
       // 1. Gọi API Login (interceptor trả về Map accessToken từ body.data)
-      const loginRes = await authService.login(data);
+      const {data} = await authService.login(requestData);
 
-      const token = loginRes?.accessToken;
+      if (!data.success) {
+        showErrorToast(data.message);
+        return;
+      }
+
+
+
+      const token = data?.data?.accessToken;
 
       if (!token) throw new Error("Phản hồi từ hệ thống không hợp lệ.");
 
@@ -48,7 +56,7 @@ export default function Login() {
 
     } catch (error: unknown) {
       // Map lỗi field từ backend
-      showErrorToast(getErrorMessage(error)); // Toast lỗi chung
+        mapServerErrors(error, setError,showErrorToast);
     } finally {
       setIsLoading(false);
     }

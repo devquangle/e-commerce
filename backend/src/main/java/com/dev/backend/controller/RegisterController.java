@@ -43,7 +43,7 @@ public class RegisterController {
 
         User user = registerService.register(registerBean, RoleName.CUSTOMER.name());
         if (user != null) {
-            String verifyToken = jwtUtil.generateVerifyToken(user.getId());
+            String verifyToken = jwtUtil.generateVerifyToken(user.getId(),user.getTokenVersion());
             sendEmailService.sendEmailRegister(user.getEmail(),
                     "Cảm ơn bạn đã đăng ký tài khoản, vui lòng kích hoạt tài khoản", verifyToken);
         }

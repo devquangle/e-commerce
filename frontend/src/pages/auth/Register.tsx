@@ -5,8 +5,8 @@ import Loading from '@/components/common/Loading';
 import authService from '@/services/authService';
 import type { RegisterFrom } from '@/types/register';
 import { getErrorMessage } from '@/utils/error';
+import { mapServerErrors } from '@/utils/mapServerErrors';
 import { showErrorToast, showSuccessToast } from '@/utils/toastUtil';
-import axios from 'axios';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
@@ -14,31 +14,14 @@ export default function Register() {
     const { register, handleSubmit, setError, formState: { errors } } = useForm<RegisterFrom>();
     const [isLoading, setIsLoading] = useState(false);
 
-    const onSubmit = async (data: RegisterFrom) => {
+    const onSubmit = async (request: RegisterFrom) => {
         setIsLoading(true);
         try {
 
-            const registerRps = await authService.register(data);
-            showSuccessToast(registerRps.message);
-
+            const {data}= await authService.register(request);
+            showSuccessToast(data?.message);
         } catch (error: unknown) {
-            if (axios.isAxiosError(error)) {
-                const serverData = error.response?.data;
-
-                if (serverData?.data && typeof serverData.data === "object") {
-                    Object.entries(serverData.data).forEach(([field, message]) => {
-                        setError(field as keyof RegisterFrom, {
-                            type: "server",
-                            message: message as string,
-                        });
-                    });
-                    return;
-                }
-                showErrorToast(getErrorMessage(error));
-
-            } else {
-                showErrorToast(getErrorMessage(error));
-            }
+           mapServerErrors(error, setError,showErrorToast);
         } finally {
             setIsLoading(false);
         }

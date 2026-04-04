@@ -1,28 +1,29 @@
-import { isAxiosError } from "axios";
-import type { ResponseData } from "@/types/response-data";
+import axios from "axios";
 
-export const getErrorMessage = <T = unknown>(err: unknown): string => {
-  if (!err) return "Có lỗi xảy ra";
+/**
+ * Lấy thông báo lỗi từ bất kỳ error nào
+ * @param error Lỗi ném ra (AxiosError hoặc Error)
+ * @returns message dạng string
+ */
+export function getErrorMessage(error: unknown): string {
+  if (axios.isAxiosError(error)) {
+    const data = error.response?.data;
 
-  // Axios: ưu tiên message từ body backend (nếu có)
-  if (isAxiosError<ResponseData<T>>(err) && err.response?.data && typeof err.response.data === "object") {
-    const data = err.response.data;
-    if ("message" in data && typeof data.message === "string" && data.message.length > 0) {
-      return data.message;
+    // Kiểm tra nếu data là object và có message
+    if (data && typeof data === "object" && "message" in data) {
+      const msg = (data as { message?: unknown }).message;
+      if (typeof msg === "string") {
+        return msg;
+      }
     }
+
+    // fallback sang statusText hoặc thông báo chung
+    return error.response?.statusText || "Đã xảy ra lỗi từ server";
   }
 
-  // Body thuần từ interceptor api / apiPublic khi reject(error.response?.data)
-  if (typeof err === "object" && err !== null && "message" in err) {
-    const msg = (err as { message?: unknown }).message;
-    if (typeof msg === "string" && msg.length > 0) {
-      return msg;
-    }
+  if (error instanceof Error) {
+    return error.message;
   }
 
-  if (isAxiosError<unknown>(err) && typeof err.message === "string" && err.message.length > 0) {
-    return err.message;
-  }
-
-  return "Có lỗi xảy ra";
-};
+  return "Đã xảy ra lỗi không xác định";
+}

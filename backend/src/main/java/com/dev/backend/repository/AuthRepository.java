@@ -14,8 +14,9 @@ import com.dev.backend.entity.User;
 public interface AuthRepository extends JpaRepository<User, Integer> {
 
         @Query("""
-                        SELECT 
+                        SELECT
                                 u.id AS id,
+                                  u.tokenVersion AS tokenVersion,
                                 u.fullName AS fullName,
                                 u.email AS email,
                                 u.password AS password,
@@ -37,7 +38,7 @@ public interface AuthRepository extends JpaRepository<User, Integer> {
         List<UserRP> findUserRPByEmail(@Param("email") String email);
 
         @Query("""
-                        SELECT 
+                        SELECT
                                 u.id AS id,
                                 u.tokenVersion AS tokenVersion,
                                 u.fullName AS fullName,

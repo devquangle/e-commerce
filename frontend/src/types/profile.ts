@@ -3,5 +3,5 @@ export interface ProfileForm {
   fullName: string
   phone: string
   street: string
-
+  image: string
 }

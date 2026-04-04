@@ -14,6 +14,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 import com.dev.backend.exception.AppException;
 import com.dev.backend.exception.DuplicateFieldException;
+import com.dev.backend.resp.ApiErrorCode;
 import com.dev.backend.resp.ResponseData;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,7 +32,7 @@ public class GlobalExceptionHandler {
                     HttpStatus.BAD_REQUEST,
                     ex.getCode(),
                     ex.getMessage(),
-                    "VALIDATION_ERROR",
+                    ApiErrorCode.VALIDATION_ERROR,
                     request.getRequestURI(),
                     duplicateFieldException.getErrors());
         }
@@ -63,7 +64,7 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST,
                 HttpStatus.BAD_REQUEST.value(),
                 "Validation failed",
-                "VALIDATION_ERROR",
+                ApiErrorCode.VALIDATION_ERROR,
                 request.getRequestURI(),
                 errors);
     }
@@ -76,7 +77,7 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST,
                 HttpStatus.BAD_REQUEST.value(),
                 ex.getMessage(),
-                "VALIDATION_ERROR",
+                ApiErrorCode.VALIDATION_ERROR,
                 request.getRequestURI(),
                 null);
     }
@@ -90,7 +91,7 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST,
                 HttpStatus.BAD_REQUEST.value(),
                 message,
-                "TYPE_MISMATCH",
+                ApiErrorCode.TYPE_MISMATCH,
                 request.getRequestURI(),
                 null);
     }
@@ -103,7 +104,7 @@ public class GlobalExceptionHandler {
                 HttpStatus.FORBIDDEN,
                 HttpStatus.FORBIDDEN.value(),
                 "You do not have permission to access this resource",
-                "ACCESS_DENIED",
+                ApiErrorCode.ACCESS_DENIED,
                 request.getRequestURI(),
                 null);
     }
@@ -115,7 +116,7 @@ public class GlobalExceptionHandler {
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "Internal server error",
-                "INTERNAL_SERVER_ERROR",
+                ApiErrorCode.INTERNAL_SERVER_ERROR,
                 request.getRequestURI(),
                 null);
     }

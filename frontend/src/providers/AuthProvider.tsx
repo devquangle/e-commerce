@@ -1,4 +1,4 @@
-import {api} from "@/configs/api";
+import { apiAuth} from "@/configs/api";
 import { AuthContext } from "@/context/auth-context";
 import type { User } from "@/types/user";
 import { hasRoleAccess, type RoleType } from "@/types/role";
@@ -29,9 +29,9 @@ export const AuthProvider = ({ children }: Props) => {
 
     try {
 
-      const user = await api.get<User>("/auth/me");
+      const {data} = await apiAuth.get("/auth/me");
 
-      setUserInfo(user);
+      setUserInfo(data?.data);
       setIsAuthenticated(true);
 
     } catch {
@@ -49,12 +49,12 @@ export const AuthProvider = ({ children }: Props) => {
 
     setToken("JWT_TOKEN", token);
 
-    const user = await api.get<User>("/auth/me");
+    const {data} = await apiAuth.get("/auth/me");
 
-    setUserInfo(user);
+    setUserInfo(data?.data);
     setIsAuthenticated(true);
 
-    return user;
+    return data.data;
   };
 
   const logout = () => {

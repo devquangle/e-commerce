@@ -1,8 +1,13 @@
 import InputField from "@/components/common/InputField";
 import { useAuth } from "@/context/useAuth";
 import type { ProfileForm } from "@/types/profile";
+
+import { getErrorMessage } from "@/utils/error";
+import { mapServerErrors } from "@/utils/mapServerErrors";
+import { showErrorToast, showSuccessToast } from "@/utils/toastUtil";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { apiAuth } from "@/configs/api";
 
 export default function Profile() {
   const { userInfo } = useAuth();
@@ -18,6 +23,7 @@ export default function Profile() {
       email: userInfo?.email || "",
       phone: userInfo?.phone || "",
       street: userInfo?.street || "",
+      image: userInfo?.image || "",
     },
   });
 
@@ -43,33 +49,18 @@ export default function Profile() {
         new Blob([JSON.stringify(data)], { type: "application/json" })
       );
       if (avatarFile) {
-        formData.append("avatar", avatarFile);
+        formData.append("image", avatarFile);
       }
 
-      const res = await fetch("/auth/me", {
-        method: "PUT",
-        body: formData,
-      });
+      const respon = await apiAuth.post("/auth/me", formData);
 
-      const result = await res.json();
-
-      if (!res.ok) {
-        // handle validation errors from server
-        if (result.data) {
-          for (const field in result.data) {
-            setError(field as keyof ProfileForm, {
-              type: "server",
-              message: result.data[field],
-            });
-          }
-        }
-        return;
+      if (respon.data.success) {
+        showSuccessToast(respon.data.message);
       }
 
-      alert("Cập nhật thành công!");
-    } catch (err: unknown) {
-      console.error(err);
-      alert("Cập nhật thất bại");
+    } catch (error: unknown) {
+      mapServerErrors(error, setError);
+      showErrorToast(getErrorMessage(error));
     } finally {
       setIsLoading(false);
     }
@@ -87,7 +78,7 @@ export default function Profile() {
             className="space-y-2 p-2"
             onSubmit={handleSubmit(onSubmit)}
           >
-            <InputField label="Họ và tên" name="fullName" type="text" 
+            <InputField label="Họ và tên" name="fullName" type="text"
               placeholder="Họ và tên"
               register={register}
               rules={{

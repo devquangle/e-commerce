@@ -8,6 +8,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Envelope API thống nhất (đồng bộ với frontend: types/response-data.ts).
+ * <p>{@code data} luôn có trong JSON kể cả null. {@code code}, {@code error}, {@code path}
+ * thường dùng cho lỗi; giá trị {@code error} chuẩn xem {@link ApiErrorCode}.
+ * Phản hồi thành công qua {@link ResponseUtil} có thể không gửi các trường đó.</p>
+ */
 @Data
 @Builder
 @NoArgsConstructor
@@ -16,10 +22,9 @@ import lombok.NoArgsConstructor;
 public class ResponseData<T> {
     private boolean success;
     private String message;
-    /** Luôn có trong JSON kể cả khi null (client thống nhất với contract API). */
     @JsonInclude(JsonInclude.Include.ALWAYS)
     private T data;
-    
+
     private Integer code;
     private String error;
     private String path;
