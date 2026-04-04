@@ -25,47 +25,47 @@ public class JwtUtil {
     }
 
     // ================= GENERATE =================
-
-    public String generateToken(int userId, JwtType type) {
-        return buildToken(userId, null, null, type);
+    public String generateAccessToken(int userId, int tokenVersion, List<String> roles, List<String> permissions) {
+        return buildToken(userId, tokenVersion, roles, permissions, JwtType.ACCESS);
     }
 
-    public String generateAccessToken(int userId, List<String> roles, List<String> permissions) {
-        return buildToken(userId, roles, permissions, JwtType.ACCESS);
+    public String generateRefreshToken(int userId, int tokenVersion) {
+        return buildToken(userId, tokenVersion, null, null, JwtType.REFRESH);
     }
 
-    public String generateRefreshToken(int userId){
-        return buildToken(userId, null, null, JwtType.REFRESH);
+    public String generateVerifyToken(int userId, int tokenVersion) {
+        return buildToken(userId, tokenVersion, null, null, JwtType.VERIFY_EMAIL);
     }
 
-    public String generateVerifyToken(int userId) {
-        return buildToken(userId, null, null, JwtType.VERIFY_EMAIL);
+    public String generateResetPasswordToken(int userId, int tokenVersion) {
+        return buildToken(userId, tokenVersion, null, null, JwtType.RESET_PASSWORD);
     }
 
-    public String generateResetPasswordToken(int userId) {
-        return buildToken(userId, null, null, JwtType.RESET_PASSWORD);
+    public String generateGenericToken(int userId, int tokenVersion, JwtType type) {
+        return buildToken(userId, tokenVersion, null, null, type);
     }
 
     private String buildToken(int userId,
+                              int tokenVersion,
                               List<String> roles,
                               List<String> permissions,
                               JwtType type) {
 
         JwtBuilder builder = Jwts.builder()
                 .setSubject(String.valueOf(userId))
+                .claim("tokenVersion", tokenVersion)
                 .claim("type", type.name())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + type.getExpirationMillis()))
                 .signWith(signingKey(), SignatureAlgorithm.HS256);
 
-        if (roles != null) builder.claim("roles", roles);
-        if (permissions != null) builder.claim("permissions", permissions);
+        if (roles != null) builder.claim("roles", List.copyOf(roles));
+        if (permissions != null) builder.claim("permissions", List.copyOf(permissions));
 
         return builder.compact();
     }
 
     // ================= PARSE =================
-
     public Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(signingKey())
@@ -83,13 +83,22 @@ public class JwtUtil {
         return JwtType.valueOf(type);
     }
 
+    public int extractTokenVersion(String token) {
+        Integer version = extractAllClaims(token).get("tokenVersion", Integer.class);
+        return version == null ? 0 : version;
+    }
+
     public List<String> extractRoles(String token) {
         List<?> roles = extractAllClaims(token).get("roles", List.class);
         return roles == null ? List.of() : roles.stream().map(Object::toString).toList();
     }
 
-    // ================= VALIDATE =================
+    public List<String> extractPermissions(String token) {
+        List<?> permissions = extractAllClaims(token).get("permissions", List.class);
+        return permissions == null ? List.of() : permissions.stream().map(Object::toString).toList();
+    }
 
+    // ================= VALIDATE =================
     public boolean isValid(String token, JwtType expectedType) {
         try {
             Claims claims = extractAllClaims(token);
@@ -109,5 +118,10 @@ public class JwtUtil {
 
     private boolean isExpired(Claims claims) {
         return claims.getExpiration().before(new Date());
+    }
+
+    // ================= HELPER =================
+    public boolean isTokenVersionValid(String token, int dbTokenVersion) {
+        return extractTokenVersion(token) == dbTokenVersion;
     }
 }

@@ -33,11 +33,12 @@ public class User {
     private String phone;
     @Column(unique = true)
     private String code;
+    private int tokenVersion;
     private String street;
     private String image;
     private LocalDateTime createAt = LocalDateTime.now();
     private LocalDateTime updateAt;
-    private boolean enabled ;
+    private boolean enabled;
     private boolean accountNonLocked = true;
     private int failedAttempt = 0;
     private LocalDateTime lockTime;

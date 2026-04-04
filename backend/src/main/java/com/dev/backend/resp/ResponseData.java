@@ -16,6 +16,8 @@ import lombok.NoArgsConstructor;
 public class ResponseData<T> {
     private boolean success;
     private String message;
+    /** Luôn có trong JSON kể cả khi null (client thống nhất với contract API). */
+    @JsonInclude(JsonInclude.Include.ALWAYS)
     private T data;
     
     private Integer code;

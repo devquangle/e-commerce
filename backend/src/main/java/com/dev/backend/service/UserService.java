@@ -1,6 +1,9 @@
 package com.dev.backend.service;
 
+import com.dev.backend.bean.ProfileBean;
+import com.dev.backend.dto.UserDTO;
 import com.dev.backend.entity.User;
+import com.dev.backend.security.CustomUserDetails;
 
 public interface UserService {
 
@@ -25,5 +28,11 @@ public interface UserService {
     void processLoginFail(Integer id);
 
     void resetFailedAttempts(Integer id);
+
+
+
+    UserDTO updateProfile(ProfileBean profileBean, CustomUserDetails userDetails);
+
+    void validateUnique(ProfileBean profileBean, User user);
 
 }

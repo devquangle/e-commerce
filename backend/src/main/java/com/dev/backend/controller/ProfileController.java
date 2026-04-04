@@ -1,5 +1,6 @@
 package com.dev.backend.controller;
 
+import com.dev.backend.bean.ProfileBean;
 import com.dev.backend.dto.UserDTO;
 import com.dev.backend.entity.User;
 import com.dev.backend.resp.ResponseData;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashSet;
@@ -54,7 +56,11 @@ public class ProfileController {
     }
 
     @PutMapping("/auth/me")
-    public ResponseEntity<ResponseData<Object>> post_profile() {
+    public ResponseEntity<ResponseData<Object>> post_profile( @RequestBody ProfileBean profileBean,
+           @AuthenticationPrincipal CustomUserDetails userDetails){
+
+
+                
         return null;
     }
 

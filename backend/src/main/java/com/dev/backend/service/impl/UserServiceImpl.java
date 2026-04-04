@@ -1,13 +1,18 @@
 package com.dev.backend.service.impl;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 
 import org.springframework.stereotype.Service;
 
+import com.dev.backend.bean.ProfileBean;
 import com.dev.backend.constant.JwtType;
+import com.dev.backend.dto.UserDTO;
 import com.dev.backend.entity.User;
+import com.dev.backend.exception.DuplicateFieldException;
 import com.dev.backend.exception.NotFoundException;
 import com.dev.backend.repository.UserRepository;
+import com.dev.backend.security.CustomUserDetails;
 import com.dev.backend.security.jwt.JwtUtil;
 import com.dev.backend.service.UserService;
 
@@ -98,6 +103,46 @@ public class UserServiceImpl implements UserService {
         user.setLockTime(null);
         user.setAccountNonLocked(true);
         saveUser(user);
+    }
+
+    @Override
+    public UserDTO updateProfile(ProfileBean profileBean, CustomUserDetails userDetails) {
+        User user = userDetails.getUser();
+
+        validateUnique(profileBean, user);
+        
+        user.setFullName(profileBean.getFullName());
+        user.setEmail(profileBean.getEmail());
+        user.setPhone(profileBean.getPhone());
+        user.setStreet(profileBean.getStreet());
+        user.setImage(null);
+        user.setUpdateAt(LocalDateTime.now());
+        saveUser(user);
+
+        return UserDTO.builder()
+                .code(user.getCode())
+                .fullName(user.getFullName())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .street(user.getStreet())
+                .image(user.getImage())
+                .build();
+    }
+
+    @Override
+    public void validateUnique(ProfileBean profileBean, User user) {
+        DuplicateFieldException errors = new DuplicateFieldException(new HashMap<>());
+        if (!profileBean.getEmail().equals(user.getEmail())
+                && existsByEmail(profileBean.getEmail())) {
+            errors.addError("email", "Email đã được sử dụng");
+        }
+        if (!profileBean.getPhone().equals(user.getPhone()) && existsByPhone(profileBean.getPhone())) {
+            errors.addError("phone", "Số điện thoại đã được sử dụng");
+        }
+
+        if (!errors.getErrors().isEmpty()) {
+            throw errors;
+        }
     }
 
 }

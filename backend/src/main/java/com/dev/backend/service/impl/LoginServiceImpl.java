@@ -60,9 +60,10 @@ public class LoginServiceImpl implements LoginService {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
 
-        String accessToken = jwtUtil.generateAccessToken(user.id(), new ArrayList<>(roles),
+        String accessToken = jwtUtil.generateAccessToken(user.id(),user.tokenVersion(),
+                new ArrayList<>(roles),
                 new ArrayList<>(permissions));
-        String refreshToken = jwtUtil.generateRefreshToken(user.id());
+        String refreshToken = jwtUtil.generateRefreshToken(user.id(), user.tokenVersion());
 
         CookieUtil.addCookie(response, "refreshToken", refreshToken);
         Map<String, String> data = Map.of("accessToken", accessToken);

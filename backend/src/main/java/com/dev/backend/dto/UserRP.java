@@ -2,6 +2,7 @@ package com.dev.backend.dto;
 
 public record UserRP(
                 Integer id,
+                int tokenVersion,
                 String fullName,
                 String email,
                 String password,

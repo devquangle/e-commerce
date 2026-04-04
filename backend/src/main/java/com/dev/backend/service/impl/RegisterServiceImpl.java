@@ -104,7 +104,7 @@ public class RegisterServiceImpl implements RegisterService {
         }
 
         // Tạo token mới
-        String newToken = jwtUtil.generateVerifyToken(user.getId());
+        String newToken = jwtUtil.generateVerifyToken(user.getId(),user.getTokenVersion());
 
         // Gửi email lại
         sendEmailService.sendEmailRegister(

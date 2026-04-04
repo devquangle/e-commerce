@@ -20,8 +20,20 @@ public class UserMapper {
         // userDTO.setPermissions(user.getUserRoles().stream()
         //         .flatMap(ur -> ur.getRole().getRolePermissions().stream())
         //         .map(rp -> rp.getPermission().getCode())
-                // .toList());        
+        // .toList());        
 
+        return userDTO;
+    }
+
+    public UserDTO toCustomerDTO(User user){
+         UserDTO userDTO = new UserDTO();
+        userDTO.setFullName(user.getFullName());
+        userDTO.setEmail(user.getEmail());
+        userDTO.setPhone(user.getPhone());
+        userDTO.setStreet(user.getStreet());
+        userDTO.setCode(user.getCode());
+        userDTO.setImage(user.getImage());
+     
         return userDTO;
     }
 }

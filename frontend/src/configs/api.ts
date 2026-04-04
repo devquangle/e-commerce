@@ -6,24 +6,52 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from "axios";
 import { getToken, setToken, removeToken } from "@/utils/cookieUtil";
-import type { ResponseData } from "@/types/response-data";
+import {
+  clientResponseError,
+  type ResponseData,
+  type ResponseDataSuccess,
+} from "@/types/response-data";
 
-const baseURL = "http://localhost:8080";
+export const baseURL = "http://localhost:8080";
 
-/** Client sau interceptor: Promise trả về `ResponseData.data`, không phải AxiosResponse */
+/** Client sau interceptor: Promise trả về `ResponseData.data` (có thể null khi success), không phải AxiosResponse */
 export type UnwrappedAxios = Omit<
   AxiosInstance,
   "get" | "delete" | "head" | "options" | "post" | "put" | "patch" | "request"
 > & {
-  <T = unknown>(config: InternalAxiosRequestConfig): Promise<T>;
-  request<T = unknown>(config: InternalAxiosRequestConfig): Promise<T>;
-  get<T = unknown>(url: string, config?: InternalAxiosRequestConfig): Promise<T>;
-  delete<T = unknown>(url: string, config?: InternalAxiosRequestConfig): Promise<T>;
-  head<T = unknown>(url: string, config?: InternalAxiosRequestConfig): Promise<T>;
-  options<T = unknown>(url: string, config?: InternalAxiosRequestConfig): Promise<T>;
-  post<T = unknown>(url: string, data?: unknown, config?: InternalAxiosRequestConfig): Promise<T>;
-  put<T = unknown>(url: string, data?: unknown, config?: InternalAxiosRequestConfig): Promise<T>;
-  patch<T = unknown>(url: string, data?: unknown, config?: InternalAxiosRequestConfig): Promise<T>;
+  <T = unknown>(config: InternalAxiosRequestConfig): Promise<T | null>;
+  request<T = unknown>(config: InternalAxiosRequestConfig): Promise<T | null>;
+  get<T = unknown>(
+    url: string,
+    config?: InternalAxiosRequestConfig,
+  ): Promise<T | null>;
+  delete<T = unknown>(
+    url: string,
+    config?: InternalAxiosRequestConfig,
+  ): Promise<T | null>;
+  head<T = unknown>(
+    url: string,
+    config?: InternalAxiosRequestConfig,
+  ): Promise<T | null>;
+  options<T = unknown>(
+    url: string,
+    config?: InternalAxiosRequestConfig,
+  ): Promise<T | null>;
+  post<T = unknown>(
+    url: string,
+    data?: unknown,
+    config?: InternalAxiosRequestConfig,
+  ): Promise<T | null>;
+  put<T = unknown>(
+    url: string,
+    data?: unknown,
+    config?: InternalAxiosRequestConfig,
+  ): Promise<T | null>;
+  patch<T = unknown>(
+    url: string,
+    data?: unknown,
+    config?: InternalAxiosRequestConfig,
+  ): Promise<T | null>;
 };
 
 function createUnwrappedClient(): UnwrappedAxios {
@@ -45,29 +73,56 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 });
 
 // ================= RESPONSE HANDLER =================
-const handleResponse = <T>(res: AxiosResponse<ResponseData<T>>) => {
+/** Axios type trả về AxiosResponse; thực tế unwrap thành ResponseData.data (cast khi .use). */
+const handleResponse = <T>(res: AxiosResponse<ResponseData<T>>): T | null => {
   const body = res.data;
   if (body == null || typeof body !== "object" || !("success" in body)) {
-    throw { success: false as const, message: "Phản hồi server không hợp lệ" };
+    throw clientResponseError("Phản hồi server không hợp lệ");
   }
   if (!body.success) throw body;
-  return body.data;
+  return body.data ?? null;
 };
+
+/** POST không Bearer: trả nguyên envelope (cần `message` khi `data` null). */
+export async function postPublicEnvelope<T = unknown>(
+  url: string,
+  body?: unknown,
+): Promise<ResponseDataSuccess<T>> {
+  const res = await axios.post<ResponseData<T>>(`${baseURL}${url}`, body, {
+    withCredentials: true,
+  });
+  const payload = res.data;
+  if (
+    payload == null ||
+    typeof payload !== "object" ||
+    !("success" in payload)
+  ) {
+    throw clientResponseError("Phản hồi server không hợp lệ");
+  }
+  if (!payload.success) throw payload;
+  return payload;
+}
 
 // ================= TOKEN REFRESH =================
 let isRefreshing = false;
-let queue: { resolve: (token: string) => void; reject: (err: unknown) => void }[] = [];
+let queue: {
+  resolve: (token: string) => void;
+  reject: (err: unknown) => void;
+}[] = [];
 
 const processQueue = (err: unknown, token?: string) => {
-  queue.forEach(p => (err ? p.reject(err) : p.resolve(token!)));
+  queue.forEach((p) => (err ? p.reject(err) : p.resolve(token!)));
   queue = [];
 };
 
 // ================= ERROR HANDLER =================
 const handleError = async (error: AxiosError<ResponseData<unknown>>) => {
-  const original = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+  const original = error.config as InternalAxiosRequestConfig & {
+    _retry?: boolean;
+  };
 
-  if (!error.response) return Promise.reject({ success: false, message: "Server unreachable" });
+  if (!error.response)
+    return Promise.reject(clientResponseError("Server unreachable"));
 
   const status = error.response.status;
   const data = error.response.data;
@@ -82,11 +137,14 @@ const handleError = async (error: AxiosError<ResponseData<unknown>>) => {
             resolve(
               api({
                 ...original,
-                headers: new AxiosHeaders(original.headers).set("Authorization", `Bearer ${t}`),
-              })
+                headers: new AxiosHeaders(original.headers).set(
+                  "Authorization",
+                  `Bearer ${t}`,
+                ),
+              }),
             ),
           reject,
-        })
+        }),
       );
     }
 
@@ -94,7 +152,8 @@ const handleError = async (error: AxiosError<ResponseData<unknown>>) => {
 
     try {
       const payload = await apiPublic.post<{ token: string }>("/auth/refresh");
-      if (!payload?.token) throw { success: false as const, message: "Refresh token không hợp lệ" };
+      if (!payload?.token)
+        throw clientResponseError("Refresh token không hợp lệ");
 
       const newToken = payload.token;
       setToken("JWT_TOKEN", newToken);
@@ -102,7 +161,10 @@ const handleError = async (error: AxiosError<ResponseData<unknown>>) => {
 
       return api({
         ...original,
-        headers: new AxiosHeaders(original.headers).set("Authorization", `Bearer ${newToken}`),
+        headers: new AxiosHeaders(original.headers).set(
+          "Authorization",
+          `Bearer ${newToken}`,
+        ),
       });
     } catch (err) {
       processQueue(err);
@@ -114,12 +176,15 @@ const handleError = async (error: AxiosError<ResponseData<unknown>>) => {
     }
   }
 
-  return Promise.reject(data ?? { success: false, message: "Unknown backend error" });
+  return Promise.reject(
+    data ?? clientResponseError("Unknown backend error"),
+  );
 };
 
 // ================= APPLY INTERCEPTORS =================
-api.interceptors.response.use(handleResponse, handleError);
-apiPublic.interceptors.response.use(
-  handleResponse,
-  (error) => Promise.reject(error.response?.data ?? { success: false, message: "Unknown backend error" })
+api.interceptors.response.use(handleResponse as never, handleError);
+apiPublic.interceptors.response.use(handleResponse as never, (error) =>
+  Promise.reject(
+    error.response?.data ?? clientResponseError("Unknown backend error"),
+  ),
 );

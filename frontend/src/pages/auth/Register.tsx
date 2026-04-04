@@ -4,6 +4,7 @@ import InputField from '@/components/common/InputField';
 import Loading from '@/components/common/Loading';
 import authService from '@/services/authService';
 import type { RegisterFrom } from '@/types/register';
+import { getErrorMessage } from '@/utils/error';
 import { showErrorToast, showSuccessToast } from '@/utils/toastUtil';
 import axios from 'axios';
 import { useState } from 'react';
@@ -18,7 +19,7 @@ export default function Register() {
         try {
 
             const registerRps = await authService.register(data);
-            showSuccessToast(registerRps?.message || "Đăng ký thành công!");
+            showSuccessToast(registerRps.message);
 
         } catch (error: unknown) {
             if (axios.isAxiosError(error)) {
@@ -33,10 +34,10 @@ export default function Register() {
                     });
                     return;
                 }
-                showErrorToast(serverData?.message || "Đăng ký thất bại");
+                showErrorToast(getErrorMessage(error));
 
             } else {
-                showErrorToast("Không thể kết nối đến máy chủ");
+                showErrorToast(getErrorMessage(error));
             }
         } finally {
             setIsLoading(false);

@@ -39,6 +39,7 @@ public interface AuthRepository extends JpaRepository<User, Integer> {
         @Query("""
                         SELECT 
                                 u.id AS id,
+                                u.tokenVersion AS tokenVersion,
                                 u.fullName AS fullName,
                                 u.email AS email,
                                 u.password AS password,
