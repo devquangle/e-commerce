@@ -91,7 +91,7 @@ export default function Header() {
                           {item.path ? (
                             <Link className="block w-full hover:text-indigo-500" to={item.path}>{item.label}</Link>
                           ) : (
-                            <button className="hover:text-red-500" onClick={item.action}>{item.label}</button>
+                            <button className="hover:text-red-500 hover:cursor-pointer" onClick={item.action}>{item.label}</button>
                           )}
                         </li>
                       ))}

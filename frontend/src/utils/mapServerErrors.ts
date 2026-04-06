@@ -4,9 +4,8 @@ import { getErrorMessage } from "./error";
 
 /**
  * Chuyển lỗi server thành lỗi form và set lên react-hook-form
- * @param error AxiosError từ server
- * @param setError hàm setError từ useForm
- * @param showErrorToast hàm hiển thị toast (tùy chọn)
+ * Nếu server trả lỗi theo field, chỉ set error trên form, không show toast
+ * Nếu không có field-specific error, show toast
  */
 export function mapServerErrors<T extends FieldValues>(
   error: unknown,
@@ -22,19 +21,23 @@ export function mapServerErrors<T extends FieldValues>(
       typeof serverData === "object" &&
       "data" in serverData &&
       serverData.data &&
-      typeof serverData.data === "object"
+      typeof serverData.data === "object" &&
+      Object.keys(serverData.data).length > 0
     ) {
+      // Chỉ set lỗi lên form, không show toast
       Object.entries(serverData.data).forEach(([field, message]) => {
         setError(field as Path<T>, {
           type: "server",
           message: String(message),
         });
       });
-      return;
+      showErrorToast?.(serverData.message ?? "Có lỗi xảy ra");
+
+      return; 
     }
 
-    // Nếu không có object lỗi, show toast
-    showErrorToast?.(getErrorMessage(error));
+    // Nếu không có lỗi field, show toast
+   showErrorToast?.(serverData?.message ?? "Có lỗi xảy ra");
   } else {
     // Lỗi không phải Axios, show toast
     showErrorToast?.(getErrorMessage(error));

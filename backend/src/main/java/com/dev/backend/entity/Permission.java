@@ -1,33 +1,32 @@
 package com.dev.backend.entity;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.dev.backend.constant.ActionType;
 import com.dev.backend.constant.Module;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "permissions")
-public class Permission {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+public class Permission extends BaseEntity<Integer> {
+
     @Column(unique = true)
     private String code;
     private String description;
@@ -36,7 +35,7 @@ public class Permission {
     @Enumerated(EnumType.STRING)
     private ActionType actionType;
 
-    @OneToMany(mappedBy = "permission")
-    private List<RolePermission> rolePermissions = new ArrayList<>();
+  @OneToMany(mappedBy = "permission", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<RolePermission> rolePermissions = new HashSet<>();
 
 }

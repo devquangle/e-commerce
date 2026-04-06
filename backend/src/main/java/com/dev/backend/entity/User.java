@@ -2,28 +2,31 @@ package com.dev.backend.entity;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.BatchSize;
+import lombok.Setter;
+
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "users")
-public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+public class User extends BaseEntity<Integer> {
+   
     private String fullName;
     @Column(nullable = false, unique = true)
     private String email;
@@ -42,11 +45,9 @@ public class User {
     private boolean accountNonLocked = true;
     private int failedAttempt = 0;
     private LocalDateTime lockTime;
-    // Giảm N+1 khi khởi tạo collection trong luồng lấy role/permission qua nhiều
-    // tầng.
-    @BatchSize(size = 50)
-    @OneToMany(mappedBy = "user")
-    private List<UserRole> userRoles = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<UserRole> userRoles = new HashSet<>();
 
     @OneToMany(mappedBy = "user")
     private List<Address> addresses = new ArrayList<>();;

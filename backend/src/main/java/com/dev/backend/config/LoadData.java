@@ -43,7 +43,7 @@ public class LoadData implements ApplicationRunner {
                     case SUPPORT -> "Hỗ trợ khách hàng";
                     case CUSTOMER -> "Người dùng";
                 };
-                roleService.save(new Role(null, roleName.name(), description, null, null));
+                roleService.save(new Role(roleName.name(), description, null, null));
             });
         }
         if (permissionService.isEmpty()) {

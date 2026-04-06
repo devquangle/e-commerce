@@ -19,11 +19,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ResponseData<T> {
+public class ResponseData {
     private boolean success;
     private String message;
     @JsonInclude(JsonInclude.Include.ALWAYS)
-    private T data;
+    private Object data;
 
     private Integer code;
     private String error;

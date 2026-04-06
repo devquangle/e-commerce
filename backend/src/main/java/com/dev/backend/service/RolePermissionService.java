@@ -1,5 +1,8 @@
 package com.dev.backend.service;
 
+import java.util.Collections;
+import java.util.Set;
+
 import org.springframework.stereotype.Service;
 
 import com.dev.backend.entity.Permission;
@@ -25,8 +28,17 @@ public class RolePermissionService {
             rolePermissionRepository.save(rp);
         }
     }
-    public boolean isEmpty(){
-        return rolePermissionRepository.count()==0;
+
+    public boolean isEmpty() {
+        return rolePermissionRepository.count() == 0;
+    }
+
+    public Set<String> findPermissionCodes(Set<Role> roles) {
+        if (roles == null || roles.isEmpty()) {
+            return Collections.emptySet();
+        }
+
+        return rolePermissionRepository.findPermissionCodes(roles);
     }
 
 }

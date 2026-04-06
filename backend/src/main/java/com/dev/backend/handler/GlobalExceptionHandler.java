@@ -26,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(AppException.class)
-    public ResponseEntity<ResponseData<Object>> handleAppException(AppException ex, HttpServletRequest request) {
+    public ResponseEntity<ResponseData> handleAppException(AppException ex, HttpServletRequest request) {
         if (ex instanceof DuplicateFieldException duplicateFieldException) {
             return buildErrorResponse(
                     HttpStatus.BAD_REQUEST,
@@ -52,7 +52,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ResponseData<Object>> handleMethodArgumentNotValid(
+    public ResponseEntity<ResponseData> handleMethodArgumentNotValid(
             MethodArgumentNotValidException ex,
             HttpServletRequest request) {
         Map<String, String> errors = new HashMap<>();
@@ -63,14 +63,14 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(
                 HttpStatus.BAD_REQUEST,
                 HttpStatus.BAD_REQUEST.value(),
-                "Validation failed",
+                "Dữ liệu không hợp lệ!",
                 ApiErrorCode.VALIDATION_ERROR,
                 request.getRequestURI(),
                 errors);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ResponseData<Object>> handleConstraintViolation(
+    public ResponseEntity<ResponseData> handleConstraintViolation(
             ConstraintViolationException ex,
             HttpServletRequest request) {
         return buildErrorResponse(
@@ -83,7 +83,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<ResponseData<Object>> handleTypeMismatch(
+    public ResponseEntity<ResponseData> handleTypeMismatch(
             MethodArgumentTypeMismatchException ex,
             HttpServletRequest request) {
         String message = "Invalid value for parameter: " + ex.getName();
@@ -97,7 +97,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ResponseData<Object>> handleAccessDenied(
+    public ResponseEntity<ResponseData> handleAccessDenied(
             AccessDeniedException ex,
             HttpServletRequest request) {
         return buildErrorResponse(
@@ -110,7 +110,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ResponseData<Object>> handleException(Exception ex, HttpServletRequest request) {
+    public ResponseEntity<ResponseData> handleException(Exception ex, HttpServletRequest request) {
         log.error("Unhandled exception at {}", request.getRequestURI(), ex);
         return buildErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR,
@@ -121,14 +121,14 @@ public class GlobalExceptionHandler {
                 null);
     }
 
-    private ResponseEntity<ResponseData<Object>> buildErrorResponse(
+    private ResponseEntity<ResponseData> buildErrorResponse(
             HttpStatus status,
             int code,
             String message,
             String error,
             String path,
             Object data) {
-        ResponseData<Object> response = ResponseData.<Object>builder()
+        ResponseData response = ResponseData.builder()
                 .success(false)
                 .message(message)
                 .data(data)

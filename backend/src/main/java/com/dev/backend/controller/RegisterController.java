@@ -27,19 +27,19 @@ public class RegisterController {
     private final SendEmailService sendEmailService;
 
     @PostMapping("/resend-verify-register")
-    public ResponseEntity<ResponseData<Object>> get_verify_email(@RequestBody @Valid JwtBean jwtBean) {
+    public ResponseEntity<ResponseData> get_verify_email(@RequestBody @Valid JwtBean jwtBean) {
         registerService.handleTokenForResend(jwtBean.getToken());
         return ResponseUtil.success("Đã gửi lại email xác thực", null);
     }
 
     @PostMapping("/verify-register")
-    public ResponseEntity<ResponseData<Object>> get_register(@RequestBody @Valid JwtBean jwtBean) {
+    public ResponseEntity<ResponseData> get_register(@RequestBody @Valid JwtBean jwtBean) {
         registerService.verifyRegister(jwtBean.getToken());
         return ResponseUtil.success("Xác thực thành công", null);
     }
 
     @PostMapping("/register")
-    public ResponseEntity<ResponseData<Object>> post_register(@RequestBody @Valid RegisterBean registerBean) {
+    public ResponseEntity<ResponseData> post_register(@RequestBody @Valid RegisterBean registerBean) {
 
         User user = registerService.register(registerBean, RoleName.CUSTOMER.name());
         if (user != null) {

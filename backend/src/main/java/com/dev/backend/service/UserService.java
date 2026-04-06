@@ -11,6 +11,8 @@ public interface UserService {
 
     Object userDTO(String token);
 
+    UserDTO dto(CustomUserDetails userDetails);
+
     User saveUser(User user);
 
     User getUserByEmail(String email);
@@ -31,9 +33,7 @@ public interface UserService {
 
     void resetFailedAttempts(Integer id);
 
-
-
-    UserDTO updateProfile(ProfileBean profileBean, CustomUserDetails userDetails,MultipartFile image);
+    UserDTO updateProfile(ProfileBean profileBean, CustomUserDetails userDetails, MultipartFile image);
 
     void validateUnique(ProfileBean profileBean, User user);
 

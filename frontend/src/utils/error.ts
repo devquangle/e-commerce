@@ -9,15 +9,12 @@ export function getErrorMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {
     const data = error.response?.data;
 
-    // Kiểm tra nếu data là object và có message
     if (data && typeof data === "object" && "message" in data) {
       const msg = (data as { message?: unknown }).message;
       if (typeof msg === "string") {
         return msg;
       }
     }
-
-    // fallback sang statusText hoặc thông báo chung
     return error.response?.statusText || "Đã xảy ra lỗi từ server";
   }
 

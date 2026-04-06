@@ -1,15 +1,20 @@
-import { apiGuest} from "@/configs/api";
+import { apiAuth, apiGuest } from "@/configs/api";
 import type { LoginForm } from "@/types/login";
 import type { RegisterFrom } from "@/types/register";
 const authService = {
-  /** Payload đã được interceptor bóc từ ResponseData.data */
   async login(request: LoginForm) {
-    return apiGuest.post("/login", request);
+    const { data } = await apiGuest.post("/login", request);
+    return data;
   },
   /** Trả envelope để lấy `message` khi backend không có payload (`data: null`). */
   async register(request: RegisterFrom) {
-    return apiGuest.post("/register", request);
+    const { data } = await apiGuest.post("/register", request);
+    return data;
   },
+  async getUser() {
+    const { data } = await apiAuth.get("/auth/me");
+    return data;
+  }
 };
 
 export default authService;

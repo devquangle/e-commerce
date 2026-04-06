@@ -2,10 +2,8 @@ import Container from '@/components/common/Container'
 import InputField from '@/components/common/InputField';
 import Loading from '@/components/common/Loading';
 import { useAuth } from '@/context/useAuth';
-import authService from '@/services/authService';
 
 import type { LoginForm } from '@/types/login';
-import { getErrorMessage } from '@/utils/error';
 import { mapServerErrors } from '@/utils/mapServerErrors';
 import { showErrorToast, showSuccessToast } from '@/utils/toastUtil';
 
@@ -20,42 +18,16 @@ export default function Login() {
   const auth = useAuth();
   const navigate = useNavigate();
   const onSubmit = async (requestData: LoginForm) => {
-    const minLoadingTime = 800; // ms
-    const startTime = Date.now();
-
     setIsLoading(true);
-
     try {
-      // 1. Gọi API Login (interceptor trả về Map accessToken từ body.data)
-      const {data} = await authService.login(requestData);
-
-      if (!data.success) {
-        showErrorToast(data.message);
-        return;
+      const user = await auth.login(requestData);
+      if (!user) {
+        return null;
       }
-
-
-
-      const token = data?.data?.accessToken;
-
-      if (!token) throw new Error("Phản hồi từ hệ thống không hợp lệ.");
-
-      // 2. Lưu thông tin User
-      const user = await auth.login(token);
-
-      // 3. Success toast
       showSuccessToast("Đăng nhập thành công!");
-
-      // 4. Delay tối thiểu để spinner hiển thị đủ lâu
-      const elapsed = Date.now() - startTime;
-      if (elapsed < minLoadingTime) await new Promise(r => setTimeout(r, minLoadingTime - elapsed));
-
-      // 5. Điều hướng
       const targetPath = user?.roles?.includes("CUSTOMER") ? "/home" : "/admin";
       navigate(targetPath);
-
     } catch (error: unknown) {
-      // Map lỗi field từ backend
         mapServerErrors(error, setError,showErrorToast);
     } finally {
       setIsLoading(false);

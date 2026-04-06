@@ -1,27 +1,64 @@
 package com.dev.backend.security;
 
-import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
+import com.dev.backend.entity.Permission;
+import com.dev.backend.entity.Role;
 import com.dev.backend.entity.User;
-
-import java.util.Collection;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.*;
 
 public class CustomUserDetails implements UserDetails {
-    private User user;
-    private Collection<? extends GrantedAuthority> authorities;
+
+    private final User user;
+    private final Set<String> roles;
+    private final Set<String> permissions;
+    private final Set<GrantedAuthority> authorities;
 
     public CustomUserDetails(User user) {
         this.user = user;
+
+        // 1️⃣ Tách roles và permissions
+        Set<String> roleSet = new HashSet<>();
+        Set<String> permSet = new HashSet<>();
+        Set<GrantedAuthority> authoritySet = new HashSet<>();
+
+        if (user.getUserRoles() != null) {
+            user.getUserRoles().forEach(userRole -> {
+                Role role = userRole.getRole();
+                if (role != null) {
+                    // Role authority
+                    String roleName = role.getName();
+                    if (roleName != null) {
+                        roleSet.add(roleName);
+                        authoritySet.add(new SimpleGrantedAuthority("ROLE_" + roleName));
+                    }
+
+                    // Permissions
+                    if (role.getRolePermissions() != null) {
+                        role.getRolePermissions().forEach(rp -> {
+                            Permission perm = rp.getPermission();
+                            if (perm != null && perm.getCode() != null) {
+                                permSet.add(perm.getCode());
+                                authoritySet.add(new SimpleGrantedAuthority(perm.getCode()));
+                            }
+                        });
+                    }
+                }
+            });
+        }
+
+        this.roles = Collections.unmodifiableSet(roleSet);
+        this.permissions = Collections.unmodifiableSet(permSet);
+        this.authorities = Collections.unmodifiableSet(authoritySet);
     }
 
-    public CustomUserDetails(User user, Collection<? extends GrantedAuthority> authorities) {
-        this.user = user;
-        this.authorities = authorities;
+    public Set<String> getRoles() {
+        return roles;
+    }
+
+    public Set<String> getPermissions() {
+        return permissions;
     }
 
     public User getUser() {
@@ -30,57 +67,36 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        if (authorities != null) {
-            return authorities;
-        }
-
-        // Fallback: tính trực tiếp từ entity (chỉ dùng khi caller chưa truyền authorities).
-        return user.getUserRoles().stream()
-                .flatMap(ur -> {
-                    Stream<String> roleStream = Stream.of("ROLE_" + ur.getRole().getName());
-                    Stream<String> permissionStream = ur.getRole().getRolePermissions().stream()
-                            .map(rp -> rp.getPermission().getCode());
-                    return Stream.concat(roleStream, permissionStream);
-                })
-                .distinct()
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
+        return authorities;
     }
 
     @Override
-    public @Nullable String getPassword() {
-        // TODO Auto-generated method stub
-        return null;
+    public String getPassword() {
+        return user.getPassword();
     }
 
     @Override
     public String getUsername() {
-        // TODO Auto-generated method stub
-        return null;
+        return user.getEmail();
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        // TODO Auto-generated method stub
-        return UserDetails.super.isAccountNonExpired();
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        // TODO Auto-generated method stub
-        return UserDetails.super.isAccountNonLocked();
+        return user.isAccountNonLocked();
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        // TODO Auto-generated method stub
-        return UserDetails.super.isCredentialsNonExpired();
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        // TODO Auto-generated method stub
-        return UserDetails.super.isEnabled();
+        return user.isEnabled();
     }
-
 }

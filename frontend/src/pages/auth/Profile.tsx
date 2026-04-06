@@ -10,7 +10,7 @@ import { useForm } from "react-hook-form";
 import { apiAuth } from "@/configs/api";
 
 export default function Profile() {
-  const { userInfo } = useAuth();
+  const { userInfo,setUserInfo } = useAuth();
 
   const {
     register,
@@ -52,10 +52,17 @@ export default function Profile() {
         formData.append("image", avatarFile);
       }
 
-      const respon = await apiAuth.post("/auth/me", formData);
+      const respon = await apiAuth.post("/auth/me", formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
       if (respon.data.success) {
         showSuccessToast(respon.data.message);
+        setUserInfo(respon.data.data);
       }
 
     } catch (error: unknown) {

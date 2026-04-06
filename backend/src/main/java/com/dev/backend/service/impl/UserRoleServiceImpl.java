@@ -16,7 +16,6 @@ public class UserRoleServiceImpl implements UserRoleService {
 
     @Override
     public boolean isEmpty() {
-        // TODO Auto-generated method stub
         return userRoleRepository.count() == 0;
     }
 

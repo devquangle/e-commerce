@@ -7,12 +7,12 @@ public class DuplicateFieldException extends AppException {
     private final Map<String, String> errors;
 
     public DuplicateFieldException(Map<String, String> errors) {
-        super(400, "Validation failed");
+        super(400, "Dữ liệu không hợp lệ!");
         this.errors = new HashMap<>(errors);
     }
 
     public DuplicateFieldException(String field, String message) {
-        super(400, "Validation failed");
+        super(400, "Dữ liệu không hợp lệ!");
         this.errors = new HashMap<>();
         this.errors.put(field, message);
     }

@@ -116,21 +116,13 @@ public class UserServiceImpl implements UserService {
         user.setEmail(profileBean.getEmail());
         user.setPhone(profileBean.getPhone());
         user.setStreet(profileBean.getStreet());
-        if (image.isEmpty()) {
+        if (image != null) {
             user.setImage(image.getOriginalFilename());
-
         }
         user.setUpdateAt(LocalDateTime.now());
         saveUser(user);
 
-        return UserDTO.builder()
-                .code(user.getCode())
-                .fullName(user.getFullName())
-                .email(user.getEmail())
-                .phone(user.getPhone())
-                .street(user.getStreet())
-                .image(user.getImage())
-                .build();
+        return dto(userDetails);
     }
 
     @Override
@@ -148,5 +140,19 @@ public class UserServiceImpl implements UserService {
             throw errors;
         }
     }
+
+@Override
+public UserDTO dto(CustomUserDetails userDetails) {
+    UserDTO userDTO = new UserDTO();
+    userDTO.setFullName(userDetails.getUser().getFullName());
+    userDTO.setEmail(userDetails.getUser().getEmail());
+    userDTO.setPhone(userDetails.getUser().getPhone());
+    userDTO.setCode(userDetails.getUser().getCode());
+    userDTO.setStreet(userDetails.getUser().getStreet());
+    userDTO.setImage(userDetails.getUser().getImage());
+    userDTO.setRoles(userDetails.getRoles());
+    userDTO.setPermissions(userDetails.getPermissions());
+    return userDTO;
+}
 
 }
