@@ -12,6 +12,7 @@ import com.dev.backend.dto.UserDTO;
 import com.dev.backend.entity.User;
 import com.dev.backend.exception.DuplicateFieldException;
 import com.dev.backend.exception.NotFoundException;
+import com.dev.backend.mapper.UserMapper;
 import com.dev.backend.repository.UserRepository;
 import com.dev.backend.security.CustomUserDetails;
 import com.dev.backend.security.jwt.JwtUtil;
@@ -24,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
     private final JwtUtil jwtUtil;
 
     @Override
@@ -108,7 +110,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO updateProfile(ProfileBean profileBean, CustomUserDetails userDetails, MultipartFile image) {
-        User user = userDetails.getUser();
+
+        User user = getUserById(userDetails.getUser().getId());
 
         validateUnique(profileBean, user);
 
@@ -119,7 +122,7 @@ public class UserServiceImpl implements UserService {
         if (image != null) {
             user.setImage(image.getOriginalFilename());
         }
-        user.setUpdateAt(LocalDateTime.now());
+        // user.setUpdateAt(LocalDateTime.now());
         saveUser(user);
 
         return dto(userDetails);
@@ -141,18 +144,9 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-@Override
-public UserDTO dto(CustomUserDetails userDetails) {
-    UserDTO userDTO = new UserDTO();
-    userDTO.setFullName(userDetails.getUser().getFullName());
-    userDTO.setEmail(userDetails.getUser().getEmail());
-    userDTO.setPhone(userDetails.getUser().getPhone());
-    userDTO.setCode(userDetails.getUser().getCode());
-    userDTO.setStreet(userDetails.getUser().getStreet());
-    userDTO.setImage(userDetails.getUser().getImage());
-    userDTO.setRoles(userDetails.getRoles());
-    userDTO.setPermissions(userDetails.getPermissions());
-    return userDTO;
-}
+    @Override
+    public UserDTO dto(CustomUserDetails userDetails) {
+        return userMapper.toDTO(userDetails);
+    }
 
 }

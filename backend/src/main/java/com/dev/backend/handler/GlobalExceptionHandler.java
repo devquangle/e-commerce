@@ -138,4 +138,49 @@ public class GlobalExceptionHandler {
                 .build();
         return ResponseEntity.status(status).body(response);
     }
+
+    @ExceptionHandler({
+            org.springframework.security.authentication.BadCredentialsException.class,
+            org.springframework.security.core.userdetails.UsernameNotFoundException.class
+    })
+    public ResponseEntity<ResponseData> handleBadCredentials(
+            Exception ex,
+            HttpServletRequest request) {
+
+        return buildErrorResponse(
+                HttpStatus.UNAUTHORIZED,
+                HttpStatus.UNAUTHORIZED.value(),
+                "Tài khoản hoặc mật khẩu không đúng",
+                ApiErrorCode.UNAUTHORIZED,
+                request.getRequestURI(),
+                null);
+    }
+
+    @ExceptionHandler(org.springframework.security.authentication.LockedException.class)
+    public ResponseEntity<ResponseData> handleLocked(
+            Exception ex,
+            HttpServletRequest request) {
+
+        return buildErrorResponse(
+                HttpStatus.UNAUTHORIZED,
+                HttpStatus.UNAUTHORIZED.value(),
+                "Tài khoản đã bị khóa",
+                ApiErrorCode.UNAUTHORIZED,
+                request.getRequestURI(),
+                null);
+    }
+
+    @ExceptionHandler(org.springframework.security.authentication.DisabledException.class)
+    public ResponseEntity<ResponseData> handleDisabled(
+            Exception ex,
+            HttpServletRequest request) {
+
+        return buildErrorResponse(
+                HttpStatus.UNAUTHORIZED,
+                HttpStatus.UNAUTHORIZED.value(),
+                "Tài khoản chưa được kích hoạt",
+                ApiErrorCode.UNAUTHORIZED,
+                request.getRequestURI(),
+                null);
+    }
 }

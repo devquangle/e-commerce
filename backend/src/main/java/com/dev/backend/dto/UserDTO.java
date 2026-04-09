@@ -4,7 +4,8 @@ import java.util.Set;
 import lombok.*;
 @AllArgsConstructor
 @Builder
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 public class UserDTO {
     private String fullName;

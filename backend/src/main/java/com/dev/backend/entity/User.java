@@ -17,6 +17,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 
 @AllArgsConstructor
@@ -36,12 +38,17 @@ public class User extends BaseEntity<Integer> {
     private String phone;
     @Column(unique = true)
     private String code;
-    private int tokenVersion;
+    @Column(nullable = false)
+    private int tokenVersion = 0;
     private String street;
     private String image;
-    private LocalDateTime createAt = LocalDateTime.now();
-    private LocalDateTime updateAt;
-    private boolean enabled;
+    @CreationTimestamp
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
+    @Column(nullable = false)
+    private boolean enabled = false;
     private boolean accountNonLocked = true;
     private int failedAttempt = 0;
     private LocalDateTime lockTime;

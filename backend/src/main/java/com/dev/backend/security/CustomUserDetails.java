@@ -1,68 +1,58 @@
 package com.dev.backend.security;
 
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import com.dev.backend.entity.Permission;
 import com.dev.backend.entity.Role;
+import com.dev.backend.entity.RolePermission;
 import com.dev.backend.entity.User;
+import com.dev.backend.entity.UserRole;
+
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class CustomUserDetails implements UserDetails {
 
+    @Getter
     private final User user;
-    private final Set<String> roles;
-    private final Set<String> permissions;
     private final Set<GrantedAuthority> authorities;
+    @Getter
+    private final Set<String> roles;
+    @Getter
+    private final Set<String> permissions;
 
     public CustomUserDetails(User user) {
         this.user = user;
 
-        // 1️⃣ Tách roles và permissions
-        Set<String> roleSet = new HashSet<>();
-        Set<String> permSet = new HashSet<>();
-        Set<GrantedAuthority> authoritySet = new HashSet<>();
+        // 🔹 roles
+        this.roles = user.getUserRoles().stream()
+                .map(UserRole::getRole)
+                .filter(Objects::nonNull)
+                .map(Role::getName)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
 
-        if (user.getUserRoles() != null) {
-            user.getUserRoles().forEach(userRole -> {
-                Role role = userRole.getRole();
-                if (role != null) {
-                    // Role authority
-                    String roleName = role.getName();
-                    if (roleName != null) {
-                        roleSet.add(roleName);
-                        authoritySet.add(new SimpleGrantedAuthority("ROLE_" + roleName));
-                    }
+        // 🔹 permissions
+        this.permissions = user.getUserRoles().stream()
+                .map(UserRole::getRole)
+                .filter(Objects::nonNull)
+                .flatMap(role -> Optional.ofNullable(role.getRolePermissions())
+                        .orElse(Collections.emptySet())
+                        .stream())
+                .map(RolePermission::getPermission)
+                .filter(Objects::nonNull)
+                .map(Permission::getCode)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
 
-                    // Permissions
-                    if (role.getRolePermissions() != null) {
-                        role.getRolePermissions().forEach(rp -> {
-                            Permission perm = rp.getPermission();
-                            if (perm != null && perm.getCode() != null) {
-                                permSet.add(perm.getCode());
-                                authoritySet.add(new SimpleGrantedAuthority(perm.getCode()));
-                            }
-                        });
-                    }
-                }
-            });
-        }
+        // 🔹 authorities
+        this.authorities = new HashSet<>();
 
-        this.roles = Collections.unmodifiableSet(roleSet);
-        this.permissions = Collections.unmodifiableSet(permSet);
-        this.authorities = Collections.unmodifiableSet(authoritySet);
-    }
+        roles.forEach(r -> authorities.add(new SimpleGrantedAuthority("ROLE_" + r)));
 
-    public Set<String> getRoles() {
-        return roles;
-    }
-
-    public Set<String> getPermissions() {
-        return permissions;
-    }
-
-    public User getUser() {
-        return user;
+        permissions.forEach(p -> authorities.add(new SimpleGrantedAuthority(p)));
     }
 
     @Override

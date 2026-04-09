@@ -15,9 +15,10 @@ public class CustomUserDetailsService implements UserDetailsService {
         private final AuthService authService;
 
         @Override
-        public UserDetails loadUserByUsername(String useId) throws UsernameNotFoundException {
-                Integer userId = Integer.parseInt(useId);
-                User user = authService.getUserById(userId);
-                return new CustomUserDetails(user);
+        public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+              User user=authService.getUserByEmail(email);
+              return new CustomUserDetails(user);
         }
+
+
 }
