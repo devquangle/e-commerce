@@ -40,8 +40,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserByEmail(String email) {
-        return userRepository.findBasicByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + email));
+        return userRepository.findUserByEmail(email)
+                .orElseThrow(() -> new NotFoundException("User not found with email: " + email));
     }
 
     @Override
@@ -52,17 +52,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserByToken(String token) {
-        String userId = jwtUtil.extractUserId(token);
-        if (userId == null || !jwtUtil.isValid(token, JwtType.ACCESS)) {
+        int userId = jwtUtil.extractUserId(token);
+        if ( !jwtUtil.isValid(token, JwtType.ACCESS)) {
             throw new NotFoundException("User not found with token: " + token);
         }
-        Integer id;
-        try {
-            id = Integer.parseInt(userId);
-        } catch (NumberFormatException e) {
-            throw new NotFoundException("Invalid user ID in token: " + token);
-        }
-        return getUserById(id);
+       
+        return getUserById(userId);
 
     }
 
@@ -87,8 +82,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void processLoginFail(Integer id) {
-        User user = getUserById(id);
+    public void processLoginFail(String email) {
+        User user = getUserByEmail(email);
         int failedAttempt = user.getFailedAttempt();
         user.setFailedAttempt(failedAttempt + 1);
         if (failedAttempt >= 5) {
@@ -96,12 +91,11 @@ public class UserServiceImpl implements UserService {
             user.setLockTime(LocalDateTime.now());
         }
         saveUser(user);
-
     }
 
     @Override
-    public void resetFailedAttempts(Integer id) {
-        User user = getUserById(id);
+    public void resetFailedAttempts(String email) {
+        User user = getUserByEmail(email);
         user.setFailedAttempt(0);
         user.setLockTime(null);
         user.setAccountNonLocked(true);
@@ -109,11 +103,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDTO updateProfile(ProfileBean profileBean, CustomUserDetails userDetails, MultipartFile image) {
+    public UserDTO updateProfile(Integer userId, ProfileBean profileBean, MultipartFile image) {
 
-        User user = getUserById(userDetails.getUser().getId());
+        User user = getUserById(userId);
 
-        validateUnique(profileBean, user);
+        validated(profileBean, user);
 
         user.setFullName(profileBean.getFullName());
         user.setEmail(profileBean.getEmail());
@@ -122,14 +116,13 @@ public class UserServiceImpl implements UserService {
         if (image != null) {
             user.setImage(image.getOriginalFilename());
         }
-        // user.setUpdateAt(LocalDateTime.now());
         saveUser(user);
 
-        return dto(userDetails);
+        return dto(null);
     }
 
     @Override
-    public void validateUnique(ProfileBean profileBean, User user) {
+    public void validated(ProfileBean profileBean, User user) {
         DuplicateFieldException errors = new DuplicateFieldException(new HashMap<>());
         if (!profileBean.getEmail().equals(user.getEmail())
                 && existsByEmail(profileBean.getEmail())) {

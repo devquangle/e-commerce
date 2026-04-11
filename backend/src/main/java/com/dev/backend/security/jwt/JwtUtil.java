@@ -2,7 +2,6 @@ package com.dev.backend.security.jwt;
 
 import java.util.Base64;
 import java.util.Date;
-import java.util.List;
 
 import javax.crypto.SecretKey;
 
@@ -25,44 +24,31 @@ public class JwtUtil {
     }
 
     // ================= GENERATE =================
-    public String generateAccessToken(int userId, int tokenVersion, List<String> roles, List<String> permissions) {
-        return buildToken(userId, tokenVersion, roles, permissions, JwtType.ACCESS);
+    public String generateAccessToken(int userId, int tokenVersion) {
+        return buildToken(userId, tokenVersion, JwtType.ACCESS);
     }
 
     public String generateRefreshToken(int userId, int tokenVersion) {
-        return buildToken(userId, tokenVersion, null, null, JwtType.REFRESH);
+        return buildToken(userId, tokenVersion, JwtType.REFRESH);
     }
 
     public String generateVerifyToken(int userId, int tokenVersion) {
-        return buildToken(userId, tokenVersion, null, null, JwtType.VERIFY_EMAIL);
+        return buildToken(userId, tokenVersion, JwtType.VERIFY_EMAIL);
     }
 
     public String generateResetPasswordToken(int userId, int tokenVersion) {
-        return buildToken(userId, tokenVersion, null, null, JwtType.RESET_PASSWORD);
+        return buildToken(userId, tokenVersion, JwtType.RESET_PASSWORD);
     }
 
-    public String generateGenericToken(int userId, int tokenVersion, JwtType type) {
-        return buildToken(userId, tokenVersion, null, null, type);
-    }
-
-    private String buildToken(int userId,
-                              int tokenVersion,
-                              List<String> roles,
-                              List<String> permissions,
-                              JwtType type) {
-
-        JwtBuilder builder = Jwts.builder()
+    private String buildToken(int userId, int tokenVersion, JwtType type) {
+        return Jwts.builder()
                 .setSubject(String.valueOf(userId))
                 .claim("tokenVersion", tokenVersion)
                 .claim("type", type.name())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + type.getExpirationMillis()))
-                .signWith(signingKey(), SignatureAlgorithm.HS256);
-
-        if (roles != null) builder.claim("roles", List.copyOf(roles));
-        if (permissions != null) builder.claim("permissions", List.copyOf(permissions));
-
-        return builder.compact();
+                .signWith(signingKey(), SignatureAlgorithm.HS256)
+                .compact();
     }
 
     // ================= PARSE =================
@@ -74,8 +60,8 @@ public class JwtUtil {
                 .getBody();
     }
 
-    public String extractUserId(String token) {
-        return extractAllClaims(token).getSubject();
+    public int extractUserId(String token) {
+        return Integer.parseInt(extractAllClaims(token).getSubject());
     }
 
     public JwtType extractType(String token) {
@@ -86,16 +72,6 @@ public class JwtUtil {
     public int extractTokenVersion(String token) {
         Integer version = extractAllClaims(token).get("tokenVersion", Integer.class);
         return version == null ? 0 : version;
-    }
-
-    public List<String> extractRoles(String token) {
-        List<?> roles = extractAllClaims(token).get("roles", List.class);
-        return roles == null ? List.of() : roles.stream().map(Object::toString).toList();
-    }
-
-    public List<String> extractPermissions(String token) {
-        List<?> permissions = extractAllClaims(token).get("permissions", List.class);
-        return permissions == null ? List.of() : permissions.stream().map(Object::toString).toList();
     }
 
     // ================= VALIDATE =================

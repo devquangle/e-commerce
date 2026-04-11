@@ -18,12 +18,12 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public User getUserById(Integer id) {
-        return authRepository.findById(id).orElseThrow(() -> new NotFoundException("User NOTFOUND"));
+        return authRepository.findById(id).orElseThrow(() -> new NotFoundException("User NOT_FOUND"));
     }
 
     @Override
     public User getUserByEmail(String email) {
-        return authRepository.findByEmail(email).orElseThrow(() -> new NotFoundException("User NOTFOUND"));
+        return authRepository.findByEmail(email).orElseThrow(() -> new NotFoundException("User NOT_FOUND"));
     }
 
     @Override

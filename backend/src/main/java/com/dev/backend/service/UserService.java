@@ -29,13 +29,13 @@ public interface UserService {
 
     boolean isEmpty();
 
-    void processLoginFail(Integer id);
+    void processLoginFail(String email);
 
-    void resetFailedAttempts(Integer id);
+    void resetFailedAttempts(String email);
 
-    UserDTO updateProfile(ProfileBean profileBean, CustomUserDetails userDetails, MultipartFile image);
+    UserDTO updateProfile(Integer userId,ProfileBean profileBean, MultipartFile image);
 
-    void validateUnique(ProfileBean profileBean, User user);
+    void validated(ProfileBean profileBean, User user);
 
 
 

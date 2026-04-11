@@ -12,13 +12,12 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
-        private final AuthService authService;
+      private final AuthService authService;
 
-        @Override
-        public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-              User user=authService.getUserByEmail(email);
-              return new CustomUserDetails(user);
-        }
-
+      @Override
+      public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+            User user = authService.getUserByEmail(email);
+            return new CustomUserDetails(user);
+      }
 
 }

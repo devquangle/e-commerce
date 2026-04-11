@@ -11,7 +11,6 @@ import com.dev.backend.entity.User;
 import com.dev.backend.entity.UserRole;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class CustomUserDetails implements UserDetails {
 
@@ -26,33 +25,39 @@ public class CustomUserDetails implements UserDetails {
     public CustomUserDetails(User user) {
         this.user = user;
 
-        // 🔹 roles
-        this.roles = user.getUserRoles().stream()
-                .map(UserRole::getRole)
-                .filter(Objects::nonNull)
-                .map(Role::getName)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-
-        // 🔹 permissions
-        this.permissions = user.getUserRoles().stream()
-                .map(UserRole::getRole)
-                .filter(Objects::nonNull)
-                .flatMap(role -> Optional.ofNullable(role.getRolePermissions())
-                        .orElse(Collections.emptySet())
-                        .stream())
-                .map(RolePermission::getPermission)
-                .filter(Objects::nonNull)
-                .map(Permission::getCode)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-
-        // 🔹 authorities
+        this.roles = new HashSet<>();
+        this.permissions = new HashSet<>();
         this.authorities = new HashSet<>();
 
-        roles.forEach(r -> authorities.add(new SimpleGrantedAuthority("ROLE_" + r)));
+        if (user.getUserRoles() == null)
+            return;
 
-        permissions.forEach(p -> authorities.add(new SimpleGrantedAuthority(p)));
+        for (UserRole ur : user.getUserRoles()) {
+            Role role = ur.getRole();
+            if (role == null)
+                continue;
+
+            String roleName = role.getName();
+            if (roleName != null) {
+                roles.add(roleName);
+                authorities.add(new SimpleGrantedAuthority("ROLE_" + roleName));
+            }
+
+            if (role.getRolePermissions() == null)
+                continue;
+
+            for (RolePermission rp : role.getRolePermissions()) {
+                Permission p = rp.getPermission();
+                if (p == null)
+                    continue;
+
+                String code = p.getCode();
+                if (code != null) {
+                    permissions.add(code);
+                    authorities.add(new SimpleGrantedAuthority(code));
+                }
+            }
+        }
     }
 
     @Override

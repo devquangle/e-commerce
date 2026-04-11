@@ -1,10 +1,7 @@
 package com.dev.backend.mapper;
 
-import java.util.Collections;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
@@ -45,25 +42,26 @@ public class UserMapper {
             return null;
         }
 
-        Set<String> roles = user.getUserRoles().stream()
-                .map(UserRole::getRole)
-                .filter(Objects::nonNull)
-                .map(Role::getName)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
+        Set<String> roles = new HashSet<>();
+        Set<String> permissions = new HashSet<>();
 
-        Set<String> permissions = user.getUserRoles().stream()
-                .map(UserRole::getRole)
-                .filter(Objects::nonNull)
-                .flatMap(role -> Optional.ofNullable(role.getRolePermissions())
-                        .orElse(Collections.emptySet())
-                        .stream())
-                .map(RolePermission::getPermission)
-                .filter(Objects::nonNull)
-                .map(Permission::getCode)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-       
+        for (UserRole ur : user.getUserRoles()) {
+            Role role = ur.getRole();
+            if (role == null)
+                continue;
+
+            roles.add(role.getName());
+
+            if (role.getRolePermissions() != null) {
+                for (RolePermission rp : role.getRolePermissions()) {
+                    Permission p = rp.getPermission();
+                    if (p != null) {
+                        permissions.add(p.getCode());
+                    }
+                }
+            }
+        }
+
         UserDTO userDTO = new UserDTO();
         userDTO.setFullName(user.getFullName());
         userDTO.setEmail(user.getEmail());
