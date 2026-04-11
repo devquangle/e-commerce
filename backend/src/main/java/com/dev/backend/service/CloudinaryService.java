@@ -2,12 +2,12 @@ package com.dev.backend.service;
 
 import java.io.IOException;
 
-
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
-
+@Service
 public class CloudinaryService {
     private static String CLOUD_NAME = "dox0mkwaz";
     private static String API_KEY = "652873321396173";

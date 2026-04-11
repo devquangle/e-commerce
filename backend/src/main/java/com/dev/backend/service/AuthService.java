@@ -1,7 +1,6 @@
 package com.dev.backend.service;
 
 
-import com.dev.backend.dto.UserDTO;
 import com.dev.backend.entity.User;
 
 public interface AuthService {
@@ -11,7 +10,6 @@ public interface AuthService {
 
     User getUserByEmail(String email);
 
-    UserDTO toDTO(Integer id);
 
 
 }

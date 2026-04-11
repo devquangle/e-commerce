@@ -45,26 +45,24 @@ public class LoginServiceImpl implements LoginService {
             if (!user.isEnabled()) {
                 throw new UnauthorizedException("Tài khoản chưa được kích hoạt");
             }
+
             if (!user.isAccountNonLocked()) {
                 throw new UnauthorizedException("Tài khoản đã bị khóa");
             }
-            String accessToken2 = jwtUtil.generateAccessToken(
-                    userDetails.getUser().getId(),
-                    userDetails.getUser().getTokenVersion(),
-                    new ArrayList<>(userDetails.getRoles()),
-                    new ArrayList<>(userDetails.getPermissions()));
 
-            String refreshToken = jwtUtil.generateRefreshToken(user.getId(), user.getTokenVersion());
+            String accessToken = jwtUtil.generateAccessToken(
+                    user.getId(),
+                    user.getTokenVersion());
+
+            String refreshToken = jwtUtil.generateRefreshToken(
+                    user.getId(),
+                    user.getTokenVersion());
 
             CookieUtil.addCookie(response, "refreshToken", refreshToken);
-            if (user.getFailedAttempt() != 0) {
-                user.setFailedAttempt(0);
-                user.setLockTime(null);
-                user.setAccountNonLocked(true);
-                userService.saveUser(user);
-            }
 
-            return Map.of("accessToken", accessToken2);
+            userService.resetFailedAttempts(user);
+
+            return Map.of("accessToken", accessToken);
 
         } catch (BadCredentialsException ex) {
             userService.processLoginFail(loginBean.getEmail());

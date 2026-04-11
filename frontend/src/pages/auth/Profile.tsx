@@ -62,6 +62,7 @@ export default function Profile() {
 
       if (respon.data.success) {
         showSuccessToast(respon.data.message);
+        console.log(respon.data.data);
         setUserInfo(respon.data.data);
       }
 

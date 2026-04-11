@@ -1,5 +1,6 @@
 package com.dev.backend.service.impl;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 
@@ -16,6 +17,7 @@ import com.dev.backend.mapper.UserMapper;
 import com.dev.backend.repository.UserRepository;
 import com.dev.backend.security.CustomUserDetails;
 import com.dev.backend.security.jwt.JwtUtil;
+import com.dev.backend.service.CloudinaryService;
 import com.dev.backend.service.UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -45,6 +47,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserDTO dto(CustomUserDetails userDetails) {
+        return userMapper.toDTO(userDetails);
+    }
+
+    @Override
     public User getUserById(Integer id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found with id: " + id));
@@ -53,10 +60,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUserByToken(String token) {
         int userId = jwtUtil.extractUserId(token);
-        if ( !jwtUtil.isValid(token, JwtType.ACCESS)) {
+        if (!jwtUtil.isValid(token, JwtType.ACCESS)) {
             throw new NotFoundException("User not found with token: " + token);
         }
-       
+
         return getUserById(userId);
 
     }
@@ -94,18 +101,36 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void resetFailedAttempts(String email) {
-        User user = getUserByEmail(email);
-        user.setFailedAttempt(0);
-        user.setLockTime(null);
-        user.setAccountNonLocked(true);
-        saveUser(user);
+    public void resetFailedAttempts(User user) {
+
+        boolean needUpdate = false;
+
+        if (user.getFailedAttempt() != 0) {
+            user.setFailedAttempt(0);
+            needUpdate = true;
+        }
+
+        if (!user.isAccountNonLocked()) {
+            user.setAccountNonLocked(true);
+            needUpdate = true;
+        }
+
+        if (user.getLockTime() != null) {
+            user.setLockTime(null);
+            needUpdate = true;
+        }
+
+        if (needUpdate) {
+            saveUser(user);
+        }
     }
 
     @Override
-    public UserDTO updateProfile(Integer userId, ProfileBean profileBean, MultipartFile image) {
-
-        User user = getUserById(userId);
+    public UserDTO updateProfile(CustomUserDetails userDetails, ProfileBean profileBean, MultipartFile image) {
+        User user = userDetails.getUser();
+        if (user == null) {
+            throw new NotFoundException("User not found");
+        }
 
         validated(profileBean, user);
 
@@ -113,12 +138,25 @@ public class UserServiceImpl implements UserService {
         user.setEmail(profileBean.getEmail());
         user.setPhone(profileBean.getPhone());
         user.setStreet(profileBean.getStreet());
-        if (image != null) {
-            user.setImage(image.getOriginalFilename());
-        }
+        setImageCloudinary(user, image);
         saveUser(user);
 
-        return dto(null);
+        return dto(userDetails);
+    }
+
+    @Override
+    public void setImageCloudinary(User user, MultipartFile image) {
+        if (image != null && !image.isEmpty()) {
+
+            if (!image.getContentType().startsWith("image/")) {
+                throw new RuntimeException("File không phải ảnh");
+            }
+            try {
+                user.setImage(CloudinaryService.uploadImage(image));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
@@ -135,11 +173,6 @@ public class UserServiceImpl implements UserService {
         if (!errors.getErrors().isEmpty()) {
             throw errors;
         }
-    }
-
-    @Override
-    public UserDTO dto(CustomUserDetails userDetails) {
-        return userMapper.toDTO(userDetails);
     }
 
 }

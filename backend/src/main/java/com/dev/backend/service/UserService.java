@@ -31,11 +31,13 @@ public interface UserService {
 
     void processLoginFail(String email);
 
-    void resetFailedAttempts(String email);
+    void resetFailedAttempts(User user);
 
-    UserDTO updateProfile(Integer userId,ProfileBean profileBean, MultipartFile image);
+    UserDTO updateProfile(CustomUserDetails userDetails,ProfileBean profileBean, MultipartFile image);
 
     void validated(ProfileBean profileBean, User user);
+
+    void setImageCloudinary(User user, MultipartFile image);
 
 
 

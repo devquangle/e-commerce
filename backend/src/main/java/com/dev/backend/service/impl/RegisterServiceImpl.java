@@ -19,7 +19,6 @@ import com.dev.backend.service.UserRoleService;
 import com.dev.backend.service.UserService;
 import com.dev.backend.util.GenerateCode;
 
-import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -74,9 +73,8 @@ public class RegisterServiceImpl implements RegisterService {
         if (!jwtUtil.isValid(token, JwtType.VERIFY_EMAIL)) {
             throw new AppException(404, "Token không hợp lệ","JWT_INVALID");
         }
-        String userId = jwtUtil.extractUserId(token);
-        Integer id = Integer.parseInt(userId);
-        User user = userService.getUserById(id);
+        int userId = jwtUtil.extractUserId(token);
+        User user = userService.getUserById(userId);
         if (user.isEnabled()) {
             throw new UnauthorizedException("Tài khoản đã được ký hoạt");
         }
@@ -86,27 +84,17 @@ public class RegisterServiceImpl implements RegisterService {
 
     @Override
     public void handleTokenForResend(String token) {
-        String userId;
+       
 
-        try {
-            // Token còn hạn
-            userId = jwtUtil.extractUserId(token);
-        } catch (ExpiredJwtException ex) {
-            // Token hết hạn → lấy userId từ claims
-            userId = ex.getClaims().getSubject();
-        }
-
-        Integer id = Integer.parseInt(userId);
-        User user = userService.getUserById(id);
+        int userId= jwtUtil.extractUserId(token);
+        User user = userService.getUserById(userId);
 
         if (user.isEnabled()) {
             throw new UnauthorizedException("Tài khoản đã được kích hoạt");
         }
 
-        // Tạo token mới
         String newToken = jwtUtil.generateVerifyToken(user.getId(),user.getTokenVersion());
 
-        // Gửi email lại
         sendEmailService.sendEmailRegister(
                 user.getEmail(),
                 "Cảm ơn bạn đã đăng ký, vui lòng kích hoạt tài khoản",
