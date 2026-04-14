@@ -3,6 +3,7 @@ package com.dev.backend.service.impl;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.Objects;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -148,13 +149,13 @@ public class UserServiceImpl implements UserService {
     public void setImageCloudinary(User user, MultipartFile image) {
         if (image != null && !image.isEmpty()) {
 
-            if (!image.getContentType().startsWith("image/")) {
+            if (!Objects.requireNonNull(image.getContentType()).startsWith("image/")) {
                 throw new RuntimeException("File không phải ảnh");
             }
             try {
                 user.setImage(CloudinaryService.uploadImage(image));
             } catch (IOException e) {
-                e.printStackTrace();
+               throw new RuntimeException("File "+e.getMessage());
             }
         }
     }

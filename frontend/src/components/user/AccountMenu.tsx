@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom'
+import { useAuth } from '@/context/useAuth'
+import { NavLink } from 'react-router-dom'
 
 type AccountMenuProps = {
     className?: string
@@ -25,6 +26,14 @@ export default function AccountMenu({
     className = '',
     variant = 'sidebar',
 }: AccountMenuProps) {
+
+    const { userInfo } = useAuth();
+
+
+
+
+
+
     return (
         <nav className="space-y-2 my-2">
 
@@ -32,12 +41,12 @@ export default function AccountMenu({
             {variant === 'sidebar' && (
                 <div className="hidden lg:flex items-center gap-3 p-4 border-b">
                     <img
-                        src=""
+                        src={userInfo?.image || 'https://via.placeholder.com/150'}
                         alt="avatar"
                         className="w-10 h-10 rounded-full bg-gray-200"
                     />
                     <div className="text-sm text-gray-700">
-                        email
+                        <p className="font-medium">{userInfo?.code || "User Name"}</p>
                     </div>
                 </div>
             )}
@@ -49,12 +58,20 @@ export default function AccountMenu({
                         key={item.path}
                         className="rounded-lg px-1 lg:px-3 hover:bg-gray-100 m-0"
                     >
-                        <Link
+                        <NavLink
                             to={item.path}
-                            className="flex justify-between items-center gap-3 w-full p-1 lg:p-3 text-sm text-gray-600 hover:text-blue-500"
+                            end={item.path === '/account/profile'}
+                            className={({ isActive }) =>
+                                `
+        flex justify-between items-center gap-3 w-full p-1 lg:p-3 text-sm  hover:text-blue-500
+            ${isActive
+                                    ? 'text-blue-500 font-medium'
+                                    : 'text-gray-600'}
+            `
+                            }
                         >
                             {item.label}
-                        </Link>
+                        </NavLink>
                     </li>
                 ))}
             </ul>

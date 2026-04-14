@@ -2,19 +2,15 @@ package com.dev.backend.controller;
 
 import com.dev.backend.bean.ProfileBean;
 import com.dev.backend.dto.UserDTO;
-import com.dev.backend.entity.User;
 import com.dev.backend.resp.ResponseData;
 import com.dev.backend.resp.ResponseUtil;
 
 import com.dev.backend.security.CustomUserDetails;
-import com.dev.backend.service.AuthService;
 import com.dev.backend.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -38,7 +34,6 @@ public class ProfileController {
             @RequestPart(value = "image", required = false) MultipartFile image,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         UserDTO userDTO = userService.updateProfile(userDetails, profileBean, image);
-
         return ResponseUtil.success("Cập nhật hồ sơ thành công", userDTO);
     }
 

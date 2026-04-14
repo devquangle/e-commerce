@@ -40,7 +40,6 @@ public class RegisterController {
 
     @PostMapping("/register")
     public ResponseEntity<ResponseData> post_register(@RequestBody @Valid RegisterBean registerBean) {
-
         User user = registerService.register(registerBean, RoleName.CUSTOMER.name());
         if (user != null) {
             String verifyToken = jwtUtil.generateVerifyToken(user.getId(),user.getTokenVersion());

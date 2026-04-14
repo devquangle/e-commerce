@@ -9,6 +9,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.dev.backend.constant.JwtType;
 import com.dev.backend.entity.User;
+import com.dev.backend.exception.NotFoundException;
+import com.dev.backend.exception.UnauthorizedException;
+import com.dev.backend.repository.AuthRepository;
 import com.dev.backend.security.CustomUserDetails;
 import com.dev.backend.service.AuthService;
 
@@ -25,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
-    private final AuthService authService;
+    private final AuthRepository authRepository;
 
     @Override
     protected void doFilterInternal(
@@ -48,9 +51,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().getAuthentication() == null) {
 
                 int userId = jwtUtil.extractUserId(token);
-                User user = authService.getUserById(userId);
-             
-                if (!jwtUtil.isTokenVersionValid(token, user.getTokenVersion())) {
+                User user = authRepository.findById(userId).orElse(null);
+
+                
+                if (user == null || !jwtUtil.isTokenVersionValid(token, user.getTokenVersion())) {
                     chain.doFilter(request, response);
                     return;
                 }
