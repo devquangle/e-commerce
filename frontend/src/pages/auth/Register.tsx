@@ -98,7 +98,7 @@ export default function Register() {
                             {/* Submit button */}
                             <button
                                 className="
-                                    hover:cursor-pointer
+                                    cursor-pointer
                                     mt-2 rounded-lg bg-blue-600 py-3
                                     text-sm font-semibold text-white
                                     hover:bg-blue-700

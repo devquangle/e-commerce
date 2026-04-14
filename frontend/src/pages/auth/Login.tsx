@@ -93,7 +93,7 @@ export default function Login() {
                 type='submit'
 
                 className="
-                hover:cursor-pointer
+                cursor-pointer
               mt-2 rounded-lg bg-blue-600 py-3
               text-sm font-semibold text-white
               hover:bg-blue-700

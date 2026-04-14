@@ -10,7 +10,7 @@ import { useForm } from "react-hook-form";
 import { apiAuth } from "@/configs/api";
 
 export default function Profile() {
-  const { userInfo,setUserInfo } = useAuth();
+  const { userInfo, setUserInfo } = useAuth();
 
   const {
     register,
@@ -140,7 +140,7 @@ export default function Profile() {
             <button
               type="submit"
               disabled={isLoading}
-              className={`w-full lg:w-auto px-4 py-2 rounded text-white ${isLoading ? "bg-gray-400" : "bg-blue-500 hover:bg-blue-600"
+              className={`w-full lg:w-auto  cursor-pointer px-4 py-2 rounded text-white ${isLoading ? "bg-gray-400" : "bg-blue-500 hover:bg-blue-600"
                 }`}
             >
               {isLoading ? "Đang lưu..." : "Lưu thay đổi"}
@@ -150,11 +150,53 @@ export default function Profile() {
 
         {/* Avatar */}
         <div className="flex flex-col items-center lg:w-1/3 space-y-4 p-4">
-          <img
-            src={avatar}
-            alt="avatar"
-            className="w-32 h-32 rounded-full border object-cover"
-          />
+
+          <div className="relative group w-32 h-32">
+
+            <img
+              src={avatar}
+              alt="avatar"
+              className="
+      w-full h-full rounded-full border object-cover
+      transition-transform duration-200
+      group-hover:scale-105
+    "
+            />
+
+            <div className="
+  absolute inset-0 rounded-full
+  flex items-center justify-center gap-3
+  ">
+
+              {/* VIEW */}
+              <button
+                type="button"
+                onClick={() => window.open(avatar, "_blank")}
+                className="
+      p-2 bg-white shadow-md rounded-full
+  opacity-0 group-hover:opacity-100
+  transition-all duration-200
+    cursor-pointer
+      "
+              >
+                👁
+              </button>
+
+              {/* EDIT */}
+              <label className="
+       p-2 bg-white shadow-md rounded-full
+  opacity-0 group-hover:opacity-100
+  transition-all duration-200
+        cursor-pointer
+    ">
+                ✏️
+                <input type="file" className="hidden" onChange={handleAvatarChange} />
+              </label>
+
+            </div>
+          </div>
+
+          {/* fallback text */}
           <label className="cursor-pointer text-blue-500 hover:underline">
             Thay đổi ảnh
             <input
@@ -164,9 +206,11 @@ export default function Profile() {
               onChange={handleAvatarChange}
             />
           </label>
-          <button className="w-full lg:w-auto px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+
+          <button className="w-full lg:w-auto px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 cursor-pointer">
             Đổi mật khẩu
           </button>
+
         </div>
       </div>
     </div>
