@@ -30,6 +30,8 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final JwtUtil jwtUtil;
+    private final CloudinaryService cloudinaryService;
+
 
     @Override
     public boolean existsByEmail(String email) {
@@ -153,7 +155,7 @@ public class UserServiceImpl implements UserService {
                 throw new RuntimeException("File không phải ảnh");
             }
             try {
-                user.setImage(CloudinaryService.uploadImage(image));
+                user.setImage(cloudinaryService.uploadImage(image));
             } catch (IOException e) {
                throw new RuntimeException("File "+e.getMessage());
             }

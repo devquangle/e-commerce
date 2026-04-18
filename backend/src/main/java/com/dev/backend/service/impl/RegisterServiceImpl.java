@@ -71,7 +71,7 @@ public class RegisterServiceImpl implements RegisterService {
     @Override
     public void verifyRegister(String token) {
         if (!jwtUtil.isValid(token, JwtType.VERIFY_EMAIL)) {
-            throw new AppException(404, "Token không hợp lệ","JWT_INVALID");
+            throw new AppException(404, "Token không hợp lệ", "JWT_INVALID");
         }
         int userId = jwtUtil.extractUserId(token);
         User user = userService.getUserById(userId);
@@ -84,16 +84,19 @@ public class RegisterServiceImpl implements RegisterService {
 
     @Override
     public void handleTokenForResend(String token) {
-       
+        if (!jwtUtil.isValid(token, JwtType.VERIFY_EMAIL)) {
+            throw new AppException(404, "Token không hợp lệ hoặc đã hết hạn", "JWT_INVALID");
+        }
 
-        int userId= jwtUtil.extractUserId(token);
+        int userId = jwtUtil.extractUserId(token);
         User user = userService.getUserById(userId);
 
         if (user.isEnabled()) {
             throw new UnauthorizedException("Tài khoản đã được kích hoạt");
         }
-
-        String newToken = jwtUtil.generateVerifyToken(user.getId(),user.getTokenVersion());
+        user.setTokenVersion(user.getTokenVersion() + 1);
+        userService.saveUser(user);
+        String newToken = jwtUtil.generateVerifyToken(user.getId(), user.getTokenVersion());
 
         sendEmailService.sendEmailRegister(
                 user.getEmail(),

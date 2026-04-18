@@ -4,7 +4,6 @@ import InputField from '@/components/common/InputField';
 import Loading from '@/components/common/Loading';
 import authService from '@/services/authService';
 import type { RegisterFrom } from '@/types/register';
-import { getErrorMessage } from '@/utils/error';
 import { mapServerErrors } from '@/utils/mapServerErrors';
 import { showErrorToast, showSuccessToast } from '@/utils/toastUtil';
 import { useState } from 'react';

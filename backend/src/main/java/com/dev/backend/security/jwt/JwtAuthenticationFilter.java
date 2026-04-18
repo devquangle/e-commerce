@@ -9,12 +9,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.dev.backend.constant.JwtType;
 import com.dev.backend.entity.User;
-import com.dev.backend.exception.NotFoundException;
-import com.dev.backend.exception.UnauthorizedException;
 import com.dev.backend.repository.AuthRepository;
 import com.dev.backend.security.CustomUserDetails;
-import com.dev.backend.service.AuthService;
-
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
