@@ -75,7 +75,7 @@ export default function Profile() {
   };
 
   return (
-    <div className="flex-1 p-4">
+    <div className="flex-1 p-2">
       <h2 className="text-xl font-semibold text-gray-800 mb-4">Tài khoản của tôi</h2>
 
       <div className="flex flex-col lg:flex-row gap-6">
@@ -83,7 +83,7 @@ export default function Profile() {
         {/* Form thông tin */}
         <div className="flex-1">
           <form
-            className="space-y-2 p-2"
+            className="space-y-2"
             onSubmit={handleSubmit(onSubmit)}
           >
             <InputField label="Họ và tên" name="fullName" type="text"

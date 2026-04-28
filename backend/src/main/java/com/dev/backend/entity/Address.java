@@ -35,7 +35,7 @@ public class Address   {
     private Integer provinceId;
 
     @Column(nullable = false)
-    private Integer distritId;
+    private Integer districtId;
 
     @Column(nullable = false)
     private String wardCode;

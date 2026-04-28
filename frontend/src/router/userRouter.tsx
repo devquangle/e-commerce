@@ -15,6 +15,7 @@ import Carts from "@/pages/user/Carts";
 import ProtectedRoute from "@/components/common/ProtectedRoute";
 import { Role } from "@/types/role";
 import RegisterConfirm from "@/pages/user/RegisterConfirm";
+import CreateAddress from "@/pages/user/CreateAddress";
 
 
 const userRouter = [
@@ -72,6 +73,10 @@ const userRouter = [
             {
                 path: "address",
                 element: <Address />,
+            },
+             {
+                path: "create-address",
+                element: <CreateAddress />,
             },
             {
                 path: "favorites",

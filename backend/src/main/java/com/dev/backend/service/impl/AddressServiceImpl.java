@@ -1,0 +1,117 @@
+package com.dev.backend.service.impl;
+
+import java.util.Comparator;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import com.dev.backend.bean.AddressBean;
+import com.dev.backend.dto.AddressDTO;
+import com.dev.backend.entity.Address;
+import com.dev.backend.entity.User;
+import com.dev.backend.exception.AppException;
+import com.dev.backend.mapper.AddressMapper;
+import com.dev.backend.repository.AddressRepository;
+import com.dev.backend.security.CustomUserDetails;
+import com.dev.backend.service.AddressService;
+import com.dev.backend.service.UserService;
+
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
+@Service
+public class AddressServiceImpl implements AddressService {
+    private final AddressRepository addressRepository;
+    private final AddressMapper addressMapper;
+    private final UserService userService;
+
+    @Override
+    public int count(CustomUserDetails userDetails) {
+        User user = userService.userIsLogin(userDetails);
+        return addressRepository.countByUserId(user.getId());
+    }
+
+    @Override
+    public void deleteAddress(Integer addressId) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public Address getAddressById(Integer addressId) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public AddressDTO getDefaultAddressByUserId(CustomUserDetails userDetails) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<AddressDTO> getListAddressByUserId(CustomUserDetails userDetails) {
+        List<Address> addresses = addressRepository
+                .findByUserId(userDetails.getUser().getId());
+
+        if (addresses == null || addresses.isEmpty()) {
+            return List.of();
+        }
+
+       return addresses.stream()
+        .map(addressMapper::toDTO)
+        .sorted(
+                Comparator.comparing(
+                                AddressDTO::getIsDefault,
+                                Comparator.nullsLast(Comparator.naturalOrder())
+                        )
+                        .reversed()
+                        .thenComparing(
+                                AddressDTO::getId,
+                                Comparator.reverseOrder()
+                        )
+        )
+        .toList();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public AddressDTO savAddress(AddressBean addressBean, CustomUserDetails userDetails) {
+        User user = userService.userIsLogin(userDetails);
+
+        if (count(userDetails) >= 6) {
+            throw new AppException(422, "Bạn chỉ được lưu tối đa 6 địa chỉ");
+        }
+
+        if (addressBean.isDefault()) {
+            addressRepository.findByUserIdAndIsDefaultIsTrue(user.getId())
+                    .ifPresent(old -> {
+                        old.setDefault(false);
+                        addressRepository.save(old);
+                    });
+        }
+        Address address = new Address();
+        address.setFullName(addressBean.getFullName());
+        address.setPhone(addressBean.getPhone());
+        address.setProvinceId(addressBean.getProvinceId());
+        address.setDistrictId(addressBean.getDistrictId());
+        address.setWardCode(addressBean.getWardCode());
+        address.setStreet(addressBean.getStreet());
+        address.setDefault(addressBean.isDefault());
+        address.setUser(user);
+        addressRepository.save(address);
+        return addressMapper.toDTO(address);
+    }
+
+    @Override
+    public AddressDTO updateAddress(AddressBean addressBean) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+}

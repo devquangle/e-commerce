@@ -11,6 +11,8 @@ public interface UserService {
 
     Object userDTO(String token);
 
+    User userIsLogin(CustomUserDetails userDetails);
+
     UserDTO dto(CustomUserDetails userDetails);
 
     User saveUser(User user);

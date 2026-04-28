@@ -32,6 +32,13 @@ public class UserServiceImpl implements UserService {
     private final JwtUtil jwtUtil;
     private final CloudinaryService cloudinaryService;
 
+    @Override
+    public User userIsLogin(CustomUserDetails userDetails) {
+        if (userDetails.getUser() == null) {
+            throw new NotFoundException("User not found");
+        }
+        return userDetails.getUser();
+    }
 
     @Override
     public boolean existsByEmail(String email) {
@@ -157,7 +164,7 @@ public class UserServiceImpl implements UserService {
             try {
                 user.setImage(cloudinaryService.uploadImage(image));
             } catch (IOException e) {
-               throw new RuntimeException("File "+e.getMessage());
+                throw new RuntimeException("File " + e.getMessage());
             }
         }
     }

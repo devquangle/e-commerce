@@ -43,7 +43,8 @@ public class SecurityConfig {
             "/genre/list",
             "/productdetail/**",
             "/images/**",
-            "/reviews/**"
+            "/reviews/**",
+            "/public/**"
     };
 
     @Bean

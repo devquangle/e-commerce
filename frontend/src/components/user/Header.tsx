@@ -65,7 +65,7 @@ export default function Header() {
               >
                 <button
                   onClick={() => setOpenAccount(!openAccount)}
-                  className="flex items-center gap-2 rounded-full border px-2 py-1 "
+                  className="flex items-center gap-2 rounded-full border px-2 py-1 cursor-pointer"
                 >
                   <img
                     src="https://i.pravatar.cc/40"
