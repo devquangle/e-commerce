@@ -6,16 +6,20 @@ const addressService = {
     const { data } = await apiAuth.get("/auth/addresses");
     return data;
   },
+  async getAddressById(addressId: number) {
+    const { data } = await apiAuth.get(`/auth/addresses/${addressId}`);
+    return data;
+  },
   async createAddress(request: AddressFrom) {
     const { data } = await apiAuth.post("/auth/addresses", request);
     return data;
   },
-  async updateAddress(id: number, request: AddressFrom) {
-    const { data } = await apiAuth.put(`/auth/addresses/${id}`, request);
+  async updateAddress(addressId: number, request: AddressFrom) {
+    const { data } = await apiAuth.put(`/auth/addresses/${addressId}`, request);
     return data;
   },
-  async deleteAddress(id: number) {
-    const { data } = await apiAuth.delete(`/auth/addresses/${id}`);
+  async deleteAddress(addressId: number) {
+    const { data } = await apiAuth.delete(`/auth/addresses/${addressId}`);
     return data;
   },
 };

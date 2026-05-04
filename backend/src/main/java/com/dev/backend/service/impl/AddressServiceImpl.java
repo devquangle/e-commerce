@@ -10,6 +10,7 @@ import com.dev.backend.dto.AddressDTO;
 import com.dev.backend.entity.Address;
 import com.dev.backend.entity.User;
 import com.dev.backend.exception.AppException;
+import com.dev.backend.exception.NotFoundException;
 import com.dev.backend.mapper.AddressMapper;
 import com.dev.backend.repository.AddressRepository;
 import com.dev.backend.security.CustomUserDetails;
@@ -21,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Service
 public class AddressServiceImpl implements AddressService {
+
     private final AddressRepository addressRepository;
     private final AddressMapper addressMapper;
     private final UserService userService;
@@ -32,15 +34,25 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    public void deleteAddress(Integer addressId) {
-        // TODO Auto-generated method stub
-
+    public Address getAddressByIdAndUserId(Integer addressId, CustomUserDetails userDetails) {
+        Integer userId = userService.userIsLogin(userDetails).getId();
+        Address address = addressRepository.findByIdAndUserId(addressId, userId)
+                .orElseThrow(() -> new NotFoundException("ADDRESS NOT FOUND"));
+        return address;
     }
 
     @Override
-    public Address getAddressById(Integer addressId) {
-        // TODO Auto-generated method stub
-        return null;
+    public void deleteAddress(Integer addressId, CustomUserDetails userDetails) {
+        Integer userId = userService.userIsLogin(userDetails).getId();
+        Address address = addressRepository.findByIdAndUserId(addressId, userId)
+                .orElseThrow(() -> new NotFoundException("ADDRESS NOT FOUND"));
+        addressRepository.delete(address);
+    }
+
+    @Override
+    public AddressDTO getAddressDTOByIdAndUserId(Integer addressId, CustomUserDetails userDetails) {
+        Address address = getAddressByIdAndUserId(addressId, userDetails);
+        return addressMapper.toDTO(address);
     }
 
     @Override
@@ -58,20 +70,17 @@ public class AddressServiceImpl implements AddressService {
             return List.of();
         }
 
-       return addresses.stream()
-        .map(addressMapper::toDTO)
-        .sorted(
-                Comparator.comparing(
+        return addresses.stream()
+                .map(addressMapper::toDTO)
+                .sorted(
+                        Comparator.comparing(
                                 AddressDTO::getIsDefault,
-                                Comparator.nullsLast(Comparator.naturalOrder())
-                        )
-                        .reversed()
-                        .thenComparing(
-                                AddressDTO::getId,
-                                Comparator.reverseOrder()
-                        )
-        )
-        .toList();
+                                Comparator.nullsLast(Comparator.naturalOrder()))
+                                .reversed()
+                                .thenComparing(
+                                        AddressDTO::getId,
+                                        Comparator.reverseOrder()))
+                .toList();
     }
 
     @Override
@@ -109,9 +118,25 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    public AddressDTO updateAddress(AddressBean addressBean) {
-        // TODO Auto-generated method stub
-        return null;
+    public AddressDTO updateAddress(Integer addressId, AddressBean addressBean, CustomUserDetails userDetails) {
+        Integer userId = userService.userIsLogin(userDetails).getId();
+        Address address = getAddressByIdAndUserId(addressId, userDetails);
+        if (addressBean.isDefault()) {
+            addressRepository.findByUserIdAndIsDefaultIsTrue(userId)
+                    .ifPresent(old -> {
+                        old.setDefault(false);
+                        addressRepository.save(old);
+                    });
+        }
+        address.setFullName(addressBean.getFullName());
+        address.setPhone(addressBean.getPhone());
+        address.setProvinceId(addressBean.getProvinceId());
+        address.setDistrictId(addressBean.getDistrictId());
+        address.setWardCode(addressBean.getWardCode());
+        address.setStreet(addressBean.getStreet());
+        address.setDefault(addressBean.isDefault());
+        addressRepository.save(address);
+        return addressMapper.toDTO(address);
     }
 
 }

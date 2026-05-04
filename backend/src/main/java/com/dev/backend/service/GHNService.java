@@ -143,9 +143,8 @@ public class GHNService {
         if (wardDTO == null) {
             return null;
         }
-        String streetFull = provinceDTO.getProvinceName() + ", " + districtDTO.getDistrictName() + ", "
-                + wardDTO.getWardName() + ", "
-                + street;
+        String streetFull = street + ", " + provinceDTO.getProvinceName() + ", " + districtDTO.getDistrictName() + ", "
+                + wardDTO.getWardName();
 
         return streetFull;
     }

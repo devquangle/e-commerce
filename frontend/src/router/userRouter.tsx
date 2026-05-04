@@ -16,6 +16,7 @@ import ProtectedRoute from "@/components/common/ProtectedRoute";
 import { Role } from "@/types/role";
 import RegisterConfirm from "@/pages/user/RegisterConfirm";
 import CreateAddress from "@/pages/user/CreateAddress";
+import UpdateAddress from "@/pages/user/UpdateAddress";
 
 
 const userRouter = [
@@ -49,10 +50,10 @@ const userRouter = [
     },
     {
         path: "/account",
-        element: 
-        <ProtectedRoute requiredRoles={[Role.CUSTOMER]}>
-            <AccountLayout />
-        </ProtectedRoute>,
+        element:
+            <ProtectedRoute requiredRoles={[Role.CUSTOMER]}>
+                <AccountLayout />
+            </ProtectedRoute>,
         children: [
             {
                 index: true,
@@ -74,10 +75,15 @@ const userRouter = [
                 path: "address",
                 element: <Address />,
             },
-             {
+            {
                 path: "create-address",
                 element: <CreateAddress />,
             },
+            {
+                path: "edit-address/:id",
+                element: <UpdateAddress />
+            },
+
             {
                 path: "favorites",
                 element: <Favorites />,

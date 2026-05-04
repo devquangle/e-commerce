@@ -10,15 +10,20 @@ import com.dev.backend.security.CustomUserDetails;
 public interface AddressService {
     List<AddressDTO> getListAddressByUserId(CustomUserDetails userDetails);
 
-    Address getAddressById(Integer addressId);
+    AddressDTO getAddressDTOByIdAndUserId(Integer addressId, CustomUserDetails userDetails);
 
     AddressDTO getDefaultAddressByUserId(CustomUserDetails userDetails);
 
-    AddressDTO savAddress(AddressBean addressBean,CustomUserDetails userDetails);
+    AddressDTO savAddress(AddressBean addressBean, CustomUserDetails userDetails);
 
-    AddressDTO updateAddress(AddressBean addressBean);
+    AddressDTO updateAddress(Integer addressId,AddressBean addressBean,CustomUserDetails userDetails);
 
     int count(CustomUserDetails userDetails);
+
     boolean isEmpty();
-    void deleteAddress(Integer addressId);
+
+   Address getAddressByIdAndUserId(Integer addressId,CustomUserDetails userDetails);
+
+
+    void deleteAddress(Integer addressId,CustomUserDetails userDetails);
 }

@@ -1,141 +1,87 @@
 import InputField from "@/components/common/InputField";
 import SelectBox from "@/components/common/SelectBox";
 import TextAreaField from "@/components/common/TextAreaField";
-import { apiAuth, apiGuest } from "@/configs/api";
-import type { AddressFrom, District, Province, Ward } from "@/types/address";
-import { showErrorToast, showSuccessToast } from "@/utils/toastUtil";
-import { useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-import { useNavigate } from 'react-router-dom';
+import Loading from "@/components/common/Loading";
+
+import {
+    useProvinces,
+    useDistricts,
+    useWards
+} from "@/hooks/useAddressGHN";
+
+import type { AddressFrom } from "@/types/address";
+
+import { Controller, useForm, useWatch } from "react-hook-form";
+import {  NavLink } from "react-router-dom";
+import { useCreateAddress } from "@/hooks/useAddress";
 
 export default function CreateAddress() {
+    const createMutation = useCreateAddress();
+
+    const { data: provinces = [] } = useProvinces();
+
     const {
-        control,
         register,
         handleSubmit,
+        control,
         resetField,
-        formState: { errors }
+
+        formState: { errors },
     } = useForm<AddressFrom>({
         defaultValues: {
             fullName: "",
             phone: "",
-            provinceId: undefined,
-            districtId: undefined,
-            wardCode: undefined,
             street: "",
-            isDefault: false
-        }
+            isDefault: false,
+        },
     });
 
-    const [isLoading, setIsLoading] = useState(false);
-    const [provinces, setProvinces] = useState<Province[]>([]);
-    const [districts, setDistricts] = useState<District[]>([]);
-    const [wards, setWards] = useState<Ward[]>([]);
-    const navigate = useNavigate();
-    // ================= LOAD PROVINCES =================
-    useEffect(() => {
-        (async () => {
-            try {
-                const res = await apiGuest.get("/public/ghn/provinces");
-                setProvinces(res.data.data || []);
-            } catch (err) {
-                console.error(err);
-            }
-        })();
-    }, []);
+    const provinceId = useWatch({ control, name: "provinceId" });
+    const districtId = useWatch({ control, name: "districtId" });
 
-    // ================= PROVINCE =================
-    const handleProvinceChange = async (provinceId: number) => {
-        if (!provinceId) return;
+    const { data: districts = [] } = useDistricts(provinceId);
+    const { data: wards = [] } = useWards(districtId);
 
-        resetField("districtId");
-        resetField("wardCode");
-        setDistricts([]);
-        setWards([]);
-
-        try {
-            const res = await apiGuest.post("/public/ghn/districts", {
-                provinceId
-            });
-            setDistricts(res.data.data || []);
-        } catch (err) {
-            console.error(err);
-        }
+    const onSubmit = (data: AddressFrom) => {
+        createMutation.mutate(data);
     };
 
-    // ================= DISTRICT =================
-    const handleDistrictChange = async (districtId: number) => {
-        if (!districtId) return;
+    if (createMutation.isPending) return <Loading />;
 
-        resetField("wardCode");
-        setWards([]);
-
-        try {
-            const res = await apiGuest.post("/public/ghn/wards", {
-                districtId
-            });
-            setWards(res.data.data || []);
-        } catch (err) {
-            console.error(err);
-        }
-    };
-
-    // ================= SUBMIT =================
-    const onSubmit = async (data: AddressFrom) => {
-        setIsLoading(true);
-        try {
-            const res = await apiAuth.post("/auth/addresses", data);
-            if (res.data.success) {
-                showSuccessToast(res.data.message);
-                navigate("/account/address");
-            }
-            else {
-                showErrorToast(res.data.message);
-            }
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    // ================= UI =================
     return (
         <div className="flex-1 p-2">
             <h2 className="text-xl font-semibold mb-4">
                 Thêm địa chỉ mới
             </h2>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
 
                 {/* NAME + PHONE */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <InputField
                         label="Họ và tên"
-                        placeholder="Nguyen Van A"
                         name="fullName"
                         register={register}
-                        rules={{ required: "Họ và tên không được bỏ trống" }}
+                        rules={{ required: "Bắt buộc nhập" }}
                         error={errors.fullName}
                     />
 
                     <InputField
                         label="Số điện thoại"
                         name="phone"
-                        placeholder="0123456789"
                         register={register}
                         rules={{
-                            required: "Số điện thoại không được bỏ trống",
+                            required: "Bắt buộc nhập",
                             pattern: {
                                 value: /^[0-9]{10}$/,
-                                message: "Số điện thoại không đúng định dạng"
-                            }
+                                message: "Sai định dạng",
+                            },
                         }}
                         error={errors.phone}
                     />
                 </div>
 
-                {/* ADDRESS */}
+                {/* LOCATION */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
                     {/* PROVINCE */}
@@ -148,20 +94,19 @@ export default function CreateAddress() {
                                 <SelectBox<number>
                                     label="Tỉnh/Thành"
                                     options={provinces.map(p => ({
-                                        label: p.ProvinceName ?? "",
-                                        value: p.ProvinceID
+                                        label: p.ProvinceName,
+                                        value: p.ProvinceID,
                                     }))}
                                     value={field.value}
                                     onChange={(val) => {
                                         field.onChange(val);
-                                        handleProvinceChange(val);
+                                        resetField("districtId");
+                                        resetField("wardCode");
                                     }}
                                 />
-                                {fieldState.error && (
-                                    <p className="text-red-500 text-sm mt-1">
-                                        {fieldState.error.message}
-                                    </p>
-                                )}
+                                <p className="text-red-500 text-sm">
+                                    {fieldState.error?.message}
+                                </p>
                             </div>
                         )}
                     />
@@ -176,21 +121,19 @@ export default function CreateAddress() {
                                 <SelectBox<number>
                                     label="Quận/Huyện"
                                     options={districts.map(d => ({
-                                        label: d.DistrictName ?? "",
-                                        value: d.DistrictID
+                                        label: d.DistrictName,
+                                        value: d.DistrictID,
                                     }))}
                                     value={field.value}
-                                    disabled={!provinces.length || districts.length === 0}
+                                    disabled={!provinceId}
                                     onChange={(val) => {
                                         field.onChange(val);
-                                        handleDistrictChange(val);
+                                        resetField("wardCode");
                                     }}
                                 />
-                                {fieldState.error && (
-                                    <p className="text-red-500 text-sm mt-1">
-                                        {fieldState.error.message}
-                                    </p>
-                                )}
+                                <p className="text-red-500 text-sm">
+                                    {fieldState.error?.message}
+                                </p>
                             </div>
                         )}
                     />
@@ -205,59 +148,52 @@ export default function CreateAddress() {
                                 <SelectBox<string>
                                     label="Phường/Xã"
                                     options={wards.map(w => ({
-                                        label: w.WardName ?? "",
-                                        value: w.WardCode
+                                        label: w.WardName,
+                                        value: w.WardCode,
                                     }))}
                                     value={field.value}
-                                    disabled={!districts.length || wards.length === 0}
+                                    disabled={!districtId}
                                     onChange={field.onChange}
                                 />
-                                {fieldState.error && (
-                                    <p className="text-red-500 text-sm mt-1">
-                                        {fieldState.error.message}
-                                    </p>
-                                )}
+                                <p className="text-red-500 text-sm">
+                                    {fieldState.error?.message}
+                                </p>
                             </div>
                         )}
                     />
-
                 </div>
 
                 {/* STREET */}
-                <TextAreaField<AddressFrom>
+                <TextAreaField
                     label="Địa chỉ cụ thể"
                     name="street"
-                    placeholder="Nhập địa chỉ..."
                     register={register}
-                    rules={{ required: "Địa chỉ không được bỏ trống" }}
+                    rules={{ required: "Bắt buộc nhập" }}
                     error={errors.street}
                 />
 
+                {/* DEFAULT */}
                 <div className="flex items-center gap-2">
-                    <input
-                        type="checkbox"
-                        id="default"
-                        {...register("isDefault")}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <label htmlFor="default" className="text-sm text-gray-700">
-                        Đặt làm địa chỉ mặc định
-                    </label>
+                    <input type="checkbox" {...register("isDefault")} />
+                    <label>Đặt làm mặc định</label>
                 </div>
 
+                {/* ACTION */}
+                <div className="flex gap-3">
+                    <NavLink
+                        to="/account/address"
+                        className="px-4 py-2 bg-gray-200 rounded"
+                    >
+                        Quay lại
+                    </NavLink>
 
-
-                {/* SUBMIT */}
-                <button
-                    type="submit"
-                    disabled={isLoading}
-                    className={`w-full py-2 rounded transition
-                    ${isLoading
-                            ? "bg-gray-300"
-                            : "bg-blue-500 text-white hover:bg-blue-600"}`}
-                >
-                    {isLoading ? "Đang lưu..." : "Lưu địa chỉ"}
-                </button>
+                    <button
+                        type="submit"
+                        className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                    >
+                        Lưu địa chỉ
+                    </button>
+                </div>
 
             </form>
         </div>

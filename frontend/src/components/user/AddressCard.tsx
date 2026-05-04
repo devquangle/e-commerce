@@ -26,7 +26,7 @@ export default function AddressCard({ item, onEdit, onDelete, onSetDefault }: Ad
                 ) : (
                     <button
                         onClick={() => onSetDefault(item.id!)}
-                        className="px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                        className="px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300 cursor-pointer"
                     >
                         Đặt mặc định
                     </button>
@@ -34,7 +34,7 @@ export default function AddressCard({ item, onEdit, onDelete, onSetDefault }: Ad
 
                 <button
                     onClick={() => onEdit(item?.id)}
-                    className="px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
+                    className="px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer"
                 >
                     Sửa
                 </button>
@@ -42,7 +42,7 @@ export default function AddressCard({ item, onEdit, onDelete, onSetDefault }: Ad
                     !item.isDefault && (
                         <button
                             onClick={() => onDelete(item.id!)}
-                            className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600"
+                            className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 cursor-pointer"
                         >
                             Xóa
                         </button>

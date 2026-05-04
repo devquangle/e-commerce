@@ -52,7 +52,7 @@ export default function Profile() {
         formData.append("image", avatarFile);
       }
 
-      const respon = await apiAuth.post("/auth/me", formData,
+      const res = await apiAuth.post("/auth/me", formData,
         {
           headers: {
             "Content-Type": "multipart/form-data",
@@ -60,10 +60,10 @@ export default function Profile() {
         }
       );
 
-      if (respon.data.success) {
-        showSuccessToast(respon.data.message);
-        console.log(respon.data.data);
-        setUserInfo(respon.data.data);
+      if (res.data.success) {
+        showSuccessToast(res.data.message);
+        console.log(res.data.data);
+        setUserInfo(res.data.data);
       }
 
     } catch (error: unknown) {

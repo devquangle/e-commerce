@@ -17,35 +17,44 @@ export default function Modal({
   onConfirm,
   title,
   content,
+  cancelText = "Cancel",
   confirmText = "Confirm",
   children
 }: ModalProps) {
 
   useEffect(() => {
+    document.body.style.overflow = isOpen ? "hidden" : "auto";
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+
     if (isOpen) {
-      document.body.style.overflow = "hidden"
-    } else {
-      document.body.style.overflow = "auto"
+      document.addEventListener("keydown", handleEsc);
     }
 
     return () => {
-      document.body.style.overflow = "auto"
-    }
-  }, [isOpen])
+      document.removeEventListener("keydown", handleEsc);
+    };
+  }, [isOpen, onClose]);
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   return (
     <div
-      className="fixed inset-0 z-999 flex items-center justify-center bg-black/40 p-4"
+      className="fixed inset-0 z-999 flex items-center justify-center bg-black/40 p-4 "
       onClick={onClose}
     >
-
       <div
         onClick={(e) => e.stopPropagation()}
         className="bg-white w-full max-w-md rounded-xl shadow-xl p-6"
       >
-
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold">{title}</h2>
 
@@ -53,20 +62,7 @@ export default function Modal({
             onClick={onClose}
             className="w-9 h-9 flex items-center justify-center rounded hover:bg-gray-200 cursor-pointer"
           >
-            <svg
-              className="w-5 h-5"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M6 18 17.94 6M18 18 6.06 6"
-              />
-            </svg>
+            ✕
           </button>
         </div>
 
@@ -77,6 +73,13 @@ export default function Modal({
         {children}
 
         <div className="flex justify-end gap-3 mt-6">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 rounded bg-gray-500 text-white hover:bg-gray-600 cursor-pointer"
+          >
+            {cancelText}
+          </button>
+
           {onConfirm && (
             <button
               onClick={onConfirm}
@@ -85,10 +88,8 @@ export default function Modal({
               {confirmText}
             </button>
           )}
-
         </div>
-
       </div>
     </div>
-  )
+  );
 }

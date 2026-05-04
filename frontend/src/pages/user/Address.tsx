@@ -1,55 +1,79 @@
 import Loading from "@/components/common/Loading";
-import AddressCard from "@/components/user/address/AddressCard";
-import addressService from "@/services/addressService";
+import Modal from "@/components/common/Modal";
+import AddressCard from "@/components/user/AddressCard";
+import { useAddresses, useDeleteAddress } from "@/hooks/useAddress";
 import type { AddressFrom } from "@/types/address";
-import { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 
 export default function Address() {
-  const [addresses, setAddresses] = useState<AddressFrom[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const { data: addresses = [], isLoading } = useAddresses();
+    const deleteMutation = useDeleteAddress();
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState<AddressFrom | null>(null);
+  const navigation = useNavigate();
 
-  useEffect(() => {
-    const lists = async () => {
-      setIsLoading(true);
-      try {
-        const res = await addressService.fetchAddresses();
-        if (res.success) {
-          setAddresses(res.data);
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
 
-    lists();
-  }, []);
-
+  const handleClose = () => {
+    setIsOpen(false);
+    setSelectedAddress(null);
+  };
 
   const handleSetDefault = async (id: number) => {
   };
 
-  const handleEdit = async (id: number) => { };
+  const handleEdit = async (id: number) => {
+    navigation(`/account/edit-address/${id}`);
+  };
 
-  const handleDelete = async (id: number) => {
+  const handleSelectedAddress = (id: number) => {
+    const found = addresses.find(a => a.id === id);
+    if (found) {
+      setSelectedAddress(found);
+      setIsOpen(true);
+    }
   };
 
 
+  const confirmDelete = () => {
+    if (!selectedAddress) return;
+
+    deleteMutation.mutate(selectedAddress.id, {
+      onSuccess: () => {
+        handleClose();
+      },
+    });
+  };
+  if (isLoading) return <Loading />;
   return (
 
     <>
-      {isLoading && <Loading />}
       <div className="flex-1 p-2">
-        {/* Header */}
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-gray-800">Danh sách địa chỉ</h2>
+          <h2 className="text-xl font-semibold text-gray-800">
+            Danh sách địa chỉ
+          </h2>
+
           <NavLink
             to="/account/create-address"
-            className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+            className="flex items-center justify-center lg:justify-start gap-2 px-3 py-2 bg-green-500 text-white rounded hover:bg-green-600"
           >
-            Thêm địa chỉ mới
+            {/* Icon luôn hiển thị */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-5 h-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+
+            {/* Text chỉ hiện từ lg */}
+            <span className="hidden lg:inline">
+              Thêm địa chỉ mới
+            </span>
           </NavLink>
         </div>
 
@@ -61,12 +85,31 @@ export default function Address() {
               item={item}
               onSetDefault={handleSetDefault}
               onEdit={handleEdit}
-              onDelete={handleDelete}
+              onDelete={() => handleSelectedAddress(item.id)}
             />
 
           ))}
         </div>
       </div>
+      <Modal
+        isOpen={isOpen}
+        onClose={handleClose}
+        title="Xác nhận xóa địa chỉ"
+        onConfirm={confirmDelete}
+        confirmText="Xóa"
+        cancelText="Hủy"
+      >
+        {selectedAddress && (
+          <div className="text-gray-700">
+            Bạn có chắc muốn xóa địa chỉ
+            <div className="mt-2 p-3 bg-gray-100 rounded">
+              <p>Họ và tên: {selectedAddress.fullName}</p>
+              <p>Số điện thoại: {selectedAddress.phone}</p>
+              <p>Địa chỉ: {selectedAddress.streetFull}</p>
+            </div>
+          </div>
+        )}
+      </Modal>
     </>
 
 

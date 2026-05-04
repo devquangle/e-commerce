@@ -36,6 +36,7 @@ public class SecurityConfig {
             "/login",
             "/logout",
             "/register",
+            "/refresh-token",
             "/resend-verify-register",
             "/verify-register",
             "/home/**",
