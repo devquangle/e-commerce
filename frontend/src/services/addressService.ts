@@ -1,4 +1,4 @@
-import { apiAuth } from "@/configs/api";
+import { apiAuth } from "@/configs/axios";
 import type { AddressFrom } from "@/types/address";
 
 const addressService = {

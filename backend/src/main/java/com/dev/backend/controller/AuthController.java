@@ -25,21 +25,21 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<ResponseData> post_login(HttpServletResponse response,
+    public ResponseEntity<ResponseData<Map<String, String>>> post_login(HttpServletResponse response,
             @RequestBody @Valid LoginBean loginBean) {
 
         Map<String, String> data = authService.login(loginBean, response);
         return ResponseUtil.success("Đăng nhập thành công", data);
     }
 
-    @PostMapping("/refresh-token")
-    public ResponseEntity<ResponseData> post_refresh_token(HttpServletRequest request) {
+    @PostMapping("/auth/refresh-token")
+    public ResponseEntity<ResponseData<Map<String, String>>> post_refresh_token(HttpServletRequest request) {
         Map<String, String> data = authService.refreshToken(request);
         return ResponseUtil.success("Tạo token mới thành công", data);
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ResponseData> post_logout(HttpServletResponse response) {
+    public ResponseEntity<ResponseData<Object>> post_logout(HttpServletResponse response) {
         authService.logout("refreshToken", response);
         return ResponseUtil.success("Đăng xuất thành công", null);
     }

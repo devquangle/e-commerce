@@ -7,7 +7,7 @@ import { mapServerErrors } from "@/utils/mapServerErrors";
 import { showErrorToast, showSuccessToast } from "@/utils/toastUtil";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { apiAuth } from "@/configs/api";
+import { apiAuth } from "@/configs/axios";
 
 export default function Profile() {
   const { userInfo, setUserInfo } = useAuth();

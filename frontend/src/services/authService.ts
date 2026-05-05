@@ -1,4 +1,4 @@
-import { apiAuth, apiGuest } from "@/configs/api";
+import { apiAuth, apiGuest } from "@/configs/axios";
 import type { LoginForm } from "@/types/login";
 import type { RegisterFrom } from "@/types/register";
 const authService = {
@@ -6,7 +6,7 @@ const authService = {
     const { data } = await apiGuest.post("/login", request);
     return data;
   },
-  /** Trả envelope để lấy `message` khi backend không có payload (`data: null`). */
+
   async register(request: RegisterFrom) {
     const { data } = await apiGuest.post("/register", request);
     return data;

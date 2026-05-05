@@ -24,13 +24,13 @@ public class ProfileController {
     private final UserService userService;
 
     @GetMapping("/auth/me")
-    public ResponseEntity<ResponseData> get_profile(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<ResponseData<UserDTO>> get_profile(@AuthenticationPrincipal CustomUserDetails userDetails) {
         UserDTO userDTO = userService.dto(userDetails);
         return ResponseUtil.success("Lấy thông tin người dùng thành công", userDTO);
     }
 
     @PostMapping("/auth/me")
-    public ResponseEntity<ResponseData> post_profile(@RequestPart("profile") ProfileBean profileBean,
+    public ResponseEntity<ResponseData<UserDTO>> post_profile(@RequestPart("profile") ProfileBean profileBean,
             @RequestPart(value = "image", required = false) MultipartFile image,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         UserDTO userDTO = userService.updateProfile(userDetails, profileBean, image);

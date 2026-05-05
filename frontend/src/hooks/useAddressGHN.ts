@@ -1,4 +1,4 @@
-import { apiGuest } from "@/configs/api";
+import { apiGuest } from "@/configs/axios";
 import type { District, Province, Ward } from "@/types/address";
 import { useQuery } from "@tanstack/react-query";
 

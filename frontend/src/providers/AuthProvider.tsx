@@ -1,4 +1,4 @@
-import { apiAuth,  } from "@/configs/api";
+import { apiAuth,  } from "@/configs/axios";
 import { AuthContext } from "@/context/auth-context";
 import type { User } from "@/types/user";
 import { hasRoleAccess, type RoleType } from "@/types/role";

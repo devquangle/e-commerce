@@ -8,7 +8,6 @@ export interface AuthContextType {
   setUserInfo: (userInfo: User | null) => void;
   isAuthenticated: boolean;
   isInitialized: boolean;
-
   login: (request:LoginForm) =>Promise<User|null>;
   logout: () => void;
   hasRole: (role: RoleType) => boolean;

@@ -26,13 +26,14 @@ public class AddressController {
     private final AddressService addressService;
 
     @GetMapping("/auth/addresses")
-    public ResponseEntity<ResponseData> getAddresses(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<ResponseData<List<AddressDTO>>> getAddresses(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
         List<AddressDTO> addresses = addressService.getListAddressByUserId(userDetails);
         return ResponseUtil.success("Lấy danh sách địa chỉ thành công", addresses);
     }
 
     @GetMapping("/auth/addresses/{addressId}")
-    public ResponseEntity<ResponseData> getAddresses(@PathVariable Integer addressId,
+    public ResponseEntity<ResponseData<AddressDTO>> getAddresses(@PathVariable Integer addressId,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         AddressDTO addresses = addressService.getAddressDTOByIdAndUserId(addressId, userDetails);
 
@@ -40,21 +41,21 @@ public class AddressController {
     }
 
     @PostMapping("/auth/addresses")
-    public ResponseEntity<ResponseData> addAddress(@RequestBody AddressBean addressBean,
+    public ResponseEntity<ResponseData<AddressDTO>> addAddress(@RequestBody AddressBean addressBean,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         AddressDTO addressDTO = addressService.savAddress(addressBean, userDetails);
         return ResponseUtil.success("Lưu địa chỉ thành công", addressDTO);
     }
 
     @PutMapping("/auth/addresses/{addressId}")
-    public ResponseEntity<ResponseData> updateAddress(@PathVariable Integer addressId,
+    public ResponseEntity<ResponseData<AddressDTO>> updateAddress(@PathVariable Integer addressId,
             @RequestBody AddressBean addressBean, @AuthenticationPrincipal CustomUserDetails userDetails) {
         AddressDTO addressDTO = addressService.updateAddress(addressId, addressBean, userDetails);
         return ResponseUtil.success("Cập nhật địa chỉ thành công", addressDTO);
     }
 
     @DeleteMapping("/auth/addresses/{addressId}")
-    public ResponseEntity<ResponseData> deleteAddress(@PathVariable Integer addressId,
+    public ResponseEntity<ResponseData<Object>> deleteAddress(@PathVariable Integer addressId,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         addressService.deleteAddress(addressId, userDetails);
         return ResponseUtil.success("Xóa địa chỉ thành công", null);

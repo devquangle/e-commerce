@@ -3,8 +3,10 @@ package com.dev.backend.resp;
 import org.springframework.http.ResponseEntity;
 
 public final class ResponseUtil {
-    public static ResponseEntity<ResponseData> success(String message, Object data) {
-        ResponseData response = ResponseData.builder()
+    private ResponseUtil() {}
+
+    public static <T> ResponseEntity<ResponseData<T>> success(String message, T data) {
+        ResponseData<T> response = ResponseData.<T>builder()
                 .success(true)
                 .message(message)
                 .data(data)

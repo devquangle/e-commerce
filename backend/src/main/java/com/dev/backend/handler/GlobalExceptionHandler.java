@@ -26,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(AppException.class)
-    public ResponseEntity<ResponseData> handleAppException(AppException ex, HttpServletRequest request) {
+    public ResponseEntity<ResponseData<Object>> handleAppException(AppException ex, HttpServletRequest request) {
         if (ex instanceof DuplicateFieldException duplicateFieldException) {
             return buildErrorResponse(
                     HttpStatus.BAD_REQUEST,
@@ -52,7 +52,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ResponseData> handleMethodArgumentNotValid(
+    public ResponseEntity<ResponseData<Object>> handleMethodArgumentNotValid(
             MethodArgumentNotValidException ex,
             HttpServletRequest request) {
         Map<String, String> errors = new HashMap<>();
@@ -70,7 +70,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ResponseData> handleConstraintViolation(
+    public ResponseEntity<ResponseData<Object>> handleConstraintViolation(
             ConstraintViolationException ex,
             HttpServletRequest request) {
         return buildErrorResponse(
@@ -83,7 +83,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<ResponseData> handleTypeMismatch(
+    public ResponseEntity<ResponseData<Object>> handleTypeMismatch(
             MethodArgumentTypeMismatchException ex,
             HttpServletRequest request) {
         String message = "Invalid value for parameter: " + ex.getName();
@@ -97,7 +97,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ResponseData> handleAccessDenied(
+    public ResponseEntity<ResponseData<Object>> handleAccessDenied(
             AccessDeniedException ex,
             HttpServletRequest request) {
         return buildErrorResponse(
@@ -110,7 +110,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ResponseData> handleException(Exception ex, HttpServletRequest request) {
+    public ResponseEntity<ResponseData<Object>> handleException(Exception ex, HttpServletRequest request) {
         log.error("Unhandled exception at {}", request.getRequestURI(), ex);
         return buildErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR,
@@ -121,14 +121,14 @@ public class GlobalExceptionHandler {
                 null);
     }
 
-    private ResponseEntity<ResponseData> buildErrorResponse(
+    private ResponseEntity<ResponseData<Object>> buildErrorResponse(
             HttpStatus status,
             int code,
             String message,
             String error,
             String path,
             Object data) {
-        ResponseData response = ResponseData.builder()
+        ResponseData<Object> response = ResponseData.<Object>builder()
                 .success(false)
                 .message(message)
                 .data(data)
@@ -143,7 +143,7 @@ public class GlobalExceptionHandler {
             org.springframework.security.authentication.BadCredentialsException.class,
             org.springframework.security.core.userdetails.UsernameNotFoundException.class
     })
-    public ResponseEntity<ResponseData> handleBadCredentials(
+    public ResponseEntity<ResponseData<Object>> handleBadCredentials(
             Exception ex,
             HttpServletRequest request) {
 
@@ -157,7 +157,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(org.springframework.security.authentication.LockedException.class)
-    public ResponseEntity<ResponseData> handleLocked(
+    public ResponseEntity<ResponseData<Object>> handleLocked(
             Exception ex,
             HttpServletRequest request) {
 
@@ -171,7 +171,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(org.springframework.security.authentication.DisabledException.class)
-    public ResponseEntity<ResponseData> handleDisabled(
+    public ResponseEntity<ResponseData<Object>> handleDisabled(
             Exception ex,
             HttpServletRequest request) {
 
