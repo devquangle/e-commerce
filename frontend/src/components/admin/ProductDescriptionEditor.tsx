@@ -1,1 +1,147 @@
-import { EditorContent, useEditor, useEditorState } from "@tiptap/react"; import type { ChainedCommands } from "@tiptap/core"; import { NodeSelection } from "@tiptap/pm/state"; import StarterKit from "@tiptap/starter-kit"; import Document from "@tiptap/extension-document"; import Image from "@tiptap/extension-image"; import { BulletList, ListItem, OrderedList } from "@tiptap/extension-list"; import Paragraph from "@tiptap/extension-paragraph"; import TextAlign from "@tiptap/extension-text-align"; import Placeholder from "@tiptap/extension-placeholder"; import { TextStyle } from "@tiptap/extension-text-style"; import Color from "@tiptap/extension-color"; import Highlight from "@tiptap/extension-highlight"; import Text from "@tiptap/extension-text"; import { Table } from "@tiptap/extension-table"; import TableRow from "@tiptap/extension-table-row"; import TableHeader from "@tiptap/extension-table-header"; import TableCell from "@tiptap/extension-table-cell"; import { AlignJustify, Bold, Italic, Underline as UnderlineIcon, Strikethrough, AlignLeft, AlignCenter, AlignRight, Image as ImageIcon, Link2, Undo2, Redo2, Table as TableIcon, ChevronDown, } from "lucide-react"; import { useCallback, useEffect, useMemo, useRef } from "react"; type Props = { value: string; onChange: (val: string) => void; }; const btnBase = "h-8 w-8 rounded-md flex items-center justify-center transition-colors"; const btnIdle = "text-gray-600 hover:bg-gray-100"; const btnActive = "bg-violet-100 text-violet-700"; const btnDisabled = "text-gray-300 cursor-not-allowed"; const CustomImage = Image.extend({ addAttributes() { return { ...this.parent?.(), class: { default: null, parseHTML: (element) => element.getAttribute("class"), renderHTML: (attributes) => { if (!attributes.class) return {}; return { class: attributes.class }; }, }, }; }, }); export default function ProductDescriptionEditor({ value, onChange }: Props) { const fileRef = useRef<HTMLInputElement>(null); const selectionRef = useRef<{ from: number; to: number } | null>(null); const imageSelectionPosRef = useRef<number | null>(null); const imageAlignClasses = useMemo(() => ({ left: "block mr-auto", center: "block mx-auto", right: "block ml-auto", }) as const, [],); const imageAlignClassTokens: string[] = useMemo(() => Object.values(imageAlignClasses), [imageAlignClasses],); const editor = useEditor({ immediatelyRender: false, extensions: [StarterKit.configure({ link: { openOnClick: false, }, document: false, paragraph: false, text: false, bulletList: false, orderedList: false, listItem: false, }), Document, CustomImage.configure({ resize: { enabled: true, alwaysPreserveAspectRatio: true, }, }), BulletList, OrderedList, ListItem, Paragraph, TextStyle, Color, Highlight, Text, TextAlign.configure({ types: ["heading", "paragraph"] }), Placeholder.configure({ placeholder: "Nhập mô tả sản phẩm...", }), Table.configure({ resizable: true }), TableRow, TableHeader, TableCell,], content: value || "", onUpdate: ({ editor }) => { onChange(editor.getHTML()); }, }); useEffect(() => { if (!editor) return; const currentContent = editor.getHTML(); if (value !== currentContent) { editor.commands.setContent(value || "", { emitUpdate: false }); } }, [editor, value]); useEffect(() => { if (!editor) return; const saveSelection = () => { const { selection } = editor.state; const { from, to } = selection; selectionRef.current = { from, to }; if (selection instanceof NodeSelection && selection.node.type.name === "image") { imageSelectionPosRef.current = selection.from; } }; saveSelection(); editor.on("selectionUpdate", saveSelection); return () => { editor.off("selectionUpdate", saveSelection); }; }, [editor]); const active = useCallback((cond: boolean) => (cond ? btnActive : btnIdle), []); const handleImage = useCallback((e: React.ChangeEvent<HTMLInputElement>) => { if (!editor) return; const file = e.target.files?.[0]; if (!file) return; const reader = new FileReader(); reader.onload = () => { const src = reader.result; if (typeof src === "string") { editor.chain().focus().setImage({ src }).run(); } }; reader.readAsDataURL(file); e.target.value = ""; }, [editor]); const insertLink = useCallback(() => { if (!editor) return; const url = window.prompt("Enter URL"); if (!url) return; editor.chain().focus().setLink({ href: url }).run(); }, [editor]); const withSelection = useCallback((action: (chain: ChainedCommands) => void) => { if (!editor) return; let chain = editor.chain().focus(); if (selectionRef.current) { chain = chain.setTextSelection(selectionRef.current); } action(chain); }, [editor],); const setImageAlignment = useCallback((align: "left" | "center" | "right") => { if (!editor) return false; const imagePos = imageSelectionPosRef.current; let chain = editor.chain().focus(); if (imagePos !== null) { chain = chain.setNodeSelection(imagePos); } const imageNode = imagePos !== null ? editor.state.doc.nodeAt(imagePos) : null; const hasImageSelection = editor.isActive("image") || imageNode?.type.name === "image"; if (!hasImageSelection) return false; const currentClass = (imageNode?.attrs.class as string | undefined) ?? ((editor.getAttributes("image")?.class as string | undefined) ?? ""); const keptClasses = currentClass.split(/\s+/).filter(Boolean).filter((cls) => !imageAlignClassTokens.includes(cls)); const nextClass = [...keptClasses, imageAlignClasses[align]].join(" "); return chain.updateAttributes("image", { class: nextClass }).run(); }, [editor, imageAlignClassTokens, imageAlignClasses],); const getActiveImageAlignment = useCallback((currentEditor: NonNullable<typeof editor>) => { if (!currentEditor.isActive("image")) return null; const imageClass = (currentEditor.getAttributes("image")?.class as string | undefined) ?? ""; if (imageClass.split(/\s+/).includes(imageAlignClasses.center)) return "center"; if (imageClass.split(/\s+/).includes(imageAlignClasses.right)) return "right"; return "left"; }, [imageAlignClasses.center, imageAlignClasses.right],); const editorState = useEditorState({ editor, selector: ({ editor: currentEditor }) => { if (!currentEditor) { return { isBold: false, isItalic: false, isUnderline: false, isStrike: false, isAlignLeft: false, isAlignCenter: false, isAlignRight: false, isAlignJustify: false, currentHeading: "Paragraph", currentList: "No list", canUndo: false, canRedo: false, }; } const headingLevel = [1, 2, 3, 4, 5, 6].find((level) => currentEditor.isActive("heading", { level }),); const imageAlignment = getActiveImageAlignment(currentEditor); return { isBold: currentEditor.isActive("bold"), isItalic: currentEditor.isActive("italic"), isUnderline: currentEditor.isActive("underline"), isStrike: currentEditor.isActive("strike"), isAlignLeft: imageAlignment === "left" || currentEditor.isActive("paragraph", { textAlign: "left" }) || currentEditor.isActive("heading", { textAlign: "left" }), isAlignCenter: imageAlignment === "center" || currentEditor.isActive("paragraph", { textAlign: "center" }) || currentEditor.isActive("heading", { textAlign: "center" }), isAlignRight: imageAlignment === "right" || currentEditor.isActive("paragraph", { textAlign: "right" }) || currentEditor.isActive("heading", { textAlign: "right" }), isAlignJustify: currentEditor.isActive("paragraph", { textAlign: "justify" }) || currentEditor.isActive("heading", { textAlign: "justify" }), currentHeading: headingLevel ? `H${headingLevel}` : "Paragraph", currentList: currentEditor.isActive("orderedList") ? "Ordered list" : currentEditor.isActive("bulletList") ? "Bullet list" : "No list", canUndo: currentEditor.can().undo(), canRedo: currentEditor.can().redo(), }; }, }); const state = editorState ?? { isBold: false, isItalic: false, isUnderline: false, isStrike: false, isAlignLeft: false, isAlignCenter: false, isAlignRight: false, isAlignJustify: false, currentHeading: "Paragraph", currentList: "No list", canUndo: false, canRedo: false, }; if (!editor) return null; return (<div className="border rounded-xl overflow-hidden shadow-sm">       {/* TOOLBAR */}       <div className="flex flex-wrap items-center gap-2 p-2 bg-gray-50 border-b">         <div className="flex items-center gap-1 pr-2 border-r border-gray-200">           <button type="button" className={`${btnBase} ${state.canUndo ? btnIdle : btnDisabled}`} disabled={!state.canUndo} onClick={() => editor.chain().focus().undo().run()}           >             <Undo2 size={16} />           </button>           <button type="button" className={`${btnBase} ${state.canRedo ? btnIdle : btnDisabled}`} disabled={!state.canRedo} onClick={() => editor.chain().focus().redo().run()}           >             <Redo2 size={16} />           </button>         </div>          <div className="relative pr-2 border-r border-gray-200">           <select className="h-8 pl-2 pr-7 text-sm rounded-md border border-gray-200 bg-white text-gray-700 appearance-none focus:outline-none focus:ring-2 focus:ring-violet-300" value={state.currentHeading} onChange={(e) => { const next = e.target.value; withSelection((chain) => { if (next === "Paragraph") { chain.setParagraph().run(); return; } const level = Number(next.replace("H", "")) as 1 | 2 | 3 | 4 | 5 | 6; chain.setHeading({ level }).run(); }); }}           >             <option value="Paragraph">Paragraph</option>             <option value="H1">Heading 1</option>             <option value="H2">Heading 2</option>             <option value="H3">Heading 3</option>             <option value="H4">Heading 4</option>             <option value="H5">Heading 5</option>             <option value="H6">Heading 6</option>           </select>           <ChevronDown size={14} className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-500" />         </div>          <div className="relative pr-2 border-r border-gray-200">           <select className="h-8 pl-2 pr-7 text-sm rounded-md border border-gray-200 bg-white text-gray-700 appearance-none focus:outline-none focus:ring-2 focus:ring-violet-300" value={state.currentList} onChange={(e) => { const next = e.target.value; const currentList = state.currentList; if (next === currentList) return; withSelection((chain) => { if (next === "Ordered list") { if (currentList === "Bullet list") { chain.toggleBulletList().toggleOrderedList().run(); return; } chain.toggleOrderedList().run(); return; } if (next === "Bullet list") { if (currentList === "Ordered list") { chain.toggleOrderedList().toggleBulletList().run(); return; } chain.toggleBulletList().run(); return; } if (currentList === "Ordered list") { chain.toggleOrderedList().run(); return; } if (currentList === "Bullet list") { chain.toggleBulletList().run(); } }); }}           >             <option value="No list">No list</option>             <option value="Bullet list">Bullet list</option>             <option value="Ordered list">Ordered list</option>           </select>           <ChevronDown size={14} className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-500" />         </div>          <button type="button" className={`${btnBase} ${active(state.isBold)}`} onClick={() => editor.chain().focus().toggleBold().run()}>           <Bold size={16} />         </button>          <button type="button" className={`${btnBase} ${active(state.isItalic)}`} onClick={() => editor.chain().focus().toggleItalic().run()}>           <Italic size={16} />         </button>          <button type="button" className={`${btnBase} ${active(state.isUnderline)}`} onClick={() => editor.chain().focus().toggleUnderline().run()}>           <UnderlineIcon size={16} />         </button>          <button type="button" className={`${btnBase} ${active(state.isStrike)}`} onClick={() => editor.chain().focus().toggleStrike().run()}>           <Strikethrough size={16} />         </button>          <div className="h-6 w-px bg-gray-200 mx-1" />          {/* ALIGN */}         <button type="button" className={`${btnBase} ${active(state.isAlignLeft)}`} onClick={() => { if (!setImageAlignment("left")) { editor.chain().focus().setTextAlign("left").run(); } }}>           <AlignLeft size={16} />         </button>          <button type="button" className={`${btnBase} ${active(state.isAlignCenter)}`} onClick={() => { if (!setImageAlignment("center")) { editor.chain().focus().setTextAlign("center").run(); } }}>           <AlignCenter size={16} />         </button>          <button type="button" className={`${btnBase} ${active(state.isAlignRight)}`} onClick={() => { if (!setImageAlignment("right")) { editor.chain().focus().setTextAlign("right").run(); } }}>           <AlignRight size={16} />         </button>          <button type="button" className={`${btnBase} ${active(state.isAlignJustify)}`} onClick={() => editor.chain().focus().setTextAlign("justify").run()}>           <AlignJustify size={16} />         </button>          <div className="h-6 w-px bg-gray-200 mx-1" />          {/* COLOR */}         <input type="color" className="w-8 h-8 rounded-md border border-gray-200 bg-white cursor-pointer" onChange={(e) => editor.chain().focus().setColor(e.target.value).run()} />          {/* HIGHLIGHT */}         <button type="button" className={`${btnBase} ${btnIdle}`} onClick={() => editor.chain().focus().toggleHighlight().run()}>           HL         </button>          {/* TABLE */}         <button type="button" className={`${btnBase} ${btnIdle}`} onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3 }).run()}>           <TableIcon size={16} />         </button>          {/* IMAGE */}         <button type="button" className={`${btnBase} ${btnIdle}`} onClick={() => fileRef.current?.click()}>           <ImageIcon size={16} />         </button>          {/* LINK */}         <button type="button" className={`${btnBase} ${btnIdle}`} onClick={insertLink}>           <Link2 size={16} />         </button>       </div>              {/* FILE INPUT */}       <input ref={fileRef} type="file" hidden onChange={handleImage} />        {/* CONTENT */}       <EditorContent editor={editor} className="tiptap min-h-[250px] p-4 [&_.ProseMirror]:min-h-[250px] [&_.ProseMirror]:outline-none [&_.ProseMirror_h1]:text-3xl [&_.ProseMirror_h1]:font-bold [&_.ProseMirror_h2]:text-2xl [&_.ProseMirror_h2]:font-bold [&_.ProseMirror_h3]:text-xl [&_.ProseMirror_h3]:font-semibold [&_.ProseMirror_img]:max-w-full [&_.ProseMirror_img]:h-auto [&_.ProseMirror_img]:rounded-md [&_.ProseMirror_.ProseMirror-selectednode]:outline-2 [&_.ProseMirror_.ProseMirror-selectednode]:outline-violet-500" />     </div>); }
+import { useEditor } from "@tiptap/react";
+import { ReactNodeViewRenderer } from "@tiptap/react";
+
+import StarterKit from "@tiptap/starter-kit";
+import Document from "@tiptap/extension-document";
+import Image from "@tiptap/extension-image";
+import { BulletList, ListItem, OrderedList } from "@tiptap/extension-list";
+import Paragraph from "@tiptap/extension-paragraph";
+import TextAlign from "@tiptap/extension-text-align";
+import Placeholder from "@tiptap/extension-placeholder";
+import { TextStyle } from "@tiptap/extension-text-style";
+import Color from "@tiptap/extension-color";
+import Highlight from "@tiptap/extension-highlight";
+import Text from "@tiptap/extension-text";
+
+import { Table } from "@tiptap/extension-table";
+import TableRow from "@tiptap/extension-table-row";
+import TableHeader from "@tiptap/extension-table-header";
+import TableCell from "@tiptap/extension-table-cell";
+
+import { useCallback, useEffect, useRef } from "react";
+import ProductDescriptionToolbar from "./ProductDescriptionToolbar";
+import ProductDescriptionView from "./ProductDescriptionView";
+import ResizableImageNodeView from "./ResizableImageNodeView";
+
+type Props = {
+  value: string;
+  onChange: (val: string) => void;
+};
+
+const CustomImage = Image.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      class: {
+        default: "mx-auto",
+        parseHTML: (el) => el.getAttribute("class"),
+        renderHTML: (attrs) => (attrs.class ? { class: attrs.class } : {}),
+      },
+      style: {
+        default: "width: 100%; max-width: 100%; height: auto;",
+        parseHTML: (el) => el.getAttribute("style"),
+        renderHTML: (attrs) => (attrs.style ? { style: attrs.style } : {}),
+      },
+    };
+  },
+  addNodeView() {
+    return ReactNodeViewRenderer(ResizableImageNodeView);
+  },
+});
+
+export default function ProductDescriptionEditor({ value, onChange }: Props) {
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const editor = useEditor({
+    immediatelyRender: false,
+    extensions: [
+      StarterKit.configure({
+        link: { openOnClick: false },
+        document: false,
+        paragraph: false,
+        text: false,
+        bulletList: false,
+        orderedList: false,
+        listItem: false,
+      }),
+
+      Document,
+      CustomImage,
+
+      BulletList,
+      OrderedList,
+      ListItem,
+      Paragraph,
+
+      TextStyle,
+      Color,
+      Highlight,
+      Text,
+
+      TextAlign.configure({
+        types: ["heading", "paragraph"],
+      }),
+
+      Placeholder.configure({
+        placeholder: "Nhap mo ta san pham...",
+      }),
+
+      Table.configure({ resizable: true }),
+      TableRow,
+      TableHeader,
+      TableCell,
+    ],
+    content: value || "",
+    onUpdate: ({ editor: currentEditor }) => {
+      onChange(currentEditor.getHTML());
+    },
+  });
+
+  useEffect(() => {
+    if (!editor) return;
+    if (value !== editor.getHTML()) {
+      editor.commands.setContent(value || "", {
+        emitUpdate: false,
+      });
+    }
+  }, [editor, value]);
+
+  const handleImage = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (!editor) return;
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === "string") {
+          editor
+            .chain()
+            .focus()
+            .setImage({ src: reader.result })
+            .updateAttributes("image", {
+              class: "block mx-auto",
+              style: "width: 100%; max-width: 100%; height: auto;",
+            })
+            .run();
+        }
+      };
+      reader.readAsDataURL(file);
+      e.target.value = "";
+    },
+    [editor]
+  );
+
+  if (!editor) return null;
+
+  return (
+    <div className="border rounded-xl overflow-hidden shadow-sm">
+      <ProductDescriptionToolbar
+        editor={editor}
+        onPickImage={() => fileRef.current?.click()}
+      />
+      <input ref={fileRef} type="file" hidden onChange={handleImage} />
+      <ProductDescriptionView editor={editor} />
+    </div>
+  );
+}
