@@ -4,25 +4,14 @@ import axios from "axios";
 
 import addressService from "@/services/addressService";
 import { showSuccessToast, showErrorToast } from "@/utils/toastUtil";
-import type { AddressFrom } from "@/types/address";
+import type { AddressRequest, AddressResponse } from "@/types/address";
 
-/* ================= SORT ================= */
-const sortByDefault = (data: AddressFrom[]) => {
-  return [...data].sort(
-    (a, b) => Number(b.isDefault) - Number(a.isDefault)
-  );
-};
-
-/* ================= FETCH ADDRESSES ================= */
+/* ================= FETCH ================= */
 export const useAddresses = () => {
-  return useQuery<AddressFrom[]>({
+  return useQuery<AddressResponse[]>({
     queryKey: ["addresses"],
-    queryFn: async () => {
-      const res = await addressService.fetchAddresses();
-      const data = res.data.data ?? res.data ?? [];
-      return sortByDefault(data);
-    },
-    staleTime: 1000 * 3,
+    queryFn: addressService.getAddresses,
+    staleTime: 1000 * 30,
   });
 };
 
@@ -34,58 +23,51 @@ export const useCreateAddress = () => {
   return useMutation({
     mutationFn: addressService.createAddress,
 
-    onSuccess: (res) => {
-      const newAddress: AddressFrom = res.data;
-
-      // ⚡ update UI ngay
-      queryClient.setQueryData<AddressFrom[]>(
+    onSuccess: (newAddress: AddressResponse) => {
+      // ⚡ UI update NGAY LẬP TỨC
+      queryClient.setQueryData<AddressResponse[]>(
         ["addresses"],
-        (old = []) => sortByDefault([...old, newAddress])
+        (old = []) => [newAddress, ...old], // id DESC feel
       );
 
-      showSuccessToast(res.message || "Thêm địa chỉ thành công");
-
-      // 🔄 sync server background (không delay UI)
-      queryClient.invalidateQueries({
-        queryKey: ["addresses"],
-        refetchType: "inactive",
-      });
+      showSuccessToast("Thêm địa chỉ thành công");
 
       navigate("/account/address");
+
+      // (OPTIONAL) sync server background
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["addresses"] });
+      }, 0);
     },
 
     onError: (error: unknown) => {
       if (axios.isAxiosError(error)) {
-        showErrorToast(
-          error.response?.data?.message || "Thêm địa chỉ thất bại"
-        );
+        showErrorToast(error.response?.data?.message || "Thêm thất bại");
       } else {
         showErrorToast("Có lỗi không xác định");
       }
     },
   });
 };
-
 /* ================= DELETE ================= */
 export const useDeleteAddress = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: addressService.deleteAddress,
+    mutationFn: (id: number) => addressService.deleteAddress(id),
 
-    onSuccess: (_, id: number) => {
-      queryClient.setQueryData<AddressFrom[]>(
-        ["addresses"],
-        (old = []) =>
-          sortByDefault(old.filter((item) => item.id !== id))
+    onSuccess: (_: void, id: number) => {
+      // ⚡ remove ngay khỏi UI
+      queryClient.setQueryData<AddressResponse[]>(["addresses"], (old = []) =>
+        old.filter((item) => item.id !== id),
       );
 
       showSuccessToast("Xoá thành công");
 
-      queryClient.invalidateQueries({
-        queryKey: ["addresses"],
-        refetchType: "inactive",
-      });
+      // OPTIONAL sync server
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["addresses"] });
+      }, 0);
     },
 
     onError: () => {
@@ -94,31 +76,78 @@ export const useDeleteAddress = () => {
   });
 };
 
-/* ================= SET DEFAULT ================= */
-// export const useSetDefaultAddress = () => {
-//   const queryClient = useQueryClient();
+/* ================= UPDATE ================== */
+export const useUpdateAddress = () => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
-//   return useMutation({
-//     mutationFn: null,
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: AddressRequest }) =>
+      addressService.updateAddress(id, data),
 
-//     onSuccess: (_, id: number) => {
-//       queryClient.setQueryData<AddressFrom[]>(
-//         ["addresses"],
-//         (old = []) =>
-//           sortByDefault(
-//             old.map((item) => ({
-//               ...item,
-//               isDefault: item.id === id,
-//             }))
-//           )
-//       );
+    onSuccess: (updatedAddress: AddressResponse) => {
+      queryClient.setQueryData<AddressResponse[]>(
+        ["addresses"],
+        (old = []) =>
+          old.map((item) =>
+            item.id === updatedAddress.id ? updatedAddress : item
+          )
+      );
 
-//       showSuccessToast("Cập nhật mặc định thành công");
+      showSuccessToast("Cập nhật địa chỉ thành công");
 
-//       queryClient.invalidateQueries({
-//         queryKey: ["addresses"],
-//         refetchType: "inactive",
-//       });
-//     },
-//   });
-// };
+      navigate("/account/address");
+
+      // optional sync
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["addresses"] });
+      }, 0);
+    },
+
+    onError: (error: unknown) => {
+      if (axios.isAxiosError(error)) {
+        showErrorToast(
+          error.response?.data?.message || "Cập nhật thất bại"
+        );
+      } else {
+        showErrorToast("Có lỗi không xác định");
+      }
+    },
+  });
+};
+/* ================= DETAIL ================== */
+export const useAddressDetail = (addressId?: number) => {
+  return useQuery({
+    queryKey: ["address", addressId],
+    queryFn: () => addressService.getAddressById(addressId!),
+    enabled: !!addressId,
+  });
+};
+/* ================= SET DEFAULT ================== */
+export const useSetDefaultAddress = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) => addressService.setDefaultAddress(id),
+
+    onSuccess: (_: void, id: number) => {
+      // ⚡ remove ngay khỏi UI
+      queryClient.setQueryData<AddressResponse[]>(["addresses"], (old = []) =>
+        old.map((item) => ({
+          ...item,
+          default: item.id === id, // chỉ item này là default
+        }))
+      );
+      showSuccessToast("Cập nhật địa chỉ mặc định thành công");
+
+      // OPTIONAL sync server
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["addresses"] });
+      }, 0);
+    },
+
+    onError: () => {
+      showErrorToast("Cập nhật địa chỉ mặc định thất bại");
+    },
+  });
+};

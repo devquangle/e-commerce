@@ -1,11 +1,14 @@
-import { apiAuth,  } from "@/configs/axios";
+
 import { AuthContext } from "@/context/auth-context";
 import type { User } from "@/types/user";
 import { hasRoleAccess, type RoleType } from "@/types/role";
-import { getToken, removeToken, setToken } from "@/utils/cookieUtil";
+import { removeToken, setToken } from "@/utils/cookieUtil";
 import { useEffect, useState } from "react";
-import type { LoginForm } from "@/types/login";
+import type { LoginRequest } from "@/types/auth";
 import authService from "@/services/authService";
+import { AUTH_STORAGE_KEY, TOKEN_KEY } from "@/constants/token";
+import { showSuccessToast } from "@/utils/toastUtil";
+import { useNavigate } from "react-router-dom";
 
 type Props = {
   children: React.ReactNode;
@@ -15,58 +18,60 @@ export const AuthProvider = ({ children }: Props) => {
   const [userInfo, setUserInfo] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+
+  const navigate = useNavigate();
   useEffect(() => {
     initAuth();
   }, []);
 
   const initAuth = async () => {
-    const token = getToken("JWT_TOKEN");
-
-    if (!token) {
+    if (sessionStorage.getItem(AUTH_STORAGE_KEY.MANUAL_LOGOUT) === "1") {
+      setUserInfo(null);
+      setIsAuthenticated(false);
       setIsInitialized(true);
       return;
     }
 
     try {
-      const { data } = await apiAuth.get("/auth/me");
+      const user = await authService.getUser();
 
-      setUserInfo(data?.data);
+      setUserInfo(user);
       setIsAuthenticated(true);
     } catch {
-      removeToken("JWT_TOKEN");
+      removeToken(TOKEN_KEY.ACCESS_TOKEN);
+      setUserInfo(null);
+      setIsAuthenticated(false);
     } finally {
       setIsInitialized(true);
     }
   };
 
-  const login = async (request: LoginForm) => {
-    const respLogin = await authService.login(request);
-    if (!respLogin.success) {
-      return null;
-    }
-   
-
-    setToken("JWT_TOKEN", respLogin?.data?.accessToken);
-
-    const respAuth = await authService.getUser();
-    if (!respAuth.success) {
-      return;
-    }
-    setUserInfo(respAuth?.data);
+  const login = async (request: LoginRequest) => {
+    sessionStorage.removeItem(AUTH_STORAGE_KEY.MANUAL_LOGOUT);
+    const res = await authService.login(request);
+    setToken(TOKEN_KEY.ACCESS_TOKEN, res.accessToken);
+    const user = await authService.getUser();
+    setUserInfo(user);
     setIsAuthenticated(true);
-
-    return respAuth.data;
+    return user;
   };
 
-   
+  const logout = async () => {
 
-  const logout = () => {
-    removeToken("JWT_TOKEN");
-    setUserInfo(null);
-    setIsAuthenticated(false);
-    setIsInitialized(true);
+
+    try {
+      sessionStorage.setItem(AUTH_STORAGE_KEY.MANUAL_LOGOUT, "1");
+      await authService.logout();
+      showSuccessToast("Đăng xuất thành công");
+    } catch {
+      showSuccessToast("Đăng xuất thất bại");
+    } finally {
+      removeToken(TOKEN_KEY.ACCESS_TOKEN);
+      setUserInfo(null);
+      setIsAuthenticated(false);
+      navigate("/login", { replace: true });
+    }
   };
-
   const hasRole = (requiredRole: RoleType) => {
     const userRoles = userInfo?.roles ?? [];
     return hasRoleAccess(userRoles, requiredRole);
@@ -78,10 +83,11 @@ export const AuthProvider = ({ children }: Props) => {
         userInfo,
         setUserInfo,
         isAuthenticated,
-        isInitialized,     
+        isInitialized,
         login,
         logout,
         hasRole,
+        
       }}
     >
       {children}

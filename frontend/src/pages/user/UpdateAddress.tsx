@@ -2,18 +2,18 @@ import InputField from "@/components/common/InputField";
 import Loading from "@/components/common/Loading";
 import SelectBox from "@/components/common/SelectBox";
 import TextAreaField from "@/components/common/TextAreaField";
-import addressService from "@/services/addressService";
-import type { AddressFrom } from "@/types/address";
-import { showErrorToast, showSuccessToast } from "@/utils/toastUtil";
-import { useEffect, useState } from "react";
+import type { AddressRequest } from "@/types/address";
+import { showErrorToast, } from "@/utils/toastUtil";
+import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { useNavigate, useParams, NavLink } from "react-router-dom";
-
+import { useParams, NavLink } from "react-router-dom";
+import { useWatch } from "react-hook-form";
 import {
     useProvinces,
     useDistricts,
     useWards
 } from "@/hooks/useAddressGHN";
+import { useAddressDetail, useUpdateAddress } from "@/hooks/useAddress";
 export default function UpdateAddress() {
     const {
         control,
@@ -21,69 +21,49 @@ export default function UpdateAddress() {
         handleSubmit,
         reset,
         setValue,
-        watch,
         formState: { errors }
-    } = useForm<AddressFrom>();
+    } = useForm<AddressRequest>();
 
-    const [isLoading, setIsLoading] = useState(false);
-    const [address, setAddress] = useState<AddressFrom | null>(null);
 
-    const navigate = useNavigate();
+    const { mutateAsync, isPending } = useUpdateAddress();
     const { id } = useParams();
     const addressId = Number(id);
 
+
     /* ================= WATCH ================= */
-    const provinceId = watch("provinceId");
-    const districtId = watch("districtId");
+    const provinceId = useWatch({ control, name: "provinceId" });
+    const districtId = useWatch({ control, name: "districtId" });
 
     /* ================= GHN DATA ================= */
     const { data: provinces = [] } = useProvinces();
     const { data: districts = [] } = useDistricts(provinceId);
     const { data: wards = [] } = useWards(districtId);
+    const {
+        data: address,
+        isLoading: isLoadingAddress,
+    } = useAddressDetail(addressId);
 
-    /* ================= LOAD ADDRESS ================= */
     useEffect(() => {
-        if (!addressId) return;
+        if (address) {
+            reset(address);
+        }
+    }, [address, reset]);
 
-        const fetchAddress = async () => {
-            setIsLoading(true);
-            try {
-                const res = await addressService.getAddressById(addressId);
-                const data = res.data;
 
-                setAddress(data);
-                reset(data);
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchAddress();
-    }, [addressId, reset]);
 
     /* ================= SUBMIT ================= */
-    const onSubmit = async (data: AddressFrom) => {
-        setIsLoading(true);
+    const onSubmit = async (data: AddressRequest) => {
         try {
-            const res = await addressService.updateAddress(addressId, data);
-
-            if (res.success) {
-                showSuccessToast(res.data.message);
-                navigate("/account/address");
-            } else {
-                showErrorToast(res.data.message);
-            }
+            await mutateAsync({ id: addressId, data });
         } catch (err) {
             console.error(err);
             showErrorToast("Cập nhật địa chỉ thất bại");
-        } finally {
-            setIsLoading(false);
         }
     };
 
-    if (isLoading && !address) return <Loading />;
+    if (isLoadingAddress && !address) return <Loading />;
+    if (isPending) return <Loading />;
+
 
     return (
         <div className="flex-1 p-2">
@@ -214,7 +194,7 @@ export default function UpdateAddress() {
                 </div>
 
                 {/* STREET */}
-                <TextAreaField<AddressFrom>
+                <TextAreaField<AddressRequest>
                     label="Địa chỉ cụ thể"
                     name="street"
                     register={register}
@@ -223,14 +203,23 @@ export default function UpdateAddress() {
                 />
 
                 {/* DEFAULT */}
-                <div className="flex items-center gap-2">
-                    <input
-                        type="checkbox"
-                        {...register("isDefault")}
-                        className="h-4 w-4"
-                    />
-                    <span>Đặt làm địa chỉ mặc định</span>
-                </div>
+                {!address?.default
+                    && (
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                id="default"
+                                {...register("default")}
+                                className="h-4 w-4"
+                            />
+                            <label htmlFor="default" className="text-sm cursor-pointer">
+                                Đặt làm địa chỉ mặc định
+                            </label>
+                        </div>
+                    )
+                }
+
+
 
                 {/* ACTION */}
                 <div className="flex gap-3">

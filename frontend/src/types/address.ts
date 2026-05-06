@@ -1,4 +1,4 @@
-export interface AddressFrom {
+export interface AddressRequest {
   id: number;
   fullName: string;
   phone: string;
@@ -7,7 +7,19 @@ export interface AddressFrom {
   wardCode?: string | undefined;
   street: string;
   streetFull?: string;
-  isDefault: boolean;
+  default: boolean;
+}
+
+export interface AddressResponse {
+  id: number;
+  fullName: string;
+  phone: string;
+  provinceId?: number | undefined;
+  districtId?: number | undefined;
+  wardCode?: string | undefined;
+  street: string;
+  streetFull?: string;
+  default: boolean;
 }
 
 export interface Province {

@@ -76,7 +76,11 @@ export default function Profile() {
 
   return (
     <div className="flex-1 p-2">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">Tài khoản của tôi</h2>
+      <div className="flex justify-between items-center gap-3 mb-4">
+        <h2 className="text-xl font-semibold text-gray-800">
+          Thông tin cá nhân
+        </h2>
+      </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
 

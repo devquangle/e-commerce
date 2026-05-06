@@ -1,8 +1,7 @@
 package com.dev.backend.service;
-
-import java.util.Map;
-
-import com.dev.backend.bean.LoginBean;
+import com.dev.backend.dto.auth.LoginRequest;
+import com.dev.backend.dto.auth.LoginResponse;
+import com.dev.backend.dto.auth.RefreshResponse;
 import com.dev.backend.entity.User;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,10 +13,10 @@ public interface AuthService {
 
     User getUserByEmail(String email);
 
-    Map<String, String> login(LoginBean loginBean, HttpServletResponse response);
+    LoginResponse login(LoginRequest loginRequest, HttpServletResponse response);
 
-    Map<String, String> refreshToken(HttpServletRequest request);
+    RefreshResponse refreshToken(HttpServletRequest request);
 
-    void logout(String refreshToken, HttpServletResponse response);
+    void logout(HttpServletResponse response);
 
 }

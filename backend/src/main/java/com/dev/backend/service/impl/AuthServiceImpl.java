@@ -1,15 +1,14 @@
 package com.dev.backend.service.impl;
 
-import java.util.Map;
-
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
-
-import com.dev.backend.bean.LoginBean;
 import com.dev.backend.constant.JwtType;
+import com.dev.backend.dto.auth.LoginRequest;
+import com.dev.backend.dto.auth.LoginResponse;
+import com.dev.backend.dto.auth.RefreshResponse;
 import com.dev.backend.entity.User;
 import com.dev.backend.exception.NotFoundException;
 import com.dev.backend.exception.UnauthorizedException;
@@ -46,17 +45,17 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public Map<String, String> login(LoginBean loginBean, HttpServletResponse response) {
+    public LoginResponse login(LoginRequest loginRequest, HttpServletResponse response) {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            loginBean.getEmail(),
-                            loginBean.getPassword()));
+                            loginRequest.getEmail(),
+                            loginRequest.getPassword()));
 
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             User user = userDetails.getUser();
 
-            log.info("User login {}", loginBean.getEmail());
+            log.info("User login {}", loginRequest.getEmail());
 
             if (!user.isEnabled()) {
                 throw new UnauthorizedException("Tài khoản chưa được kích hoạt");
@@ -78,16 +77,18 @@ public class AuthServiceImpl implements AuthService {
 
             userService.resetFailedAttempts(user);
 
-            return Map.of("accessToken", accessToken);
+            return LoginResponse.builder()
+                    .accessToken(accessToken)
+                    .build();
 
         } catch (BadCredentialsException ex) {
-            userService.processLoginFail(loginBean.getEmail());
+            userService.processLoginFail(loginRequest.getEmail());
             throw ex;
         }
     }
 
     @Override
-    public Map<String, String> refreshToken(HttpServletRequest request) {
+    public RefreshResponse refreshToken(HttpServletRequest request) {
         String refreshToken = CookieUtil.getCookie(request, "refreshToken");
         if (!jwtUtil.isValid(refreshToken, JwtType.REFRESH)) {
             throw new UnauthorizedException("Token không hợp lệ");
@@ -99,12 +100,16 @@ public class AuthServiceImpl implements AuthService {
         }
 
         String accessToken = jwtUtil.generateAccessToken(user.getId(), user.getTokenVersion());
-        return Map.of("accessToken", accessToken);
+        return RefreshResponse.builder()
+                .accessToken(accessToken)
+                .build();
+
     }
 
     @Override
-    public void logout(String refreshToken, HttpServletResponse response) {
-        CookieUtil.deleteCookie(response, refreshToken);
+    public void logout(HttpServletResponse response) {
+        CookieUtil.deleteCookie(response, "refreshToken");
+
     }
 
 }

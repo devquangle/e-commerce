@@ -1,5 +1,7 @@
 package com.dev.backend.bean;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,6 +18,7 @@ public class AddressBean {
     private Integer provinceId;
     private Integer districtId;
     private String wardCode;
+    @JsonProperty("default")
     private boolean isDefault = false;
 
 }

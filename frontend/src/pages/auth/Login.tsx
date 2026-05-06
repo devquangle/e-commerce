@@ -3,7 +3,7 @@ import InputField from '@/components/common/InputField';
 import Loading from '@/components/common/Loading';
 import { useAuth } from '@/context/useAuth';
 
-import type { LoginForm } from '@/types/login';
+import type { LoginRequest } from '@/types/auth';
 import { mapServerErrors } from '@/utils/mapServerErrors';
 import { showErrorToast, showSuccessToast } from '@/utils/toastUtil';
 
@@ -13,11 +13,11 @@ import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 
 export default function Login() {
-  const { register, handleSubmit,setError, formState: { errors } } = useForm<LoginForm>();
+  const { register, handleSubmit,setError, formState: { errors } } = useForm<LoginRequest>();
   const [isLoading, setIsLoading] = useState(false);
   const auth = useAuth();
   const navigate = useNavigate();
-  const onSubmit = async (requestData: LoginForm) => {
+  const onSubmit = async (requestData: LoginRequest) => {
     setIsLoading(true);
     try {
       const user = await auth.login(requestData);

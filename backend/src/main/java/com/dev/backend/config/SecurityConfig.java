@@ -98,6 +98,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
 
                 .exceptionHandling(ex -> ex.accessDeniedHandler(customAccessDeniedHandler))
+                .logout(logout -> logout.disable())
 
                 .addFilterBefore(jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class);

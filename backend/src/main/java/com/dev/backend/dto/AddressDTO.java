@@ -1,5 +1,7 @@
 package com.dev.backend.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,6 +16,7 @@ public class AddressDTO {
     private String wardCode;
     private String street;
     private String streetFull;
-    private Boolean isDefault;
+    @JsonProperty("default")
+    private boolean isDefault;
 
 }

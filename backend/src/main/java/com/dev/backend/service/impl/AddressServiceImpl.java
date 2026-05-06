@@ -1,6 +1,5 @@
 package com.dev.backend.service.impl;
 
-import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -17,6 +16,7 @@ import com.dev.backend.security.CustomUserDetails;
 import com.dev.backend.service.AddressService;
 import com.dev.backend.service.UserService;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -55,11 +55,7 @@ public class AddressServiceImpl implements AddressService {
         return addressMapper.toDTO(address);
     }
 
-    @Override
-    public AddressDTO getDefaultAddressByUserId(CustomUserDetails userDetails) {
-        // TODO Auto-generated method stub
-        return null;
-    }
+
 
     @Override
     public List<AddressDTO> getListAddressByUserId(CustomUserDetails userDetails) {
@@ -72,37 +68,21 @@ public class AddressServiceImpl implements AddressService {
 
         return addresses.stream()
                 .map(addressMapper::toDTO)
-                .sorted(
-                        Comparator.comparing(
-                                AddressDTO::getIsDefault,
-                                Comparator.nullsLast(Comparator.naturalOrder()))
-                                .reversed()
-                                .thenComparing(
-                                        AddressDTO::getId,
-                                        Comparator.reverseOrder()))
                 .toList();
     }
 
+   
     @Override
-    public boolean isEmpty() {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
+    @Transactional
     public AddressDTO savAddress(AddressBean addressBean, CustomUserDetails userDetails) {
         User user = userService.userIsLogin(userDetails);
-
+        Integer userId = userService.userIsLogin(userDetails).getId();
         if (count(userDetails) >= 6) {
             throw new AppException(422, "Bạn chỉ được lưu tối đa 6 địa chỉ");
         }
 
         if (addressBean.isDefault()) {
-            addressRepository.findByUserIdAndIsDefaultIsTrue(user.getId())
-                    .ifPresent(old -> {
-                        old.setDefault(false);
-                        addressRepository.save(old);
-                    });
+            addressRepository.clearDefaultOnly(userId);
         }
         Address address = new Address();
         address.setFullName(addressBean.getFullName());
@@ -118,15 +98,12 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
+    @Transactional
     public AddressDTO updateAddress(Integer addressId, AddressBean addressBean, CustomUserDetails userDetails) {
         Integer userId = userService.userIsLogin(userDetails).getId();
         Address address = getAddressByIdAndUserId(addressId, userDetails);
         if (addressBean.isDefault()) {
-            addressRepository.findByUserIdAndIsDefaultIsTrue(userId)
-                    .ifPresent(old -> {
-                        old.setDefault(false);
-                        addressRepository.save(old);
-                    });
+            addressRepository.clearDefaultOnly(userId);
         }
         address.setFullName(addressBean.getFullName());
         address.setPhone(addressBean.getPhone());
@@ -137,6 +114,16 @@ public class AddressServiceImpl implements AddressService {
         address.setDefault(addressBean.isDefault());
         addressRepository.save(address);
         return addressMapper.toDTO(address);
+    }
+
+    @Override
+    @Transactional
+    public void defaultAddress(Integer addressId, CustomUserDetails userDetails) {
+        Integer userId = userService.userIsLogin(userDetails).getId();
+        Address address = getAddressByIdAndUserId(addressId, userDetails);
+        addressRepository.clearDefaultOnly(userId);
+        address.setDefault(true);
+        addressRepository.save(address);
     }
 
 }

@@ -1,5 +1,5 @@
 
-import { Link, useNavigate } from "react-router-dom"
+import { Link } from "react-router-dom"
 import Container from "../common/Container"
 
 import { useState } from "react";
@@ -25,13 +25,9 @@ export default function Header() {
         { id: 1, label: "Tài khoản", path: "/profile" },
         { id: 2, label: "Đăng xuất", action: () => setOpen(true) },
     ]
-    const navigate = useNavigate();
-
-
-    const handleLogout = () => {
+    const handleLogout = async () => {
         setOpen(false);
-        logout();
-        navigate("/login");
+        await logout();
     }
 
     const user_code = () => {
@@ -48,7 +44,7 @@ export default function Header() {
                         <Logo />
                         <button className="lg:hidden md:hidden cursor-pointer" onClick={() => setIsMobileNavOpen(true)}>
                             <svg className="w-8 h-8 text-indigo-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 24 24">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 6H6m12 4H6m12 4H6m12 4H6" />
+                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 6H6m12 4H6m12 4H6m12 4H6" />
                             </svg>
                         </button>
                         <Search />

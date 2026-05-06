@@ -1,15 +1,13 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import {  Routes, Route } from "react-router-dom";
 import "./App.css";
 import UserLayout from "./layouts/UserLayout";
 import userRouter from "./router/userRouter";
 import AdminLayout from "./layouts/AdminLayout";
 import adminRouter from "./router/adminRouter";
-import { ToastContainer }  from 'react-toastify';
 
 function App() {
   return (
-    <BrowserRouter>
-     <ToastContainer/> 
+   
       <Routes>
         <Route element={<UserLayout />}>
           {userRouter.map((route) => (
@@ -35,7 +33,6 @@ function App() {
           ))}
         </Route>
       </Routes>
-    </BrowserRouter>
   );
 }
 

@@ -12,18 +12,16 @@ public interface AddressService {
 
     AddressDTO getAddressDTOByIdAndUserId(Integer addressId, CustomUserDetails userDetails);
 
-    AddressDTO getDefaultAddressByUserId(CustomUserDetails userDetails);
-
     AddressDTO savAddress(AddressBean addressBean, CustomUserDetails userDetails);
 
-    AddressDTO updateAddress(Integer addressId,AddressBean addressBean,CustomUserDetails userDetails);
+    AddressDTO updateAddress(Integer addressId, AddressBean addressBean, CustomUserDetails userDetails);
 
     int count(CustomUserDetails userDetails);
 
-    boolean isEmpty();
+    Address getAddressByIdAndUserId(Integer addressId, CustomUserDetails userDetails);
 
-   Address getAddressByIdAndUserId(Integer addressId,CustomUserDetails userDetails);
+    void deleteAddress(Integer addressId, CustomUserDetails userDetails);
 
+    void defaultAddress(Integer addressId, CustomUserDetails userDetails);
 
-    void deleteAddress(Integer addressId,CustomUserDetails userDetails);
 }

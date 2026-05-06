@@ -1,7 +1,7 @@
-import type { AddressFrom } from '@/types/address'
+import type { AddressResponse } from '@/types/address'
 
 type AddressCardProps = {
-    item: AddressFrom,
+    item: AddressResponse,
     onEdit: (id: number) => void,
     onDelete: (id: number) => void,
     onSetDefault: (id: number) => void,
@@ -11,7 +11,7 @@ export default function AddressCard({ item, onEdit, onDelete, onSetDefault }: Ad
         <div
             key={item.id}
             className={`border rounded-xl p-4 flex flex-col justify-between shadow-sm transition hover:shadow-md
-              ${item.isDefault ? "border-blue-500 bg-blue-50" : "border-gray-300 bg-white"}
+              ${item.default ? "border-blue-500 bg-blue-50" : "border-gray-300 bg-white"}
             `}
         >
             <div className="space-y-1">
@@ -21,7 +21,7 @@ export default function AddressCard({ item, onEdit, onDelete, onSetDefault }: Ad
             </div>
 
             <div className="flex items-center gap-2 mt-3">
-                {item.isDefault ? (
+                {item.default ? (
                     <span className="px-2 py-1 text-xs text-white bg-blue-500 rounded">Mặc định</span>
                 ) : (
                     <button
@@ -39,7 +39,7 @@ export default function AddressCard({ item, onEdit, onDelete, onSetDefault }: Ad
                     Sửa
                 </button>
                 {
-                    !item.isDefault && (
+                    !item.default && (
                         <button
                             onClick={() => onDelete(item.id!)}
                             className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 cursor-pointer"

@@ -45,7 +45,7 @@ export default function Header() {
             <Logo />
             <button className="lg:hidden cursor-pointer" onClick={() => setIsMobileNavOpen(true)}>
               <svg className="w-8 h-8 text-indigo-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 24 24">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 6H6m12 4H6m12 4H6m12 4H6" />
+                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 6H6m12 4H6m12 4H6m12 4H6" />
               </svg>
             </button>
             <MenuItem className="hidden lg:flex items-center gap-5 text-md" />
@@ -54,7 +54,7 @@ export default function Header() {
               {/* icon cart */}
               <Link to={"/carts"} className="hidden lg:flex justify-center items-center gap-2  ">
                 <svg className="w-8 h-8 text-indigo-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 24 24">
-                  <path fill-rule="evenodd" d="M4 4a1 1 0 0 1 1-1h1.5a1 1 0 0 1 .979.796L7.939 6H19a1 1 0 0 1 .979 1.204l-1.25 6a1 1 0 0 1-.979.796H9.605l.208 1H17a3 3 0 1 1-2.83 2h-2.34a3 3 0 1 1-4.009-1.76L5.686 5H5a1 1 0 0 1-1-1Z" clip-rule="evenodd" />
+                  <path fillRule="evenodd" d="M4 4a1 1 0 0 1 1-1h1.5a1 1 0 0 1 .979.796L7.939 6H19a1 1 0 0 1 .979 1.204l-1.25 6a1 1 0 0 1-.979.796H9.605l.208 1H17a3 3 0 1 1-2.83 2h-2.34a3 3 0 1 1-4.009-1.76L5.686 5H5a1 1 0 0 1-1-1Z" clipRule="evenodd" />
                 </svg>
               </Link>
               {/* icon menu */}
@@ -68,7 +68,7 @@ export default function Header() {
                   className="flex items-center gap-2 rounded-full border px-2 py-1 cursor-pointer"
                 >
                   <img
-                    src="https://i.pravatar.cc/40"
+                    src={userInfo?.image || "https://i.pravatar.cc/40"}
                     className=" h-8 w-8 rounded-full"
                   />
 
@@ -111,12 +111,9 @@ export default function Header() {
       <Modal
         isOpen={open}
         onClose={() => setOpen(false)}
-        onConfirm={() => {
-          {
-            setOpen(false);
-            logout();
-          }
-
+        onConfirm={async () => {
+          setOpen(false);
+          await logout();
         }}
         title="Xác nhận đăng xuất"
         content="Bạn sẽ cần đăng nhập lại để tiếp tục sử dụng?"

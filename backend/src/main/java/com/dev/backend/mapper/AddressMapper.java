@@ -28,7 +28,7 @@ public class AddressMapper {
         dto.setStreet(address.getStreet());
         dto.setStreetFull(ghnService.getStreetFull(address.getProvinceId(), address.getDistrictId(),
                 address.getWardCode(), address.getStreet()));
-        dto.setIsDefault(address.isDefault());
+        dto.setDefault(address.isDefault());
         return dto;
     }
 }

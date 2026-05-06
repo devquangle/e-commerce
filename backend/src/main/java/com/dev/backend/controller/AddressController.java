@@ -61,4 +61,11 @@ public class AddressController {
         return ResponseUtil.success("Xóa địa chỉ thành công", null);
     }
 
+    @PutMapping("/auth/addresses/{addressId}/default")
+    public ResponseEntity<ResponseData<Object>> defaultAddress(@PathVariable Integer addressId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        addressService.defaultAddress(addressId, userDetails);
+        return ResponseUtil.success("Cập nhật địa chỉ thành công", null);
+    }
+
 }
