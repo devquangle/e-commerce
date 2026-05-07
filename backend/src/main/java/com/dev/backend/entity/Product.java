@@ -1,5 +1,6 @@
 package com.dev.backend.entity;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -25,7 +26,8 @@ public class Product {
     private Integer id;
     private String name;
     private Integer quantity;
-    private Double price;
+
+    private BigDecimal price;
     private String description;
     private int weight;
     private String isbn;

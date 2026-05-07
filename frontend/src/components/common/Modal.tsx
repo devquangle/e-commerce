@@ -1,15 +1,16 @@
-import { useEffect } from "react"
+import { useEffect } from "react";
 
 type ModalProps = {
-  isOpen: boolean
-  onClose: () => void
-  onConfirm?: () => void
-  title: string
-  content?: string
-  confirmText?: string
-  cancelText?: string
-  children?: React.ReactNode
-}
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm?: () => void;
+  title: string;
+  content?: string;
+  confirmText?: string;
+  cancelText?: string;
+  children?: React.ReactNode;
+  size?: "sm" | "md" | "lg";
+};
 
 export default function Modal({
   isOpen,
@@ -19,9 +20,9 @@ export default function Modal({
   content,
   cancelText = "Cancel",
   confirmText = "Confirm",
-  children
+  children,
+  size = "md",
 }: ModalProps) {
-
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "auto";
 
@@ -45,7 +46,11 @@ export default function Modal({
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
-
+  const sizeClass = {
+    sm: "max-w-sm",
+    md: "max-w-md",
+    lg: "max-w-2xl",
+  };
   return (
     <div
       className="fixed inset-0 z-999 flex items-center justify-center bg-black/40 p-4 "
@@ -53,7 +58,7 @@ export default function Modal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white w-full max-w-md rounded-xl shadow-xl p-6"
+        className={`bg-white w-full ${sizeClass[size]} rounded-xl shadow-xl p-6`}
       >
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold">{title}</h2>
@@ -66,9 +71,7 @@ export default function Modal({
           </button>
         </div>
 
-        {content && (
-          <p className="text-gray-600 mb-4">{content}</p>
-        )}
+        {content && <p className="text-gray-600 mb-4">{content}</p>}
 
         {children}
 

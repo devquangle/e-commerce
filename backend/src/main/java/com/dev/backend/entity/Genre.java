@@ -2,31 +2,37 @@ package com.dev.backend.entity;
 
 import java.util.List;
 
+import com.dev.backend.constant.GenreStatus;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
 @Entity
+@Builder
 @Table(name = "genres")
-public class Genre {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+public class Genre extends BaseEntity<Integer>  {
+
 
     @Column(nullable = false)
     private String name;
 
-    private String urlImage;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private GenreStatus status = GenreStatus.ACTIVE;
 
     @OneToMany(mappedBy = "genre")
     private List<ProductGenre> productGenres;

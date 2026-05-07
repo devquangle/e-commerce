@@ -9,6 +9,7 @@ import com.dev.backend.constant.PermissionEnum;
 import com.dev.backend.constant.RoleName;
 import com.dev.backend.entity.Permission;
 import com.dev.backend.entity.Role;
+import com.dev.backend.service.GenreService;
 import com.dev.backend.service.PermissionService;
 import com.dev.backend.service.RegisterService;
 import com.dev.backend.service.RolePermissionService;
@@ -26,6 +27,8 @@ public class LoadData implements ApplicationRunner {
 
     private final UserService userService;
     private final  RegisterService registerService;
+
+    private final GenreService genreService;
 
     @Override
     public void run(org.springframework.boot.ApplicationArguments args) throws Exception {
@@ -108,6 +111,8 @@ public class LoadData implements ApplicationRunner {
         if (userService.isEmpty()){
             registerService.setUp();
         }
+
+        genreService.demoData();
 
 
       

@@ -9,7 +9,7 @@ import {
     useWards
 } from "@/hooks/useAddressGHN";
 
-import type { AddressFrom } from "@/types/address";
+import type { AddressRequest } from "@/types/address";
 
 import { Controller, useForm, useWatch } from "react-hook-form";
 import {  NavLink } from "react-router-dom";
@@ -27,12 +27,12 @@ export default function CreateAddress() {
         resetField,
 
         formState: { errors },
-    } = useForm<AddressFrom>({
+    } = useForm<AddressRequest>({
         defaultValues: {
             fullName: "",
             phone: "",
             street: "",
-            isDefault: false,
+            default: false,
         },
     });
 
@@ -42,7 +42,7 @@ export default function CreateAddress() {
     const { data: districts = [] } = useDistricts(provinceId);
     const { data: wards = [] } = useWards(districtId);
 
-    const onSubmit = (data: AddressFrom) => {
+    const onSubmit = (data: AddressRequest) => {
         createMutation.mutate(data);
     };
 
@@ -174,7 +174,7 @@ export default function CreateAddress() {
 
                 {/* DEFAULT */}
                 <div className="flex items-center gap-2">
-                    <input type="checkbox" {...register("isDefault")} />
+                    <input type="checkbox" {...register("default")} />
                     <label>Đặt làm mặc định</label>
                 </div>
 

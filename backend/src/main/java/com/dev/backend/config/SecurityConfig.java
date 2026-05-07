@@ -18,6 +18,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 
+import com.dev.backend.constant.RoleName;
 import com.dev.backend.security.CustomAccessDeniedHandler;
 import com.dev.backend.security.CustomUserDetailsService;
 import com.dev.backend.security.jwt.JwtAuthenticationFilter;
@@ -91,7 +92,10 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(req -> req
                         .requestMatchers(PUBLIC_URLS).permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/admin/**")
+                        .hasAnyRole(
+                                RoleName.SUPER_ADMIN.name(),
+                                RoleName.ADMIN.name())
                         .requestMatchers("/staff/**").hasRole("STAFF")
                         .requestMatchers("/accounting/**").hasRole("ACCOUNTANT")
                         .requestMatchers("/customer/**").hasRole("CUSTOMER")

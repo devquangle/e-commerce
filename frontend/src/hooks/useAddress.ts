@@ -27,7 +27,7 @@ export const useCreateAddress = () => {
       // ⚡ UI update NGAY LẬP TỨC
       queryClient.setQueryData<AddressResponse[]>(
         ["addresses"],
-        (old = []) => [newAddress, ...old], // id DESC feel
+        (old = []) => [newAddress, ...old],
       );
 
       showSuccessToast("Thêm địa chỉ thành công");
