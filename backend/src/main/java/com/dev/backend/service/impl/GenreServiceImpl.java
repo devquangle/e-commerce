@@ -2,6 +2,10 @@ package com.dev.backend.service.impl;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.dev.backend.constant.GenreStatus;
@@ -11,6 +15,7 @@ import com.dev.backend.entity.Genre;
 import com.dev.backend.exception.NotFoundException;
 import com.dev.backend.mapper.GenreMapper;
 import com.dev.backend.repository.GenreRepository;
+import com.dev.backend.resp.PageResponse;
 import com.dev.backend.service.GenreService;
 
 import lombok.RequiredArgsConstructor;
@@ -92,5 +97,32 @@ public class GenreServiceImpl implements GenreService {
         public Genre findByName(String name) {
                 // TODO Auto-generated method stub
                 return null;
+        }
+
+        @Override
+        public PageResponse<GenreResponse> pageGenre(int page, int size, String keyword) {
+                Pageable pageable = PageRequest.of(
+                                page,
+                                size,
+                                Sort.by(Sort.Direction.DESC, "id"));
+
+                Page<Genre> genrePage = (keyword == null || keyword.isEmpty())
+                                ? genreRepository.findAll(pageable)
+                                : genreRepository.findByNameContainingIgnoreCase(
+                                                keyword,
+                                                pageable);
+
+                List<GenreResponse> items = genrePage
+                                .getContent()
+                                .stream()
+                                .map(genreMapper::toDTO)
+                                .toList();
+
+                return new PageResponse<>(
+                                items,
+                                genrePage.getNumber(),
+                                genrePage.getSize(),
+                                genrePage.getTotalElements(),
+                                genrePage.getTotalPages());
         }
 }

@@ -1,17 +1,35 @@
 import Loading from "@/components/common/Loading";
 import { useCreateGenre, useGenre } from "@/hooks/useGenre";
-import GenreChildren from "./GenreChildren";
 import {
   GenreStatus,
   GenreStatusLabel,
   type GenreRequest,
 } from "@/types/genre";
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Modal from "@/components/common/Modal";
-import {useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import InputField from "@/components/common/InputField";
 import { mapServerErrors } from "@/utils/mapServerErrors";
 import { showErrorToast, showSuccessToast } from "@/utils/toastUtil";
+import Pagination from "@/components/common/Pagination";
+import type { options as GenreOptions } from "@/types/genre";
+import { useSearchParams } from "react-router-dom";
+import useDebounce from "@/hooks/useDebounce";
+
+const initialFilterOptions: GenreOptions = {
+  keyword: "",
+  page: 1,
+  size: 10,
+};
+
+function getPositiveNumberParam(
+  searchParams: URLSearchParams,
+  key: string,
+  fallback: number,
+) {
+  const value = Number(searchParams.get(key));
+  return Number.isInteger(value) && value > 0 ? value : fallback;
+}
 
 function statusClass(status: GenreStatus) {
   switch (status) {
@@ -27,7 +45,29 @@ function statusClass(status: GenreStatus) {
 }
 
 export default function Genre() {
-  const { data: genres = [], isPending } = useGenre();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [keyword, setKeyword] = useState(
+    searchParams.get("keyword") ?? initialFilterOptions.keyword,
+  );
+  const debouncedKeyword = useDebounce(keyword, 500);
+  const options = useMemo<GenreOptions>(
+    () => ({
+      keyword: searchParams.get("keyword") ?? initialFilterOptions.keyword,
+      page: getPositiveNumberParam(
+        searchParams,
+        "page",
+        initialFilterOptions.page ?? 1,
+      ),
+      size: getPositiveNumberParam(
+        searchParams,
+        "size",
+        initialFilterOptions.size ?? 10,
+      ),
+    }),
+    [searchParams],
+  );
+  const { data, isPending, isFetching } = useGenre(options);
+  const genres = data?.items ?? [];
   const {
     register,
     handleSubmit,
@@ -41,10 +81,9 @@ export default function Genre() {
     },
   });
   const [openAddGenreModal, setOpenAddGenreModal] = useState(false);
-  const [openEditGenreModal, setOpenEditGenreModal] = useState(false);
-  const [selectedGenre, setSelectedGenre] = useState(null);
 
   const createMutation = useCreateGenre();
+
   const onSubmitAddGenre = async (data: GenreRequest) => {
     if (createMutation.isPending) return;
     try {
@@ -57,13 +96,55 @@ export default function Genre() {
   };
   const handleCloseAddGenreModal = () => {
     reset();
-    setSelectedGenre(null);
     setOpenAddGenreModal(false);
   };
 
-  const onSubmitEditGenre = (data: GenreRequest) => {
-    console.log("Edit Genre:", data);
-    setOpenEditGenreModal(false);
+  const updateSearchParams = useCallback(
+    (nextOptions: GenreOptions, replace = true) => {
+      const nextSearchParams = new URLSearchParams(searchParams);
+      const nextKeyword = nextOptions.keyword?.trim();
+
+      if (nextKeyword) {
+        nextSearchParams.set("keyword", nextKeyword);
+      } else {
+        nextSearchParams.delete("keyword");
+      }
+
+      nextSearchParams.set(
+        "page",
+        String(nextOptions.page ?? initialFilterOptions.page),
+      );
+      nextSearchParams.set(
+        "size",
+        String(nextOptions.size ?? initialFilterOptions.size),
+      );
+
+      setSearchParams(nextSearchParams, { replace });
+    },
+    [searchParams, setSearchParams],
+  );
+
+  useEffect(() => {
+    if (debouncedKeyword === options.keyword) return;
+
+    updateSearchParams({
+      ...options,
+      keyword: debouncedKeyword,
+      page: 1,
+    });
+  }, [debouncedKeyword, options, updateSearchParams]);
+
+  const handleKeywordChange = (keyword: string) => {
+    setKeyword(keyword);
+  };
+
+  const handlePageChange = (page: number) => {
+    updateSearchParams({ ...options, page }, false);
+  };
+
+  const handleResetFilter = () => {
+    setKeyword(initialFilterOptions.keyword ?? "");
+    setSearchParams(new URLSearchParams(), { replace: true });
   };
 
   if (isPending) return <Loading />;
@@ -96,6 +177,8 @@ export default function Genre() {
             <input
               type="text"
               placeholder="Tìm theo tên thể loại..."
+              value={keyword}
+              onChange={(event) => handleKeywordChange(event.target.value)}
               className="rounded-lg border px-3 py-2 text-sm outline-none ring-indigo-500 focus:ring-2"
             />
 
@@ -106,7 +189,10 @@ export default function Genre() {
               <option>{GenreStatusLabel[GenreStatus.DELETED]}</option>
             </select>
 
-            <button className="rounded-lg border px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+            <button
+              className="rounded-lg border px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              onClick={handleResetFilter}
+            >
               Làm mới
             </button>
           </div>
@@ -133,7 +219,6 @@ export default function Genre() {
                       {genre?.name}
                     </td>
 
-                  
                     <td className="py-3 text-gray-700 align-top">
                       <span className="inline-flex items-center justify-center w-8 h-6 text-sm">
                         {genre.totalProduct}
@@ -183,8 +268,6 @@ export default function Genre() {
 
                 {/* INFO */}
                 <div className="mt-2 text-sm text-gray-600 space-y-1">
-                  
-
                   <div>
                     <span className="font-medium">Số sách:</span>{" "}
                     {genre.totalProduct}
@@ -203,6 +286,17 @@ export default function Genre() {
               </div>
             ))}
           </div>
+        </div>
+        {/* PAGINATION */}
+        <div>
+          <Pagination
+            currentPage={(data?.page ?? 0) + 1}
+            totalPages={Math.max(data?.totalPages ?? 0, 1)}
+            onPageChange={handlePageChange}
+            totalItems={data?.totalItems || 0}
+            pageSize={data?.size || options.size || 10}
+            disabled={isFetching}
+          />
         </div>
       </div>
       <Modal
@@ -227,7 +321,6 @@ export default function Genre() {
               }}
               error={errors?.name}
             />
-           
           </form>
         </div>
       </Modal>

@@ -27,3 +27,11 @@ export interface GenreRequest {
   name: string;
   status: GenreStatus;
 }
+
+
+
+export type options = {
+  keyword?: string;
+  page?: number;
+  size?: number;
+};

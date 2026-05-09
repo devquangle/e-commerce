@@ -1,11 +1,15 @@
 import { apiAuth } from "@/configs/axios";
 import type { ApiResponse } from "@/types/api-response";
-import type { GenreRequest, GenreResponse } from "@/types/genre";
+import type { GenreRequest, GenreResponse, options } from "@/types/genre";
+import type { Pagination } from "@/types/pagination";
 
 const genreService = {
-  async getGenres() {
+  async getGenres(options?: options) {
     const res =
-      await apiAuth.get<ApiResponse<GenreResponse[]>>("/admin/genres");
+      await apiAuth.get<ApiResponse<Pagination<GenreResponse>>>(
+        "/admin/genres",
+        { params: options }
+      );
     if (!res.data.success || !res.data.data) {
       throw new Error(res.data.message || "Fetch addresses failed");
     }
@@ -19,7 +23,7 @@ const genreService = {
     if (!res.data.success ) {
       throw new Error(res.data.message || "Failed to create genre");
     }
-    return;
+    return res.data.data;
   },
 };
 
