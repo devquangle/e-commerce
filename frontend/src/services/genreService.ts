@@ -25,6 +25,15 @@ const genreService = {
     }
     return res.data.data;
   },
+  async deleteGenre(id: number) {
+    const res = await apiAuth.delete<ApiResponse<void>>(
+      `/admin/genres/${id}`,
+    );
+    if (!res.data.success) {
+      throw new Error(res.data.message || "Delete address failed");
+    }
+    return;
+  },
 };
 
 export default genreService;

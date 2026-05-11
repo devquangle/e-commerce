@@ -1,5 +1,5 @@
 import Loading from "@/components/common/Loading";
-import { useCreateGenre, useGenre } from "@/hooks/useGenre";
+import { useCreateGenre, useDeleteGenre, useGenre } from "@/hooks/useGenre";
 import {
   GenreStatus,
   GenreStatusLabel,
@@ -12,7 +12,7 @@ import InputField from "@/components/common/InputField";
 import { mapServerErrors } from "@/utils/mapServerErrors";
 import { showErrorToast, showSuccessToast } from "@/utils/toastUtil";
 import Pagination from "@/components/common/Pagination";
-import type { options as GenreOptions } from "@/types/genre";
+import type { options as GenreOptions, GenreResponse } from "@/types/genre";
 import { useSearchParams } from "react-router-dom";
 import useDebounce from "@/hooks/useDebounce";
 
@@ -81,19 +81,46 @@ export default function Genre() {
     },
   });
   const [openAddGenreModal, setOpenAddGenreModal] = useState(false);
+  const [openDeleteGenreModal, setOpenDeleteGenreModal] = useState(false);
+  const [selectGenre, setSelectGenre] = useState<GenreResponse | null>(null);
 
   const createMutation = useCreateGenre();
+  const deleteGenre = useDeleteGenre();
 
   const onSubmitAddGenre = async (data: GenreRequest) => {
     if (createMutation.isPending) return;
     try {
       await createMutation.mutateAsync(data);
       showSuccessToast("Thêm thể loại thành công!");
+      reset();
       handleCloseAddGenreModal();
     } catch (error: unknown) {
       mapServerErrors(error, setError, showErrorToast);
     }
   };
+  const onSubmitDeleteGenre = async () => {
+    deleteGenre.mutate(selectGenre?.id ?? 0, {
+      onSuccess: () => {
+        showSuccessToast("Xóa thể loại thành công!");
+        handleCloseDeleteGenreModal();
+      },
+      onError: (error: unknown) => {
+        mapServerErrors(error, () => {}, showErrorToast);
+      },
+    });
+  };
+
+
+  const handleCloseDeleteGenreModal = () => {
+    reset();
+    setOpenDeleteGenreModal(false);
+  };
+
+  const handleOpenDeleteGenreModal = (genre: GenreResponse) => {
+    setSelectGenre(genre);
+    setOpenDeleteGenreModal(true);
+  };
+
   const handleCloseAddGenreModal = () => {
     reset();
     setOpenAddGenreModal(false);
@@ -140,6 +167,10 @@ export default function Genre() {
 
   const handlePageChange = (page: number) => {
     updateSearchParams({ ...options, page }, false);
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    updateSearchParams({ ...options, page: 1, size }, false);
   };
 
   const handleResetFilter = () => {
@@ -236,7 +267,10 @@ export default function Genre() {
                       <button className="mr-2 rounded-md border px-3 py-1.5 text-xs hover:bg-gray-50">
                         Sửa
                       </button>
-                      <button className="rounded-md border border-red-200 px-3 py-1.5 text-xs text-red-600 hover:bg-red-50">
+                      <button
+                        onClick={() => handleOpenDeleteGenreModal(genre)}
+                        className="rounded-md border border-red-200 px-3 py-1.5 text-xs text-red-600 hover:bg-red-50"
+                      >
                         Xóa
                       </button>
                     </td>
@@ -279,7 +313,10 @@ export default function Genre() {
                   <button className="flex-1 rounded border py-1 text-xs hover:bg-gray-50">
                     Sửa
                   </button>
-                  <button className="flex-1 rounded border border-red-200 py-1 text-xs text-red-600 hover:bg-red-50">
+                  <button
+                    onClick={() => handleOpenDeleteGenreModal(genre)}
+                    className="flex-1 rounded border border-red-200 py-1 text-xs text-red-600 hover:bg-red-50"
+                  >
                     Xóa
                   </button>
                 </div>
@@ -295,6 +332,7 @@ export default function Genre() {
             onPageChange={handlePageChange}
             totalItems={data?.totalItems || 0}
             pageSize={data?.size || options.size || 10}
+            onPageSizeChange={handlePageSizeChange}
             disabled={isFetching}
           />
         </div>
@@ -322,6 +360,24 @@ export default function Genre() {
               error={errors?.name}
             />
           </form>
+        </div>
+      </Modal>
+      <Modal
+        isOpen={openDeleteGenreModal}
+        onClose={handleCloseDeleteGenreModal}
+        title="Xóa thể loại"
+        onConfirm={handleSubmit(onSubmitDeleteGenre)}
+        confirmText="Xóa"
+        cancelText="Hủy"
+        size="lg"
+      >
+        <div>
+          {selectGenre && (
+            <p className="text-gray-700 mb-4">
+              Bạn sắp xóa thể loại{" "}
+              <span className="font-semibold">{selectGenre.name}</span>.
+            </p>
+          )}
         </div>
       </Modal>
     </>

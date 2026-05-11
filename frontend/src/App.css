@@ -1,0 +1,7 @@
+   body {
+        font-family: 'Inter', sans-serif;
+    }
+
+   body.admin-no-body-scroll {
+        overflow: hidden !important;
+   }

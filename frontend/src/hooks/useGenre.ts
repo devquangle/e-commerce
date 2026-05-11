@@ -7,7 +7,6 @@ export const useGenre = (options?: options) => {
   return useQuery<Pagination<GenreResponse>>({
     queryKey: ["genres", options],
     queryFn: () => genreService.getGenres(options),
-    staleTime: 1000 * 30,
   });
 };
 
@@ -17,6 +16,16 @@ export const useCreateGenre = () => {
   return useMutation({
     mutationFn: (data: GenreRequest) => genreService.createGenre(data),
 
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["genres"] });
+    },
+  });
+};
+
+export const useDeleteGenre = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => genreService.deleteGenre(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["genres"] });
     },

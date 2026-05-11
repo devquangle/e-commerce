@@ -1,5 +1,6 @@
 package com.dev.backend.service.impl;
 
+import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -12,11 +13,13 @@ import com.dev.backend.constant.GenreStatus;
 import com.dev.backend.dto.genre.GenreRequest;
 import com.dev.backend.dto.genre.GenreResponse;
 import com.dev.backend.entity.Genre;
+import com.dev.backend.exception.DuplicateFieldException;
 import com.dev.backend.exception.NotFoundException;
 import com.dev.backend.mapper.GenreMapper;
 import com.dev.backend.repository.GenreRepository;
 import com.dev.backend.resp.PageResponse;
 import com.dev.backend.service.GenreService;
+import com.dev.backend.service.ProductGenreService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 public class GenreServiceImpl implements GenreService {
         private final GenreRepository genreRepository;
         private final GenreMapper genreMapper;
+        private final ProductGenreService productGenreService;
 
         @Override
         public boolean isEmpty() {
@@ -74,9 +78,19 @@ public class GenreServiceImpl implements GenreService {
         }
 
         @Override
-        public boolean validation(String name) {
-                // TODO Auto-generated method stub
-                return false;
+        public void validate(String name) {
+                DuplicateFieldException errors = new DuplicateFieldException(new HashMap<>());
+                if (existsByName(name)) {
+                        errors.addError("name", "Tên thể loại đã tồn tại");
+                }
+                if (!errors.getErrors().isEmpty()) {
+                        throw errors;
+                }
+        }
+
+        @Override
+        public boolean existsByName(String name) {
+                return genreRepository.existsByName(name);
         }
 
         @Override
@@ -97,6 +111,19 @@ public class GenreServiceImpl implements GenreService {
         public Genre findByName(String name) {
                 // TODO Auto-generated method stub
                 return null;
+        }
+
+        @Override
+        public void delete(Integer id) {
+                Genre genre = findById(id);
+                boolean hasProducts = productGenreService.existsByGenreId(id);
+                if (hasProducts) {
+                        genre.setStatus(GenreStatus.DELETED);
+                        save(genre);
+                        return;
+                }
+                genreRepository.delete(genre);
+
         }
 
         @Override

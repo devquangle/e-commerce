@@ -1,4 +1,5 @@
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
+import type { ChangeEvent } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -12,6 +13,8 @@ export type PaginationProps = {
   siblingCount?: number;
   totalItems?: number;
   pageSize?: number;
+  pageSizeOptions?: number[];
+  onPageSizeChange?: (pageSize: number) => void;
   disabled?: boolean;
 };
 
@@ -59,13 +62,16 @@ export default function Pagination({
   siblingCount = 1,
   totalItems,
   pageSize,
+  pageSizeOptions = [10, 20, 50, 100],
+  onPageSizeChange,
   disabled = false,
 }: PaginationProps) {
-   if (totalPages === 0) return null;
-
+  if (totalPages === 0) return null;
 
   const safeTotalPages = Math.max(1, totalPages);
   const safeCurrentPage = Math.min(Math.max(currentPage, 1), safeTotalPages);
+  const safePageSize =
+    typeof pageSize === "number" && pageSize > 0 ? pageSize : undefined;
   const pages = createPageItems(
     safeCurrentPage,
     safeTotalPages,
@@ -75,17 +81,29 @@ export default function Pagination({
   const canGoNext = safeCurrentPage < safeTotalPages && !disabled;
   const showSummary =
     typeof totalItems === "number" &&
-    typeof pageSize === "number" &&
+    typeof safePageSize === "number" &&
     totalItems > 0 &&
-    pageSize > 0;
-  const startItem = showSummary ? (safeCurrentPage - 1) * pageSize + 1 : 0;
+    safePageSize > 0;
+  const startItem = showSummary ? (safeCurrentPage - 1) * safePageSize + 1 : 0;
   const endItem = showSummary
-    ? Math.min(safeCurrentPage * pageSize, totalItems)
+    ? Math.min(safeCurrentPage * safePageSize, totalItems)
     : 0;
+  const canChangePageSize = Boolean(onPageSizeChange && safePageSize);
+  const sizeOptions = safePageSize
+    ? Array.from(new Set([...pageSizeOptions, safePageSize])).sort(
+        (first, second) => first - second
+      )
+    : pageSizeOptions;
 
   const handlePageChange = (page: number) => {
     if (disabled || page === safeCurrentPage) return;
     onPageChange(page);
+  };
+
+  const handlePageSizeChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    const nextPageSize = Number(event.target.value);
+    if (disabled || !onPageSizeChange || nextPageSize === safePageSize) return;
+    onPageSizeChange(nextPageSize);
   };
 
   return (
@@ -106,7 +124,25 @@ export default function Pagination({
         </p>
       )}
 
-      <div className="flex items-center gap-1">
+      <div className="flex flex-wrap items-center gap-2">
+        {canChangePageSize && (
+          <label className="flex items-center gap-2 text-sm text-gray-500">
+            <span>Size</span>
+            <select
+              value={safePageSize}
+              onChange={handlePageSizeChange}
+              disabled={disabled}
+              className="h-9 rounded-md border bg-white px-2 text-sm text-gray-700 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {sizeOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+
         <button
           type="button"
           aria-label="Previous page"

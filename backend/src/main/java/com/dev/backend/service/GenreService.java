@@ -9,16 +9,25 @@ import com.dev.backend.resp.PageResponse;
 
 public interface GenreService {
     boolean isEmpty();
+
     List<GenreResponse> getAllGenre();
+
     Genre save(Genre genre);
+
     Genre findById(Integer id);
+
     Genre findByName(String name);
+
     void demoData();
-    boolean validation(String name);
 
     Genre addGenre(GenreRequest genreRequest);
 
     PageResponse<GenreResponse> pageGenre(int page, int size, String keyword);
-    
-    
+
+    boolean existsByName(String name);
+
+    void validate(String name);
+
+    void delete(Integer id);
+
 }

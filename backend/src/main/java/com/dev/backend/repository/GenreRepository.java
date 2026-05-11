@@ -27,4 +27,9 @@ public interface GenreRepository extends JpaRepository<Genre, Integer> {
                         @Param("keyword") String keyword,
                         Pageable pageable);
 
+        @Query("SELECT COUNT(g)>0 FROM Genre g WHERE g.name = :name")
+        boolean existsByName(@Param("name") String name);
+
+
+
 }
