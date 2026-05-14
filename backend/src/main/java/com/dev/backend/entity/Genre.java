@@ -29,6 +29,8 @@ public class Genre extends BaseEntity<Integer>  {
     @Column(nullable = false)
     private String name;
 
+    private String urlImage;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default

@@ -5,11 +5,10 @@ import type { Pagination } from "@/types/pagination";
 
 const genreService = {
   async getGenres(options?: options) {
-    const res =
-      await apiAuth.get<ApiResponse<Pagination<GenreResponse>>>(
-        "/admin/genres",
-        { params: options }
-      );
+    const res = await apiAuth.get<ApiResponse<Pagination<GenreResponse>>>(
+      "/admin/genres",
+      { params: options },
+    );
     if (!res.data.success || !res.data.data) {
       throw new Error(res.data.message || "Fetch addresses failed");
     }
@@ -20,17 +19,25 @@ const genreService = {
       "/admin/genres",
       data,
     );
-    if (!res.data.success ) {
+    if (!res.data.success) {
       throw new Error(res.data.message || "Failed to create genre");
     }
     return res.data.data;
   },
-  async deleteGenre(id: number) {
-    const res = await apiAuth.delete<ApiResponse<void>>(
+  async updateGenre(id: number, data: GenreRequest) {
+    const res = await apiAuth.put<ApiResponse<GenreResponse>>(
       `/admin/genres/${id}`,
+      data,
     );
+    if (!res.data.success || !res.data.data) {
+      throw new Error(res.data.message || "Failed to update genre");
+    }
+    return res.data.data;
+  },
+  async deleteGenre(id: number) {
+    const res = await apiAuth.delete<ApiResponse<void>>(`/admin/genres/${id}`);
     if (!res.data.success) {
-      throw new Error(res.data.message || "Delete address failed");
+      throw new Error(res.data.message || "Delete genre failed");
     }
     return;
   },

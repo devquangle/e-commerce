@@ -1,5 +1,10 @@
 import Loading from "@/components/common/Loading";
-import { useCreateGenre, useDeleteGenre, useGenre } from "@/hooks/useGenre";
+import {
+  useCreateGenre,
+  useDeleteGenre,
+  useGenre,
+  useUpdateGenre,
+} from "@/hooks/useGenre";
 import {
   GenreStatus,
   GenreStatusLabel,
@@ -7,7 +12,7 @@ import {
 } from "@/types/genre";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Modal from "@/components/common/Modal";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import InputField from "@/components/common/InputField";
 import { mapServerErrors } from "@/utils/mapServerErrors";
 import { showErrorToast, showSuccessToast } from "@/utils/toastUtil";
@@ -15,6 +20,7 @@ import Pagination from "@/components/common/Pagination";
 import type { options as GenreOptions, GenreResponse } from "@/types/genre";
 import { useSearchParams } from "react-router-dom";
 import useDebounce from "@/hooks/useDebounce";
+import SelectBox from "@/components/common/SelectBox";
 
 const initialFilterOptions: GenreOptions = {
   keyword: "",
@@ -72,6 +78,8 @@ export default function Genre() {
     register,
     handleSubmit,
     reset,
+    setValue,
+    control,
     setError,
     formState: { errors },
   } = useForm<GenreRequest>({
@@ -82,10 +90,12 @@ export default function Genre() {
   });
   const [openAddGenreModal, setOpenAddGenreModal] = useState(false);
   const [openDeleteGenreModal, setOpenDeleteGenreModal] = useState(false);
+  const [openUpdateGenreModal, setOpenUpdateGenreModal] = useState(false);
   const [selectGenre, setSelectGenre] = useState<GenreResponse | null>(null);
 
   const createMutation = useCreateGenre();
   const deleteGenre = useDeleteGenre();
+  const updateGenre = useUpdateGenre();
 
   const onSubmitAddGenre = async (data: GenreRequest) => {
     if (createMutation.isPending) return;
@@ -94,6 +104,17 @@ export default function Genre() {
       showSuccessToast("Thêm thể loại thành công!");
       reset();
       handleCloseAddGenreModal();
+    } catch (error: unknown) {
+      mapServerErrors(error, setError, showErrorToast);
+    }
+  };
+  const onSubmitUpdateGenre = async (data: GenreRequest) => {
+    if (updateGenre.isPending) return;
+    try {
+      await updateGenre.mutateAsync({ id: selectGenre?.id ?? 0, data });
+      showSuccessToast("Cập nhật thể loại thành công!");
+      reset();
+      handleCloseUpdateGenreModal();
     } catch (error: unknown) {
       mapServerErrors(error, setError, showErrorToast);
     }
@@ -110,7 +131,6 @@ export default function Genre() {
     });
   };
 
-
   const handleCloseDeleteGenreModal = () => {
     reset();
     setOpenDeleteGenreModal(false);
@@ -121,9 +141,20 @@ export default function Genre() {
     setOpenDeleteGenreModal(true);
   };
 
+  const handleOpenUpdateGenreModal = (genre: GenreResponse) => {
+    setSelectGenre(genre);
+    setValue("name", genre.name);
+    setValue("status", genre.status);
+    setOpenUpdateGenreModal(true);
+  };
+
   const handleCloseAddGenreModal = () => {
     reset();
     setOpenAddGenreModal(false);
+  };
+  const handleCloseUpdateGenreModal = () => {
+    reset();
+    setOpenUpdateGenreModal(false);
   };
 
   const updateSearchParams = useCallback(
@@ -177,6 +208,15 @@ export default function Genre() {
     setKeyword(initialFilterOptions.keyword ?? "");
     setSearchParams(new URLSearchParams(), { replace: true });
   };
+
+  const statusOptions = useMemo(
+    () =>
+      Object.values(GenreStatus).map((value) => ({
+        label: GenreStatusLabel[value],
+        value,
+      })),
+    [],
+  );
 
   if (isPending) return <Loading />;
 
@@ -264,7 +304,10 @@ export default function Genre() {
                       </span>
                     </td>
                     <td className="py-3 text-right">
-                      <button className="mr-2 rounded-md border px-3 py-1.5 text-xs hover:bg-gray-50">
+                      <button
+                        onClick={() => handleOpenUpdateGenreModal(genre)}
+                        className="mr-2 rounded-md border px-3 py-1.5 text-xs hover:bg-gray-50"
+                      >
                         Sửa
                       </button>
                       <button
@@ -310,7 +353,10 @@ export default function Genre() {
 
                 {/* ACTION */}
                 <div className="mt-3 flex gap-2">
-                  <button className="flex-1 rounded border py-1 text-xs hover:bg-gray-50">
+                  <button
+                    onClick={() => handleOpenUpdateGenreModal(genre)}
+                    className="flex-1 rounded border py-1 text-xs hover:bg-gray-50"
+                  >
                     Sửa
                   </button>
                   <button
@@ -358,6 +404,50 @@ export default function Genre() {
                 required: "Tên thể loại là bắt buộc",
               }}
               error={errors?.name}
+            />
+          </form>
+        </div>
+      </Modal>
+      <Modal
+        isOpen={openUpdateGenreModal}
+        onClose={handleCloseUpdateGenreModal}
+        title="Cập nhật thể loại"
+        onConfirm={handleSubmit(onSubmitUpdateGenre)}
+        confirmText="Cập nhật"
+        cancelText="Hủy"
+        size="lg"
+      >
+        <div>
+          <form className="space-y-4">
+            <InputField
+              label="Tên thể loại"
+              name="name"
+              type="text"
+              placeholder="Nhập tên thể loại"
+              register={register}
+              rules={{
+                required: "Tên thể loại là bắt buộc",
+              }}
+              error={errors?.name}
+            />
+            <Controller
+              name="status"
+              control={control}
+              rules={{ required: "Vui lòng chọn trạng thái" }}
+              render={({ field, fieldState }) => (
+                <div>
+                  <SelectBox<string>
+                    label="Trạng thái"
+                    options={statusOptions}
+                    value={field.value}
+                    onChange={field.onChange}
+                    searchable={false}
+                  />
+                  <p className="text-red-500 text-sm">
+                    {fieldState.error?.message}
+                  </p>
+                </div>
+              )}
             />
           </form>
         </div>

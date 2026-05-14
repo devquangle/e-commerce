@@ -22,6 +22,17 @@ export const useCreateGenre = () => {
   });
 };
 
+export const useUpdateGenre = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: GenreRequest }) =>
+      genreService.updateGenre(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["genres"] });
+    },
+  });
+};
+
 export const useDeleteGenre = () => {
   const queryClient = useQueryClient();
   return useMutation({

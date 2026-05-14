@@ -1,13 +1,16 @@
 package com.dev.backend.service.impl;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.dev.backend.constant.GenreStatus;
 import com.dev.backend.dto.genre.GenreRequest;
@@ -18,6 +21,7 @@ import com.dev.backend.exception.NotFoundException;
 import com.dev.backend.mapper.GenreMapper;
 import com.dev.backend.repository.GenreRepository;
 import com.dev.backend.resp.PageResponse;
+import com.dev.backend.service.CloudinaryService;
 import com.dev.backend.service.GenreService;
 import com.dev.backend.service.ProductGenreService;
 
@@ -29,6 +33,7 @@ public class GenreServiceImpl implements GenreService {
         private final GenreRepository genreRepository;
         private final GenreMapper genreMapper;
         private final ProductGenreService productGenreService;
+        private final CloudinaryService cloudinaryService;
 
         @Override
         public boolean isEmpty() {
@@ -78,6 +83,11 @@ public class GenreServiceImpl implements GenreService {
         }
 
         @Override
+        public boolean existsByName(String name) {
+                return genreRepository.existsByName(name);
+        }
+
+        @Override
         public void validate(String name) {
                 DuplicateFieldException errors = new DuplicateFieldException(new HashMap<>());
                 if (existsByName(name)) {
@@ -89,17 +99,41 @@ public class GenreServiceImpl implements GenreService {
         }
 
         @Override
-        public boolean existsByName(String name) {
-                return genreRepository.existsByName(name);
+        public GenreResponse addGenre(GenreRequest genreRequest, MultipartFile image) {
+                Genre genre = new Genre();
+                validate(genreRequest.getName());
+                genre.setName(genreRequest.getName());
+                genre.setStatus(genreRequest.getStatus());
+                setImageCloudinary(genre, image);
+
+                return genreMapper.toDTO(save(genre));
         }
 
         @Override
-        public Genre addGenre(GenreRequest genreRequest) {
-                Genre genre = new Genre();
+        public GenreResponse updateGenre(Integer id, GenreRequest genreRequest, MultipartFile image) {
+                Genre genre = findById(id);
+                if (!genre.getName().equals(genreRequest.getName())) {
+                        validate(genreRequest.getName());
+                }
                 genre.setName(genreRequest.getName());
                 genre.setStatus(genreRequest.getStatus());
+                setImageCloudinary(genre, image);
+                return genreMapper.toDTO(save(genre));
+        }
 
-                return save(genre);
+        @Override
+        public void setImageCloudinary(Genre genre, MultipartFile image) {
+                if (image != null && !image.isEmpty()) {
+                        if (!Objects.requireNonNull(image.getContentType()).startsWith("image/")) {
+                                throw new RuntimeException("File không phải ảnh");
+                        }
+                        try {
+                                genre.setUrlImage(cloudinaryService.uploadImage(image));
+                        } catch (IOException e) {
+                                throw new RuntimeException("File " + e.getMessage());
+                        }
+                }
+
         }
 
         @Override
