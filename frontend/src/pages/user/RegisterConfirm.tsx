@@ -1,5 +1,5 @@
 import Container from "@/components/common/Container";
-import type { ResponseData } from "@/types/response-data";
+import type { ApiResponse } from "@/types/api-response";
 import { showErrorToast, showSuccessToast } from "@/utils/toastUtil";
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
@@ -24,7 +24,7 @@ export default function RegisterConfirm() {
 
     const checkToken = async () => {
       try {
-        const res = await axios.post<ResponseData>(`http://localhost:8080/verify-register`,
+        const res = await axios.post<ApiResponse<any>>(`http://localhost:8080/verify-register`,
           { token: verifyToken }
         );
 

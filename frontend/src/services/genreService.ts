@@ -14,10 +14,15 @@ const genreService = {
     }
     return res.data.data;
   },
-  async createGenre(data: GenreRequest) {
+  async createGenre(formData: FormData) {
     const res = await apiAuth.post<ApiResponse<GenreResponse>>(
       "/admin/genres",
-      data,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      },
     );
     if (!res.data.success) {
       throw new Error(res.data.message || "Failed to create genre");

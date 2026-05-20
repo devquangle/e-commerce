@@ -1,5 +1,5 @@
 import Container from "@/components/common/Container"
-import React, { useState } from "react"
+import { useState } from "react"
 
 interface Product {
     id: number

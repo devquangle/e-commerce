@@ -1,4 +1,4 @@
-import Loading from "@/components/common/Loading";
+﻿import Loading from "@/components/common/Loading";
 import {
   useCreateGenre,
   useDeleteGenre,
@@ -21,6 +21,8 @@ import type { options as GenreOptions, GenreResponse } from "@/types/genre";
 import { useSearchParams } from "react-router-dom";
 import useDebounce from "@/hooks/useDebounce";
 import SelectBox from "@/components/common/SelectBox";
+import { Edit, Eye, Trash2, Sparkles } from "lucide-react";
+import imageService from "@/services/imageService";
 
 const initialFilterOptions: GenreOptions = {
   keyword: "",
@@ -73,12 +75,19 @@ export default function Genre() {
     [searchParams],
   );
   const { data, isPending, isFetching } = useGenre(options);
+  const [file, setFile] = useState<File | null>(null);
+  const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(
+    null,
+  );
+  const [generatedImageRetry, setGeneratedImageRetry] = useState(0);
+  const [generatedImageError, setGeneratedImageError] = useState(false);
   const genres = data?.items ?? [];
   const {
     register,
     handleSubmit,
     reset,
     setValue,
+    getValues,
     control,
     setError,
     formState: { errors },
@@ -92,6 +101,7 @@ export default function Genre() {
   const [openDeleteGenreModal, setOpenDeleteGenreModal] = useState(false);
   const [openUpdateGenreModal, setOpenUpdateGenreModal] = useState(false);
   const [selectGenre, setSelectGenre] = useState<GenreResponse | null>(null);
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
 
   const createMutation = useCreateGenre();
   const deleteGenre = useDeleteGenre();
@@ -100,9 +110,26 @@ export default function Genre() {
   const onSubmitAddGenre = async (data: GenreRequest) => {
     if (createMutation.isPending) return;
     try {
-      await createMutation.mutateAsync(data);
+      const formData = new FormData();
+
+      formData.append(
+        "data",
+        new Blob([JSON.stringify(data)], {
+          type: "application/json",
+        }),
+      );
+
+      if (file) {
+        formData.append("image", file);
+      }
+
+      await createMutation.mutateAsync(formData);
       showSuccessToast("Thêm thể loại thành công!");
       reset();
+      setFile(null);
+      setGeneratedImageUrl(null); 
+      setGeneratedImageRetry(0);
+      setGeneratedImageError(false);
       handleCloseAddGenreModal();
     } catch (error: unknown) {
       mapServerErrors(error, setError, showErrorToast);
@@ -150,11 +177,44 @@ export default function Genre() {
 
   const handleCloseAddGenreModal = () => {
     reset();
+    setFile(null);
+    setGeneratedImageUrl(null);
+    setGeneratedImageRetry(0);
+    setGeneratedImageError(false);
     setOpenAddGenreModal(false);
   };
   const handleCloseUpdateGenreModal = () => {
     reset();
     setOpenUpdateGenreModal(false);
+  };
+
+  const handleGenerateImageWithAI = async () => {
+    const genreName = getValues("name")?.trim();
+
+    if (!genreName) {
+      setError("name", {
+        type: "manual",
+        message: "Vui lòng nhập tên thể loại trước khi tạo ảnh",
+      });
+      return;
+    }
+
+    setIsGeneratingAI(true);
+    try {
+      const resp = await imageService.createImage({
+        input: genreName,
+      });
+
+      setGeneratedImageUrl(resp.imageUrl);
+      setGeneratedImageRetry(0);
+      setGeneratedImageError(false);
+      showSuccessToast("Tạo ảnh bằng AI thành công!");
+    } catch (error) {
+      showErrorToast("Lỗi tạo ảnh bằng AI");
+      console.error(error);
+    } finally {
+      setIsGeneratingAI(false);
+    }
   };
 
   const updateSearchParams = useCallback(
@@ -217,6 +277,12 @@ export default function Genre() {
       })),
     [],
   );
+  const generatedPreviewUrl = useMemo(() => {
+    if (!generatedImageUrl) return "";
+
+    const separator = generatedImageUrl.includes("?") ? "&" : "?";
+    return `${generatedImageUrl}${separator}retry=${generatedImageRetry}`;
+  }, [generatedImageRetry, generatedImageUrl]);
 
   if (isPending) return <Loading />;
 
@@ -405,6 +471,134 @@ export default function Genre() {
               }}
               error={errors?.name}
             />
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Ảnh thể loại</label>
+
+              <div className="flex gap-2 mb-3">
+                <button
+                  type="button"
+                  onClick={handleGenerateImageWithAI}
+                  disabled={isGeneratingAI}
+                  className="flex items-center gap-2 rounded-lg border border-indigo-300 bg-indigo-50 px-3 py-2 text-sm font-medium text-indigo-600 hover:bg-indigo-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Sparkles size={16} />
+                  {isGeneratingAI ? "Đang tạo..." : "Tạo ảnh bằng AI"}
+                </button>
+              </div>
+
+              {!file && !generatedImageUrl ? (
+                <label
+                  className="
+        flex cursor-pointer items-center justify-center
+        rounded-xl border-2 border-dashed
+        border-gray-300 p-6
+        transition hover:border-primary
+        hover:bg-muted/50
+      "
+                >
+                  <div className="flex flex-col items-center gap-2 text-sm text-muted-foreground">
+                    <span className="text-3xl">📁</span>
+
+                    <span>Chọn ảnh hoặc kéo thả vào đây</span>
+
+                    <span className="text-xs">PNG, JPG, WEBP</span>
+                  </div>
+
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+
+                      if (file) {
+                        setFile(file);
+                        setGeneratedImageUrl(null);
+                        setGeneratedImageRetry(0);
+                        setGeneratedImageError(false);
+                      }
+                    }}
+                  />
+                </label>
+              ) : (
+                <div className="relative group rounded-lg border p-2 overflow-hidden">
+                  <img
+                    src={file ? URL.createObjectURL(file) : generatedPreviewUrl}
+                    alt="preview"
+                    referrerPolicy="no-referrer"
+                    className="h-40 w-full rounded-lg object-cover"
+                    onLoad={() => setGeneratedImageError(false)}
+                    onError={() => {
+                      if (!file && generatedImageUrl && generatedImageRetry < 6) {
+                        window.setTimeout(() => {
+                          setGeneratedImageRetry((retry) => retry + 1);
+                        }, 1500);
+                        return;
+                      }
+
+                      setGeneratedImageError(true);
+                    }}
+                  />
+
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all duration-200 rounded-lg flex items-center justify-center gap-3">
+                    {generatedImageUrl && !file && (
+                      <a
+                        href={generatedImageUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        title="Mở ảnh trong tab mới"
+                        className="bg-white p-2 rounded cursor-pointer hover:bg-gray-100 transition flex items-center justify-center"
+                      >
+                        <Eye size={20} className="text-gray-700" />
+                      </a>
+                    )}
+                    <label className="bg-white p-2 rounded cursor-pointer hover:bg-gray-100 transition flex items-center justify-center">
+                      <Edit size={20} className="text-gray-700" />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            setFile(file);
+                            setGeneratedImageUrl(null);
+                            setGeneratedImageRetry(0);
+                            setGeneratedImageError(false);
+                          }
+                        }}
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFile(null);
+                        setGeneratedImageUrl(null);
+                        setGeneratedImageRetry(0);
+                        setGeneratedImageError(false);
+                      }}
+                      className="bg-red-500 text-white p-2 rounded hover:bg-red-600 transition flex items-center justify-center"
+                    >
+                      <Trash2 size={20} />
+                    </button>
+                  </div>
+
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    {file?.name ?? "Ảnh được tạo bằng AI"}
+                  </p>
+                  {generatedImageError && generatedImageUrl && !file && (
+                    <a
+                      href={generatedImageUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-1 block text-sm text-red-600 underline"
+                    >
+                      Không tải được ảnh. Mở ảnh trong tab mới
+                    </a>
+                  )}
+                </div>
+              )}
+            </div>
           </form>
         </div>
       </Modal>

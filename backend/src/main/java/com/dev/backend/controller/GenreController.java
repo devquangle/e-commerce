@@ -1,5 +1,9 @@
 package com.dev.backend.controller;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +22,7 @@ import com.dev.backend.dto.genre.GenreResponse;
 import com.dev.backend.resp.PageResponse;
 import com.dev.backend.resp.ResponseData;
 import com.dev.backend.resp.ResponseUtil;
+import com.dev.backend.service.GeminiService;
 import com.dev.backend.service.GenreService;
 
 import lombok.RequiredArgsConstructor;
@@ -27,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/admin")
 public class GenreController {
     private final GenreService genreService;
+    private final GeminiService geminiService;
 
     @GetMapping("/genres")
     public ResponseEntity<ResponseData<PageResponse<GenreResponse>>> pageGenre(
@@ -40,7 +46,7 @@ public class GenreController {
 
     @PostMapping("/genres")
     public ResponseEntity<ResponseData<GenreResponse>> post_genre(
-            @RequestBody GenreRequest genreRequest,
+            @RequestPart("data") GenreRequest genreRequest,
             @RequestPart(value = "image", required = false) MultipartFile image) {
         GenreResponse addGenre = genreService.addGenre(genreRequest, image);
         return ResponseUtil.success("Thêm thể loại thành công", addGenre);
@@ -61,4 +67,5 @@ public class GenreController {
         return ResponseUtil.success("Xóa thể loại thành công", null);
     }
 
+   
 }

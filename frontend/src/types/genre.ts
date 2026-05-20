@@ -24,6 +24,7 @@ export interface GenreResponse {
 export interface GenreRequest {
   name: string;
   status: GenreStatus;
+  
 }
 
 
@@ -33,3 +34,8 @@ export type options = {
   page?: number;
   size?: number;
 };
+
+export interface ChildGenreResponse {
+  id: number;
+  name: string;
+}

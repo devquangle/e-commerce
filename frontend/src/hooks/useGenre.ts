@@ -14,7 +14,7 @@ export const useCreateGenre = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: GenreRequest) => genreService.createGenre(data),
+    mutationFn: (formData: FormData) => genreService.createGenre(formData),
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["genres"] });

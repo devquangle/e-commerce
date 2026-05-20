@@ -3,8 +3,6 @@ package com.dev.backend.service.impl;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,18 +20,23 @@ import com.dev.backend.mapper.GenreMapper;
 import com.dev.backend.repository.GenreRepository;
 import com.dev.backend.resp.PageResponse;
 import com.dev.backend.service.CloudinaryService;
+import com.dev.backend.service.GeminiService;
 import com.dev.backend.service.GenreService;
+import com.dev.backend.service.OpenAIService;
 import com.dev.backend.service.ProductGenreService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 @Service
+@Log4j2
 @RequiredArgsConstructor
 public class GenreServiceImpl implements GenreService {
         private final GenreRepository genreRepository;
         private final GenreMapper genreMapper;
         private final ProductGenreService productGenreService;
         private final CloudinaryService cloudinaryService;
+        private final GeminiService geminiService;
 
         @Override
         public boolean isEmpty() {
@@ -104,7 +107,17 @@ public class GenreServiceImpl implements GenreService {
                 validate(genreRequest.getName());
                 genre.setName(genreRequest.getName());
                 genre.setStatus(genreRequest.getStatus());
-                setImageCloudinary(genre, image);
+                if (image != null && !image.isEmpty()) {
+                        setImageCloudinary(genre, image);
+
+                } else {
+                        String imageUrl = geminiService.generateImage(
+                                        genreRequest.getName());
+
+                        genre.setUrlImage(imageUrl);
+                        log.info("imageUrl" + imageUrl);
+
+                }
 
                 return genreMapper.toDTO(save(genre));
         }
@@ -117,23 +130,49 @@ public class GenreServiceImpl implements GenreService {
                 }
                 genre.setName(genreRequest.getName());
                 genre.setStatus(genreRequest.getStatus());
-                setImageCloudinary(genre, image);
+                if (image != null && !image.isEmpty()) {
+                        setImageCloudinary(genre, image);
+
+                } else {
+                        String imageUrl = geminiService.generateImage(
+                                        genreRequest.getName());
+
+                        genre.setUrlImage(imageUrl);
+                }
                 return genreMapper.toDTO(save(genre));
         }
 
         @Override
-        public void setImageCloudinary(Genre genre, MultipartFile image) {
-                if (image != null && !image.isEmpty()) {
-                        if (!Objects.requireNonNull(image.getContentType()).startsWith("image/")) {
-                                throw new RuntimeException("File không phải ảnh");
-                        }
-                        try {
-                                genre.setUrlImage(cloudinaryService.uploadImage(image));
-                        } catch (IOException e) {
-                                throw new RuntimeException("File " + e.getMessage());
-                        }
+        public void setImageCloudinary(
+                        Genre genre,
+                        MultipartFile image) {
+
+                if (image == null || image.isEmpty()) {
+                        return;
                 }
 
+                String contentType = image.getContentType();
+
+                if (contentType == null ||
+                                !contentType.startsWith("image/")) {
+
+                        throw new RuntimeException(
+                                        "File không phải ảnh");
+                }
+
+                try {
+
+                        String imageUrl = cloudinaryService
+                                        .uploadImage(image);
+
+                        genre.setUrlImage(imageUrl);
+
+                } catch (IOException e) {
+
+                        throw new RuntimeException(
+                                        "Upload ảnh thất bại",
+                                        e);
+                }
         }
 
         @Override

@@ -16,9 +16,8 @@ export default function Register() {
     const onSubmit = async (request: RegisterFrom) => {
         setIsLoading(true);
         try {
-
-            const {data}= await authService.register(request);
-            showSuccessToast(data?.message);
+            const res = await authService.register(request);
+            showSuccessToast(res?.message);
         } catch (error: unknown) {
            mapServerErrors(error, setError,showErrorToast);
         } finally {
