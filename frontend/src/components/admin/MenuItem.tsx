@@ -34,14 +34,14 @@ export default function MenuItem() {
           <li key={group.id}>
             <button
               onClick={() => toggleGroup(group.id, items.length)}
-              className="flex w-full items-center justify-between px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-900 hover:text-indigo-600 transition-colors"
+              className="flex w-full items-center justify-between px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 hover:text-indigo-600 transition-colors"
             >
               <span className="flex-1 text-left">{group.label}</span>
 
               {items.length > 1 && (
                 <ChevronDown
-                  size={14}
-                  className={`ml-1 text-slate-700 transition-transform duration-200 ${
+                  size={12}
+                  className={`ml-1 text-slate-500 transition-transform duration-200 ${
                     openGroup === group.id ? "rotate-180" : ""
                   }`}
                 />
@@ -59,18 +59,17 @@ export default function MenuItem() {
                         to={item.path!}
                         className={({ isActive }) =>
                           [
-                            "group flex items-center gap-3 px-3 py-2 text-sm rounded-lg border border-transparent transition-colors",
-                            "hover:bg-slate-100 hover:text-indigo-600",
+                            "group flex items-center gap-3 px-3.5 py-2.5 text-xs font-medium rounded-xl transition-all duration-200 border-l-2",
                             isActive
-                              ? "bg-indigo-50 text-indigo-600 border-indigo-100"
-                              : "text-slate-900",
+                              ? "bg-indigo-50 text-indigo-600 border-l-indigo-500 shadow-sm shadow-indigo-100/50"
+                              : "text-slate-600 border-l-transparent hover:bg-slate-50 hover:text-indigo-600 hover:translate-x-1",
                           ].join(" ")
                         }
                       >
                         {Icon && (
                           <Icon
-                            size={18}
-                            className="text-slate-800 group-hover:text-indigo-600"
+                            size={16}
+                            className="text-current transition-colors shrink-0"
                           />
                         )}
 

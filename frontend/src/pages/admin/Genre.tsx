@@ -1,4 +1,4 @@
-﻿import Loading from "@/components/common/Loading";
+import Loading from "@/components/common/Loading";
 import {
   useCreateGenre,
   useDeleteGenre,
@@ -21,7 +21,7 @@ import type { options as GenreOptions, GenreResponse } from "@/types/genre";
 import { useSearchParams } from "react-router-dom";
 import useDebounce from "@/hooks/useDebounce";
 import SelectBox from "@/components/common/SelectBox";
-import { Edit, Eye, Trash2, Sparkles } from "lucide-react";
+import { Edit, Eye, Trash2, Sparkles, Plus, RotateCcw, Search, Layers, BookOpen } from "lucide-react";
 import imageService from "@/services/imageService";
 
 const initialFilterOptions: GenreOptions = {
@@ -42,13 +42,13 @@ function getPositiveNumberParam(
 function statusClass(status: GenreStatus) {
   switch (status) {
     case GenreStatus.ACTIVE:
-      return "bg-green-100 text-green-700";
+      return "bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-semibold";
     case GenreStatus.INACTIVE:
-      return "bg-gray-100 text-gray-600";
+      return "bg-slate-100 text-slate-600 border border-slate-200 font-semibold";
     case GenreStatus.DELETED:
-      return "bg-red-100 text-red-700";
+      return "bg-rose-50 text-rose-700 border border-rose-200/60 font-semibold";
     default:
-      return "bg-gray-100 text-gray-600";
+      return "bg-slate-100 text-slate-600 border border-slate-200 font-semibold";
   }
 }
 
@@ -288,100 +288,121 @@ export default function Genre() {
 
   return (
     <>
-      <div className="flex-1 p-2">
+      <div className="flex-1 p-4 md:p-6 space-y-6">
         {/* HEADER */}
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              Quản lý thể loại
-            </h1>
-            <p className="text-sm text-gray-500">
-              Tạo và quản lý danh mục sản phẩm theo nhóm.
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <div className="rounded-lg bg-indigo-50 p-2 text-indigo-600">
+                <Layers size={22} />
+              </div>
+              <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+                Quản lý thể loại
+              </h1>
+            </div>
+            <p className="text-sm text-slate-500">
+              Phân loại sách và quản lý các danh mục sản phẩm của cửa hàng.
             </p>
           </div>
 
           <button
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+            className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-indigo-600/10 hover:shadow-lg hover:shadow-indigo-600/20 hover:from-indigo-500 hover:to-violet-500 transition-all duration-300 transform active:scale-95 cursor-pointer"
             onClick={() => setOpenAddGenreModal(true)}
           >
-            + Thêm thể loại
+            <Plus size={18} />
+            Thêm thể loại
           </button>
         </div>
 
-        {/* FILTER */}
-        <div className="mt-4 rounded-xl border bg-white p-4 shadow-sm">
-          <div className="mb-4 grid gap-3 md:grid-cols-3">
-            <input
-              type="text"
-              placeholder="Tìm theo tên thể loại..."
-              value={keyword}
-              onChange={(event) => handleKeywordChange(event.target.value)}
-              className="rounded-lg border px-3 py-2 text-sm outline-none ring-indigo-500 focus:ring-2"
-            />
+        {/* FILTER & TABLE CONTAINER */}
+        <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm shadow-slate-100/50">
+          <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-center">
+            {/* Search input */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Tìm theo tên thể loại..."
+                value={keyword}
+                onChange={(event) => handleKeywordChange(event.target.value)}
+                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-10 pr-4 py-2.5 text-sm placeholder-slate-400 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100"
+              />
+            </div>
 
-            <select className="rounded-lg border px-3 py-2 text-sm outline-none ring-indigo-500 focus:ring-2">
-              <option>Tất cả trạng thái</option>
-              <option>{GenreStatusLabel[GenreStatus.ACTIVE]}</option>
-              <option>{GenreStatusLabel[GenreStatus.INACTIVE]}</option>
-              <option>{GenreStatusLabel[GenreStatus.DELETED]}</option>
-            </select>
+            {/* Status dropdown */}
+            <div className="w-full md:w-56">
+              <select className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-700 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100 cursor-pointer">
+                <option>Tất cả trạng thái</option>
+                <option>{GenreStatusLabel[GenreStatus.ACTIVE]}</option>
+                <option>{GenreStatusLabel[GenreStatus.INACTIVE]}</option>
+                <option>{GenreStatusLabel[GenreStatus.DELETED]}</option>
+              </select>
+            </div>
 
+            {/* Reset Button */}
             <button
-              className="rounded-lg border px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all active:scale-95 cursor-pointer"
               onClick={handleResetFilter}
             >
+              <RotateCcw size={16} />
               Làm mới
             </button>
           </div>
 
           {/* ===================== DESKTOP TABLE ===================== */}
           <div className="hidden md:block overflow-x-auto">
-            <table className="w-full text-left text-sm min-w-[900px]">
+            <table className="w-full text-left text-sm border-collapse">
               <thead>
-                <tr className="border-b text-gray-500">
-                  <th className="py-2">Tên thể loại</th>
-                  <th className="py-2">Số sách</th>
-                  <th className="py-2">Trạng thái</th>
-                  <th className="py-2 text-right">Thao tác</th>
+                <tr className="border-b border-slate-100 text-slate-500">
+                  <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50 first:rounded-l-lg last:rounded-r-lg">Tên thể loại</th>
+                  <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50">Số sách liên quan</th>
+                  <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50">Trạng thái</th>
+                  <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50 text-right">Thao tác</th>
                 </tr>
               </thead>
 
-              <tbody>
+              <tbody className="divide-y divide-slate-100">
                 {genres.map((genre) => (
                   <tr
                     key={genre.id}
-                    className="border-b last:border-none hover:bg-gray-50"
+                    className="hover:bg-slate-50/50 transition-colors"
                   >
-                    <td className="py-3 text-gray-700 font-medium">
+                    <td className="py-4 px-4 text-slate-900 font-semibold">
                       {genre?.name}
                     </td>
 
-                    <td className="py-3 text-gray-700 align-top">
-                      <span className="inline-flex items-center justify-center w-8 h-6 text-sm">
-                        {genre.totalProduct}
+                    <td className="py-4 px-4 text-slate-600">
+                      <span className="inline-flex items-center gap-1 bg-slate-100 text-slate-800 text-xs px-2.5 py-1 rounded-md font-semibold">
+                        <BookOpen size={13} className="text-slate-500" />
+                        {genre.totalProduct || 0} cuốn
                       </span>
                     </td>
 
-                    <td className="py-3">
+                    <td className="py-4 px-4">
                       <span
-                        className={`px-3 py-1 text-xs rounded-full ${statusClass(genre.status)}`}
+                        className={`px-2.5 py-1 text-xs rounded-full font-semibold ${statusClass(genre.status)}`}
                       >
                         {GenreStatusLabel[genre.status]}
                       </span>
                     </td>
-                    <td className="py-3 text-right">
-                      <button
-                        onClick={() => handleOpenUpdateGenreModal(genre)}
-                        className="mr-2 rounded-md border px-3 py-1.5 text-xs hover:bg-gray-50"
-                      >
-                        Sửa
-                      </button>
-                      <button
-                        onClick={() => handleOpenDeleteGenreModal(genre)}
-                        className="rounded-md border border-red-200 px-3 py-1.5 text-xs text-red-600 hover:bg-red-50"
-                      >
-                        Xóa
-                      </button>
+                    
+                    <td className="py-4 px-4 text-right">
+                      <div className="inline-flex gap-2">
+                        <button
+                          onClick={() => handleOpenUpdateGenreModal(genre)}
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition-all cursor-pointer"
+                        >
+                          <Edit size={13} />
+                          Sửa
+                        </button>
+                        <button
+                          onClick={() => handleOpenDeleteGenreModal(genre)}
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 hover:border-rose-300 transition-all cursor-pointer"
+                        >
+                          <Trash2 size={13} />
+                          Xóa
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -390,45 +411,48 @@ export default function Genre() {
           </div>
 
           {/* ===================== MOBILE CARD ===================== */}
-          <div className="space-y-3 md:hidden">
+          <div className="space-y-4 md:hidden">
             {genres.map((genre) => (
               <div
                 key={genre.id}
-                className="rounded-lg border bg-white p-3 shadow-sm"
+                className="rounded-xl border border-slate-150 bg-white p-4 shadow-sm space-y-3"
               >
                 {/* TITLE */}
                 <div className="flex justify-between items-start">
-                  <div className="font-semibold text-gray-800">
+                  <div className="font-bold text-slate-800 text-base">
                     {genre?.name}
                   </div>
 
                   <span
-                    className={`text-xs px-2 py-1 rounded-full ${statusClass(genre.status)}`}
+                    className={`text-xs px-2.5 py-0.5 rounded-full font-semibold ${statusClass(genre.status)}`}
                   >
                     {GenreStatusLabel[genre.status]}
                   </span>
                 </div>
 
                 {/* INFO */}
-                <div className="mt-2 text-sm text-gray-600 space-y-1">
-                  <div>
-                    <span className="font-medium">Số sách:</span>{" "}
-                    {genre.totalProduct}
-                  </div>
+                <div className="text-sm text-slate-600 flex items-center justify-between border-t border-slate-50 pt-2">
+                  <span className="font-medium text-slate-500">Số lượng sách:</span>
+                  <span className="inline-flex items-center gap-1 bg-slate-100 text-slate-800 text-xs px-2.5 py-1 rounded-md font-semibold">
+                    <BookOpen size={13} className="text-slate-500" />
+                    {genre.totalProduct || 0} cuốn
+                  </span>
                 </div>
 
                 {/* ACTION */}
                 <div className="mt-3 flex gap-2">
                   <button
                     onClick={() => handleOpenUpdateGenreModal(genre)}
-                    className="flex-1 rounded border py-1 text-xs hover:bg-gray-50"
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-all cursor-pointer"
                   >
+                    <Edit size={13} />
                     Sửa
                   </button>
                   <button
                     onClick={() => handleOpenDeleteGenreModal(genre)}
-                    className="flex-1 rounded border border-red-200 py-1 text-xs text-red-600 hover:bg-red-50"
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-rose-100 bg-rose-50/50 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 hover:border-rose-200 transition-all cursor-pointer"
                   >
+                    <Trash2 size={13} />
                     Xóa
                   </button>
                 </div>
@@ -436,8 +460,9 @@ export default function Genre() {
             ))}
           </div>
         </div>
+
         {/* PAGINATION */}
-        <div>
+        <div className="mt-4">
           <Pagination
             currentPage={(data?.page ?? 0) + 1}
             totalPages={Math.max(data?.totalPages ?? 0, 1)}
@@ -449,12 +474,14 @@ export default function Genre() {
           />
         </div>
       </div>
+
+      {/* CREATE MODAL */}
       <Modal
         isOpen={openAddGenreModal}
         onClose={handleCloseAddGenreModal}
         title="Thêm thể loại mới"
         onConfirm={handleSubmit(onSubmitAddGenre)}
-        confirmText="Thêm"
+        confirmText="Thêm thể loại"
         cancelText="Hủy"
         size="lg"
       >
@@ -464,7 +491,7 @@ export default function Genre() {
               label="Tên thể loại"
               name="name"
               type="text"
-              placeholder="Nhập tên thể loại"
+              placeholder="Nhập tên thể loại ví dụ: Khoa học viễn tưởng..."
               register={register}
               rules={{
                 required: "Tên thể loại là bắt buộc",
@@ -472,36 +499,34 @@ export default function Genre() {
               error={errors?.name}
             />
             <div className="space-y-2">
-              <label className="text-sm font-medium">Ảnh thể loại</label>
+              <label className="text-sm font-semibold text-slate-700">Ảnh đại diện thể loại</label>
 
               <div className="flex gap-2 mb-3">
                 <button
                   type="button"
                   onClick={handleGenerateImageWithAI}
                   disabled={isGeneratingAI}
-                  className="flex items-center gap-2 rounded-lg border border-indigo-300 bg-indigo-50 px-3 py-2 text-sm font-medium text-indigo-600 hover:bg-indigo-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50/50 px-4 py-2.5 text-sm font-semibold text-indigo-600 hover:bg-indigo-50 transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
-                  <Sparkles size={16} />
-                  {isGeneratingAI ? "Đang tạo..." : "Tạo ảnh bằng AI"}
+                  <Sparkles size={16} className="animate-pulse text-indigo-500" />
+                  {isGeneratingAI ? "Đang tạo ảnh..." : "Tạo ảnh đại diện bằng AI"}
                 </button>
               </div>
 
               {!file && !generatedImageUrl ? (
                 <label
                   className="
-        flex cursor-pointer items-center justify-center
-        rounded-xl border-2 border-dashed
-        border-gray-300 p-6
-        transition hover:border-primary
-        hover:bg-muted/50
-      "
+                    flex cursor-pointer items-center justify-center
+                    rounded-2xl border-2 border-dashed
+                    border-slate-200 p-8 bg-slate-50/50
+                    transition hover:border-indigo-500
+                    hover:bg-indigo-50/10
+                  "
                 >
-                  <div className="flex flex-col items-center gap-2 text-sm text-muted-foreground">
-                    <span className="text-3xl">📁</span>
-
-                    <span>Chọn ảnh hoặc kéo thả vào đây</span>
-
-                    <span className="text-xs">PNG, JPG, WEBP</span>
+                  <div className="flex flex-col items-center gap-2 text-sm text-slate-500">
+                    <span className="text-4xl filter drop-shadow">📁</span>
+                    <span className="font-semibold text-slate-700">Chọn ảnh hoặc kéo thả vào đây</span>
+                    <span className="text-xs text-slate-400">Chấp nhận PNG, JPG, WEBP</span>
                   </div>
 
                   <input
@@ -521,12 +546,12 @@ export default function Genre() {
                   />
                 </label>
               ) : (
-                <div className="relative group rounded-lg border p-2 overflow-hidden">
+                <div className="relative group rounded-2xl border border-slate-200 p-2 overflow-hidden bg-slate-50/30">
                   <img
                     src={file ? URL.createObjectURL(file) : generatedPreviewUrl}
                     alt="preview"
                     referrerPolicy="no-referrer"
-                    className="h-40 w-full rounded-lg object-cover"
+                    className="h-44 w-full rounded-xl object-cover"
                     onLoad={() => setGeneratedImageError(false)}
                     onError={() => {
                       if (!file && generatedImageUrl && generatedImageRetry < 6) {
@@ -540,20 +565,20 @@ export default function Genre() {
                     }}
                   />
 
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all duration-200 rounded-lg flex items-center justify-center gap-3">
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-slate-900/40 backdrop-blur-xs transition-all duration-200 rounded-xl flex items-center justify-center gap-3">
                     {generatedImageUrl && !file && (
                       <a
                         href={generatedImageUrl}
                         target="_blank"
                         rel="noreferrer"
                         title="Mở ảnh trong tab mới"
-                        className="bg-white p-2 rounded cursor-pointer hover:bg-gray-100 transition flex items-center justify-center"
+                        className="bg-white p-2.5 rounded-xl cursor-pointer hover:bg-slate-100 transition shadow-lg flex items-center justify-center"
                       >
-                        <Eye size={20} className="text-gray-700" />
+                        <Eye size={18} className="text-slate-700" />
                       </a>
                     )}
-                    <label className="bg-white p-2 rounded cursor-pointer hover:bg-gray-100 transition flex items-center justify-center">
-                      <Edit size={20} className="text-gray-700" />
+                    <label className="bg-white p-2.5 rounded-xl cursor-pointer hover:bg-slate-100 transition shadow-lg flex items-center justify-center">
+                      <Edit size={18} className="text-slate-700" />
                       <input
                         type="file"
                         accept="image/*"
@@ -577,21 +602,23 @@ export default function Genre() {
                         setGeneratedImageRetry(0);
                         setGeneratedImageError(false);
                       }}
-                      className="bg-red-500 text-white p-2 rounded hover:bg-red-600 transition flex items-center justify-center"
+                      className="bg-rose-500 text-white p-2.5 rounded-xl hover:bg-rose-600 transition shadow-lg flex items-center justify-center cursor-pointer"
                     >
-                      <Trash2 size={20} />
+                      <Trash2 size={18} />
                     </button>
                   </div>
 
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    {file?.name ?? "Ảnh được tạo bằng AI"}
-                  </p>
+                  <div className="mt-2.5 px-1.5 flex justify-between items-center">
+                    <p className="text-xs font-semibold text-slate-500 truncate max-w-[80%]">
+                      {file?.name ?? "Ảnh được sinh bởi AI"}
+                    </p>
+                  </div>
                   {generatedImageError && generatedImageUrl && !file && (
                     <a
                       href={generatedImageUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="mt-1 block text-sm text-red-600 underline"
+                      className="mt-1 block text-xs text-rose-600 underline px-1.5"
                     >
                       Không tải được ảnh. Mở ảnh trong tab mới
                     </a>
@@ -602,12 +629,14 @@ export default function Genre() {
           </form>
         </div>
       </Modal>
+
+      {/* UPDATE MODAL */}
       <Modal
         isOpen={openUpdateGenreModal}
         onClose={handleCloseUpdateGenreModal}
         title="Cập nhật thể loại"
         onConfirm={handleSubmit(onSubmitUpdateGenre)}
-        confirmText="Cập nhật"
+        confirmText="Lưu thay đổi"
         cancelText="Hủy"
         size="lg"
       >
@@ -637,7 +666,7 @@ export default function Genre() {
                     onChange={field.onChange}
                     searchable={false}
                   />
-                  <p className="text-red-500 text-sm">
+                  <p className="text-rose-500 text-xs mt-1">
                     {fieldState.error?.message}
                   </p>
                 </div>
@@ -646,20 +675,24 @@ export default function Genre() {
           </form>
         </div>
       </Modal>
+
+      {/* DELETE MODAL */}
       <Modal
         isOpen={openDeleteGenreModal}
         onClose={handleCloseDeleteGenreModal}
         title="Xóa thể loại"
         onConfirm={handleSubmit(onSubmitDeleteGenre)}
-        confirmText="Xóa"
+        confirmText="Xóa thể loại"
         cancelText="Hủy"
         size="lg"
       >
-        <div>
+        <div className="py-2">
           {selectGenre && (
-            <p className="text-gray-700 mb-4">
-              Bạn sắp xóa thể loại{" "}
-              <span className="font-semibold">{selectGenre.name}</span>.
+            <p className="text-slate-700 text-base leading-relaxed">
+              Bạn có chắc chắn muốn xóa thể loại{" "}
+              <span className="font-bold text-slate-900">"{selectGenre.name}"</span>?
+              <br />
+              <span className="text-sm text-rose-500 mt-2 block font-medium">Lưu ý: Hành động này không thể hoàn tác và có thể ảnh hưởng đến các sản phẩm thuộc thể loại này.</span>
             </p>
           )}
         </div>

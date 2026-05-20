@@ -16,20 +16,20 @@ function MobileDrawer({
         <>
             {isOpen && (
                 <div
-                    className="fixed inset-0 bg-black/30 z-30 lg:hidden"
+                    className="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 lg:hidden"
                     onClick={onClose}
                 />
             )}
 
             <div
-                className={`fixed top-0 left-0 h-screen w-64 bg-white z-40 transform transition lg:hidden
+                className={`fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 z-50 transform transition-transform duration-300 lg:hidden
         ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
             >
-                <div className="flex h-16 items-center justify-between p-4 border-b">
+                <div className="flex h-16 items-center justify-between p-4 border-b border-slate-200">
                     <Logo />
-                    <button className="cursor-pointer" onClick={onClose}>
+                    <button className="cursor-pointer text-slate-500 hover:text-indigo-600 transition-colors" onClick={onClose}>
                         <svg
-                            className="w-8 h-8 text-indigo-500"
+                            className="w-7 h-7"
                             xmlns="http://www.w3.org/2000/svg"
                             fill="none"
                             viewBox="0 0 24 24"
@@ -45,7 +45,6 @@ function MobileDrawer({
                 {/* Content */}
                 <div className="p-4 space-y-2 overflow-y-auto h-[calc(100vh-64px)]">
                     <MenuItem />
-                 
                 </div>
             </div>
         </>
