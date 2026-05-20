@@ -24,6 +24,7 @@ export interface GenreResponse {
 export interface GenreRequest {
   name: string;
   status: GenreStatus;
+  previewImageUrl: string;
   
 }
 

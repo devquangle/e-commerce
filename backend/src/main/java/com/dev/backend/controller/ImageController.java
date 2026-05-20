@@ -22,16 +22,9 @@ public class ImageController {
 
     @GetMapping("/generate")
     public ResponseEntity<ResponseData<Map<String, String>>> generate(@RequestParam String input) {
-
-      
-
-
-        // 2. Generate image
         String imageUrl = geminiService.generateImageUrl(input);
-
         Map<String, String> data = Map.of("imageUrl", imageUrl);
-
-        return ResponseUtil.success("Tạo prompt thành công", data);
+        return ResponseUtil.success("Tạo ảnh thành công", data);
     }
 
 }

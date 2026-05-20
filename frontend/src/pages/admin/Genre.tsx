@@ -1,4 +1,4 @@
-import Loading from "@/components/common/Loading";
+﻿import Loading from "@/components/common/Loading";
 import {
   useCreateGenre,
   useDeleteGenre,
@@ -21,7 +21,17 @@ import type { options as GenreOptions, GenreResponse } from "@/types/genre";
 import { useSearchParams } from "react-router-dom";
 import useDebounce from "@/hooks/useDebounce";
 import SelectBox from "@/components/common/SelectBox";
-import { Edit, Eye, Trash2, Sparkles, Plus, RotateCcw, Search, Layers, BookOpen } from "lucide-react";
+import {
+  Edit,
+  Eye,
+  Trash2,
+  Sparkles,
+  Plus,
+  RotateCcw,
+  Search,
+  Layers,
+  BookOpen,
+} from "lucide-react";
 import imageService from "@/services/imageService";
 
 const initialFilterOptions: GenreOptions = {
@@ -95,6 +105,7 @@ export default function Genre() {
     defaultValues: {
       name: "",
       status: GenreStatus.ACTIVE,
+      previewImageUrl: "",
     },
   });
   const [openAddGenreModal, setOpenAddGenreModal] = useState(false);
@@ -127,7 +138,8 @@ export default function Genre() {
       showSuccessToast("Thêm thể loại thành công!");
       reset();
       setFile(null);
-      setGeneratedImageUrl(null); 
+      setValue("previewImageUrl", "");
+      setGeneratedImageUrl(null);
       setGeneratedImageRetry(0);
       setGeneratedImageError(false);
       handleCloseAddGenreModal();
@@ -204,6 +216,7 @@ export default function Genre() {
       const resp = await imageService.createImage({
         input: genreName,
       });
+      setValue("previewImageUrl", resp.imageUrl);
 
       setGeneratedImageUrl(resp.imageUrl);
       setGeneratedImageRetry(0);
@@ -354,10 +367,18 @@ export default function Genre() {
             <table className="w-full text-left text-sm border-collapse">
               <thead>
                 <tr className="border-b border-slate-100 text-slate-500">
-                  <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50 first:rounded-l-lg last:rounded-r-lg">Tên thể loại</th>
-                  <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50">Số sách liên quan</th>
-                  <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50">Trạng thái</th>
-                  <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50 text-right">Thao tác</th>
+                  <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50 first:rounded-l-lg last:rounded-r-lg">
+                    Tên thể loại
+                  </th>
+                  <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50">
+                    Số sách liên quan
+                  </th>
+                  <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50">
+                    Trạng thái
+                  </th>
+                  <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50 text-right">
+                    Thao tác
+                  </th>
                 </tr>
               </thead>
 
@@ -385,7 +406,7 @@ export default function Genre() {
                         {GenreStatusLabel[genre.status]}
                       </span>
                     </td>
-                    
+
                     <td className="py-4 px-4 text-right">
                       <div className="inline-flex gap-2">
                         <button
@@ -432,7 +453,9 @@ export default function Genre() {
 
                 {/* INFO */}
                 <div className="text-sm text-slate-600 flex items-center justify-between border-t border-slate-50 pt-2">
-                  <span className="font-medium text-slate-500">Số lượng sách:</span>
+                  <span className="font-medium text-slate-500">
+                    Số lượng sách:
+                  </span>
                   <span className="inline-flex items-center gap-1 bg-slate-100 text-slate-800 text-xs px-2.5 py-1 rounded-md font-semibold">
                     <BookOpen size={13} className="text-slate-500" />
                     {genre.totalProduct || 0} cuốn
@@ -481,11 +504,16 @@ export default function Genre() {
         onClose={handleCloseAddGenreModal}
         title="Thêm thể loại mới"
         onConfirm={handleSubmit(onSubmitAddGenre)}
-        confirmText="Thêm thể loại"
+        confirmText={
+          createMutation.isPending ? "Đang thêm..." : "Thêm thể loại"
+        }
         cancelText="Hủy"
         size="lg"
       >
         <div>
+          {createMutation.isPending && (
+            <Loading />
+          )}
           <form className="space-y-4">
             <InputField
               label="Tên thể loại"
@@ -499,7 +527,9 @@ export default function Genre() {
               error={errors?.name}
             />
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700">Ảnh đại diện thể loại</label>
+              <label className="text-sm font-semibold text-slate-700">
+                Ảnh đại diện thể loại
+              </label>
 
               <div className="flex gap-2 mb-3">
                 <button
@@ -508,8 +538,13 @@ export default function Genre() {
                   disabled={isGeneratingAI}
                   className="flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50/50 px-4 py-2.5 text-sm font-semibold text-indigo-600 hover:bg-indigo-50 transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
-                  <Sparkles size={16} className="animate-pulse text-indigo-500" />
-                  {isGeneratingAI ? "Đang tạo ảnh..." : "Tạo ảnh đại diện bằng AI"}
+                  <Sparkles
+                    size={16}
+                    className="animate-pulse text-indigo-500"
+                  />
+                  {isGeneratingAI
+                    ? "Đang tạo ảnh..."
+                    : "Tạo ảnh đại diện bằng AI"}
                 </button>
               </div>
 
@@ -525,8 +560,12 @@ export default function Genre() {
                 >
                   <div className="flex flex-col items-center gap-2 text-sm text-slate-500">
                     <span className="text-4xl filter drop-shadow">📁</span>
-                    <span className="font-semibold text-slate-700">Chọn ảnh hoặc kéo thả vào đây</span>
-                    <span className="text-xs text-slate-400">Chấp nhận PNG, JPG, WEBP</span>
+                    <span className="font-semibold text-slate-700">
+                      Chọn ảnh hoặc kéo thả vào đây
+                    </span>
+                    <span className="text-xs text-slate-400">
+                      Chấp nhận PNG, JPG, WEBP
+                    </span>
                   </div>
 
                   <input
@@ -554,7 +593,11 @@ export default function Genre() {
                     className="h-44 w-full rounded-xl object-cover"
                     onLoad={() => setGeneratedImageError(false)}
                     onError={() => {
-                      if (!file && generatedImageUrl && generatedImageRetry < 6) {
+                      if (
+                        !file &&
+                        generatedImageUrl &&
+                        generatedImageRetry < 6
+                      ) {
                         window.setTimeout(() => {
                           setGeneratedImageRetry((retry) => retry + 1);
                         }, 1500);
@@ -690,9 +733,15 @@ export default function Genre() {
           {selectGenre && (
             <p className="text-slate-700 text-base leading-relaxed">
               Bạn có chắc chắn muốn xóa thể loại{" "}
-              <span className="font-bold text-slate-900">"{selectGenre.name}"</span>?
+              <span className="font-bold text-slate-900">
+                "{selectGenre.name}"
+              </span>
+              ?
               <br />
-              <span className="text-sm text-rose-500 mt-2 block font-medium">Lưu ý: Hành động này không thể hoàn tác và có thể ảnh hưởng đến các sản phẩm thuộc thể loại này.</span>
+              <span className="text-sm text-rose-500 mt-2 block font-medium">
+                Lưu ý: Hành động này không thể hoàn tác và có thể ảnh hưởng đến
+                các sản phẩm thuộc thể loại này.
+              </span>
             </p>
           )}
         </div>

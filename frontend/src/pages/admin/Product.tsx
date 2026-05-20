@@ -6,6 +6,7 @@ import {
   Trash2, 
   SlidersHorizontal
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function Product() {
   const products = [
@@ -29,10 +30,10 @@ export default function Product() {
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Quản lý sản phẩm</h1>
           <p className="mt-1 text-sm text-slate-500">Theo dõi tồn kho, giá bán và trạng thái hiển thị sản phẩm.</p>
         </div>
-        <button className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition-all duration-200 cursor-pointer active:scale-95">
+        <Link to="/admin/add-product" className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 hover:shadow-indigo-600/15 transition-all duration-200 cursor-pointer active:scale-95">
           <Plus size={16} />
           Thêm sản phẩm
-        </button>
+        </Link>
       </div>
 
       {/* FILTERS & PRODUCTS CONTAINER */}
@@ -102,9 +103,9 @@ export default function Product() {
                     <button className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:text-indigo-600 hover:bg-slate-50 transition active:scale-90 cursor-pointer" title="Chi tiết">
                       <Eye size={14} />
                     </button>
-                    <button className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:text-indigo-600 hover:bg-slate-50 transition active:scale-90 cursor-pointer" title="Sửa">
+                    <Link to={`/admin/edit-product/${product.sku}`} className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:text-indigo-600 hover:bg-slate-50 transition active:scale-90 cursor-pointer" title="Sửa">
                       <Edit2 size={14} />
-                    </button>
+                    </Link>
                     <button className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-rose-100 text-rose-500 hover:bg-rose-50 transition active:scale-90 cursor-pointer" title="Xóa">
                       <Trash2 size={14} />
                     </button>
@@ -147,9 +148,9 @@ export default function Product() {
                 <button className="flex items-center justify-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition cursor-pointer">
                   <Eye size={12} /> Chi tiết
                 </button>
-                <button className="flex items-center justify-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition cursor-pointer">
+                <Link to={`/admin/edit-product/${product.sku}`} className="flex items-center justify-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition cursor-pointer">
                   <Edit2 size={12} /> Sửa
-                </button>
+                </Link>
               </div>
             </div>
           ))}

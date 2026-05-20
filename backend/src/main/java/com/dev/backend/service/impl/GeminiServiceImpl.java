@@ -3,12 +3,11 @@ package com.dev.backend.service.impl;
 import com.dev.backend.service.CloudinaryService;
 import com.dev.backend.service.GeminiService;
 import com.google.genai.Client;
-import com.google.genai.types.Blob;
-import com.google.genai.types.GenerateContentConfig;
 import com.google.genai.types.GenerateContentResponse;
-import com.google.genai.types.Part;
 import lombok.RequiredArgsConstructor;
 
+import java.io.InputStream;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
@@ -24,178 +23,103 @@ public class GeminiServiceImpl implements GeminiService {
 
     private final Client client;
     private final CloudinaryService cloudinaryService;
-
-    // FIX: use stable image model
     private static final String MODEL_ID = "gemini-3-flash-preview";
 
     @Override
     public String generateImage(String genreName) {
         try {
-            logger.info("Generating image for genre: {}", genreName);
+            logger.info("Generating image via Pollinations for genre: {}", genreName);
 
-            String prompt = "Cinematic book cover illustration for '" + genreName + "', " +
-                    "ultra detailed, professional digital art, dramatic lighting, 8k, no text, no watermark.";
+            // 1. Lấy URL ảnh từ Pollinations (Đã được Gemini dịch và tối ưu prompt)
+            String imageUrl = generateImageUrl(genreName);
+            logger.info("Target Pollinations URL: {}", imageUrl);
 
-            byte[] imageBytes = generateImageDirectly(prompt);
+            byte[] imageBytes;
+            try (InputStream in =  URI.create(imageUrl).toURL().openStream()) {
+                imageBytes = in.readAllBytes();
+            }
 
+            // Kiểm tra xem dữ liệu tải về có hợp lệ không
             if (imageBytes == null || imageBytes.length < 100) {
-                logger.error("Invalid image response from Gemini");
+                logger.error("Invalid image bytes downloaded from Pollinations");
                 return fallbackImage();
             }
 
-            logger.info("Image generated successfully: {} bytes", imageBytes.length);
+            logger.info("Image downloaded successfully: {} bytes. Uploading to Cloudinary...", imageBytes.length);
+
+            // 3. Upload mảng bytes này lên Cloudinary của bạn
             return cloudinaryService.uploadImage(imageBytes);
 
         } catch (Exception e) {
-            logger.error("Gemini image generation failed", e);
+            logger.error("Gemini + Pollinations image generation flow failed", e);
             return fallbackImage();
         }
     }
 
-    private byte[] generateImageDirectly(String prompt) {
-        try {
-            GenerateContentConfig config = GenerateContentConfig.builder()
-                    .responseModalities("IMAGE")
-                    .build();
-
-            GenerateContentResponse response = client.models.generateContent(MODEL_ID, prompt, config);
-
-            return extractImageBytes(response);
-
-        } catch (Exception e) {
-            logger.error("Gemini API error", e);
-            return null;
-        }
-    }
-
-    private byte[] extractImageBytes(GenerateContentResponse response) {
-
-        if (response == null ||
-                response.candidates() == null ||
-                response.candidates().isEmpty()) {
-            return null;
-        }
-
-        var candidate = response.candidates().get().get(0);
-
-        if (candidate.content().isEmpty()) {
-            return null;
-        }
-
-        var content = candidate.content().get();
-
-        if (content.parts().isEmpty()) {
-            return null;
-        }
-
-        for (Part part : content.parts().get()) {
-
-            var blobOpt = part.inlineData();
-
-            if (blobOpt.isEmpty()) {
-                continue;
-            }
-
-            Blob blob = blobOpt.get();
-
-            byte[] data = blob.data().orElse(null);
-
-            if (data != null && data.length > 0) {
-                return data;
-            }
-        }
-
-        return null;
-    }
-
-    private String fallbackImage() {
-        return "https://via.placeholder.com/1024x1024.png?text=Image+Generation+Failed";
-    }
-
     @Override
     public String toEnglishPrompt(String viInput) {
-
         String prompt = """
-                You are a professional AI prompt engineer for BOOK GENRE illustrations.
-
-                Convert the input genre into ONE short professional AI image prompt.
+                You are a professional AI prompt engineer.
+                Convert the following book genre into a short, concise image generation prompt for a website thumbnail.
 
                 RULES:
-                - English only
-                - Output ONLY the final prompt
-                - Maximum 25 words
-                - Use comma-separated keywords
-                - No storytelling
-                - Focus on visual representation of a BOOK GENRE
-
-                VISUAL REQUIREMENTS:
-                - symbolic objects related to the genre
-                - cinematic atmosphere
-                - suitable as a genre thumbnail or category image
-                - centered composition
-                - visually clear and iconic
-
-                STYLE:
-                cinematic lighting, ultra detailed, concept art, digital painting, 4k
-
-                IMPORTANT:
-                IF THE GENRE IS NOT IN THE EXAMPLES:
-                - infer the visual symbolism from the genre meaning
-                - create iconic objects and atmosphere related to the genre
-                - keep the output visually clear and suitable as a genre thumbnail
+                - Output ONLY the final prompt keywords, separated by commas.
+                - Do not include any introductory text, quotes, explanations, or markdown.
+                - Language: English.
+                - Max length: 20 words.
+                - Style: cinematic lighting, ultra detailed, concept art, digital painting, 4k.
 
                 EXAMPLES:
+                Input: Kinh dị -> dark haunted library, ghost shadows, fog, eerie atmosphere, horror concept art
+                Input: Lãng mạn -> romantic books, roses, warm sunset glow, dreamy atmosphere, romance concept art
+                Input: Trinh thám -> mystery books, magnifying glass, dark desk, noir atmosphere, detective concept art
 
-                Horror:
-                dark haunted library, ghost shadows, fog, eerie atmosphere, cinematic lighting, horror concept art, 4k
+                Input: %s
+                """.formatted(viInput);
 
-                Romance:
-                romantic books, roses, warm sunset glow, dreamy atmosphere, soft lighting, romance concept art, 4k
+        try {
+            GenerateContentResponse response = client.models.generateContent(MODEL_ID, prompt, null);
 
-                Fantasy:
-                magical library, floating spell books, glowing runes, fantasy atmosphere, cinematic lighting, 4k
+            if (response == null || response.text() == null) {
+                return "book, " + viInput + ", cinematic lighting, clean background";
+            }
 
-                Anime:
-                anime manga books, japanese art style, vibrant colors, cinematic lighting, anime illustration, 4k
+            String result = response.text()
+                    .replaceAll("(?i)Prompt:", "")
+                    .replace("\n", "")
+                    .replace("\"", "")
+                    .replace("`", "")
+                    .replace("*", "")
+                    .trim();
 
-                Detective:
-                mystery books, magnifying glass, dark desk, noir atmosphere, cinematic lighting, detective concept art, 4k
+            if (result.endsWith(".")) {
+                result = result.substring(0, result.length() - 1);
+            }
 
-                INPUT:
-                %s
-                """
-                .formatted(viInput);
+            result += ", centered composition, clean background";
 
-        GenerateContentResponse response = client.models.generateContent(
-                MODEL_ID,
-                prompt,
-                null);
-        String result = response.text()
-                .replace("\n", "")
-                .replace("\"", "")
-                .trim();
-        result += ", centered composition, clean background";
+            if (result.length() > 300) {
+                result = result.substring(0, 300);
+            }
+            return result;
 
-        // chống prompt quá dài cho Pollinations
-        if (result.length() > 300) {
-            result = result.substring(0, 300);
+        } catch (Exception e) {
+            logger.error("Failed to generate prompt via Gemini, using fallback text", e);
+            return viInput + " book genre, cinematic lighting, clean background";
         }
-
-        return result;
     }
 
     @Override
     public String generateImageUrl(String viInput) {
 
-        // 1. Vietnamese -> English optimized prompt
         String englishPrompt = toEnglishPrompt(viInput);
 
-        // 2. Encode URL
-        String encodedPrompt = URLEncoder.encode(
-                englishPrompt,
-                StandardCharsets.UTF_8);
+        String encodedPrompt = URLEncoder.encode(englishPrompt, StandardCharsets.UTF_8);
 
-        // 3. Pollinations URL
         return "https://image.pollinations.ai/prompt/" + encodedPrompt;
+    }
+
+    private String fallbackImage() {
+        return "https://via.placeholder.com/1024x1024.png?text=Image+Generation+Failed";
     }
 }

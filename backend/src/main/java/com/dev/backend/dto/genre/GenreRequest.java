@@ -14,4 +14,5 @@ import lombok.Setter;
 public class GenreRequest {
     private String name;
     private GenreStatus status = GenreStatus.ACTIVE;
+    private String previewImageUrl;
 }

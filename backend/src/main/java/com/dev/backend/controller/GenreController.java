@@ -32,7 +32,6 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/admin")
 public class GenreController {
     private final GenreService genreService;
-    private final GeminiService geminiService;
 
     @GetMapping("/genres")
     public ResponseEntity<ResponseData<PageResponse<GenreResponse>>> pageGenre(

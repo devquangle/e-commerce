@@ -22,7 +22,6 @@ import com.dev.backend.resp.PageResponse;
 import com.dev.backend.service.CloudinaryService;
 import com.dev.backend.service.GeminiService;
 import com.dev.backend.service.GenreService;
-import com.dev.backend.service.OpenAIService;
 import com.dev.backend.service.ProductGenreService;
 
 import lombok.RequiredArgsConstructor;
@@ -107,16 +106,19 @@ public class GenreServiceImpl implements GenreService {
                 validate(genreRequest.getName());
                 genre.setName(genreRequest.getName());
                 genre.setStatus(genreRequest.getStatus());
+
+                // Trường hợp 1: Người dùng tự upload file ảnh từ máy tính lên
                 if (image != null && !image.isEmpty()) {
                         setImageCloudinary(genre, image);
-
-                } else {
-                        String imageUrl = geminiService.generateImage(
-                                        genreRequest.getName());
-
-                        genre.setUrlImage(imageUrl);
-                        log.info("imageUrl" + imageUrl);
-
+                }
+                else if (genreRequest.getPreviewImageUrl() != null && !genreRequest.getPreviewImageUrl().isEmpty()) {
+                     
+                        String finalCloudinaryUrl = geminiService.generateImage(genreRequest.getPreviewImageUrl());
+                        genre.setUrlImage(finalCloudinaryUrl);
+                        log.info("Saved AI Image to Cloudinary: " + finalCloudinaryUrl);
+                }
+                else {
+                        genre.setUrlImage("https://via.placeholder.com/1024x1024.png?text=No+Image");
                 }
 
                 return genreMapper.toDTO(save(genre));
