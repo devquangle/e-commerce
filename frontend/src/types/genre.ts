@@ -17,6 +17,7 @@ export interface GenreResponse {
   id: number;
   name: string;
   status: GenreStatus;
+  urlImage: string;
   totalProduct: number;
 }
 

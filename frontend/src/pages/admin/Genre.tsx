@@ -30,9 +30,10 @@ import {
   RotateCcw,
   Search,
   Layers,
-  BookOpen,
 } from "lucide-react";
 import imageService from "@/services/imageService";
+import GenreTable from "@/components/admin/genre/GenreTable";
+import GenreMobileCard from "@/components/admin/genre/GenreMobileCard";
 
 const initialFilterOptions: GenreOptions = {
   keyword: "",
@@ -47,19 +48,6 @@ function getPositiveNumberParam(
 ) {
   const value = Number(searchParams.get(key));
   return Number.isInteger(value) && value > 0 ? value : fallback;
-}
-
-function statusClass(status: GenreStatus) {
-  switch (status) {
-    case GenreStatus.ACTIVE:
-      return "bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-semibold";
-    case GenreStatus.INACTIVE:
-      return "bg-slate-100 text-slate-600 border border-slate-200 font-semibold";
-    case GenreStatus.DELETED:
-      return "bg-rose-50 text-rose-700 border border-rose-200/60 font-semibold";
-    default:
-      return "bg-slate-100 text-slate-600 border border-slate-200 font-semibold";
-  }
 }
 
 export default function Genre() {
@@ -362,127 +350,20 @@ export default function Genre() {
             </button>
           </div>
 
-          {/* ===================== DESKTOP TABLE ===================== */}
-          <div className="hidden md:block overflow-x-auto">
-            <table className="w-full text-left text-sm border-collapse">
-              <thead>
-                <tr className="border-b border-slate-100 text-slate-500">
-                  <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50 first:rounded-l-lg last:rounded-r-lg">
-                    Tên thể loại
-                  </th>
-                  <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50">
-                    Số sách liên quan
-                  </th>
-                  <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50">
-                    Trạng thái
-                  </th>
-                  <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50 text-right">
-                    Thao tác
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody className="divide-y divide-slate-100">
-                {genres.map((genre) => (
-                  <tr
-                    key={genre.id}
-                    className="hover:bg-slate-50/50 transition-colors"
-                  >
-                    <td className="py-4 px-4 text-slate-900 font-semibold">
-                      {genre?.name}
-                    </td>
-
-                    <td className="py-4 px-4 text-slate-600">
-                      <span className="inline-flex items-center gap-1 bg-slate-100 text-slate-800 text-xs px-2.5 py-1 rounded-md font-semibold">
-                        <BookOpen size={13} className="text-slate-500" />
-                        {genre.totalProduct || 0} cuốn
-                      </span>
-                    </td>
-
-                    <td className="py-4 px-4">
-                      <span
-                        className={`px-2.5 py-1 text-xs rounded-full font-semibold ${statusClass(genre.status)}`}
-                      >
-                        {GenreStatusLabel[genre.status]}
-                      </span>
-                    </td>
-
-                    <td className="py-4 px-4 text-right">
-                      <div className="inline-flex gap-2">
-                        <button
-                          onClick={() => handleOpenUpdateGenreModal(genre)}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition-all cursor-pointer"
-                        >
-                          <Edit size={13} />
-                          Sửa
-                        </button>
-                        <button
-                          onClick={() => handleOpenDeleteGenreModal(genre)}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 hover:border-rose-300 transition-all cursor-pointer"
-                        >
-                          <Trash2 size={13} />
-                          Xóa
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <GenreTable
+            genres={genres}
+            onEdit={handleOpenUpdateGenreModal}
+            onDelete={handleOpenDeleteGenreModal}
+          />
 
           {/* ===================== MOBILE CARD ===================== */}
-          <div className="space-y-4 md:hidden">
-            {genres.map((genre) => (
-              <div
-                key={genre.id}
-                className="rounded-xl border border-slate-150 bg-white p-4 shadow-sm space-y-3"
-              >
-                {/* TITLE */}
-                <div className="flex justify-between items-start">
-                  <div className="font-bold text-slate-800 text-base">
-                    {genre?.name}
-                  </div>
-
-                  <span
-                    className={`text-xs px-2.5 py-0.5 rounded-full font-semibold ${statusClass(genre.status)}`}
-                  >
-                    {GenreStatusLabel[genre.status]}
-                  </span>
-                </div>
-
-                {/* INFO */}
-                <div className="text-sm text-slate-600 flex items-center justify-between border-t border-slate-50 pt-2">
-                  <span className="font-medium text-slate-500">
-                    Số lượng sách:
-                  </span>
-                  <span className="inline-flex items-center gap-1 bg-slate-100 text-slate-800 text-xs px-2.5 py-1 rounded-md font-semibold">
-                    <BookOpen size={13} className="text-slate-500" />
-                    {genre.totalProduct || 0} cuốn
-                  </span>
-                </div>
-
-                {/* ACTION */}
-                <div className="mt-3 flex gap-2">
-                  <button
-                    onClick={() => handleOpenUpdateGenreModal(genre)}
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-all cursor-pointer"
-                  >
-                    <Edit size={13} />
-                    Sửa
-                  </button>
-                  <button
-                    onClick={() => handleOpenDeleteGenreModal(genre)}
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-rose-100 bg-rose-50/50 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 hover:border-rose-200 transition-all cursor-pointer"
-                  >
-                    <Trash2 size={13} />
-                    Xóa
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+          
+          <GenreMobileCard
+            genres={genres}
+            onEdit={handleOpenUpdateGenreModal}
+            onDelete={handleOpenDeleteGenreModal}
+          />
+        </div> 
 
         {/* PAGINATION */}
         <div className="mt-4">
