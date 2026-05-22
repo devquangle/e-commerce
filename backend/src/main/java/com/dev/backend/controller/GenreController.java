@@ -1,8 +1,5 @@
 package com.dev.backend.controller;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,7 +19,6 @@ import com.dev.backend.dto.genre.GenreResponse;
 import com.dev.backend.resp.PageResponse;
 import com.dev.backend.resp.ResponseData;
 import com.dev.backend.resp.ResponseUtil;
-import com.dev.backend.service.GeminiService;
 import com.dev.backend.service.GenreService;
 
 import lombok.RequiredArgsConstructor;
