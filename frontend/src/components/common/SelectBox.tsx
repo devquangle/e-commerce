@@ -6,7 +6,7 @@ interface Option<T> {
 }
 
 interface Props<T> {
-  label: string;
+  label?: string;
   options: Option<T>[];
   value?: T;
   onChange: (value: T) => void;
@@ -33,16 +33,14 @@ export default function SelectBox<T>({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const selected = useMemo(() => {
-    return options.find(
-      (o) => value !== undefined && isEqual(o.value, value)
-    );
+    return options.find((o) => value !== undefined && isEqual(o.value, value));
   }, [options, value]);
 
   const filteredOptions = useMemo(() => {
     if (!searchable || !search.trim()) return options;
 
     return options.filter((o) =>
-      o.label.toLowerCase().includes(search.toLowerCase())
+      o.label.toLowerCase().includes(search.toLowerCase()),
     );
   }, [options, search, searchable]);
 
@@ -84,9 +82,11 @@ export default function SelectBox<T>({
 
   return (
     <div ref={ref} className="relative w-full">
-      <label className="block text-sm font-medium mb-1">
-        {label} <span className="text-red-500">*</span>
-      </label>
+      {label && (
+        <label className="block text-sm font-medium mb-1">
+          {label} <span className="text-red-500">*</span>
+        </label>
+      )}
 
       <div
         onClick={() => !disabled && setOpen((prev) => !prev)}
@@ -105,9 +105,7 @@ export default function SelectBox<T>({
         </span>
 
         <svg
-          className={`w-4 h-4 transition-transform ${
-            open ? "rotate-180" : ""
-          }`}
+          className={`w-4 h-4 transition-transform ${open ? "rotate-180" : ""}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -147,9 +145,7 @@ export default function SelectBox<T>({
 
         <div className="max-h-60 overflow-auto">
           {filteredOptions.length === 0 && (
-            <div className="p-2 text-gray-400 text-sm">
-              Không có kết quả
-            </div>
+            <div className="p-2 text-gray-400 text-sm">Không có kết quả</div>
           )}
 
           {filteredOptions.map((option) => (

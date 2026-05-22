@@ -55,10 +55,14 @@ export default function Genre() {
   const [keyword, setKeyword] = useState(
     searchParams.get("keyword") ?? initialFilterOptions.keyword,
   );
+  const [status, setStatus] = useState<GenreStatus | null>(
+    (searchParams.get("status") as GenreStatus) ?? null,
+  );
   const debouncedKeyword = useDebounce(keyword, 500);
   const options = useMemo<GenreOptions>(
     () => ({
       keyword: searchParams.get("keyword") ?? initialFilterOptions.keyword,
+      status: (searchParams.get("status") as GenreStatus) || undefined,
       page: getPositiveNumberParam(
         searchParams,
         "page",
@@ -229,6 +233,12 @@ export default function Genre() {
         nextSearchParams.delete("keyword");
       }
 
+      if (nextOptions.status) {
+        nextSearchParams.set("status", nextOptions.status);
+      } else {
+        nextSearchParams.delete("status");
+      }
+
       nextSearchParams.set(
         "page",
         String(nextOptions.page ?? initialFilterOptions.page),
@@ -257,6 +267,11 @@ export default function Genre() {
     setKeyword(keyword);
   };
 
+  const handleStatusChange = (value: GenreStatus | null) => {
+    setStatus(value);
+    updateSearchParams({ ...options, status: value ?? undefined, page: 1 }, false);
+  };
+
   const handlePageChange = (page: number) => {
     updateSearchParams({ ...options, page }, false);
   };
@@ -267,15 +282,18 @@ export default function Genre() {
 
   const handleResetFilter = () => {
     setKeyword(initialFilterOptions.keyword ?? "");
+    setStatus(null);
     setSearchParams(new URLSearchParams(), { replace: true });
   };
 
   const statusOptions = useMemo(
-    () =>
-      Object.values(GenreStatus).map((value) => ({
+    () => [
+      { label: "Tất cả trạng thái", value: null as GenreStatus | null },
+      ...Object.values(GenreStatus).map((value) => ({
         label: GenreStatusLabel[value],
         value,
       })),
+    ],
     [],
   );
   const generatedPreviewUrl = useMemo(() => {
@@ -332,12 +350,13 @@ export default function Genre() {
 
             {/* Status dropdown */}
             <div className="w-full md:w-56">
-              <select className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-700 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100 cursor-pointer">
-                <option>Tất cả trạng thái</option>
-                <option>{GenreStatusLabel[GenreStatus.ACTIVE]}</option>
-                <option>{GenreStatusLabel[GenreStatus.INACTIVE]}</option>
-                <option>{GenreStatusLabel[GenreStatus.DELETED]}</option>
-              </select>
+              <SelectBox<GenreStatus | null>
+              
+                options={statusOptions}
+                value={status}
+                onChange={handleStatusChange}
+                searchable={false}
+              />
             </div>
 
             {/* Reset Button */}
@@ -583,7 +602,7 @@ export default function Genre() {
               rules={{ required: "Vui lòng chọn trạng thái" }}
               render={({ field, fieldState }) => (
                 <div>
-                  <SelectBox<string>
+                  <SelectBox<GenreStatus | null>
                     label="Trạng thái"
                     options={statusOptions}
                     value={field.value}

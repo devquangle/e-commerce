@@ -107,7 +107,7 @@ export default function SelectedMutil({
       {/* Trigger Button */}
       <div
         onClick={() => !disabled && setOpen(!open)}
-        className={`w-full rounded-xl border border-slate-200 bg-white/70 px-4 py-2.5 text-sm cursor-pointer flex items-center justify-between min-h-[44px] transition-all hover:border-slate-350 ${
+        className={`w-full rounded-xl border border-slate-200 bg-white/70 px-4 py-2.5 text-sm cursor-pointer flex items-center justify-between min-h-11 transition-all hover:border-slate-350 ${
           disabled ? "bg-slate-100 cursor-not-allowed opacity-60" : "focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-100"
         }`}
       >
