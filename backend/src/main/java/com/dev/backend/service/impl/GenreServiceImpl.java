@@ -134,7 +134,6 @@ public class GenreServiceImpl implements GenreService {
                 genre.setStatus(genreRequest.getStatus());
                 if (image != null && !image.isEmpty()) {
                         setImageCloudinary(genre, image);
-
                 } else {
                         String imageUrl = geminiService.generateImage(
                                         genreRequest.getName());
