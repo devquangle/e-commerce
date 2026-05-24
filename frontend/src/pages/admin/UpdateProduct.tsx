@@ -26,6 +26,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useGenre } from "@/hooks/useGenre";
 import { showSuccessToast, showErrorToast } from "@/utils/toastUtil";
+import type { GenreResponse } from "@/types/genre";
 
 type UpdateBookForm = {
   title: string;
@@ -123,7 +124,7 @@ export default function UpdateProduct() {
     "Tiểu thuyết - Truyện ngắn"
   ];
 
-  const activeGenres = genresList.length > 0 ? genresList.map((g: any) => g.name) : fallbackGenres;
+  const activeGenres = genresList.length > 0 ? genresList.map((g: GenreResponse) => g.name) : fallbackGenres;
 
   // Map genres to Options for SelectedMutil
   const genreOptions = useMemo(() => {
@@ -249,7 +250,7 @@ export default function UpdateProduct() {
       setTimeout(() => {
         navigate("/admin/products");
       }, 1000);
-    } catch (error) {
+    } catch {
       showErrorToast("Có lỗi xảy ra, vui lòng thử lại!");
     } finally {
       setIsSubmitting(false);

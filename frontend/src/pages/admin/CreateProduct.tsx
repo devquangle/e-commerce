@@ -25,6 +25,10 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useGenre } from "@/hooks/useGenre";
 import { showSuccessToast, showErrorToast } from "@/utils/toastUtil";
+import type { AuthorResponse } from "@/types/author";
+import AuthorService from "@/services/authorService";
+import { useQuery } from "@tanstack/react-query";
+import type { GenreResponse } from "@/types/genre";
 
 type CreateBookForm = {
   title: string;
@@ -77,23 +81,6 @@ const POPULAR_PUBLISHERS = [
   "NXB Mỹ Thuật"
 ];
 
-const POPULAR_AUTHORS = [
-  "Dale Carnegie",
-  "Nguyễn Nhật Ánh",
-  "Haruki Murakami",
-  "Paulo Coelho",
-  "Tony Buổi Sáng",
-  "Stephen Hawking",
-  "Napoleon Hill",
-  "J.K. Rowling",
-  "Nguyễn Du",
-  "Tô Hoài",
-  "Victor Hugo",
-  "Hồ Chí Minh",
-  "Nam Cao",
-  "Xuân Diệu",
-  "Trần Đăng Khoa"
-];
 
 export default function CreateProduct() {
   const [form, setForm] = useState<CreateBookForm>(initialForm);
@@ -103,8 +90,13 @@ export default function CreateProduct() {
   const publisherDropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
+  const { data: authorsData = [] } = useQuery({
+    queryKey: ["authors"],
+    queryFn: AuthorService.getAuthor,
+  });
   // Fetch active genres from DB using hook
   const { data: genresData } = useGenre({ size: 100 });
+
   const genresList = genresData?.items || [];
 
   const fallbackGenres = [
@@ -118,7 +110,7 @@ export default function CreateProduct() {
     "Tiểu thuyết - Truyện ngắn"
   ];
 
-  const activeGenres = genresList.length > 0 ? genresList.map((g: any) => g.name) : fallbackGenres;
+  const activeGenres = genresList.length > 0 ? genresList.map((g: GenreResponse) => g.name) : fallbackGenres;
 
   // Map genres to Options for SelectedMutil
   const genreOptions = useMemo(() => {
@@ -129,12 +121,13 @@ export default function CreateProduct() {
   }, [activeGenres]);
 
   // Map authors to Options for SelectedMutil
-  const authorOptions = useMemo(() => {
-    return POPULAR_AUTHORS.map((authName) => ({
-      label: authName,
-      value: authName,
-    }));
-  }, []);
+ const authorOptions = useMemo(() => {
+  // Sửa từ (author: AuthorResponse[]) thành (author: AuthorResponse)
+  return authorsData.map((author: AuthorResponse) => ({
+    label: author.displayName,
+    value: author.name,
+  }));
+}, [authorsData]);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -244,7 +237,7 @@ export default function CreateProduct() {
       setTimeout(() => {
         navigate("/admin/products");
       }, 1000);
-    } catch (error) {
+    } catch {
       showErrorToast("Có lỗi xảy ra, vui lòng thử lại!");
     } finally {
       setIsSubmitting(false);

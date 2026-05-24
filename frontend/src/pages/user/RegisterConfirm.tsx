@@ -24,7 +24,7 @@ export default function RegisterConfirm() {
 
     const checkToken = async () => {
       try {
-        const res = await axios.post<ApiResponse<any>>(`http://localhost:8080/verify-register`,
+        const res = await axios.post<ApiResponse<null>>(`http://localhost:8080/verify-register`,
           { token: verifyToken }
         );
 

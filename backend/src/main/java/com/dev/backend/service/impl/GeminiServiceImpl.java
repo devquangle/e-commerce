@@ -23,7 +23,7 @@ public class GeminiServiceImpl implements GeminiService {
 
     private final Client client;
     private final CloudinaryService cloudinaryService;
-    private static final String MODEL_ID = "gemini-3-flash-preview";
+    private static final String MODEL_ID = "gemini-3.1-flash-lite";
 
     @Override
     public String generateImage(String genreName) {
