@@ -94,7 +94,7 @@ export default function SelectBox<T>({
       <div
         onClick={() => !disabled && setOpen((prev) => !prev)}
         className={`
-          w-full rounded-xl border border-slate-200 bg-white/70 px-4 py-2.5 text-sm 
+          w-full rounded-xl border border-slate-200 bg-white/70 h-11 px-4 text-sm 
           cursor-pointer flex items-center justify-between min-h-11 transition-all 
           hover:border-slate-300
           ${

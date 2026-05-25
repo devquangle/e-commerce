@@ -40,7 +40,7 @@ export default function InputField<T extends FieldValues>({
       : placeholder;
   const hasRequiredRule = rules?.required !== undefined;
   return (
-    <div className="flex flex-col gap-1">
+    <div className="w-full space-y-1.5">
       {/* Label */}
       {label && (
         <label
@@ -56,19 +56,18 @@ export default function InputField<T extends FieldValues>({
 
       {/* Wrapper - Bỏ focus-within và hover */}
       <div
-        className={`relative flex items-center rounded-xl border transition-all duration-200
+        className={`relative flex h-11 min-h-11 items-center rounded-xl border box-border transition-all duration-200
     ${error
             ? "border-red-500 bg-red-50"
             : "border-gray-200 bg-[#edf2f9] focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100"
           }`}
       >
-        {/* Input - Thêm outline-none */}
         <input
           id={name}
           type={inputType}
           placeholder={inputPlaceholder}
           {...register(name, rules)}
-          className="w-full bg-transparent px-4 py-2 text-gray-800 outline-none pr-10 rounded-xl"
+          className="h-full min-h-0 w-full bg-transparent px-4 py-0 text-sm text-gray-800 outline-none pr-10 rounded-xl"
         />
 
         {/* Toggle button for password */}

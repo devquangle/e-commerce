@@ -152,13 +152,13 @@ export default function SelectedMutil({
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label={`Select ${label || "options"}, ${value.length} selected`}
-        className={`w-full rounded-xl border border-slate-200 bg-white/70 px-4 py-2.5 text-sm cursor-pointer flex items-center justify-between min-h-11 transition-all hover:border-slate-300 ${
+        className={`w-full rounded-xl border border-slate-200 bg-white/70 h-11 px-4 text-sm cursor-pointer flex items-center justify-between min-h-11 transition-all hover:border-slate-300 ${
           disabled
             ? "bg-slate-100 cursor-not-allowed opacity-60"
             : "focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-100"
         }`}
       >
-        <div className="flex flex-wrap gap-1.5 items-center pr-4">
+        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide pr-4">
           {value.length === 0 ? (
             <span className="text-slate-400 text-sm select-none">
               {placeholder}
