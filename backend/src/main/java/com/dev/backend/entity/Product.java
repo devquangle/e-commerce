@@ -26,14 +26,20 @@ public class Product {
     private Integer id;
     private String name;
     private Integer quantity;
-
+    private BigDecimal originalPrice;
     private BigDecimal price;
+
     private String description;
     private int weight;
+
     private String isbn;
+
     private Integer publishYear;
     private Integer pageCount;
-    private String language;
+
+    private Integer publisherId;
+
+    private List<Integer> authorIds;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

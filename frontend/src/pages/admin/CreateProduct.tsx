@@ -11,13 +11,12 @@ import {
   Image as ImageIcon,
   ArrowLeft,
   ChevronRight,
-  Sparkles,
-  Percent,
   Loader2,
-  Globe,
   Calendar,
-  Hash,
   BookMarked,
+  Upload,
+  Weight,
+  Sparkles,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useGenre } from "@/hooks/useGenre";
@@ -35,7 +34,7 @@ type CreateBookForm = {
   author: string[];
   publisher: string;
   genre: string[];
-  language: string;
+  weight: string;
   publishYear: string;
   pages: string;
   price: string;
@@ -54,13 +53,13 @@ const initialForm: CreateBookForm = {
   author: [],
   publisher: "",
   genre: [],
-  language: "Tiếng Việt",
+  weight: "",
   publishYear: "",
   pages: "",
   price: "",
   compareAtPrice: "",
   stock: "",
-  status: "DRAFT",
+  status: "ACTIVE", // Default to Active
   shortDescription: "",
   description: "",
   coverImages: [""],
@@ -69,6 +68,7 @@ const initialForm: CreateBookForm = {
 export default function CreateProduct() {
   const [form, setForm] = useState<CreateBookForm>(initialForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imageUploadMode, setImageUploadMode] = useState<"file" | "url">("file");
   const navigate = useNavigate();
 
   const { data: genresData } = useGenre({ size: 100 });
@@ -103,7 +103,6 @@ export default function CreateProduct() {
 
   // Map authors to Options for SelectedMutil
   const authorOptions = useMemo(() => {
-    // Sửa từ (author: AuthorResponse[]) thành (author: AuthorResponse)
     return authorsData.map((author: AuthorResponse) => ({
       label: author.displayName,
       value: author.name,
@@ -118,9 +117,7 @@ export default function CreateProduct() {
     }));
   }, [publishersData]);
 
-
-
-  // Auto-generate clean slug URL from title
+  // Auto-generate clean slug URL from title in background
   const convertToSlug = (text: string) => {
     return text
       .toLowerCase()
@@ -146,7 +143,7 @@ export default function CreateProduct() {
     handleChange("slug", convertToSlug(val));
   };
 
-  // Media Management
+  // Media Management - URL based
   const handleCoverImageChange = (index: number, value: string) => {
     const nextImages = [...form.coverImages];
     nextImages[index] = value;
@@ -168,6 +165,29 @@ export default function CreateProduct() {
     );
   };
 
+  // Media Management - Local File upload
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const newImagePromises = Array.from(files).map((file) => {
+      return new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          resolve(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    Promise.all(newImagePromises).then((base64Images) => {
+      const currentImages = form.coverImages.filter(Boolean);
+      const updatedImages = [...currentImages, ...base64Images];
+      handleChange("coverImages", updatedImages.length > 0 ? updatedImages : [""]);
+      showSuccessToast(`Đã thêm ${base64Images.length} ảnh thành công!`);
+    });
+  };
+
   // Discount calculator
   const getDiscountPercentage = () => {
     const p = parseFloat(form.price);
@@ -177,8 +197,6 @@ export default function CreateProduct() {
     }
     return 0;
   };
-
-
 
   // Form submission handler
   const handleSubmit = async (e: React.FormEvent, isDraft = false) => {
@@ -216,7 +234,6 @@ export default function CreateProduct() {
 
     setIsSubmitting(true);
     try {
-      // Simulate API call for adding product
       await new Promise((resolve) => setTimeout(resolve, 1200));
       showSuccessToast(
         isDraft
@@ -237,27 +254,30 @@ export default function CreateProduct() {
   const currentDiscount = getDiscountPercentage();
 
   return (
-    <section className="space-y-6 p-4 md:p-6 flex-1 max-w-7xl mx-auto w-full">
-      {/* HEADER BREADCRUMB - STICKY FOR PREMIUM CONTROLS */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between pb-4 border-b border-slate-200/60">
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+    <section className="space-y-8 p-4 md:p-8 flex-1 max-w-7xl mx-auto w-full">
+      {/* HEADER BREADCRUMB - STICKY FROSTED GLASS BAR */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between pb-5 border-b border-slate-200/40 sticky top-0 bg-white/70 backdrop-blur-xl z-30 pt-3 transition-all duration-300">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
             <Link
               to="/admin/products"
-              className="hover:text-indigo-600 transition"
+              className="hover:text-indigo-600 transition-colors"
             >
               Sách
             </Link>
-            <ChevronRight size={12} />
-            <span className="text-slate-600">Thêm mới</span>
+            <ChevronRight size={12} className="text-slate-300" />
+            <span className="text-indigo-600 font-bold bg-indigo-50/50 px-2 py-0.5 rounded-md">Thêm mới</span>
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wide bg-gradient-to-r from-indigo-500/10 to-violet-500/10 text-indigo-600 border border-indigo-100/30">
+              <Sparkles size={9} className="animate-spin" /> Premium Suite
+            </span>
           </div>
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-3">
             <Link
               to="/admin/products"
-              className="rounded-xl border border-slate-200 bg-white p-2 text-slate-500 hover:bg-slate-50 active:scale-95 transition cursor-pointer shadow-sm hover:text-slate-800"
+              className="group rounded-xl border border-slate-200 bg-white p-2.5 text-slate-500 hover:bg-slate-50 active:scale-95 transition-all duration-200 cursor-pointer shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:text-slate-800"
               title="Quay lại"
             >
-              <ArrowLeft size={16} />
+              <ArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
             </Link>
             <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
               Thêm sách mới
@@ -266,12 +286,12 @@ export default function CreateProduct() {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={(e) => handleSubmit(e, true)}
             disabled={isSubmitting}
-            className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-sm"
+            className="flex items-center justify-center gap-2 rounded-xl border border-slate-200/80 bg-white/80 backdrop-blur-md px-5 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50 hover:text-slate-900 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-sm"
           >
             <Save size={16} className="text-slate-500" />
             Lưu nháp
@@ -280,7 +300,7 @@ export default function CreateProduct() {
             type="button"
             onClick={(e) => handleSubmit(e, false)}
             disabled={isSubmitting}
-            className="flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-indigo-600/15 hover:shadow-lg hover:shadow-indigo-600/25 hover:from-indigo-500 hover:to-violet-500 active:scale-95 transition-all duration-250 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 via-violet-650 to-indigo-700 px-6 py-3 text-sm font-bold text-white shadow-[0_10px_20px_-5px_rgba(99,102,241,0.35)] hover:shadow-[0_15px_30px_-5px_rgba(99,102,241,0.5)] hover:-translate-y-0.5 active:translate-y-0 active:scale-95 transition-all duration-250 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
             {isSubmitting ? (
               <Loader2 size={16} className="animate-spin" />
@@ -295,42 +315,42 @@ export default function CreateProduct() {
       {/* FORM BODY */}
       <form
         id="create-product-form"
-        className="grid gap-6 lg:grid-cols-3 align-start"
+        className="grid gap-8 lg:grid-cols-3 align-start"
         onSubmit={(e) => handleSubmit(e, false)}
       >
         {/* LEFT COLUMN (2/3 width on large screens) */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-8">
           {/* BASIC INFORMATION */}
-          <div className="rounded-2xl border border-slate-200/60 bg-gradient-to-tr from-slate-50 to-white p-5 md:p-6 shadow-sm space-y-5">
-            <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-              <div className="rounded-xl bg-indigo-50 p-2 text-indigo-600">
+          <div className="rounded-3xl border border-slate-200/50 bg-gradient-to-br from-white via-white to-slate-50/20 p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.015)] hover:shadow-[0_20px_40px_rgba(99,102,241,0.02)] transition-all duration-500 space-y-6">
+            <div className="flex items-center gap-3.5 pb-4 border-b border-slate-100/80">
+              <div className="rounded-2xl bg-gradient-to-tr from-indigo-500/10 to-violet-500/10 p-2.5 text-indigo-600 dark:bg-indigo-950/20">
                 <BookOpen size={20} />
               </div>
               <div>
-                <h2 className="text-base font-bold text-slate-900">
+                <h2 className="text-lg font-bold text-slate-900 leading-snug">
                   Thông tin sách cơ bản
                 </h2>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-400">
                   Mô tả đặc điểm, thuộc tính chính của tác phẩm
                 </p>
               </div>
             </div>
 
-            <div className="grid gap-5 md:grid-cols-2">
+            <div className="grid gap-6 md:grid-cols-2">
               {/* Tên sách */}
-              <div className="md:col-span-2 space-y-1.5">
+              <div className="md:col-span-2 space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-slate-600 uppercase tracking-wide flex items-center gap-1">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
                     Tên sách <span className="text-rose-500">*</span>
                   </label>
                   <span
-                    className={`text-[10px] font-semibold ${form.title.length > 100 ? "text-rose-500" : "text-slate-400"}`}
+                    className={`text-[10px] font-bold ${form.title.length > 100 ? "text-rose-500" : "text-slate-400"}`}
                   >
                     {form.title.length}/120 ký tự
                   </span>
                 </div>
-                <div className="relative">
-                  <div className="absolute left-4 top-3.5 text-slate-400 pointer-events-none">
+                <div className="relative group">
+                  <div className="absolute left-4 top-3.5 text-slate-400 group-focus-within:text-indigo-500 transition-colors duration-250 pointer-events-none">
                     <BookMarked size={16} />
                   </div>
                   <input
@@ -340,82 +360,35 @@ export default function CreateProduct() {
                     value={form.title}
                     onChange={(event) => handleTitleChange(event.target.value)}
                     placeholder="Nhập tên đầy đủ của tác phẩm sách..."
-                    className="w-full rounded-xl border border-slate-200 bg-white/70 pl-10 pr-4 py-3 text-sm placeholder-slate-400 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100"
+                    className="w-full rounded-xl border border-slate-200/80 bg-white/50 pl-11 pr-4 py-3 text-sm placeholder-slate-400 outline-none transition-all duration-300 focus:border-indigo-500 focus:bg-white focus:shadow-[0_10px_20px_-10px_rgba(99,102,241,0.06)] focus:ring-4 focus:ring-indigo-100/50"
                   />
                 </div>
               </div>
 
-              {/* Slug URL */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-slate-600 uppercase tracking-wide flex items-center gap-1">
-                    Đường dẫn thân thiện (Slug URL)
-                  </label>
-                  <span className="text-[10px] text-indigo-500 font-semibold flex items-center gap-0.5">
-                    <Sparkles size={10} /> Tự động
-                  </span>
-                </div>
-                <div className="relative">
-                  <div className="absolute left-4 top-3 text-[11px] text-slate-400 font-semibold bg-slate-100/80 px-2 py-0.5 rounded border border-slate-200 pointer-events-none">
-                    /books/
-                  </div>
-                  <input
-                    type="text"
-                    value={form.slug}
-                    onChange={(event) =>
-                      handleChange("slug", event.target.value)
-                    }
-                    placeholder="dac-nhan-tam"
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-20 pr-4 py-2.5 text-xs placeholder-slate-400 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100 font-mono text-slate-600"
-                  />
-                </div>
-              </div>
-
-              {/* SKU Code */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-600 uppercase tracking-wide flex items-center gap-1">
-                  Mã định danh (SKU)
-                </label>
-                <div className="relative">
-                  <div className="absolute left-4 top-3 text-slate-400 pointer-events-none">
-                    <Hash size={15} />
-                  </div>
-                  <input
-                    type="text"
-                    value={form.sku}
-                    onChange={(event) =>
-                      handleChange("sku", event.target.value)
-                    }
-                    placeholder="Ví dụ: BK-DACNHANTAM-01"
-                    className="w-full rounded-xl border border-slate-200 bg-white/70 pl-10 pr-4 py-2.5 text-sm placeholder-slate-400 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100"
-                  />
-                </div>
-              </div>
-
-              {/* Tác giả (Chọn nhiều dùng component SelectedMutil với Filter) */}
-              <div className="md:col-span-2">
+              {/* Tác giả */}
+              <div className="space-y-1">
                 <SelectedMutil
                   label="Tác giả / Dịch giả *"
                   options={authorOptions}
                   value={form.author}
                   onChange={(val) => handleChange("author", val)}
-                  placeholder="Chọn hoặc gõ tìm kiếm tác giả (chọn nhiều)..."
+                  placeholder="Chọn tác giả..."
                 />
               </div>
 
-              {/* Thể loại (Chọn nhiều dùng component SelectedMutil với Filter) */}
-              <div>
+              {/* Thể loại */}
+              <div className="space-y-1">
                 <SelectedMutil
                   label="Thể loại sách *"
                   options={genreOptions}
                   value={form.genre}
                   onChange={(val) => handleChange("genre", val)}
-                  placeholder="Chọn thể loại (chọn nhiều)..."
+                  placeholder="Chọn thể loại..."
                 />
               </div>
 
-              {/* Nhà xuất bản (Chọn duy nhất 1) */}
-              <div className="space-y-1.5 relative">
+              {/* Nhà xuất bản */}
+              <div className="space-y-1 relative">
                 <SelectBox<string>
                   label="Nhà xuất bản"
                   options={publisherOptions}
@@ -425,34 +398,34 @@ export default function CreateProduct() {
                 />
               </div>
 
-              {/* Ngôn ngữ */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-600 uppercase tracking-wide">
-                  Ngôn ngữ
+              {/* Cân nặng */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  Cân nặng (gram)
                 </label>
-                <div className="relative">
-                  <div className="absolute left-4 top-3 text-slate-400 pointer-events-none">
-                    <Globe size={15} />
+                <div className="relative group">
+                  <div className="absolute left-4 top-3 text-slate-400 group-focus-within:text-indigo-500 transition-colors duration-250 pointer-events-none">
+                    <Weight size={15} />
                   </div>
                   <input
-                    type="text"
-                    value={form.language}
+                    type="number"
+                    value={form.weight}
                     onChange={(event) =>
-                      handleChange("language", event.target.value)
+                      handleChange("weight", event.target.value)
                     }
-                    placeholder="Ví dụ: Tiếng Việt, Tiếng Anh..."
-                    className="w-full rounded-xl border border-slate-200 bg-white/70 pl-10 pr-4 py-2.5 text-sm placeholder-slate-400 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100"
+                    placeholder="Ví dụ: 350"
+                    className="w-full rounded-xl border border-slate-200/80 bg-white/50 pl-11 pr-4 py-2.5 text-sm placeholder-slate-400 outline-none transition-all duration-300 focus:border-indigo-500 focus:bg-white focus:shadow-[0_10px_20px_-10px_rgba(99,102,241,0.06)] focus:ring-4 focus:ring-indigo-100/50"
                   />
                 </div>
               </div>
 
               {/* Năm xuất bản */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-600 uppercase tracking-wide">
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                   Năm xuất bản
                 </label>
-                <div className="relative">
-                  <div className="absolute left-4 top-3 text-slate-400 pointer-events-none">
+                <div className="relative group">
+                  <div className="absolute left-4 top-3 text-slate-400 group-focus-within:text-indigo-500 transition-colors duration-250 pointer-events-none">
                     <Calendar size={15} />
                   </div>
                   <input
@@ -462,18 +435,18 @@ export default function CreateProduct() {
                       handleChange("publishYear", event.target.value)
                     }
                     placeholder="Ví dụ: 2026"
-                    className="w-full rounded-xl border border-slate-200 bg-white/70 pl-10 pr-4 py-2.5 text-sm placeholder-slate-400 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100"
+                    className="w-full rounded-xl border border-slate-200/80 bg-white/50 pl-11 pr-4 py-2.5 text-sm placeholder-slate-400 outline-none transition-all duration-300 focus:border-indigo-500 focus:bg-white focus:shadow-[0_10px_20px_-10px_rgba(99,102,241,0.06)] focus:ring-4 focus:ring-indigo-100/50"
                   />
                 </div>
               </div>
 
               {/* Số trang */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-600 uppercase tracking-wide">
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                   Số trang
                 </label>
-                <div className="relative">
-                  <div className="absolute left-4 top-3 text-slate-400 pointer-events-none">
+                <div className="relative group">
+                  <div className="absolute left-4 top-3 text-slate-400 group-focus-within:text-indigo-500 transition-colors duration-250 pointer-events-none">
                     <FileText size={15} />
                   </div>
                   <input
@@ -483,7 +456,7 @@ export default function CreateProduct() {
                       handleChange("pages", event.target.value)
                     }
                     placeholder="Ví dụ: 350"
-                    className="w-full rounded-xl border border-slate-200 bg-white/70 pl-10 pr-4 py-2.5 text-sm placeholder-slate-400 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100"
+                    className="w-full rounded-xl border border-slate-200/80 bg-white/50 pl-11 pr-4 py-2.5 text-sm placeholder-slate-400 outline-none transition-all duration-300 focus:border-indigo-500 focus:bg-white focus:shadow-[0_10px_20px_-10px_rgba(99,102,241,0.06)] focus:ring-4 focus:ring-indigo-100/50"
                   />
                 </div>
               </div>
@@ -491,50 +464,27 @@ export default function CreateProduct() {
           </div>
 
           {/* PRODUCT DESCRIPTION */}
-          <div className="rounded-2xl border border-slate-200/60 bg-gradient-to-tr from-slate-50 to-white p-5 md:p-6 shadow-sm space-y-4">
-            <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-              <div className="rounded-xl bg-indigo-50 p-2 text-indigo-600">
+          <div className="rounded-3xl border border-slate-200/50 bg-gradient-to-br from-white via-white to-slate-50/20 p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.015)] hover:shadow-[0_20px_40px_rgba(99,102,241,0.02)] transition-all duration-500 space-y-5">
+            <div className="flex items-center gap-3.5 pb-4 border-b border-slate-100/80">
+              <div className="rounded-2xl bg-gradient-to-tr from-indigo-500/10 to-violet-500/10 p-2.5 text-indigo-600 dark:bg-indigo-950/20">
                 <FileText size={20} />
               </div>
               <div>
-                <h2 className="text-base font-bold text-slate-900">
+                <h2 className="text-lg font-bold text-slate-900 leading-snug">
                   Mô tả chi tiết
                 </h2>
-                <p className="text-xs text-slate-500">
-                  Giới thiệu ngắn gọn và tóm tắt nội dung cốt lõi của sách
+                <p className="text-xs text-slate-400">
+                  Giới thiệu đầy đủ nội dung cốt lõi của cuốn sách
                 </p>
               </div>
             </div>
 
-            <div className="space-y-5">
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-slate-600 uppercase tracking-wide">
-                    Mô tả ngắn
-                  </label>
-                  <span
-                    className={`text-[10px] font-semibold ${form.shortDescription.length > 220 ? "text-rose-500" : "text-slate-400"}`}
-                  >
-                    {form.shortDescription.length}/250 ký tự
-                  </span>
-                </div>
-                <textarea
-                  rows={2}
-                  maxLength={250}
-                  value={form.shortDescription}
-                  onChange={(event) =>
-                    handleChange("shortDescription", event.target.value)
-                  }
-                  placeholder="Mô tả tóm tắt nội dung sách hiển thị ở trang kết quả tìm kiếm..."
-                  className="w-full rounded-xl border border-slate-200 bg-white/70 px-4 py-3 text-sm placeholder-slate-400 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100 resize-none"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-600 uppercase tracking-wide">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                   Mô tả đầy đủ (Tiptap Rich Text)
                 </label>
-                <div className="bg-white rounded-xl overflow-hidden shadow-xs border border-slate-100">
+                <div className="bg-white rounded-2xl overflow-hidden shadow-[inset_0_2px_8px_rgba(0,0,0,0.01)] border border-slate-200 transition-all duration-300 focus-within:border-indigo-500 focus-within:shadow-[0_10px_25px_-10px_rgba(99,102,241,0.06)] focus-within:ring-4 focus-within:ring-indigo-100/50">
                   <ProductDescriptionEditor
                     value={form.description}
                     onChange={(value) => handleChange("description", value)}
@@ -546,39 +496,39 @@ export default function CreateProduct() {
         </div>
 
         {/* RIGHT COLUMN (1/3 width on large screens) */}
-        <div className="space-y-6">
+        <div className="space-y-8">
           {/* PRICE AND STOCK */}
-          <div className="rounded-2xl border border-slate-200/60 bg-gradient-to-tr from-slate-50 to-white p-5 md:p-6 shadow-sm space-y-4">
-            <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-              <div className="rounded-xl bg-indigo-50 p-2 text-indigo-600">
+          <div className="rounded-3xl border border-slate-200/50 bg-gradient-to-br from-white via-white to-slate-50/20 p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.015)] hover:shadow-[0_20px_40px_rgba(99,102,241,0.02)] transition-all duration-500 space-y-5">
+            <div className="flex items-center gap-3.5 pb-4 border-b border-slate-100/80">
+              <div className="rounded-2xl bg-gradient-to-tr from-indigo-500/10 to-violet-500/10 p-2.5 text-indigo-600 dark:bg-indigo-950/20">
                 <DollarSign size={20} />
               </div>
               <div>
-                <h2 className="text-base font-bold text-slate-900">
+                <h2 className="text-lg font-bold text-slate-900 leading-snug">
                   Giá bán & Tồn kho
                 </h2>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-400">
                   Thiết lập giá và số lượng trong kho
                 </p>
               </div>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-5">
               {/* Giá bán lẻ */}
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-slate-600 uppercase tracking-wide flex items-center gap-1">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
                     Giá bán thực tế (VND){" "}
                     <span className="text-rose-500">*</span>
                   </label>
                   {currentDiscount > 0 && (
-                    <span className="inline-flex items-center gap-0.5 rounded-full bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-rose-600 border border-rose-100 animate-pulse">
-                      <Percent size={10} /> Giảm {currentDiscount}%
+                    <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2.5 py-1 text-[10px] font-extrabold text-rose-600 border border-rose-100/80 animate-pulse">
+                      <Percent size={9} /> Giảm {currentDiscount}%
                     </span>
                   )}
                 </div>
-                <div className="relative">
-                  <div className="absolute right-4 top-2.5 text-slate-400 text-xs font-bold">
+                <div className="relative group">
+                  <div className="absolute right-4 top-3 text-slate-400 text-xs font-extrabold group-focus-within:text-indigo-500 transition-colors duration-200">
                     VND
                   </div>
                   <input
@@ -589,18 +539,18 @@ export default function CreateProduct() {
                       handleChange("price", event.target.value)
                     }
                     placeholder="Ví dụ: 95000"
-                    className="w-full rounded-xl border border-slate-200 bg-white/70 pl-4 pr-12 py-2.5 text-sm placeholder-slate-400 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100 font-semibold text-slate-800"
+                    className="w-full rounded-xl border border-slate-200/80 bg-white/50 pl-4 pr-14 py-3 text-sm placeholder-slate-400 outline-none transition-all duration-300 focus:border-indigo-500 focus:bg-white focus:shadow-[0_10px_20px_-10px_rgba(99,102,241,0.06)] focus:ring-4 focus:ring-indigo-100/50 font-bold text-slate-800"
                   />
                 </div>
               </div>
 
               {/* Giá so sánh */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-600 uppercase tracking-wide">
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                   Giá gốc / So sánh (VND)
                 </label>
-                <div className="relative">
-                  <div className="absolute right-4 top-2.5 text-slate-400 text-xs font-bold">
+                <div className="relative group">
+                  <div className="absolute right-4 top-3 text-slate-400 text-xs font-extrabold group-focus-within:text-indigo-500 transition-colors duration-200">
                     VND
                   </div>
                   <input
@@ -610,14 +560,14 @@ export default function CreateProduct() {
                       handleChange("compareAtPrice", event.target.value)
                     }
                     placeholder="Ví dụ: 120000"
-                    className="w-full rounded-xl border border-slate-200 bg-white/70 pl-4 pr-12 py-2.5 text-sm placeholder-slate-400 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100 text-slate-500 font-medium"
+                    className="w-full rounded-xl border border-slate-200/80 bg-white/50 pl-4 pr-14 py-3 text-sm placeholder-slate-400 outline-none transition-all duration-300 focus:border-indigo-500 focus:bg-white focus:shadow-[0_10px_20px_-10px_rgba(99,102,241,0.06)] focus:ring-4 focus:ring-indigo-100/50 text-slate-500 font-medium"
                   />
                 </div>
               </div>
 
               {/* Số lượng tồn kho */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-600 uppercase tracking-wide flex items-center gap-1">
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
                   Số lượng trong kho <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -628,88 +578,67 @@ export default function CreateProduct() {
                     handleChange("stock", event.target.value)
                   }
                   placeholder="Ví dụ: 100"
-                  className="w-full rounded-xl border border-slate-200 bg-white/70 px-4 py-2.5 text-sm placeholder-slate-400 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100"
+                  className="w-full rounded-xl border border-slate-200/80 bg-white/50 px-4 py-3 text-sm placeholder-slate-400 outline-none transition-all duration-300 focus:border-indigo-500 focus:bg-white focus:shadow-[0_10px_20px_-10px_rgba(99,102,241,0.06)] focus:ring-4 focus:ring-indigo-100/50"
                 />
               </div>
 
-              {/* Trạng thái - Bằng Radio Cards cao cấp */}
-              <div className="space-y-2 pt-2">
-                <label className="text-xs font-bold text-slate-600 uppercase tracking-wide">
+              {/* Trạng thái - Hoạt động và Ngừng hoạt động */}
+              <div className="space-y-2.5 pt-2">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                   Trạng thái phát hành
                 </label>
 
-                <div className="space-y-2">
-                  {/* Bản nháp (DRAFT) */}
-                  <div
-                    onClick={() => handleChange("status", "DRAFT")}
-                    className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer select-none transition-all ${
-                      form.status === "DRAFT"
-                        ? "border-slate-800 bg-slate-50 shadow-sm"
-                        : "border-slate-200 hover:bg-slate-50/50"
-                    }`}
-                  >
-                    <div className="h-4.5 w-4.5 rounded-full border border-slate-300 flex items-center justify-center bg-white shrink-0">
-                      {form.status === "DRAFT" && (
-                        <div className="h-2 w-2 rounded-full bg-slate-800" />
-                      )}
-                    </div>
-                    <div className="space-y-0.5">
-                      <div className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                        <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
-                        Bản nháp (Draft)
-                      </div>
-                      <div className="text-[10px] text-slate-500">
-                        Chỉ quản trị viên mới thấy sách này.
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Đang bán (ACTIVE) */}
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Hoạt động (ACTIVE) */}
                   <div
                     onClick={() => handleChange("status", "ACTIVE")}
-                    className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer select-none transition-all ${
+                    className={`flex flex-col gap-2.5 p-4 rounded-2xl border cursor-pointer select-none transition-all duration-300 hover:scale-[1.01] ${
                       form.status === "ACTIVE"
-                        ? "border-emerald-500 bg-emerald-50/40 shadow-sm"
+                        ? "border-emerald-500/80 bg-emerald-50/20 shadow-[0_8px_20px_rgba(16,185,129,0.06)]"
                         : "border-slate-200 hover:bg-slate-50/50"
                     }`}
                   >
-                    <div className="h-4.5 w-4.5 rounded-full border border-slate-300 flex items-center justify-center bg-white shrink-0">
-                      {form.status === "ACTIVE" && (
-                        <div className="h-2 w-2 rounded-full bg-emerald-600" />
-                      )}
+                    <div className="flex items-center justify-between">
+                      <div className="h-5 w-5 rounded-full border border-slate-350 flex items-center justify-center bg-white shrink-0">
+                        {form.status === "ACTIVE" && (
+                          <div className="h-2.5 w-2.5 rounded-full bg-emerald-600 animate-pulse" />
+                        )}
+                      </div>
+                      <span className={`h-2 w-2 rounded-full ${form.status === "ACTIVE" ? "bg-emerald-500 animate-ping" : "bg-slate-300"}`} />
                     </div>
                     <div className="space-y-0.5">
-                      <div className="text-xs font-bold text-emerald-800 flex items-center gap-1.5">
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        Đang bán lẻ (Active)
+                      <div className="text-xs font-extrabold text-slate-800">
+                        Hoạt động
                       </div>
-                      <div className="text-[10px] text-emerald-600/80">
-                        Hiển thị công khai lên cửa hàng ngay.
+                      <div className="text-[10px] text-slate-400 leading-normal">
+                        Hiển thị ngay lên website.
                       </div>
                     </div>
                   </div>
 
-                  {/* Hết hàng (OUT_OF_STOCK) */}
+                  {/* Ngừng hoạt động (DRAFT) */}
                   <div
-                    onClick={() => handleChange("status", "OUT_OF_STOCK")}
-                    className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer select-none transition-all ${
-                      form.status === "OUT_OF_STOCK"
-                        ? "border-rose-500 bg-rose-50/40 shadow-sm"
+                    onClick={() => handleChange("status", "DRAFT")}
+                    className={`flex flex-col gap-2.5 p-4 rounded-2xl border cursor-pointer select-none transition-all duration-300 hover:scale-[1.01] ${
+                      form.status === "DRAFT"
+                        ? "border-slate-800 bg-slate-50/80 shadow-[0_8px_20px_rgba(30,41,59,0.05)]"
                         : "border-slate-200 hover:bg-slate-50/50"
                     }`}
                   >
-                    <div className="h-4.5 w-4.5 rounded-full border border-slate-300 flex items-center justify-center bg-white shrink-0">
-                      {form.status === "OUT_OF_STOCK" && (
-                        <div className="h-2 w-2 rounded-full bg-rose-600" />
-                      )}
+                    <div className="flex items-center justify-between">
+                      <div className="h-5 w-5 rounded-full border border-slate-350 flex items-center justify-center bg-white shrink-0">
+                        {form.status === "DRAFT" && (
+                          <div className="h-2.5 w-2.5 rounded-full bg-slate-800" />
+                        )}
+                      </div>
+                      <span className="h-2 w-2 rounded-full bg-slate-400" />
                     </div>
                     <div className="space-y-0.5">
-                      <div className="text-xs font-bold text-rose-800 flex items-center gap-1.5">
-                        <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
-                        Tạm hết hàng
+                      <div className="text-xs font-extrabold text-slate-800">
+                        Tạm ẩn
                       </div>
-                      <div className="text-[10px] text-rose-600/80">
-                        Khóa đặt hàng trên website.
+                      <div className="text-[10px] text-slate-400 leading-normal">
+                        Lưu nháp, tạm ẩn công khai.
                       </div>
                     </div>
                   </div>
@@ -718,260 +647,201 @@ export default function CreateProduct() {
             </div>
           </div>
 
-          {/* PRODUCT IMAGES (Hỗ trợ nhiều ảnh) */}
-          <div className="rounded-2xl border border-slate-200/60 bg-gradient-to-tr from-slate-50 to-white p-5 md:p-6 shadow-sm space-y-4">
-            <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-              <div className="rounded-xl bg-indigo-50 p-2 text-indigo-600">
-                <ImageIcon size={20} />
-              </div>
-              <div>
-                <h2 className="text-base font-bold text-slate-900">
-                  Ảnh bìa & Minh họa
-                </h2>
-                <p className="text-xs text-slate-500">
-                  Thêm nhiều ảnh để hiển thị chi tiết (Dán URL)
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className="space-y-3">
-                {form.coverImages.map((image, index) => (
-                  <div key={index} className="space-y-1">
-                    <div className="flex gap-2 items-center">
-                      <div className="relative shrink-0">
-                        {image ? (
-                          <img
-                            src={image}
-                            alt=""
-                            className="h-10 w-10 rounded-xl object-cover border border-slate-200 bg-slate-50 shadow-xs"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).style.display =
-                                "none";
-                            }}
-                          />
-                        ) : (
-                          <div className="h-10 w-10 rounded-xl border border-dashed border-slate-200 bg-slate-100/50 flex items-center justify-center text-slate-400">
-                            <ImageIcon size={14} />
-                          </div>
-                        )}
-                        {index === 0 && (
-                          <span
-                            className="absolute -top-1 -left-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-indigo-600 text-[8px] font-bold text-white shadow-xs"
-                            title="Ảnh đại diện chính"
-                          >
-                            ★
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex-1 relative">
-                        <input
-                          type="text"
-                          value={image}
-                          onChange={(event) =>
-                            handleCoverImageChange(index, event.target.value)
-                          }
-                          placeholder={
-                            index === 0
-                              ? "Dán URL Ảnh bìa chính... (Bắt buộc)"
-                              : `Dán URL Ảnh minh họa thứ ${index + 1}...`
-                          }
-                          className="w-full rounded-xl border border-slate-200 bg-white/70 pl-3 pr-8 py-2 text-xs placeholder-slate-400 outline-none transition-all focus:border-indigo-500 focus:bg-white"
-                        />
-                        {index === 0 && (
-                          <span className="absolute right-3 top-2 text-[9px] font-bold text-indigo-500 uppercase tracking-wide bg-indigo-50 px-1 rounded border border-indigo-100">
-                            Ảnh chính
-                          </span>
-                        )}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveCoverImage(index)}
-                        className="rounded-xl border border-slate-200 bg-white p-2 text-slate-500 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-100 active:scale-95 transition cursor-pointer flex items-center justify-center shrink-0 shadow-xs"
-                        title="Xóa liên kết này"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <button
-                type="button"
-                onClick={handleAddCoverImage}
-                className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl border border-dashed border-indigo-200 bg-indigo-50/20 px-3 py-2.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 transition cursor-pointer active:scale-98"
-              >
-                <Plus size={14} />
-                Thêm URL ảnh minh họa
-              </button>
-
-              {/* Cover previews grid with dynamic responsive cards */}
-              <div className="grid grid-cols-3 gap-2.5 pt-2">
-                {form.coverImages.filter(Boolean).length > 0 ? (
-                  form.coverImages.filter(Boolean).map((image, index) => (
-                    <div
-                      key={`${image}-${index}`}
-                      className="group relative h-20 flex items-center justify-center rounded-xl border border-slate-100 bg-white p-1.5 overflow-hidden shadow-xs"
-                    >
-                      <img
-                        src={image}
-                        alt={`Preview ${index + 1}`}
-                        className="h-full w-full object-contain rounded-lg transition duration-300 group-hover:scale-105"
-                      />
-                      {index === 0 && (
-                        <div className="absolute top-1 left-1 bg-indigo-600 text-white font-extrabold text-[8px] px-1 py-0.5 rounded shadow-xs">
-                          Bìa chính
-                        </div>
-                      )}
-                      <div className="absolute inset-0 bg-slate-950/20 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                        <span className="text-[8px] bg-slate-900/80 text-white font-semibold px-1.5 py-0.5 rounded-full">
-                          Ảnh {index + 1}
-                        </span>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="col-span-3 text-center text-xs text-slate-400 py-6 border border-dashed border-slate-100 bg-slate-50/50 rounded-xl">
-                    Chưa có ảnh xem trước.
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* DYNAMIC LIVE STOREFRONT PREVIEW (WOW FACTOR) */}
-          <div className="rounded-2xl border border-indigo-100 bg-gradient-to-tr from-indigo-50/20 to-purple-50/20 p-5 md:p-6 shadow-sm space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-indigo-100/50">
-              <div className="flex items-center gap-2">
-                <div className="rounded-xl bg-indigo-600 p-2 text-white shadow-sm shadow-indigo-600/20">
-                  <Sparkles size={16} />
+          {/* PRODUCT IMAGES */}
+          <div className="rounded-3xl border border-slate-200/50 bg-gradient-to-br from-white via-white to-slate-50/20 p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.015)] hover:shadow-[0_20px_40px_rgba(99,102,241,0.02)] transition-all duration-500 space-y-5">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100/80">
+              <div className="flex items-center gap-3.5">
+                <div className="rounded-2xl bg-gradient-to-tr from-indigo-500/10 to-violet-500/10 p-2.5 text-indigo-600 dark:bg-indigo-950/20">
+                  <ImageIcon size={20} />
                 </div>
                 <div>
-                  <h2 className="text-sm font-extrabold text-slate-900">
-                    Xem trước hiển thị (Live Preview)
+                  <h2 className="text-lg font-bold text-slate-900 leading-snug">
+                    Ảnh bìa & Minh họa
                   </h2>
-                  <p className="text-[10px] text-slate-500">
-                    Mô phỏng thực tế thẻ sách khách hàng sẽ thấy
+                  <p className="text-xs text-slate-400">
+                    Tải ảnh lên hoặc dán liên kết URL từ mạng
                   </p>
                 </div>
               </div>
-              <span className="bg-indigo-600/10 text-indigo-700 text-[9px] font-extrabold px-2 py-0.5 rounded-full border border-indigo-200/50 uppercase tracking-wide">
-                Live Storefront
-              </span>
             </div>
 
-            {/* Simulated Bookstore Card */}
-            <div className="flex justify-center py-2">
-              <div className="w-56 bg-white rounded-2xl border border-slate-150 overflow-hidden shadow-md hover:shadow-lg transition-all duration-300">
-                {/* Book Cover Image Slot */}
-                <div className="relative h-64 bg-slate-50 flex items-center justify-center overflow-hidden border-b border-slate-100">
-                  {form.coverImages[0] ? (
-                    <img
-                      src={form.coverImages[0]}
-                      alt=""
-                      className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = "none";
-                      }}
+            {/* Mode Switcher - Frosted look */}
+            <div className="flex rounded-xl bg-slate-100/80 p-1 text-xs font-semibold shadow-inner">
+              <button
+                type="button"
+                onClick={() => setImageUploadMode("file")}
+                className={`flex-1 py-2.5 rounded-lg text-center cursor-pointer transition-all duration-200 ${
+                  imageUploadMode === "file"
+                    ? "bg-white text-indigo-600 shadow-sm font-extrabold"
+                    : "text-slate-500 hover:text-slate-800"
+                }`}
+              >
+                Chọn tệp hình ảnh (File)
+              </button>
+              <button
+                type="button"
+                onClick={() => setImageUploadMode("url")}
+                className={`flex-1 py-2.5 rounded-lg text-center cursor-pointer transition-all duration-200 ${
+                  imageUploadMode === "url"
+                    ? "bg-white text-indigo-600 shadow-sm font-extrabold"
+                    : "text-slate-500 hover:text-slate-800"
+                }`}
+              >
+                Nhập liên kết (URL)
+              </button>
+            </div>
+
+            <div className="space-y-5">
+              {imageUploadMode === "file" ? (
+                /* FILE UPLOAD ZONE */
+                <div className="space-y-4 animate-fade-in">
+                  <div className="relative">
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="hidden"
+                      id="file-upload-input"
                     />
-                  ) : (
-                    <div className="flex flex-col items-center gap-2 text-slate-300 p-4">
-                      <div className="h-12 w-12 rounded-full bg-slate-100/80 flex items-center justify-center border border-dashed border-slate-200">
-                        <BookMarked size={20} className="text-slate-400" />
+                    <label
+                      htmlFor="file-upload-input"
+                      className="border-2 border-dashed border-slate-200 hover:border-indigo-400 bg-slate-50/30 hover:bg-indigo-50/10 rounded-2xl p-7 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all duration-300 group"
+                    >
+                      <div className="rounded-full bg-indigo-50/80 p-3 text-indigo-600 group-hover:scale-110 group-hover:bg-indigo-100 group-hover:text-indigo-750 transition-all duration-300 shadow-xs">
+                        <Upload size={20} className="animate-bounce" />
                       </div>
-                      <span className="text-[10px] font-bold text-slate-400 italic">
-                        Chưa nhập ảnh bìa
-                      </span>
-                    </div>
-                  )}
-                  {/* Discount Badge */}
-                  {currentDiscount > 0 && (
-                    <div className="absolute top-3 right-3 bg-rose-600 text-white font-extrabold text-xs px-2 py-0.5 rounded-lg shadow-sm shadow-rose-600/20">
-                      -{currentDiscount}%
-                    </div>
-                  )}
-                  {/* Status Pill on Preview */}
-                  <div className="absolute bottom-2.5 left-2.5">
-                    {form.status === "ACTIVE" && (
-                      <span className="bg-emerald-500/90 text-white font-extrabold text-[8px] px-2 py-0.5 rounded shadow-sm border border-emerald-400/20 flex items-center gap-0.5">
-                        <span className="h-1 w-1 rounded-full bg-white animate-pulse" />{" "}
-                        ĐANG BÁN
-                      </span>
-                    )}
-                    {form.status === "DRAFT" && (
-                      <span className="bg-slate-700/90 text-white font-extrabold text-[8px] px-2 py-0.5 rounded shadow-sm flex items-center gap-0.5">
-                        BẢN NHÁP
-                      </span>
-                    )}
-                    {form.status === "OUT_OF_STOCK" && (
-                      <span className="bg-rose-600/90 text-white font-extrabold text-[8px] px-2 py-0.5 rounded shadow-sm flex items-center gap-0.5">
-                        HẾT HÀNG
-                      </span>
-                    )}
+                      <div className="text-xs font-bold text-slate-700 text-center">
+                        Nhấn để chọn tệp hoặc kéo thả ảnh vào đây
+                      </div>
+                      <div className="text-[10px] text-slate-400 text-center leading-normal">
+                        Chấp nhận PNG, JPG, JPEG, WEBP<br />Hỗ trợ tải lên cùng lúc nhiều tệp
+                      </div>
+                    </label>
                   </div>
                 </div>
-
-                {/* Card Details */}
-                <div className="p-4 space-y-2">
-                  {/* Genres Row */}
-                  <div className="flex flex-wrap gap-1 max-h-5 overflow-hidden">
-                    {form.genre.length > 0 ? (
-                      form.genre.slice(0, 2).map((g) => (
-                        <span
-                          key={g}
-                          className="bg-slate-100 text-slate-600 text-[8px] font-bold px-1.5 py-0.5 rounded"
-                        >
-                          {g}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="text-slate-300 text-[8px] italic">
-                        Chưa chọn thể loại
-                      </span>
-                    )}
+              ) : (
+                /* URL INPUT MODE */
+                <div className="space-y-4 animate-fade-in">
+                  <div className="space-y-3">
+                    {form.coverImages.map((image, index) => (
+                      <div key={index} className="space-y-1">
+                        <div className="flex gap-2 items-center">
+                          <div className="relative shrink-0">
+                            {image ? (
+                              <img
+                                src={image}
+                                alt=""
+                                className="h-10 w-10 rounded-xl object-cover border border-slate-200 bg-slate-50 shadow-sm"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).style.display =
+                                    "none";
+                                }}
+                              />
+                            ) : (
+                              <div className="h-10 w-10 rounded-xl border border-dashed border-slate-200 bg-slate-100/50 flex items-center justify-center text-slate-400">
+                                <ImageIcon size={14} />
+                              </div>
+                            )}
+                            {index === 0 && (
+                              <span
+                                className="absolute -top-1 -left-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-indigo-600 text-[8px] font-bold text-white shadow-xs"
+                                title="Ảnh đại diện chính"
+                              >
+                                ★
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex-1 relative">
+                            <input
+                              type="text"
+                              value={image}
+                              onChange={(event) =>
+                                handleCoverImageChange(index, event.target.value)
+                              }
+                              placeholder={
+                                index === 0
+                                  ? "Dán URL Ảnh bìa chính... (Bắt buộc)"
+                                  : `Dán URL Ảnh minh họa thứ ${index + 1}...`
+                              }
+                              className="w-full rounded-xl border border-slate-200 bg-white/50 pl-3 pr-8 py-2 text-xs placeholder-slate-400 outline-none transition-all duration-300 focus:border-indigo-500 focus:bg-white"
+                            />
+                            {index === 0 && (
+                              <span className="absolute right-3 top-2 text-[9px] font-bold text-indigo-500 uppercase tracking-wide bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100">
+                                Ảnh chính
+                              </span>
+                            )}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveCoverImage(index)}
+                            className="rounded-xl border border-slate-200 bg-white p-2.5 text-slate-500 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-100 active:scale-95 transition-all duration-200 cursor-pointer flex items-center justify-center shrink-0 shadow-xs"
+                            title="Xóa liên kết này"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
 
-                  {/* Title */}
-                  <h3
-                    className="font-bold text-slate-800 text-xs leading-tight line-clamp-2 h-8"
-                    title={form.title}
+                  <button
+                    type="button"
+                    onClick={handleAddCoverImage}
+                    className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl border border-dashed border-indigo-200 bg-indigo-50/10 px-3 py-2.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 transition-all duration-250 cursor-pointer active:scale-98"
                   >
-                    {form.title.trim() || (
-                      <span className="text-slate-400 font-medium italic">
-                        Chưa nhập tên tác phẩm...
-                      </span>
-                    )}
-                  </h3>
+                    <Plus size={14} />
+                    Thêm URL ảnh minh họa
+                  </button>
+                </div>
+              )}
 
-                  {/* Authors */}
-                  <p className="text-[10px] text-slate-500 truncate">
-                    {form.author.length > 0 ? (
-                      `Bởi ${form.author.join(", ")}`
-                    ) : (
-                      <span className="text-slate-300 italic">Khuyết danh</span>
-                    )}
-                  </p>
-
-                  {/* Pricing */}
-                  <div className="pt-1 flex items-baseline gap-1.5">
-                    {form.price ? (
-                      <span className="text-indigo-600 font-extrabold text-sm">
-                        {Number(form.price).toLocaleString("vi-VN")}đ
-                      </span>
-                    ) : (
-                      <span className="text-slate-400 font-bold text-xs italic">
-                        Liên hệ
-                      </span>
-                    )}
-                    {form.price &&
-                      form.compareAtPrice &&
-                      Number(form.compareAtPrice) > Number(form.price) && (
-                        <span className="text-slate-400 text-[10px] line-through">
-                          {Number(form.compareAtPrice).toLocaleString("vi-VN")}đ
-                        </span>
-                      )}
-                  </div>
+              {/* Dynamic Previews Grid for Selected Images */}
+              <div className="space-y-2.5 pt-2">
+                <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  Danh sách ảnh đã chọn ({form.coverImages.filter(Boolean).length})
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  {form.coverImages.filter(Boolean).length > 0 ? (
+                    form.coverImages.filter(Boolean).map((image, index) => (
+                      <div
+                        key={`${image}-${index}`}
+                        className="group relative h-24 flex items-center justify-center rounded-2xl border border-slate-200/60 bg-white p-2 overflow-hidden shadow-sm hover:shadow-md hover:scale-[1.03] hover:rotate-1 transition-all duration-300"
+                      >
+                        <img
+                          src={image}
+                          alt={`Preview ${index + 1}`}
+                          className="h-full w-full object-contain rounded-xl"
+                        />
+                        {index === 0 ? (
+                          <div className="absolute top-1.5 left-1.5 bg-indigo-600 text-white font-extrabold text-[8px] px-1.5 py-0.5 rounded shadow-sm">
+                            Bìa chính
+                          </div>
+                        ) : (
+                          <div className="absolute top-1.5 left-1.5 bg-slate-800/90 text-white font-extrabold text-[8px] px-1.5 py-0.5 rounded shadow-sm">
+                            Ảnh {index + 1}
+                          </div>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveCoverImage(form.coverImages.indexOf(image))}
+                          className="absolute right-1.5 top-1.5 bg-rose-600 text-white p-1.5 rounded-xl opacity-0 group-hover:opacity-100 backdrop-blur-xs transition-all duration-250 hover:bg-rose-500 shadow-sm active:scale-90"
+                          title="Xóa ảnh này"
+                        >
+                          <Trash2 size={10} />
+                        </button>
+                        <div className="absolute inset-x-0 bottom-0 bg-slate-950/45 py-1 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <span className="text-[8px] text-white font-extrabold">
+                            Hình {index + 1}
+                          </span>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="col-span-3 text-center text-xs text-slate-400 py-8 border border-dashed border-slate-200/80 bg-slate-50/50 rounded-2xl leading-relaxed">
+                      Chưa chọn hoặc tải ảnh nào.<br />Hãy chọn tệp ảnh để xem trước.
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
