@@ -18,7 +18,7 @@ import com.dev.backend.exception.DuplicateFieldException;
 import com.dev.backend.exception.NotFoundException;
 import com.dev.backend.mapper.GenreMapper;
 import com.dev.backend.repository.GenreRepository;
-import com.dev.backend.resp.PageResponse;
+import com.dev.backend.response.PageResponse;
 import com.dev.backend.service.CloudinaryService;
 import com.dev.backend.service.GeminiService;
 import com.dev.backend.service.GenreService;

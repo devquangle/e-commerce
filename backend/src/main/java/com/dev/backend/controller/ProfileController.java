@@ -2,8 +2,8 @@ package com.dev.backend.controller;
 
 import com.dev.backend.bean.ProfileBean;
 import com.dev.backend.dto.UserDTO;
-import com.dev.backend.resp.ResponseData;
-import com.dev.backend.resp.ResponseUtil;
+import com.dev.backend.response.ResponseData;
+import com.dev.backend.response.ResponseUtil;
 
 import com.dev.backend.security.CustomUserDetails;
 import com.dev.backend.service.UserService;

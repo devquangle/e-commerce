@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.dev.backend.resp.ResponseData;
-import com.dev.backend.resp.ResponseUtil;
+import com.dev.backend.response.ResponseData;
+import com.dev.backend.response.ResponseUtil;
 import com.dev.backend.service.GeminiService;
 
 import lombok.RequiredArgsConstructor;

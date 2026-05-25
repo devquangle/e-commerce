@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.dev.backend.constant.AuthorType;
 import com.dev.backend.dto.author.AuthorResponse;
 import com.dev.backend.mapper.AuthorMapper;
-import com.dev.backend.resp.ResponseData;
-import com.dev.backend.resp.ResponseUtil;
+import com.dev.backend.response.ResponseData;
+import com.dev.backend.response.ResponseUtil;
 
 import lombok.RequiredArgsConstructor;
 

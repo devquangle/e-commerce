@@ -14,8 +14,8 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 import com.dev.backend.exception.AppException;
 import com.dev.backend.exception.DuplicateFieldException;
-import com.dev.backend.resp.ApiErrorCode;
-import com.dev.backend.resp.ResponseData;
+import com.dev.backend.response.ApiErrorCode;
+import com.dev.backend.response.ResponseData;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;

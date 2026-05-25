@@ -5,8 +5,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.dev.backend.dto.auth.LoginRequest;
 import com.dev.backend.dto.auth.LoginResponse;
 import com.dev.backend.dto.auth.RefreshResponse;
-import com.dev.backend.resp.ResponseData;
-import com.dev.backend.resp.ResponseUtil;
+import com.dev.backend.response.ResponseData;
+import com.dev.backend.response.ResponseUtil;
 import com.dev.backend.service.AuthService;
 
 import jakarta.servlet.http.HttpServletRequest;

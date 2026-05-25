@@ -1,4 +1,4 @@
-package com.dev.backend.resp;
+package com.dev.backend.response;
 
 import org.springframework.data.domain.Page;
 

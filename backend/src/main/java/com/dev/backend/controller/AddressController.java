@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dev.backend.bean.AddressBean;
 import com.dev.backend.dto.AddressDTO;
-import com.dev.backend.resp.ResponseData;
-import com.dev.backend.resp.ResponseUtil;
+import com.dev.backend.response.ResponseData;
+import com.dev.backend.response.ResponseUtil;
 import com.dev.backend.security.CustomUserDetails;
 import com.dev.backend.service.AddressService;
 import lombok.RequiredArgsConstructor;

@@ -13,15 +13,15 @@ import com.dev.backend.bean.ProvinceBean;
 import com.dev.backend.dto.ghn.DistrictDTO;
 import com.dev.backend.dto.ghn.ProvinceDTO;
 import com.dev.backend.dto.ghn.WardDTO;
-import com.dev.backend.resp.ResponseData;
-import com.dev.backend.resp.ResponseUtil;
+import com.dev.backend.response.ResponseData;
+import com.dev.backend.response.ResponseUtil;
 import com.dev.backend.service.GHNService;
 
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-public class API_GHN_Controller {
+public class ApiGhnController {
     private final GHNService ghnService;
 
     @GetMapping("/public/ghn/provinces")

@@ -1,4 +1,4 @@
-package com.dev.backend.resp;
+package com.dev.backend.response;
 
 import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonFormat;

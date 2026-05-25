@@ -1,4 +1,4 @@
-package com.dev.backend.resp;
+package com.dev.backend.response;
 
 import java.util.List;
 
