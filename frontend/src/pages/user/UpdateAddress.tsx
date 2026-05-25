@@ -1,6 +1,6 @@
 import InputField from "@/components/common/InputField";
 import Loading from "@/components/common/Loading";
-import SelectBox from "@/components/common/SelectBox";
+import SelectBox from "@/components/common/SelectedBox";
 import TextAreaField from "@/components/common/TextAreaField";
 import type { AddressRequest } from "@/types/address";
 import { showErrorToast, } from "@/utils/toastUtil";

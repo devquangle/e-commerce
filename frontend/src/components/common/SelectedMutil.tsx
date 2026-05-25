@@ -33,7 +33,7 @@ export default function SelectedMutil({
   // Lọc danh sách dựa trên từ khóa tìm kiếm
   const filteredOptions = useMemo(() => {
     return options.filter((o) =>
-      o.label.toLowerCase().includes(search.toLowerCase()),
+      o.label.toLowerCase().includes(search.toLowerCase())
     );
   }, [options, search]);
 
@@ -41,15 +41,16 @@ export default function SelectedMutil({
     return new Map(options.map((option) => [option.value, option.label]));
   }, [options]);
 
-  const toggleValue = (val: string) => {
-    if (disabled) return;
-
-    if (value.includes(val)) {
-      onChange(value.filter((v) => v !== val));
-    } else {
-      onChange([...value, val]);
+  const toggleValue = useMemo(() => {
+    return (val: string) => {
+      if (disabled) return;
+      if (value.includes(val)) {
+        onChange(value.filter((v) => v !== val));
+      } else {
+        onChange([...value, val]);
     }
-  };
+    };
+  }, [disabled, value, onChange]);
 
   // Đóng dropdown khi click ra ngoài
   useEffect(() => {
@@ -68,11 +69,33 @@ export default function SelectedMutil({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Focus vào ô input khi mở dropdown
   useEffect(() => {
     if (open) {
       inputRef.current?.focus();
     }
   }, [open]);
+
+  // Tự động cuộn (Scroll into view) khi điều hướng bằng bàn phím
+  useEffect(() => {
+    if (highlightedIndex < 0 || !optionsListRef.current) return;
+    
+    const listContainer = optionsListRef.current;
+    const highlightedElement = listContainer.children[highlightedIndex] as HTMLElement;
+    
+    if (highlightedElement) {
+      const containerTop = listContainer.scrollTop;
+      const containerBottom = containerTop + listContainer.clientHeight;
+      const elemTop = highlightedElement.offsetTop;
+      const elemBottom = elemTop + highlightedElement.clientHeight;
+
+      if (elemTop < containerTop) {
+        listContainer.scrollTop = elemTop;
+      } else if (elemBottom > containerBottom) {
+        listContainer.scrollTop = elemBottom - listContainer.clientHeight;
+      }
+    }
+  }, [highlightedIndex]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -110,7 +133,7 @@ export default function SelectedMutil({
       document.addEventListener("keydown", handleKeyDown);
       return () => document.removeEventListener("keydown", handleKeyDown);
     }
-  }, [open, highlightedIndex, filteredOptions]);
+  }, [open, highlightedIndex, filteredOptions, toggleValue]);
 
   return (
     <div ref={containerRef} className="relative w-full space-y-1.5">
@@ -144,7 +167,7 @@ export default function SelectedMutil({
             value.map((val) => (
               <span
                 key={val}
-                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border animate-fade-in ${
+                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all ${
                   disabled
                     ? "bg-slate-100 text-slate-500 border-slate-200"
                     : "bg-indigo-50 text-indigo-700 border-indigo-100 cursor-pointer hover:bg-indigo-100"
@@ -201,16 +224,22 @@ export default function SelectedMutil({
             ref={inputRef}
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setHighlightedIndex(-1); // ĐÃ SỬA: Reset đồng bộ ngay tại handler
+            }}
             placeholder="Tìm kiếm danh sách..."
-            className="w-full pl-9 pr-8 py-2 text-xs rounded-lg border border-slate-250 bg-slate-50/50 outline-none transition focus:border-indigo-500 focus:bg-white"
+            className="w-full pl-9 pr-8 py-2 text-xs rounded-lg border border-slate-200 bg-slate-50/50 outline-none transition focus:border-indigo-500 focus:bg-white"
             onClick={(e) => e.stopPropagation()}
           />
           {search && (
             <button
               type="button"
-              onClick={() => setSearch("")}
-              className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-650 cursor-pointer"
+              onClick={() => {
+                setSearch("");
+                setHighlightedIndex(-1); // ĐÃ SỬA: Reset đồng bộ ngay tại handler
+              }}
+              className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 cursor-pointer"
             >
               <X size={12} />
             </button>
@@ -221,7 +250,6 @@ export default function SelectedMutil({
         <div 
           ref={optionsListRef}
           className="max-h-52 overflow-y-auto space-y-0.5"
-          role="presentation"
         >
           {filteredOptions.map((opt, index) => {
             const isSelected = value.includes(opt.value);
@@ -233,7 +261,6 @@ export default function SelectedMutil({
                 aria-selected={isSelected}
                 onClick={() => toggleValue(opt.value)}
                 onMouseEnter={() => setHighlightedIndex(index)}
-                onMouseLeave={() => setHighlightedIndex(-1)}
                 className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs cursor-pointer select-none transition ${
                   isHighlighted
                     ? "bg-indigo-100 text-indigo-900"

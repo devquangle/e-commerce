@@ -20,7 +20,7 @@ import Pagination from "@/components/common/Pagination";
 import type { options as GenreOptions, GenreResponse } from "@/types/genre";
 import { useSearchParams } from "react-router-dom";
 import useDebounce from "@/hooks/useDebounce";
-import SelectBox from "@/components/common/SelectBox";
+import SelectBox from "@/components/common/SelectedBox";
 import {
   Edit,
   Eye,
