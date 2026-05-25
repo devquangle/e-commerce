@@ -1,58 +1,72 @@
 package com.dev.backend.constant;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 public enum AuthorType {
 
+    // === KHÁC ===
+    OTHER("Khác", 1),
+
     // === VIỆT NAM ===
-    TO_HOAI("Tô Hoài", 1),
-    NAM_CAO("Nam Cao", 2),
-    XUAN_DIEU("Xuân Diệu", 3),
-    TRAN_DANG_KHOA("Trần Đăng Khoa", 4),
-    NGUYEN_DU("Nguyễn Du", 5),
-    NGUYEN_NHAT_ANH("Nguyễn Nhật Ánh", 6),
-    BAO_NINH("Bảo Ninh", 7),
+    TO_HOAI("Tô Hoài", 2),
+    NAM_CAO("Nam Cao", 3),
+    XUAN_DIEU("Xuân Diệu", 4),
+    TRAN_DANG_KHOA("Trần Đăng Khoa", 5),
+    NGUYEN_DU("Nguyễn Du", 6),
+    NGUYEN_NHAT_ANH("Nguyễn Nhật Ánh", 7),
+    BAO_NINH("Bảo Ninh", 8),
 
     // === NHẬT BẢN ===
-    HARUKI_MURAKAMI("Haruki Murakami", 8),
-    YASUNARI_KAWABATA("Yasunari Kawabata", 9),
-    KEIGO_HIGASHINO("Keigo Higashino", 10),
-    RYUNOSUKE_AKUTAGAWA("Ryunosuke Akutagawa", 11),
+    HARUKI_MURAKAMI("Haruki Murakami", 9),
+    YASUNARI_KAWABATA("Yasunari Kawabata", 10),
+    KEIGO_HIGASHINO("Keigo Higashino", 11),
+    RYUNOSUKE_AKUTAGAWA("Ryunosuke Akutagawa", 12),
 
     // === ANH ===
-    WILLIAM_SHAKESPEARE("William Shakespeare", 12),
-    JK_ROWLING("J.K. Rowling", 13),
-    AGATHA_CHRISTIE("Agatha Christie", 14),
-    CONAN_DOYLE("Arthur Conan Doyle", 15),
+    WILLIAM_SHAKESPEARE("William Shakespeare", 13),
+    JK_ROWLING("J.K. Rowling", 14),
+    AGATHA_CHRISTIE("Agatha Christie", 15),
+    CONAN_DOYLE("Arthur Conan Doyle", 16),
 
     // === PHÁP ===
-    VICTOR_HUGO("Victor Hugo", 16),
-    SAINT_EXUPERY("Antoine de Saint-Exupéry", 17),
-    ALEXANDRE_DUMAS("Alexandre Dumas", 18),
+    VICTOR_HUGO("Victor Hugo", 17),
+    SAINT_EXUPERY("Antoine de Saint-Exupéry", 18),
+    ALEXANDRE_DUMAS("Alexandre Dumas", 19),
 
     // === MỸ ===
-    ERNEST_HEMINGWAY("Ernest Hemingway", 19),
-    MARK_TWAIN("Mark Twain", 20),
-    STEPHEN_KING("Stephen King", 21),
-    JACK_LONDON("Jack London", 22),
-
-    // === KHÁC ===
-    OTHER("Khác", 23);
+    ERNEST_HEMINGWAY("Ernest Hemingway", 20),
+    MARK_TWAIN("Mark Twain", 21),
+    STEPHEN_KING("Stephen King", 22),
+    JACK_LONDON("Jack London", 23);
 
     private final String displayName;
     private final Integer id;
 
-    // Sửa lỗi chính tả tham số truyền vào và gán giá trị chính xác
     AuthorType(String displayName, Integer id) {
         this.displayName = displayName;
         this.id = id;
     }
 
-    // Getter để lấy tên hiển thị
     public String getDisplayName() {
         return displayName;
     }
 
-    // Bổ sung Getter để lấy ID của tác giả
     public Integer getId() {
         return id;
+    }
+
+    // Cache để lookup nhanh
+    private static final Map<Integer, AuthorType> ID_MAP =
+            Arrays.stream(values())
+                    .collect(Collectors.toMap(
+                            AuthorType::getId,
+                            Function.identity()
+                    ));
+
+    public static AuthorType fromId(Integer id) {
+        return ID_MAP.getOrDefault(id, OTHER);
     }
 }
