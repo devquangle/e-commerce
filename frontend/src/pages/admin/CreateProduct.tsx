@@ -66,6 +66,7 @@ export default function CreateProduct() {
   const [imageUploadMode, setImageUploadMode] = useState<"file" | "url">(
     "file",
   );
+  const [thumbnailIndex, setThumbnailIndex] = useState(0);
   const navigate = useNavigate();
 
   const { data: genresData } = useGenre({ size: 100 });
@@ -154,12 +155,24 @@ export default function CreateProduct() {
   const handleRemoveCoverImage = (index: number) => {
     if (form.coverImages.length === 1) {
       handleChange("coverImages", [""]);
+      setThumbnailIndex(0);
       return;
     }
-    handleChange(
-      "coverImages",
-      form.coverImages.filter((_, i) => i !== index),
-    );
+    const nextImages = form.coverImages.filter((_, i) => i !== index);
+    handleChange("coverImages", nextImages);
+    setThumbnailIndex((prev) => {
+      if (index === prev) {
+        const firstWithImage = nextImages.findIndex(Boolean);
+        return firstWithImage >= 0 ? firstWithImage : 0;
+      }
+      if (index < prev) return prev - 1;
+      return prev;
+    });
+  };
+
+  const handleSetThumbnail = (index: number) => {
+    if (!form.coverImages[index]) return;
+    setThumbnailIndex(index);
   };
 
   // Media Management - Local File upload
@@ -619,11 +632,7 @@ export default function CreateProduct() {
                         onChange={(event) =>
                           handleCoverImageChange(index, event.target.value)
                         }
-                        placeholder={
-                          index === 0
-                            ? "URL Ảnh bìa chính..."
-                            : `URL Ảnh phụ ${index + 1}...`
-                        }
+                        placeholder={`URL ảnh ${index + 1}...`}
                         className="flex-1 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs outline-none focus:border-indigo-500"
                       />
                       <button
@@ -657,22 +666,50 @@ export default function CreateProduct() {
                       return (
                         <div
                           key={`${image}-${index}`}
-                          className="group relative h-20 border border-slate-200 bg-slate-50 p-1 rounded-xl overflow-hidden flex items-center justify-center"
+                          className={`group relative flex flex-col gap-1 ${
+                            thumbnailIndex === index
+                              ? "ring-2 ring-indigo-500 ring-offset-1 rounded-xl"
+                              : ""
+                          }`}
                         >
-                          <img
-                            src={image}
-                            alt=""
-                            className="h-full w-full object-contain rounded-lg"
-                          />
-                          <div className="absolute top-1 left-1 bg-slate-900/70 text-white text-[8px] px-1 rounded">
-                            {index === 0 ? "Chính" : `#${index + 1}`}
+                          <div className="relative h-20 border border-slate-200 bg-slate-50 p-1 rounded-xl overflow-hidden flex items-center justify-center">
+                            <img
+                              src={image}
+                              alt=""
+                              className="h-full w-full object-contain rounded-lg"
+                            />
+                            {thumbnailIndex === index && (
+                              <div className="absolute top-1 left-1 bg-indigo-600 text-white text-[8px] font-bold px-1 rounded">
+                                Đại diện
+                              </div>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveCoverImage(index)}
+                              className="absolute top-1 right-1 bg-rose-600 text-white p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity hover:bg-rose-700"
+                            >
+                              <Trash2 size={10} />
+                            </button>
                           </div>
                           <button
                             type="button"
-                            onClick={() => handleRemoveCoverImage(index)}
-                            className="absolute top-1 right-1 bg-rose-600 text-white p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity hover:bg-rose-700"
+                            onClick={() => handleSetThumbnail(index)}
+                            className={`flex items-center justify-center gap-1 rounded-lg border px-1 py-0.5 text-[10px] font-semibold transition-colors cursor-pointer ${
+                              thumbnailIndex === index
+                                ? "border-indigo-500 bg-indigo-50 text-indigo-700"
+                                : "border-slate-200 bg-white text-slate-500 hover:border-indigo-300 hover:text-indigo-600"
+                            }`}
                           >
-                            <Trash2 size={10} />
+                            <span
+                              className={`inline-flex h-3 w-3 items-center justify-center rounded border text-[8px] leading-none ${
+                                thumbnailIndex === index
+                                  ? "border-indigo-600 bg-indigo-600 text-white"
+                                  : "border-slate-300 bg-white"
+                              }`}
+                            >
+                              {thumbnailIndex === index ? "✓" : ""}
+                            </span>
+                            Ảnh đại diện
                           </button>
                         </div>
                       );
