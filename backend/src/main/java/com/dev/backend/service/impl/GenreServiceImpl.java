@@ -183,7 +183,6 @@ public class GenreServiceImpl implements GenreService {
 
         @Override
         public Genre findByName(String name) {
-                // TODO Auto-generated method stub
                 return null;
         }
 

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Check, X, Search, ChevronDown, Plus } from "lucide-react";
+import { Check, X, Search, ChevronDown } from "lucide-react";
 
 interface Option {
   label: string;
@@ -13,8 +13,6 @@ interface Props {
   onChange: (value: string[]) => void;
   placeholder?: string;
   disabled?: boolean;
-  allowCustom?: boolean; // Cho phép thêm phần tử mới nếu không tìm thấy trong danh sách
-  customPrefix?: string; // Ví dụ: "Thêm tác giả" hoặc "Thêm thể loại"
 }
 
 export default function SelectedMutil({
@@ -24,55 +22,28 @@ export default function SelectedMutil({
   onChange,
   placeholder = "Chọn...",
   disabled = false,
-  allowCustom = true,
-  customPrefix = "Thêm mới",
 }: Props) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Gộp cả các giá trị tự chế vào danh sách hiển thị
-  const mergedOptions = useMemo(() => {
-    const list = [...options];
-    // Nếu trong value có giá trị nào không nằm trong options thì tự động bổ sung vào options hiển thị
-    value.forEach((val) => {
-      if (!list.some((o) => o.value === val)) {
-        list.push({ label: val, value: val });
-      }
-    });
-    return list;
-  }, [options, value]);
-
   // Lọc danh sách dựa trên từ khóa tìm kiếm
   const filteredOptions = useMemo(() => {
-    return mergedOptions.filter((o) =>
+    return options.filter((o) =>
       o.label.toLowerCase().includes(search.toLowerCase())
     );
-  }, [mergedOptions, search]);
+  }, [options, search]);
 
-  // Kiểm tra xem từ khóa tìm kiếm có khớp chính xác với bất kỳ option nào không
-  const hasExactMatch = useMemo(() => {
-    const trimmed = search.trim();
-    if (!trimmed) return true;
-    return mergedOptions.some(
-      (o) => o.label.toLowerCase() === trimmed.toLowerCase()
-    );
-  }, [mergedOptions, search]);
+  const optionLabelByValue = useMemo(() => {
+    return new Map(options.map((option) => [option.value, option.label]));
+  }, [options]);
 
   const toggleValue = (val: string) => {
     if (value.includes(val)) {
       onChange(value.filter((v) => v !== val));
     } else {
       onChange([...value, val]);
-    }
-  };
-
-  const handleAddCustom = () => {
-    const trimmed = search.trim();
-    if (trimmed && !value.includes(trimmed)) {
-      onChange([...value, trimmed]);
-      setSearch("");
     }
   };
 
@@ -124,7 +95,7 @@ export default function SelectedMutil({
                   toggleValue(val);
                 }}
               >
-                {val}
+                {optionLabelByValue.get(val) ?? val}
                 <X size={10} className="hover:text-indigo-900 ml-0.5 cursor-pointer shrink-0" />
               </span>
             ))
@@ -191,20 +162,7 @@ export default function SelectedMutil({
             );
           })}
 
-          {/* Nút thêm phần tử mới tùy chỉnh (Custom Add) */}
-          {allowCustom && search.trim() && !hasExactMatch && (
-            <div
-              onClick={handleAddCustom}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-indigo-600 bg-indigo-50/40 hover:bg-indigo-50 cursor-pointer border border-dashed border-indigo-100"
-            >
-              <Plus size={13} className="shrink-0" />
-              <span>
-                {customPrefix}: "{search.trim()}"
-              </span>
-            </div>
-          )}
-
-          {filteredOptions.length === 0 && (!allowCustom || !search.trim()) && (
+          {filteredOptions.length === 0 && (
             <div className="py-6 text-center text-xs text-slate-400 italic">
               Không tìm thấy kết quả phù hợp
             </div>

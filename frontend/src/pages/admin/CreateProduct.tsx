@@ -378,7 +378,7 @@ export default function CreateProduct() {
                 </div>
               </div>
 
-              {/* Tác giả (Chọn nhiều dùng component SelectedMutil với Filter & Custom Add) */}
+              {/* Tác giả (Chọn nhiều dùng component SelectedMutil với Filter) */}
               <div className="md:col-span-2">
                 <SelectedMutil
                   label="Tác giả / Dịch giả *"
@@ -386,12 +386,10 @@ export default function CreateProduct() {
                   value={form.author}
                   onChange={(val) => handleChange("author", val)}
                   placeholder="Chọn hoặc gõ tìm kiếm tác giả (chọn nhiều)..."
-                  allowCustom={true}
-                  customPrefix="Thêm tác giả mới"
                 />
               </div>
 
-              {/* Thể loại (Chọn nhiều dùng component SelectedMutil với Filter & Custom Add) */}
+              {/* Thể loại (Chọn nhiều dùng component SelectedMutil với Filter) */}
               <div>
                 <SelectedMutil
                   label="Thể loại sách *"
@@ -399,8 +397,6 @@ export default function CreateProduct() {
                   value={form.genre}
                   onChange={(val) => handleChange("genre", val)}
                   placeholder="Chọn thể loại (chọn nhiều)..."
-                  allowCustom={true}
-                  customPrefix="Thêm thể loại mới"
                 />
               </div>
 
