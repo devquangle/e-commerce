@@ -35,10 +35,6 @@ export default function SelectedMutil({
     );
   }, [options, search]);
 
-  const optionLabelByValue = useMemo(() => {
-    return new Map(options.map((option) => [option.value, option.label]));
-  }, [options]);
-
   const toggleValue = (val: string) => {
     if (value.includes(val)) {
       onChange(value.filter((v) => v !== val));
@@ -95,7 +91,7 @@ export default function SelectedMutil({
                   toggleValue(val);
                 }}
               >
-                {optionLabelByValue.get(val) ?? val}
+                {val}
                 <X size={10} className="hover:text-indigo-900 ml-0.5 cursor-pointer shrink-0" />
               </span>
             ))
