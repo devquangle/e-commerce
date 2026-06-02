@@ -1,11 +1,15 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { createBrowserRouter, RouterProvider } from "react-router-dom"; // Thay đổi ở đây
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ToastContainer } from "react-toastify";
 import "./index.css";
 import App from "./App.tsx";
 import { AuthProvider } from "./providers/AuthProvider.tsx";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter } from "react-router-dom";
-import { ToastContainer } from "react-toastify";
+import UserLayout from "./layouts/UserLayout";
+import AdminLayout from "./layouts/AdminLayout";
+import userRouter from "./routers/userRouter";
+import adminRouter from "./routers/adminRouter";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -17,14 +21,29 @@ const queryClient = new QueryClient({
   },
 });
 
+// Khai báo Router ở đây
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />, // App chứa Outlet
+    children: [
+      {
+        element: <UserLayout />,
+        children: userRouter,
+      },
+      {
+        path: "admin",
+        element: <AdminLayout />,
+        children: adminRouter,
+      },
+    ],
+  },
+]);
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <AuthProvider>
-          <App />
-        </AuthProvider>
-      </BrowserRouter>
+      <RouterProvider router={router} />
       <ToastContainer />
     </QueryClientProvider>
   </StrictMode>,
