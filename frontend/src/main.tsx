@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ToastContainer } from "react-toastify";
 import "./index.css";
 import App from "./App.tsx";
-import { AuthProvider } from "./providers/AuthProvider.tsx";
 import UserLayout from "./layouts/UserLayout";
 import AdminLayout from "./layouts/AdminLayout";
 import userRouter from "./routers/userRouter";

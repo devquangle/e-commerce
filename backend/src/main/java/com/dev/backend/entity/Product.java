@@ -26,11 +26,11 @@ public class Product {
     private Integer id;
     private String name;
     private Integer quantity;
-    private BigDecimal originalPrice;
-    private BigDecimal price;
+    private Integer originalPrice;
+    private Integer price;
 
     private String description;
-    private int weight;
+    private Integer weight;
 
     private String isbn;
 

@@ -1,36 +1,45 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useCallback,
+} from "react";
 import { Check, X, Search, ChevronDown } from "lucide-react";
 
-interface Option {
+type OptionValue = string | number;
+
+interface Option<T extends OptionValue> {
   label: string;
-  value: string;
+  value: T;
 }
 
-interface Props {
+interface Props<T extends OptionValue> {
   label?: string;
-  options: Option[];
-  value: string[];
-  onChange: (value: string[]) => void;
+  options: Option<T>[];
+  value: T[];
+  onChange: (value: T[]) => void;
   placeholder?: string;
   disabled?: boolean;
 }
 
-export default function SelectedMutil({
+export default function SelectedMutil<T extends OptionValue>({
   label,
   options,
-  value = [],
+  value,
   onChange,
   placeholder = "Chọn...",
   disabled = false,
-}: Props) {
+}: Props<T>) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
+  const [highlightedIndex, setHighlightedIndex] =
+    useState<number>(-1);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const optionsListRef = useRef<HTMLDivElement>(null);
 
-  // Lọc danh sách dựa trên từ khóa tìm kiếm
   const filteredOptions = useMemo(() => {
     return options.filter((o) =>
       o.label.toLowerCase().includes(search.toLowerCase())
@@ -38,21 +47,27 @@ export default function SelectedMutil({
   }, [options, search]);
 
   const optionLabelByValue = useMemo(() => {
-    return new Map(options.map((option) => [option.value, option.label]));
+    return new Map<T, string>(
+      options.map((option) => [
+        option.value,
+        option.label,
+      ])
+    );
   }, [options]);
 
-  const toggleValue = useMemo(() => {
-    return (val: string) => {
+  const toggleValue = useCallback(
+    (val: T) => {
       if (disabled) return;
+
       if (value.includes(val)) {
         onChange(value.filter((v) => v !== val));
       } else {
         onChange([...value, val]);
-    }
-    };
-  }, [disabled, value, onChange]);
+      }
+    },
+    [disabled, value, onChange]
+  );
 
-  // Đóng dropdown khi click ra ngoài
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (
@@ -65,41 +80,61 @@ export default function SelectedMutil({
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener(
+      "mousedown",
+      handleClickOutside
+    );
+
+    return () => {
+      document.removeEventListener(
+        "mousedown",
+        handleClickOutside
+      );
+    };
   }, []);
 
-  // Focus vào ô input khi mở dropdown
   useEffect(() => {
     if (open) {
       inputRef.current?.focus();
     }
   }, [open]);
 
-  // Tự động cuộn (Scroll into view) khi điều hướng bằng bàn phím
   useEffect(() => {
-    if (highlightedIndex < 0 || !optionsListRef.current) return;
-    
-    const listContainer = optionsListRef.current;
-    const highlightedElement = listContainer.children[highlightedIndex] as HTMLElement;
-    
-    if (highlightedElement) {
-      const containerTop = listContainer.scrollTop;
-      const containerBottom = containerTop + listContainer.clientHeight;
-      const elemTop = highlightedElement.offsetTop;
-      const elemBottom = elemTop + highlightedElement.clientHeight;
+    if (
+      highlightedIndex < 0 ||
+      !optionsListRef.current
+    )
+      return;
 
-      if (elemTop < containerTop) {
-        listContainer.scrollTop = elemTop;
-      } else if (elemBottom > containerBottom) {
-        listContainer.scrollTop = elemBottom - listContainer.clientHeight;
-      }
+    const listContainer = optionsListRef.current;
+
+    const highlightedElement =
+      listContainer.children[
+        highlightedIndex
+      ] as HTMLElement;
+
+    if (!highlightedElement) return;
+
+    const containerTop = listContainer.scrollTop;
+    const containerBottom =
+      containerTop + listContainer.clientHeight;
+
+    const elemTop = highlightedElement.offsetTop;
+    const elemBottom =
+      elemTop + highlightedElement.clientHeight;
+
+    if (elemTop < containerTop) {
+      listContainer.scrollTop = elemTop;
+    } else if (elemBottom > containerBottom) {
+      listContainer.scrollTop =
+        elemBottom - listContainer.clientHeight;
     }
   }, [highlightedIndex]);
 
-  // Keyboard navigation
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const handleKeyDown = (
+      e: KeyboardEvent
+    ) => {
       if (!open) return;
 
       switch (e.key) {
@@ -108,176 +143,206 @@ export default function SelectedMutil({
           setSearch("");
           setHighlightedIndex(-1);
           break;
+
         case "ArrowDown":
           e.preventDefault();
+
           setHighlightedIndex((prev) =>
-            prev < filteredOptions.length - 1 ? prev + 1 : prev
+            prev < filteredOptions.length - 1
+              ? prev + 1
+              : prev
           );
           break;
+
         case "ArrowUp":
           e.preventDefault();
-          setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : -1));
+
+          setHighlightedIndex((prev) =>
+            prev > 0 ? prev - 1 : -1
+          );
           break;
+
         case "Enter":
           e.preventDefault();
-          if (highlightedIndex >= 0 && filteredOptions[highlightedIndex]) {
-            toggleValue(filteredOptions[highlightedIndex].value);
+
+          if (
+            highlightedIndex >= 0 &&
+            filteredOptions[highlightedIndex]
+          ) {
+            toggleValue(
+              filteredOptions[highlightedIndex].value
+            );
           }
-          break;
-        default:
+
           break;
       }
     };
 
     if (open) {
-      document.addEventListener("keydown", handleKeyDown);
-      return () => document.removeEventListener("keydown", handleKeyDown);
+      document.addEventListener(
+        "keydown",
+        handleKeyDown
+      );
+
+      return () => {
+        document.removeEventListener(
+          "keydown",
+          handleKeyDown
+        );
+      };
     }
-  }, [open, highlightedIndex, filteredOptions, toggleValue]);
+  }, [
+    open,
+    highlightedIndex,
+    filteredOptions,
+    toggleValue,
+  ]);
 
   return (
-    <div ref={containerRef} className="relative w-full space-y-1.5">
-      {/* Label */}
+    <div
+      ref={containerRef}
+      className="relative w-full space-y-1.5"
+    >
       {label && (
         <label className="block text-xs font-bold text-slate-600 uppercase tracking-wide">
           {label}
         </label>
       )}
 
-      {/* Trigger Button */}
       <button
         type="button"
         disabled={disabled}
-        onClick={() => !disabled && setOpen(!open)}
+        onClick={() =>
+          !disabled && setOpen(!open)
+        }
         aria-haspopup="listbox"
         aria-expanded={open}
-        aria-label={`Select ${label || "options"}, ${value.length} selected`}
-        className={`w-full rounded-xl border border-slate-200 bg-white/70 h-11 px-4 text-sm cursor-pointer flex items-center justify-between min-h-11 transition-all hover:border-slate-300 ${
+        className={`w-full rounded-xl border border-slate-200 bg-white/70 h-11 px-4 text-sm flex items-center justify-between transition-all ${
           disabled
             ? "bg-slate-100 cursor-not-allowed opacity-60"
-            : "focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-100"
+            : "cursor-pointer hover:border-slate-300"
         }`}
       >
         <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide pr-4">
           {value.length === 0 ? (
-            <span className="text-slate-400 text-sm select-none">
+            <span className="text-slate-400">
               {placeholder}
             </span>
           ) : (
             value.map((val) => (
               <span
-                key={val}
-                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all ${
-                  disabled
-                    ? "bg-slate-100 text-slate-500 border-slate-200"
-                    : "bg-indigo-50 text-indigo-700 border-indigo-100 cursor-pointer hover:bg-indigo-100"
-                }`}
+                key={String(val)}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border bg-indigo-50 text-indigo-700 border-indigo-100"
                 onClick={(e) => {
-                  if (!disabled) {
-                    e.stopPropagation();
-                    toggleValue(val);
-                  }
-                }}
-                role={!disabled ? "button" : undefined}
-                tabIndex={!disabled ? 0 : undefined}
-                onKeyDown={(e) => {
-                  if (!disabled && (e.key === "Enter" || e.key === " ")) {
-                    e.preventDefault();
-                    toggleValue(val);
-                  }
+                  e.stopPropagation();
+                  toggleValue(val);
                 }}
               >
-                {optionLabelByValue.get(val) ?? val}
-                {!disabled && (
-                  <X
-                    size={10}
-                    className="hover:text-indigo-900 ml-0.5 cursor-pointer shrink-0"
-                  />
-                )}
+                {optionLabelByValue.get(val) ??
+                  String(val)}
+
+                <X
+                  size={10}
+                  className="cursor-pointer"
+                />
               </span>
             ))
           )}
         </div>
+
         <ChevronDown
           size={16}
-          className={`text-slate-400 transition-transform duration-250 shrink-0 ${
-            open ? "rotate-180 text-indigo-500" : ""
+          className={`transition-transform ${
+            open ? "rotate-180" : ""
           }`}
         />
       </button>
 
-      {/* Dropdown Menu */}
       <div
         role="listbox"
-        className={`absolute left-0 right-0 z-50 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-lg transition-all duration-200 origin-top overflow-hidden p-2 space-y-2 ${
+        className={`absolute left-0 right-0 z-50 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-lg transition-all origin-top overflow-hidden p-2 space-y-2 ${
           open
             ? "opacity-100 scale-100"
             : "opacity-0 scale-95 pointer-events-none"
         }`}
       >
-        {/* Search Input Box */}
         <div className="relative">
-          <div className="absolute left-3 top-2.5 text-slate-400">
-            <Search size={14} />
-          </div>
+          <Search
+            size={14}
+            className="absolute left-3 top-2.5 text-slate-400"
+          />
+
           <input
             ref={inputRef}
             type="text"
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
-              setHighlightedIndex(-1); // ĐÃ SỬA: Reset đồng bộ ngay tại handler
+              setHighlightedIndex(-1);
             }}
-            placeholder="Tìm kiếm danh sách..."
-            className="w-full pl-9 pr-8 py-2 text-xs rounded-lg border border-slate-200 bg-slate-50/50 outline-none transition focus:border-indigo-500 focus:bg-white"
-            onClick={(e) => e.stopPropagation()}
+            placeholder="Tìm kiếm..."
+            className="w-full pl-9 pr-8 py-2 text-xs rounded-lg border border-slate-200 outline-none focus:border-indigo-500"
           />
+
           {search && (
             <button
               type="button"
               onClick={() => {
                 setSearch("");
-                setHighlightedIndex(-1); // ĐÃ SỬA: Reset đồng bộ ngay tại handler
+                setHighlightedIndex(-1);
               }}
-              className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 cursor-pointer"
+              className="absolute right-2 top-2"
             >
               <X size={12} />
             </button>
           )}
         </div>
 
-        {/* Options List */}
-        <div 
+        <div
           ref={optionsListRef}
-          className="max-h-52 overflow-y-auto space-y-0.5"
+          className="max-h-52 overflow-y-auto"
         >
-          {filteredOptions.map((opt, index) => {
-            const isSelected = value.includes(opt.value);
-            const isHighlighted = highlightedIndex === index;
-            return (
-              <div
-                key={opt.value}
-                role="option"
-                aria-selected={isSelected}
-                onClick={() => toggleValue(opt.value)}
-                onMouseEnter={() => setHighlightedIndex(index)}
-                className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs cursor-pointer select-none transition ${
-                  isHighlighted
-                    ? "bg-indigo-100 text-indigo-900"
-                    : isSelected
-                      ? "bg-indigo-50 text-indigo-900 font-semibold"
-                      : "hover:bg-slate-50 text-slate-700"
-                }`}
-              >
-                <span>{opt.label}</span>
-                {isSelected && (
-                  <Check size={14} className="text-indigo-600 shrink-0" />
-                )}
-              </div>
-            );
-          })}
+          {filteredOptions.length > 0 ? (
+            filteredOptions.map(
+              (opt, index) => {
+                const isSelected =
+                  value.includes(opt.value);
 
-          {filteredOptions.length === 0 && (
+                const isHighlighted =
+                  highlightedIndex === index;
+
+                return (
+                  <div
+                    key={String(opt.value)}
+                    role="option"
+                    aria-selected={isSelected}
+                    onClick={() =>
+                      toggleValue(opt.value)
+                    }
+                    onMouseEnter={() =>
+                      setHighlightedIndex(index)
+                    }
+                    className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs cursor-pointer transition ${
+                      isHighlighted
+                        ? "bg-indigo-100 text-indigo-900"
+                        : isSelected
+                        ? "bg-indigo-50 text-indigo-900 font-semibold"
+                        : "hover:bg-slate-50"
+                    }`}
+                  >
+                    <span>{opt.label}</span>
+
+                    {isSelected && (
+                      <Check
+                        size={14}
+                        className="text-indigo-600"
+                      />
+                    )}
+                  </div>
+                );
+              }
+            )
+          ) : (
             <div className="py-6 text-center text-xs text-slate-400 italic">
               Không tìm thấy kết quả phù hợp
             </div>

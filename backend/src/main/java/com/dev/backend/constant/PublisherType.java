@@ -50,12 +50,10 @@ public enum PublisherType {
         return id;
     }
 
-    private static final Map<Integer, PublisherType> ID_MAP =
-            Arrays.stream(values())
-                    .collect(Collectors.toMap(
-                            PublisherType::getId,
-                            Function.identity()
-                    ));
+    private static final Map<Integer, PublisherType> ID_MAP = Arrays.stream(values())
+            .collect(Collectors.toMap(
+                    PublisherType::getId,
+                    Function.identity()));
 
     public static PublisherType fromId(Integer id) {
         return ID_MAP.getOrDefault(id, OTHER);

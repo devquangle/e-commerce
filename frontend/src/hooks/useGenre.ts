@@ -10,6 +10,14 @@ export const useGenre = (options?: options) => {
   });
 };
 
+export const useGenreAll = () => {
+  return useQuery<GenreResponse[]>({
+    queryKey: ["genres-all"],
+    queryFn: genreService.getAllGenres,
+  });
+};
+
+
 export const useCreateGenre = () => {
   const queryClient = useQueryClient();
 

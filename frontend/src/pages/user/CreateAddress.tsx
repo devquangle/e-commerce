@@ -25,7 +25,6 @@ export default function CreateAddress() {
         handleSubmit,
         control,
         resetField,
-
         formState: { errors },
     } = useForm<AddressRequest>({
         defaultValues: {

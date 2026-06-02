@@ -1,7 +1,5 @@
 package com.dev.backend.dto.product;
 
-import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,8 +9,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class ProductRequest {
-
+public class ProductResponse {
+    private Integer id;
     private String name;
     private Integer originalPrice;
     private Integer price;
@@ -21,14 +19,4 @@ public class ProductRequest {
     private Integer weight;
     private Integer publishYear;
     private Integer pageCount;
-
-    private List<Integer> genreIds;
-    private List<Integer> authorIds;
-
-    private Integer publisherId;
-    
-    private String status;
-
-    private String description;
-
 }

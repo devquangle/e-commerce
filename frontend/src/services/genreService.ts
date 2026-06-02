@@ -46,6 +46,15 @@ const genreService = {
     }
     return;
   },
+  async getAllGenres() {
+    const res = await apiAuth.get<ApiResponse<GenreResponse[]>>(
+      "/genres/all",
+    );
+    if (!res.data.success || !res.data.data) {
+      throw new Error(res.data.message || "Failed to fetch all genres");
+    }
+    return res.data.data;
+  }
 };
 
 export default genreService;

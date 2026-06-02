@@ -1,5 +1,6 @@
 package com.dev.backend.controller;
 
+import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -62,5 +63,10 @@ public class GenreController {
         return ResponseUtil.success("Xóa thể loại thành công", null);
     }
 
-   
+    @GetMapping("/genres/all")
+    public ResponseEntity<ResponseData<List<GenreResponse>>> listGenre() {
+        List<GenreResponse> listGenre = genreService.getAllGenre();
+        return ResponseUtil.success("Lấy danh sách thể loại thành công", listGenre);
+    }
+
 }

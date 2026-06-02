@@ -1,4 +1,4 @@
-import { Search, X } from "lucide-react";
+import { ChevronDown, Search, X } from "lucide-react";
 import { useState, useRef, useEffect, useMemo } from "react";
 
 interface Option<T> {
@@ -41,7 +41,7 @@ export default function SelectBox<T>({
     if (!searchable || !search.trim()) return options;
 
     return options.filter((o) =>
-      o.label.toLowerCase().includes(search.toLowerCase())
+      o.label.toLowerCase().includes(search.toLowerCase()),
     );
   }, [options, search, searchable]);
 
@@ -104,25 +104,16 @@ export default function SelectBox<T>({
           }
         `}
       >
-        <span className={`select-none ${selected ? "text-slate-800" : "text-slate-400"}`}>
+        <span
+          className={`select-none ${selected ? "text-slate-800" : "text-slate-400"}`}
+        >
           {selected ? selected.label : placeholder}
         </span>
 
-        <svg
-          className={`w-4 h-4 text-slate-400 transition-transform duration-250 shrink-0 ${
-            open ? "rotate-180 text-indigo-500" : ""
-          }`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M19 9l-7 7-7-7"
-          />
-        </svg>
+        <ChevronDown
+          size={16}
+          className={`transition-transform ${open ? "rotate-180" : ""}`}
+        />
       </div>
 
       {/* Dropdown Menu */}
@@ -176,7 +167,8 @@ export default function SelectBox<T>({
           )}
 
           {filteredOptions.map((option) => {
-            const isSelected = value !== undefined && isEqual(option.value, value);
+            const isSelected =
+              value !== undefined && isEqual(option.value, value);
             return (
               <div
                 key={String(option.value)}
