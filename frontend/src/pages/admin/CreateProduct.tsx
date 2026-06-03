@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import ProductDescriptionEditor from "../../components/admin/ProductDescriptionEditor";
 import SelectedMutil from "@/components/common/SelectedMutil";
 import {
@@ -12,9 +12,11 @@ import {
   ArrowLeft,
   Loader2,
   Upload,
+  Edit,
+  Eye,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useGenreAll } from "@/hooks/useGenre";
+import { useListGenre } from "@/hooks/useGenre";
 
 import type { AuthorResponse } from "@/types/author";
 import type { GenreResponse } from "@/types/genre";
@@ -23,6 +25,7 @@ import { usePublisher } from "@/hooks/usePublisher";
 import SelectBox from "@/components/common/SelectedBox";
 import { Controller, useForm } from "react-hook-form";
 import InputField from "@/components/common/InputField";
+import { showWarningToast } from "@/utils/toastUtil";
 type CoverImage = {
   file?: File;
   url: string;
@@ -30,11 +33,11 @@ type CoverImage = {
 };
 type CreateBookForm = {
   name: string;
-  authors: number[];
+  authorIds: number[];
   publisherId: number | undefined;
-  genres: number[];
+  genreIds: number[];
   weight: number;
-  publishYear: number;
+  publishYear: string;
   pages: number;
   price: number;
   originalPrice: number;
@@ -46,16 +49,16 @@ type CreateBookForm = {
 
 const initialForm: CreateBookForm = {
   name: "",
-  authors: [],
+  authorIds: [],
   publisherId: undefined,
-  genres: [],
-  weight: 0,
-  publishYear: 0,
-  pages: 0,
+  genreIds: [],
+  weight: 500,
+  publishYear: "01-01-2020",
+  pages: 200,
   originalPrice: 200000,
   price: 190000,
 
-  quantity: 0,
+  quantity: 10,
   status: "ACTIVE",
   description: "",
   coverImages: [] as CoverImage[],
@@ -71,15 +74,16 @@ export default function CreateProduct() {
     control,
     watch,
     setError,
-    formState: { errors },
+    formState: { errors ,isSubmitted},
   } = useForm<CreateBookForm>({
     defaultValues: initialForm,
   });
 
-  const { data: genresData = [] } = useGenreAll();
+  const { data: genresData = [] } = useListGenre();
 
   const { data: authorsData = [] } = useAuthor();
   const { data: publishersData = [] } = usePublisher();
+
   const MAX_IMAGES = 6;
   const [imageUploadMode, setImageUploadMode] = useState<"file" | "url">(
     "file",
@@ -111,71 +115,120 @@ export default function CreateProduct() {
       value: publisher.id,
     }));
   }, [publishersData]);
+
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-
     if (!files?.length) return;
 
-    const currentImages = getValues("coverImages");
+    const currentImages = getValues("coverImages") || [];
 
-    const newImages: CoverImage[] = Array.from(files).map((file) => ({
+    if (currentImages.length >= MAX_IMAGES) {
+      showWarningToast(
+        `Bạn chỉ được phép tải lên tối đa ${MAX_IMAGES} hình ảnh.`,
+      );
+      e.target.value = "";
+      return;
+    }
+
+
+    const availableSlots = MAX_IMAGES - currentImages.length;
+    const filesToUpload = Array.from(files).slice(0, availableSlots);
+
+
+    if (files.length > availableSlots) {
+      showWarningToast(
+        `Chỉ có thể thêm ${availableSlots} ảnh. Các ảnh dư thừa đã bị loại bỏ.`,
+      );
+    }
+
+
+    const newImages: CoverImage[] = filesToUpload.map((file) => ({
       file,
       url: URL.createObjectURL(file),
       isThumbnail: false,
     }));
 
-    if (currentImages.length === 0) {
+   
+    const hasThumbnail = currentImages.some((img) => img.isThumbnail);
+    if (!hasThumbnail && newImages.length > 0) {
       newImages[0].isThumbnail = true;
     }
 
+
     setValue("coverImages", [...currentImages, ...newImages], {
       shouldDirty: true,
+      shouldValidate: true,
     });
 
+ 
     e.target.value = "";
-  };
+  }; 
+
   const handleAddImageUrl = () => {
     if (!imageUrl.trim()) return;
 
-    const currentImages = getValues("coverImages");
+    const currentImages = getValues("coverImages") || [];
+
+    if (currentImages.length >= MAX_IMAGES) {
+      showWarningToast(
+        `Danh sách đã đạt tối đa ${MAX_IMAGES} hình ảnh. Không thể thêm từ URL.`,
+      );
+      return;
+    }
 
     const newImage: CoverImage = {
       url: imageUrl.trim(),
-      isThumbnail: currentImages.length === 0,
+      // Nếu mảng đang trống HOẶC hiện tại không có ảnh nào làm thumbnail thì cái này làm thumbnail
+      isThumbnail:
+        currentImages.length === 0 ||
+        !currentImages.some((img) => img.isThumbnail),
     };
 
     setValue("coverImages", [...currentImages, newImage], {
       shouldDirty: true,
+      shouldValidate: true,
     });
 
     setImageUrl("");
   };
+
   const handleSetThumbnail = (index: number) => {
-    const images = getValues("coverImages");
+    const images = getValues("coverImages") || [];
+    if (index < 0 || index >= images.length) return;
 
     setValue(
       "coverImages",
       images.map((img, i) => ({
         ...img,
-        isThumbnail: i === index,
+        isThumbnail: i === index, 
       })),
       {
         shouldDirty: true,
       },
     );
   };
+
   const handleRemoveImage = (index: number) => {
-    const images = getValues("coverImages");
+    const images = getValues("coverImages") || [];
+    if (index < 0 || index >= images.length) return;
 
-    if (images[index].isThumbnail) return;
+    const imageToRemove = images[index];
 
-    setValue(
-      "coverImages",
-      images.filter((_, i) => i !== index),
-      {
-        shouldDirty: true,
-      },
-    );
+    if (imageToRemove.url.startsWith("blob:")) {
+      URL.revokeObjectURL(imageToRemove.url);
+    }
+
+    const updatedImages = images.filter((_, i) => i !== index);
+
+    if (imageToRemove.isThumbnail && updatedImages.length > 0) {
+      updatedImages[0].isThumbnail = true;
+    }
+
+    setValue("coverImages", updatedImages, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
   };
   return (
     <section className="max-w-7xl mx-auto w-full">
@@ -210,14 +263,15 @@ export default function CreateProduct() {
             type="button"
             className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50 cursor-pointer"
           >
-            <Save size={15} />
-            Lưu nháp
+            <Eye size={15} />
+            Xem nháp
           </button>
           <button
             type="button"
             onClick={() => handleSubmit((data) => console.log(data))()}
             className="flex items-center justify-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors disabled:opacity-50 cursor-pointer"
           >
+            <Save size={15} />
             Lưu
           </button>
         </div>
@@ -258,7 +312,7 @@ export default function CreateProduct() {
               {/* Tác giả, thể loại, nhà xuất bản — 1 cột */}
               <div className="md:col-span-2 space-y-4">
                 <Controller
-                  name="genres"
+                  name="genreIds"
                   control={control}
                   rules={{ required: "Vui lòng chọn thể loại" }}
                   render={({ field, fieldState }) => (
@@ -269,7 +323,9 @@ export default function CreateProduct() {
                         options={genreOptions}
                         value={field.value}
                         onChange={(val) => field.onChange(val)}
-                      />
+                        required={true}
+                      />  
+                      
                       <p className="text-red-600 text-sm mt-1">
                         {fieldState.error?.message}
                       </p>
@@ -278,7 +334,7 @@ export default function CreateProduct() {
                 />
 
                 <Controller
-                  name="authors"
+                  name="authorIds"
                   control={control}
                   rules={{ required: "Vui lòng chọn tác giả" }}
                   render={({ field, fieldState }) => (
@@ -289,6 +345,7 @@ export default function CreateProduct() {
                         options={authorOptions}
                         value={field.value}
                         onChange={(val) => field.onChange(val)}
+                        required={true}
                       />
                       <p className="text-red-600 text-sm mt-1">
                         {fieldState.error?.message}
@@ -309,6 +366,7 @@ export default function CreateProduct() {
                         placeholder="Chọn nhà xuất bản..."
                         value={field.value}
                         onChange={(val) => field.onChange(val)}
+                        required={true}
                       />
                       <p className="text-red-600 text-sm mt-1">
                         {fieldState.error?.message}
@@ -453,6 +511,14 @@ export default function CreateProduct() {
                 type="number"
                 placeholder="Nhập số lượng.."
                 register={register}
+                rules={{
+                  required: "Số lượng là bắt buộc",
+                  valueAsNumber: true,
+                  min: {
+                    value: 0,
+                    message: "Số lượng phải lớn hơn hoặc bằng 0",
+                  },
+                }}
                 error={errors?.quantity}
               />
 
@@ -602,8 +668,8 @@ export default function CreateProduct() {
               </div>
             )}
 
-            {coverImages.length === 0 && (
-              <div className="text-center text-sm text-slate-400 py-6">
+            {coverImages.length === 0 && isSubmitted  &&(
+              <div className="text-center text-sm text-red-600 py-6">
                 Chưa có ảnh nào được thêm
               </div>
             )}

@@ -24,7 +24,7 @@ import {
   X
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { useGenre } from "@/hooks/useGenre";
+import { useFilterGenre } from "@/hooks/useGenre";
 import { showSuccessToast, showErrorToast } from "@/utils/toastUtil";
 import type { GenreResponse } from "@/types/genre";
 
@@ -110,7 +110,7 @@ export default function UpdateProduct() {
   const navigate = useNavigate();
 
   // Fetch active genres from DB using hook
-  const { data: genresData } = useGenre({ size: 100 });
+  const { data: genresData } = useFilterGenre({ size: 100 });
   const genresList = genresData?.items || [];
 
   const fallbackGenres = [

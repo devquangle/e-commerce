@@ -2,7 +2,7 @@
 import {
   useCreateGenre,
   useDeleteGenre,
-  useGenre,
+  useFilterGenre,
   useUpdateGenre,
 } from "@/hooks/useGenre";
 import {
@@ -76,7 +76,7 @@ export default function Genre() {
     }),
     [searchParams],
   );
-  const { data, isPending, isFetching } = useGenre(options);
+  const { data, isPending, isFetching } = useFilterGenre(options);
   const [file, setFile] = useState<File | null>(null);
   const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(
     null,

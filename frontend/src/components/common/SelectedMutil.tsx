@@ -21,6 +21,7 @@ interface Props<T extends OptionValue> {
   onChange: (value: T[]) => void;
   placeholder?: string;
   disabled?: boolean;
+  required?: boolean;
 }
 
 export default function SelectedMutil<T extends OptionValue>({
@@ -30,6 +31,7 @@ export default function SelectedMutil<T extends OptionValue>({
   onChange,
   placeholder = "Chọn...",
   disabled = false,
+  required = false,
 }: Props<T>) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -205,7 +207,7 @@ export default function SelectedMutil<T extends OptionValue>({
     >
       {label && (
         <label className="block text-xs font-bold text-slate-600 uppercase tracking-wide">
-          {label}
+          {label} {required && <span className="ml-1 text-red-500">*</span>}
         </label>
       )}
 

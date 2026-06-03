@@ -4,13 +4,10 @@ import type { GenreRequest, GenreResponse, options } from "@/types/genre";
 import type { Pagination } from "@/types/pagination";
 
 const genreService = {
-  async getGenres(options?: options) {
-    const res = await apiAuth.get<ApiResponse<Pagination<GenreResponse>>>(
-      "/admin/genres",
-      { params: options },
-    );
+  async listGenre() {
+    const res = await apiAuth.get<ApiResponse<GenreResponse[]>>("/admin/genres");
     if (!res.data.success || !res.data.data) {
-      throw new Error(res.data.message || "Fetch addresses failed");
+      throw new Error(res.data.message || "Failed to fetch all genres");
     }
     return res.data.data;
   },
@@ -46,15 +43,16 @@ const genreService = {
     }
     return;
   },
-  async getAllGenres() {
-    const res = await apiAuth.get<ApiResponse<GenreResponse[]>>(
-      "/genres/all",
+  async filterGenre(options?: options) {
+    const res = await apiAuth.get<ApiResponse<Pagination<GenreResponse>>>(
+      "/admin/genres/filter",
+      { params: options },
     );
     if (!res.data.success || !res.data.data) {
-      throw new Error(res.data.message || "Failed to fetch all genres");
+      throw new Error(res.data.message || "Fetch addresses failed");
     }
     return res.data.data;
-  }
+  },
 };
 
 export default genreService;

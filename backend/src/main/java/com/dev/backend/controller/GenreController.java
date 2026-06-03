@@ -31,13 +31,9 @@ public class GenreController {
     private final GenreService genreService;
 
     @GetMapping("/genres")
-    public ResponseEntity<ResponseData<PageResponse<GenreResponse>>> pageGenre(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String keyword) {
-        PageResponse<GenreResponse> pageGenre = genreService.pageGenre(page - 1, size, keyword);
-        return ResponseUtil.success("Load thể loại thành công", pageGenre);
-
+    public ResponseEntity<ResponseData<List<GenreResponse>>> listGenre() {
+        List<GenreResponse> listGenre = genreService.getAllGenre();
+        return ResponseUtil.success("Lấy danh sách thể loại thành công", listGenre);
     }
 
     @PostMapping("/genres")
@@ -63,10 +59,14 @@ public class GenreController {
         return ResponseUtil.success("Xóa thể loại thành công", null);
     }
 
-    @GetMapping("/genres/all")
-    public ResponseEntity<ResponseData<List<GenreResponse>>> listGenre() {
-        List<GenreResponse> listGenre = genreService.getAllGenre();
-        return ResponseUtil.success("Lấy danh sách thể loại thành công", listGenre);
+    @GetMapping("/genres/filter")
+    public ResponseEntity<ResponseData<PageResponse<GenreResponse>>> pageGenre(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String keyword) {
+        PageResponse<GenreResponse> pageGenre = genreService.pageGenre(page - 1, size, keyword);
+        return ResponseUtil.success("Load thể loại thành công", pageGenre);
+
     }
 
 }

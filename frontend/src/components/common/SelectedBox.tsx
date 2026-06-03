@@ -14,6 +14,7 @@ interface Props<T> {
   placeholder?: string;
   disabled?: boolean;
   searchable?: boolean;
+  required?: boolean;
 }
 
 const isEqual = <T,>(a: T, b: T) => a === b;
@@ -26,6 +27,7 @@ export default function SelectBox<T>({
   placeholder = "Chọn...",
   disabled = false,
   searchable = true,
+  required = false,
 }: Props<T>) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -86,7 +88,7 @@ export default function SelectBox<T>({
     <div ref={ref} className="relative w-full space-y-1.5">
       {label && (
         <label className="block text-xs font-bold text-slate-600 uppercase tracking-wide">
-          {label}
+          {label} {required && <span className="ml-1 text-red-500">*</span>}
         </label>
       )}
 
