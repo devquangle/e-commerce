@@ -407,9 +407,9 @@ export default function CreateProduct() {
     });
   };
   // Đồng bộ dữ liệu form vào bảng "Thông Tin Sách" trong mô tả
-  const [authorIds, genreIds, publisherId, publishYear, pages] = useWatch({
+  const [authorIds, genreIds, publisherId, publishYear, pages, seriesId] = useWatch({
     control,
-    name: ["authorIds", "genreIds", "publisherId", "publishYear", "pages"],
+    name: ["authorIds", "genreIds", "publisherId", "publishYear", "pages", "seriesId"],
   });
 
   useEffect(() => {
@@ -478,6 +478,28 @@ export default function CreateProduct() {
       pages ? String(pages) : "[Số trang]",
     );
 
+    // Series
+    const seriesRowRegex = /(<tr[^>]*>[\s\S]*?<td[^>]*>(?:<p[^>]*>)?\s*Series\s*(?:<\/p>)?<\/td>[\s\S]*?<\/tr>)/i;
+    const hasSeriesRow = seriesRowRegex.test(newDesc);
+
+    if (seriesId) {
+      const seriesName = seriesOptions.find((s) => s.value === seriesId)?.label || "[Tên series]";
+      if (hasSeriesRow) {
+        newDesc = updateTableData(newDesc, "Series", seriesName);
+      } else {
+        // Chèn vào ngay sau Số trang
+        const pagesRowRegex = /(<tr[^>]*>[\s\S]*?<td[^>]*>(?:<p[^>]*>)?\s*Số trang\s*(?:<\/p>)?<\/td>[\s\S]*?<\/tr>)/i;
+        newDesc = newDesc.replace(pagesRowRegex, (match) => {
+          return `${match}\n    <tr>\n      <td>Series</td>\n      <td>${seriesName}</td>\n    </tr>`;
+        });
+      }
+    } else {
+      // Xoá row Series nếu có
+      if (hasSeriesRow) {
+        newDesc = newDesc.replace(seriesRowRegex, "");
+      }
+    }
+
     if (newDesc !== currentDesc) {
       setValue("description", newDesc, { shouldDirty: true });
     }
@@ -487,9 +509,11 @@ export default function CreateProduct() {
     publisherId,
     publishYear,
     pages,
+    seriesId,
     authorOptions,
     genreOptions,
     publisherOptions,
+    seriesOptions,
     setValue,
     getValues,
   ]);

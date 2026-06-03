@@ -93,8 +93,8 @@ export default function ResizableImageNodeView({
     const reader = new FileReader();
     reader.onload = () => {
       if (typeof reader.result === "string") {
-        const pos = typeof getPos === "function" ? getPos() : null;
-        if (pos !== null && editor) {
+        const pos = typeof getPos === "function" ? getPos() : undefined;
+        if (typeof pos === "number" && editor) {
           editor.chain().focus().insertContentAt(pos + node.nodeSize, {
             type: "image",
             attrs: {
@@ -199,8 +199,8 @@ export default function ResizableImageNodeView({
               e.preventDefault();
               const url = window.prompt("Nhập URL ảnh cần thêm:");
               if (url) {
-                const pos = typeof getPos === "function" ? getPos() : null;
-                if (pos !== null && editor) {
+                const pos = typeof getPos === "function" ? getPos() : undefined;
+                if (typeof pos === "number" && editor) {
                   editor.chain().focus().insertContentAt(pos + node.nodeSize, {
                     type: "image",
                     attrs: {
