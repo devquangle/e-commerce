@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import ProductDescriptionEditor from "../../components/admin/ProductDescriptionEditor";
 import SelectedMutil from "@/components/common/SelectedMutil";
 import {
@@ -12,6 +12,7 @@ import {
   Upload,
   Eye,
   RotateCcw,
+  Pencil,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { AuthorResponse } from "@/types/author";
@@ -285,6 +286,8 @@ export default function CreateProduct() {
     "file",
   );
   const [imageUrl, setImageUrl] = useState("");
+  const [replaceIndex, setReplaceIndex] = useState<number | null>(null);
+  const replaceFileInputRef = useRef<HTMLInputElement>(null);
 
   const coverImages = useWatch({ name: "coverImages", control }) || [];
 
@@ -410,6 +413,38 @@ export default function CreateProduct() {
       shouldDirty: true,
       shouldValidate: true,
     });
+  };
+
+  const handleEditClick = (index: number) => {
+    setReplaceIndex(index);
+    replaceFileInputRef.current?.click();
+  };
+
+  const handleReplaceFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || replaceIndex === null) return;
+
+    const newImage: CoverImage = {
+      file,
+      url: URL.createObjectURL(file),
+      isThumbnail: coverImages[replaceIndex].isThumbnail,
+    };
+
+    const oldImage = coverImages[replaceIndex];
+    if (oldImage.url.startsWith("blob:")) {
+      URL.revokeObjectURL(oldImage.url);
+    }
+
+    const updatedImages = [...coverImages];
+    updatedImages[replaceIndex] = newImage;
+
+    setValue("coverImages", updatedImages, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+
+    setReplaceIndex(null);
+    e.target.value = "";
   };
   // Đồng bộ dữ liệu form vào bảng "Thông Tin Sách" trong mô tả
   const [authorIds, genreIds, publisherId, publishYear, pages, seriesId] =
@@ -925,15 +960,26 @@ export default function CreateProduct() {
                   {image.isThumbnail ? "Đại diện" : "Chọn"}
                 </button>
 
-                {!image.isThumbnail && (
+                <div className="absolute top-2 right-2 flex gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition">
                   <button
                     type="button"
-                    onClick={() => handleRemoveImage(index)}
-                    className="absolute top-2 right-2 flex items-center justify-center w-7 h-7 rounded-full bg-red-500 text-white opacity-100 sm:opacity-0 group-hover:opacity-100 transition hover:bg-red-600"
+                    title="Thay thế ảnh"
+                    onClick={() => handleEditClick(index)}
+                    className="flex items-center justify-center w-7 h-7 rounded-full bg-blue-500 text-white hover:bg-blue-600 shadow-sm"
                   >
-                    <Trash2 size={14} />
+                    <Pencil size={12} />
                   </button>
-                )}
+                  {!image.isThumbnail && (
+                    <button
+                      type="button"
+                      title="Xóa ảnh"
+                      onClick={() => handleRemoveImage(index)}
+                      className="flex items-center justify-center w-7 h-7 rounded-full bg-red-500 text-white hover:bg-red-600 shadow-sm"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  )}
+                </div>
 
                 <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
                   {index + 1}/{MAX_IMAGES}
@@ -942,6 +988,14 @@ export default function CreateProduct() {
             ))}
           </div>
         )}
+
+        <input
+          type="file"
+          ref={replaceFileInputRef}
+          hidden
+          accept="image/*"
+          onChange={handleReplaceFileChange}
+        />
 
         {isSubmitted && coverImages.length === 0 && (
           <div className="text-center text-sm py-8 border border-dashed rounded-xl border-red-500 text-red-500 bg-red-50">
