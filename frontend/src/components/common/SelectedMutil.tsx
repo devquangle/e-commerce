@@ -1,10 +1,4 @@
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useCallback,
-} from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { Check, X, Search, ChevronDown } from "lucide-react";
 
 type OptionValue = string | number;
@@ -35,8 +29,7 @@ export default function SelectedMutil<T extends OptionValue>({
 }: Props<T>) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [highlightedIndex, setHighlightedIndex] =
-    useState<number>(-1);
+  const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -44,16 +37,13 @@ export default function SelectedMutil<T extends OptionValue>({
 
   const filteredOptions = useMemo(() => {
     return options.filter((o) =>
-      o.label.toLowerCase().includes(search.toLowerCase())
+      o.label.toLowerCase().includes(search.toLowerCase()),
     );
   }, [options, search]);
 
   const optionLabelByValue = useMemo(() => {
     return new Map<T, string>(
-      options.map((option) => [
-        option.value,
-        option.label,
-      ])
+      options.map((option) => [option.value, option.label]),
     );
   }, [options]);
 
@@ -67,7 +57,7 @@ export default function SelectedMutil<T extends OptionValue>({
         onChange([...value, val]);
       }
     },
-    [disabled, value, onChange]
+    [disabled, value, onChange],
   );
 
   useEffect(() => {
@@ -82,16 +72,10 @@ export default function SelectedMutil<T extends OptionValue>({
       }
     };
 
-    document.addEventListener(
-      "mousedown",
-      handleClickOutside
-    );
+    document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
-      document.removeEventListener(
-        "mousedown",
-        handleClickOutside
-      );
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -102,41 +86,31 @@ export default function SelectedMutil<T extends OptionValue>({
   }, [open]);
 
   useEffect(() => {
-    if (
-      highlightedIndex < 0 ||
-      !optionsListRef.current
-    )
-      return;
+    if (highlightedIndex < 0 || !optionsListRef.current) return;
 
     const listContainer = optionsListRef.current;
 
-    const highlightedElement =
-      listContainer.children[
-        highlightedIndex
-      ] as HTMLElement;
+    const highlightedElement = listContainer.children[
+      highlightedIndex
+    ] as HTMLElement;
 
     if (!highlightedElement) return;
 
     const containerTop = listContainer.scrollTop;
-    const containerBottom =
-      containerTop + listContainer.clientHeight;
+    const containerBottom = containerTop + listContainer.clientHeight;
 
     const elemTop = highlightedElement.offsetTop;
-    const elemBottom =
-      elemTop + highlightedElement.clientHeight;
+    const elemBottom = elemTop + highlightedElement.clientHeight;
 
     if (elemTop < containerTop) {
       listContainer.scrollTop = elemTop;
     } else if (elemBottom > containerBottom) {
-      listContainer.scrollTop =
-        elemBottom - listContainer.clientHeight;
+      listContainer.scrollTop = elemBottom - listContainer.clientHeight;
     }
   }, [highlightedIndex]);
 
   useEffect(() => {
-    const handleKeyDown = (
-      e: KeyboardEvent
-    ) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       if (!open) return;
 
       switch (e.key) {
@@ -150,30 +124,21 @@ export default function SelectedMutil<T extends OptionValue>({
           e.preventDefault();
 
           setHighlightedIndex((prev) =>
-            prev < filteredOptions.length - 1
-              ? prev + 1
-              : prev
+            prev < filteredOptions.length - 1 ? prev + 1 : prev,
           );
           break;
 
         case "ArrowUp":
           e.preventDefault();
 
-          setHighlightedIndex((prev) =>
-            prev > 0 ? prev - 1 : -1
-          );
+          setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : -1));
           break;
 
         case "Enter":
           e.preventDefault();
 
-          if (
-            highlightedIndex >= 0 &&
-            filteredOptions[highlightedIndex]
-          ) {
-            toggleValue(
-              filteredOptions[highlightedIndex].value
-            );
+          if (highlightedIndex >= 0 && filteredOptions[highlightedIndex]) {
+            toggleValue(filteredOptions[highlightedIndex].value);
           }
 
           break;
@@ -181,30 +146,16 @@ export default function SelectedMutil<T extends OptionValue>({
     };
 
     if (open) {
-      document.addEventListener(
-        "keydown",
-        handleKeyDown
-      );
+      document.addEventListener("keydown", handleKeyDown);
 
       return () => {
-        document.removeEventListener(
-          "keydown",
-          handleKeyDown
-        );
+        document.removeEventListener("keydown", handleKeyDown);
       };
     }
-  }, [
-    open,
-    highlightedIndex,
-    filteredOptions,
-    toggleValue,
-  ]);
+  }, [open, highlightedIndex, filteredOptions, toggleValue]);
 
   return (
-    <div
-      ref={containerRef}
-      className="relative w-full space-y-1.5"
-    >
+    <div ref={containerRef} className="relative w-full space-y-1.5">
       {label && (
         <label className="block text-xs font-bold text-slate-600 uppercase tracking-wide">
           {label} {required && <span className="ml-1 text-red-500">*</span>}
@@ -214,9 +165,7 @@ export default function SelectedMutil<T extends OptionValue>({
       <button
         type="button"
         disabled={disabled}
-        onClick={() =>
-          !disabled && setOpen(!open)
-        }
+        onClick={() => !disabled && setOpen(!open)}
         aria-haspopup="listbox"
         aria-expanded={open}
         className={`w-full rounded-xl border border-slate-200 bg-white/70 h-11 px-4 text-sm flex items-center justify-between transition-all ${
@@ -225,28 +174,24 @@ export default function SelectedMutil<T extends OptionValue>({
             : "cursor-pointer hover:border-slate-300"
         }`}
       >
-        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide pr-4">
+        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide pr-4 whitespace-nowrap">
           {value.length === 0 ? (
-            <span className="text-slate-400">
-              {placeholder}
-            </span>
+            <span className="text-slate-400">{placeholder}</span>
           ) : (
             value.map((val) => (
               <span
                 key={String(val)}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border bg-indigo-50 text-indigo-700 border-indigo-100"
+                className="inline-flex shrink-0 items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border bg-indigo-50 text-indigo-700 border-indigo-100 whitespace-nowrap"
                 onClick={(e) => {
                   e.stopPropagation();
                   toggleValue(val);
                 }}
               >
-                {optionLabelByValue.get(val) ??
-                  String(val)}
+                <span className="whitespace-nowrap">
+                  {optionLabelByValue.get(val) ?? String(val)}
+                </span>
 
-                <X
-                  size={10}
-                  className="cursor-pointer"
-                />
+                <X size={10} className="cursor-pointer shrink-0" />
               </span>
             ))
           )}
@@ -254,9 +199,7 @@ export default function SelectedMutil<T extends OptionValue>({
 
         <ChevronDown
           size={16}
-          className={`transition-transform ${
-            open ? "rotate-180" : ""
-          }`}
+          className={`transition-transform ${open ? "rotate-180" : ""}`}
         />
       </button>
 
@@ -300,50 +243,36 @@ export default function SelectedMutil<T extends OptionValue>({
           )}
         </div>
 
-        <div
-          ref={optionsListRef}
-          className="max-h-52 overflow-y-auto"
-        >
+        <div ref={optionsListRef} className="max-h-52 overflow-y-auto">
           {filteredOptions.length > 0 ? (
-            filteredOptions.map(
-              (opt, index) => {
-                const isSelected =
-                  value.includes(opt.value);
+            filteredOptions.map((opt, index) => {
+              const isSelected = value.includes(opt.value);
 
-                const isHighlighted =
-                  highlightedIndex === index;
+              const isHighlighted = highlightedIndex === index;
 
-                return (
-                  <div
-                    key={String(opt.value)}
-                    role="option"
-                    aria-selected={isSelected}
-                    onClick={() =>
-                      toggleValue(opt.value)
-                    }
-                    onMouseEnter={() =>
-                      setHighlightedIndex(index)
-                    }
-                    className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs cursor-pointer transition ${
-                      isHighlighted
-                        ? "bg-indigo-100 text-indigo-900"
-                        : isSelected
+              return (
+                <div
+                  key={String(opt.value)}
+                  role="option"
+                  aria-selected={isSelected}
+                  onClick={() => toggleValue(opt.value)}
+                  onMouseEnter={() => setHighlightedIndex(index)}
+                  className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs cursor-pointer transition ${
+                    isHighlighted
+                      ? "bg-indigo-100 text-indigo-900"
+                      : isSelected
                         ? "bg-indigo-50 text-indigo-900 font-semibold"
                         : "hover:bg-slate-50"
-                    }`}
-                  >
-                    <span>{opt.label}</span>
+                  }`}
+                >
+                  <span>{opt.label}</span>
 
-                    {isSelected && (
-                      <Check
-                        size={14}
-                        className="text-indigo-600"
-                      />
-                    )}
-                  </div>
-                );
-              }
-            )
+                  {isSelected && (
+                    <Check size={14} className="text-indigo-600" />
+                  )}
+                </div>
+              );
+            })
           ) : (
             <div className="py-6 text-center text-xs text-slate-400 italic">
               Không tìm thấy kết quả phù hợp

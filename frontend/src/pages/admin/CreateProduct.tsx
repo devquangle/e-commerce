@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import ProductDescriptionEditor from "../../components/admin/ProductDescriptionEditor";
 import SelectedMutil from "@/components/common/SelectedMutil";
 import {
@@ -261,7 +261,7 @@ export default function CreateProduct() {
     getValues,
     control,
     trigger,
-    formState: { errors },
+    formState: { errors, isSubmitted },
   } = useForm<CreateBookForm>({
     defaultValues: initialForm,
     mode: "onChange",
@@ -355,10 +355,10 @@ export default function CreateProduct() {
 
   const handleAddImageUrl = () => {
     if (!imageUrl.trim()) return;
-    
+
     try {
       const url = new URL(imageUrl.trim());
-      if (!['http:', 'https:'].includes(url.protocol)) throw new Error();
+      if (!["http:", "https:"].includes(url.protocol)) throw new Error();
     } catch {
       showWarningToast("URL ảnh không hợp lệ.");
       return;
@@ -406,7 +406,93 @@ export default function CreateProduct() {
       shouldValidate: true,
     });
   };
-  // Đã loại bỏ useEffect gây lỗi lặp vô hạn và validate sớm cho coverImages
+  // Đồng bộ dữ liệu form vào bảng "Thông Tin Sách" trong mô tả
+  const [authorIds, genreIds, publisherId, publishYear, pages] = useWatch({
+    control,
+    name: ["authorIds", "genreIds", "publisherId", "publishYear", "pages"],
+  });
+
+  useEffect(() => {
+    const currentDesc = getValues("description");
+    if (!currentDesc) return;
+
+    let newDesc = currentDesc;
+
+    const updateTableData = (
+      html: string,
+      rowLabel: string,
+      newValue: string,
+    ) => {
+      const regex = new RegExp(
+        `(<td[^>]*>(?:<p[^>]*>)?\\s*${rowLabel}\\s*(?:<\\/p>)?<\\/td>\\s*<td[^>]*>(?:<p[^>]*>)?)([\\s\\S]*?)(<\\/p>)?(<\\/td>)`,
+        "i",
+      );
+      return html.replace(regex, (match, p1, p2, p3, p4) => {
+        return `${p1}${newValue}${p3 || ""}${p4}`;
+      });
+    };
+
+    // Tác giả
+    const authorNames = ((authorIds as number[]) || [])
+      .map((id) => authorOptions.find((a) => a.value === id)?.label)
+      .filter(Boolean)
+      .join(", ");
+    newDesc = updateTableData(
+      newDesc,
+      "Tác giả",
+      authorNames || "[Tên tác giả]",
+    );
+
+    // Thể loại
+    const genreNames = ((genreIds as number[]) || [])
+      .map((id) => genreOptions.find((g) => g.value === id)?.label)
+      .filter(Boolean)
+      .join(", ");
+    newDesc = updateTableData(
+      newDesc,
+      "Thể loại",
+      genreNames || "[Tên thể loại]",
+    );
+
+    // Nhà xuất bản
+    const publisherName = publisherOptions.find(
+      (p) => p.value === publisherId,
+    )?.label;
+    newDesc = updateTableData(
+      newDesc,
+      "Nhà xuất bản",
+      publisherName || "[Tên nhà xuất bản]",
+    );
+
+    // Ngày xuất bản
+    newDesc = updateTableData(
+      newDesc,
+      "Ngày xuất bản",
+      (publishYear as string) || "[Ngày xuất bản]",
+    );
+
+    // Số trang
+    newDesc = updateTableData(
+      newDesc,
+      "Số trang",
+      pages ? String(pages) : "[Số trang]",
+    );
+
+    if (newDesc !== currentDesc) {
+      setValue("description", newDesc, { shouldDirty: true });
+    }
+  }, [
+    authorIds,
+    genreIds,
+    publisherId,
+    publishYear,
+    pages,
+    authorOptions,
+    genreOptions,
+    publisherOptions,
+    setValue,
+    getValues,
+  ]);
   const handleReset = () => {
     reset(initialForm);
   };
@@ -466,7 +552,7 @@ export default function CreateProduct() {
 
       {/* LEFT COLUMN: BASIC INFO */}
       {/* 🛠 SỬA ĐỔI: Sử dụng xl:h-full và xl:col-span-8 để chỉ kéo dãn trên desktop */}
-      <div className="col-span-12 xl:col-span-8 space-y-6 xl:h-full">
+      <div className="col-span-12 xl:col-span-7 space-y-6 xl:h-full">
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-5 xl:h-full flex flex-col justify-between">
           <div>
             <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
@@ -608,7 +694,7 @@ export default function CreateProduct() {
 
       {/* RIGHT COLUMN: TAXONOMY */}
       {/* 🛠 SỬA ĐỔI: Sử dụng xl:h-full và xl:col-span-4 */}
-      <div className="col-span-12 xl:col-span-4 space-y-6 xl:h-full">
+      <div className="col-span-12 xl:col-span-5 space-y-6 xl:h-full">
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-4 xl:h-full">
           <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
             <DollarSign size={18} className="text-indigo-600" />
@@ -748,6 +834,12 @@ export default function CreateProduct() {
               type="text"
               value={imageUrl}
               onChange={(e) => setImageUrl(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleAddImageUrl();
+                }
+              }}
               placeholder="https://example.com/image.jpg"
               className="flex-1 h-11 rounded-xl border border-slate-200 px-4 text-sm outline-none focus:border-indigo-500"
             />
@@ -761,7 +853,7 @@ export default function CreateProduct() {
           </div>
         )}
 
-        {coverImages.length > 0 ? (
+        {coverImages.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
             {coverImages.map((image, index) => (
               <div
@@ -808,10 +900,17 @@ export default function CreateProduct() {
               </div>
             ))}
           </div>
-        ) : (
-          <div className="text-center text-sm text-slate-400 py-8 border border-dashed border-slate-200 rounded-xl">
+        )}
+
+        {isSubmitted && coverImages.length === 0 && (
+          <div className="text-center text-sm py-8 border border-dashed rounded-xl border-red-500 text-red-500 bg-red-50">
             Chưa có ảnh nào được thêm
+              <p className="mt-2 text-xs font-medium text-red-500">
+                Vui lòng thêm ít nhất một ảnh sản phẩm!
+              </p>
+        
           </div>
+         
         )}
       </div>
 
