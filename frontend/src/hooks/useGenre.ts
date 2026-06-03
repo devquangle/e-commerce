@@ -3,10 +3,10 @@ import type { GenreRequest, GenreResponse, options } from "@/types/genre";
 import type { Pagination } from "@/types/pagination";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-export const useListGenre = () => {
+export const useGenre = () => {
   return useQuery<GenreResponse[]>({
     queryKey: ["genres"],
-    queryFn: genreService.listGenre,
+    queryFn: genreService.getGenres,
   });
 };
 
