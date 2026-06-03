@@ -40,7 +40,7 @@ export default function Header() {
   return (
     <>
       <header className="sticky top-0 z-30 border-b bg-white/80 backdrop-blur">
-        <Container className="px-2 md:px-4">
+        <Container className="px-2 md:px-4 md:pr-8">
           <nav className="flex justify-between items-center h-15 gap-2">
             <Logo />
             <button
@@ -89,7 +89,7 @@ export default function Header() {
 
                 {/* BẢNG MENU DROPDOWN */}
                 <div
-                  className={`absolute top-full right-0 pt-2 z-50 transition-all duration-200 origin-top-right w-56
+                  className={`absolute top-full right-0 pt-2 z-50 transition-all duration-200 origin-top-right min-w-44 max-w-[calc(100vw-1rem)]
             ${
               openAccount
                 ? "opacity-100 scale-100 translate-y-0 pointer-events-auto"

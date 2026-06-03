@@ -23,7 +23,7 @@ import { showWarningToast } from "@/utils/toastUtil";
 import Button from "@/components/common/Button";
 import { useBookFormData } from "@/hooks/useBookFormData";
 
-type Serries = {
+type Series = {
   id: number;
   name: string;
 };
@@ -52,7 +52,7 @@ type CreateBookForm = {
   description: string;
 };
 
-const seriesData: Serries[] = [
+const seriesData: Series[] = [
   { id: 1, name: "Sách kỹ năng sống" },
   { id: 2, name: "Sách văn học" },
   { id: 3, name: "Sách lịch sử" },
@@ -81,7 +81,175 @@ const initialForm: CreateBookForm = {
   quantity: 10,
   status: "ACTIVE",
   coverImages: [] as CoverImage[],
-  description: `<h4><strong>Giới Thiệu Sách</strong></h4><p>Nhập phần giới thiệu ngắn gọn về cuốn sách tại đây.</p>`,
+  description: `
+
+<h4><strong>Giới Thiệu Sách</strong></h4>
+
+
+
+<p>
+
+  Nhập phần giới thiệu ngắn gọn về cuốn sách tại đây. Mô tả nội dung chính,
+
+  thông điệp nổi bật hoặc giá trị mà cuốn sách mang lại cho người đọc.
+
+</p>
+
+
+
+<img
+
+  src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=600"
+
+  alt="Ảnh bìa sách"
+
+/>
+
+
+
+<p style="text-align:center">
+
+  <em>Hình ảnh minh họa cho cuốn sách</em>
+
+</p>
+
+
+
+<hr />
+
+
+
+<h5><strong>1. Nội Dung Chính</strong></h5>
+
+
+
+<p>
+
+  Mô tả ngắn gọn cốt truyện, kiến thức hoặc chủ đề chính của cuốn sách.
+
+  Có thể chia thành nhiều đoạn văn để người đọc dễ theo dõi.
+
+</p>
+
+
+
+<h5><strong>2. Điểm Nổi Bật</strong></h5>
+
+
+
+<ul>
+
+  <li>Nội dung hấp dẫn và dễ tiếp cận.</li>
+
+  <li>Thông tin được trình bày rõ ràng, logic.</li>
+
+  <li>Phù hợp với nhiều nhóm độc giả.</li>
+
+  <li>Mang lại giá trị thực tiễn cho người đọc.</li>
+
+</ul>
+
+
+
+<hr />
+
+
+
+<h5><strong>3. Thông Tin Sách</strong></h5>
+
+
+
+<table>
+
+  <tbody>
+
+    <tr>
+
+      <th>Thuộc tính</th>
+
+      <th>Thông tin</th>
+
+    </tr>
+
+    <tr>
+
+      <td>Tác giả</td>
+
+      <td>[Tên tác giả]</td>
+
+    </tr>
+
+    <tr>
+
+      <td>Thể loại</td>
+
+      <td>[Tên thể loại]</td>
+
+    </tr>
+
+    <tr>
+
+      <td>Nhà xuất bản</td>
+
+      <td>[Tên nhà xuất bản]</td>
+
+    </tr>
+
+    <tr>
+
+      <td>Ngày xuất bản</td>
+
+      <td>[Ngày xuất bản]</td>
+
+    </tr>
+
+    <tr>
+
+      <td>Số trang</td>
+
+      <td>[Số trang]</td>
+
+    </tr>
+
+  </tbody>
+
+</table>
+
+
+
+<hr />
+
+
+
+<h5><strong>4. Đối Tượng Độc Giả</strong></h5>
+
+
+
+<p>
+
+  Cuốn sách phù hợp với những người quan tâm đến chủ đề này,
+
+  học sinh, sinh viên hoặc người đi làm muốn mở rộng kiến thức.
+
+</p>
+
+
+
+<hr />
+
+
+
+<h5><strong>5. Về Tác Giả</strong></h5>
+
+
+
+<p>
+
+  Giới thiệu ngắn gọn về tác giả, quá trình sáng tác và các tác phẩm nổi bật khác.
+
+</p>
+
+`,
 };
 
 export default function CreateProduct() {
@@ -108,27 +276,33 @@ export default function CreateProduct() {
   } = useBookFormData();
 
   const MAX_IMAGES = 6;
-  const [imageUploadMode, setImageUploadMode] = useState<"file" | "url">("file");
+  const [imageUploadMode, setImageUploadMode] = useState<"file" | "url">(
+    "file",
+  );
   const [imageUrl, setImageUrl] = useState("");
 
   const coverImages = useWatch({ name: "coverImages", control }) || [];
-  const description = useWatch({ control, name: "description" });
 
   const genreOptions = useMemo(
-    () => genresData.map((g: GenreResponse) => ({ label: g.name, value: g.id })),
-    [genresData]
+    () =>
+      genresData.map((g: GenreResponse) => ({ label: g.name, value: g.id })),
+    [genresData],
   );
   const authorOptions = useMemo(
-    () => authorsData.map((a: AuthorResponse) => ({ label: a.displayName, value: a.id })),
-    [authorsData]
+    () =>
+      authorsData.map((a: AuthorResponse) => ({
+        label: a.displayName,
+        value: a.id,
+      })),
+    [authorsData],
   );
   const publisherOptions = useMemo(
     () => publishersData.map((p) => ({ label: p.displayName, value: p.id })),
-    [publishersData]
+    [publishersData],
   );
   const seriesOptions = useMemo(
     () => seriesData.map((s) => ({ label: s.name, value: s.id })),
-    []
+    [],
   );
 
   const onSubmit = (data: CreateBookForm) => {
@@ -139,9 +313,11 @@ export default function CreateProduct() {
     console.log("Dữ liệu form hợp lệ:", data);
   };
 
-  const onError = (formErrors: any) => {
+  const onError = (formErrors: unknown) => {
     console.error("Form chứa các lỗi sau:", formErrors);
-    showWarningToast("Vui lòng kiểm tra lại các trường thông tin bị nhập sai hoặc thiếu!");
+    showWarningToast(
+      "Vui lòng kiểm tra lại các trường thông tin bị nhập sai hoặc thiếu!",
+    );
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -149,7 +325,9 @@ export default function CreateProduct() {
     if (!files?.length) return;
 
     if (coverImages.length >= MAX_IMAGES) {
-      showWarningToast(`Bạn chỉ được phép tải lên tối đa ${MAX_IMAGES} hình ảnh.`);
+      showWarningToast(
+        `Bạn chỉ được phép tải lên tối đa ${MAX_IMAGES} hình ảnh.`,
+      );
       e.target.value = "";
       return;
     }
@@ -177,6 +355,14 @@ export default function CreateProduct() {
 
   const handleAddImageUrl = () => {
     if (!imageUrl.trim()) return;
+    
+    try {
+      const url = new URL(imageUrl.trim());
+      if (!['http:', 'https:'].includes(url.protocol)) throw new Error();
+    } catch {
+      showWarningToast("URL ảnh không hợp lệ.");
+      return;
+    }
 
     if (coverImages.length >= MAX_IMAGES) {
       showWarningToast(`Danh sách đã đạt tối đa ${MAX_IMAGES} hình ảnh.`);
@@ -185,7 +371,8 @@ export default function CreateProduct() {
 
     const newImage: CoverImage = {
       url: imageUrl.trim(),
-      isThumbnail: coverImages.length === 0 || !coverImages.some((img) => img.isThumbnail),
+      isThumbnail:
+        coverImages.length === 0 || !coverImages.some((img) => img.isThumbnail),
     };
 
     setValue("coverImages", [...coverImages, newImage], {
@@ -199,7 +386,7 @@ export default function CreateProduct() {
     setValue(
       "coverImages",
       coverImages.map((img, i) => ({ ...img, isThumbnail: i === index })),
-      { shouldDirty: true }
+      { shouldDirty: true },
     );
   };
 
@@ -219,13 +406,19 @@ export default function CreateProduct() {
       shouldValidate: true,
     });
   };
-
+  // Đã loại bỏ useEffect gây lỗi lặp vô hạn và validate sớm cho coverImages
   const handleReset = () => {
     reset(initialForm);
   };
 
-  if (isLoading) return <div className="p-6 text-center">Đang tải dữ liệu form...</div>;
-  if (isError) return <div className="p-6 text-center text-red-500">Có lỗi xảy ra khi tải dữ liệu.</div>;
+  if (isLoading)
+    return <div className="p-6 text-center">Đang tải dữ liệu form...</div>;
+  if (isError)
+    return (
+      <div className="p-6 text-center text-red-500">
+        Có lỗi xảy ra khi tải dữ liệu.
+      </div>
+    );
 
   return (
     <form
@@ -249,10 +442,19 @@ export default function CreateProduct() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <Button type="button" color="secondary" className="w-full sm:w-auto">
+            <Button
+              type="button"
+              color="secondary"
+              className="w-full sm:w-auto"
+            >
               <Eye size={15} /> Xem nháp
             </Button>
-            <Button type="button" onClick={handleReset} color="warning" className="w-full sm:w-auto">
+            <Button
+              type="button"
+              onClick={handleReset}
+              color="warning"
+              className="w-full sm:w-auto"
+            >
               <RotateCcw size={15} /> Đặt lại
             </Button>
             <Button type="submit" color="primary" className="w-full sm:w-auto">
@@ -296,11 +498,17 @@ export default function CreateProduct() {
                   rules={{
                     required: "Giá nhập là bắt buộc",
                     valueAsNumber: true,
-                    min: { value: 0, message: "Giá nhập phải lớn hơn hoặc bằng 0" },
+                    min: {
+                      value: 0,
+                      message: "Giá nhập phải lớn hơn hoặc bằng 0",
+                    },
                     validate: (value) => {
                       const price = getValues("price");
                       if (!price || Number.isNaN(price)) return true;
-                      return Number(value) <= Number(price) || "Giá nhập không được lớn hơn giá bán";
+                      return (
+                        Number(value) <= Number(price) ||
+                        "Giá nhập không được lớn hơn giá bán"
+                      );
                     },
                     onChange: () => trigger("price"),
                   }}
@@ -317,11 +525,18 @@ export default function CreateProduct() {
                   rules={{
                     required: "Giá bán là bắt buộc",
                     valueAsNumber: true,
-                    min: { value: 0, message: "Giá bán phải lớn hơn hoặc bằng 0" },
+                    min: {
+                      value: 0,
+                      message: "Giá bán phải lớn hơn hoặc bằng 0",
+                    },
                     validate: (value) => {
                       const originalPrice = getValues("originalPrice");
-                      if (!originalPrice || Number.isNaN(originalPrice)) return true;
-                      return Number(value) >= Number(originalPrice) || "Giá bán không được nhỏ hơn giá nhập";
+                      if (!originalPrice || Number.isNaN(originalPrice))
+                        return true;
+                      return (
+                        Number(value) >= Number(originalPrice) ||
+                        "Giá bán không được nhỏ hơn giá nhập"
+                      );
                     },
                     onChange: () => trigger("originalPrice"),
                   }}
@@ -337,7 +552,10 @@ export default function CreateProduct() {
                   rules={{
                     required: "Số lượng là bắt buộc",
                     valueAsNumber: true,
-                    min: { value: 0, message: "Số lượng phải lớn hơn hoặc bằng 0" },
+                    min: {
+                      value: 0,
+                      message: "Số lượng phải lớn hơn hoặc bằng 0",
+                    },
                   }}
                   error={errors?.quantity}
                 />
@@ -413,7 +631,9 @@ export default function CreateProduct() {
                     required
                   />
                   {fieldState.error && (
-                    <p className="text-red-600 text-xs mt-1">{fieldState.error.message}</p>
+                    <p className="text-red-600 text-xs mt-1">
+                      {fieldState.error.message}
+                    </p>
                   )}
                 </div>
               )}
@@ -434,7 +654,9 @@ export default function CreateProduct() {
                     required
                   />
                   {fieldState.error && (
-                    <p className="text-red-600 text-xs mt-1">{fieldState.error.message}</p>
+                    <p className="text-red-600 text-xs mt-1">
+                      {fieldState.error.message}
+                    </p>
                   )}
                 </div>
               )}
@@ -455,7 +677,9 @@ export default function CreateProduct() {
                     required
                   />
                   {fieldState.error && (
-                    <p className="text-red-600 text-xs mt-1">{fieldState.error.message}</p>
+                    <p className="text-red-600 text-xs mt-1">
+                      {fieldState.error.message}
+                    </p>
                   )}
                 </div>
               )}
@@ -508,7 +732,13 @@ export default function CreateProduct() {
             <Upload size={28} className="text-slate-400 mb-2" />
             <span className="text-sm text-slate-600">Chọn ảnh từ máy tính</span>
             <span className="text-xs text-slate-400 mt-1">PNG, JPG, WEBP</span>
-            <input type="file" multiple accept="image/*" className="hidden" onChange={handleFileChange} />
+            <input
+              type="file"
+              multiple
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileChange}
+            />
           </label>
         )}
 
@@ -536,15 +766,28 @@ export default function CreateProduct() {
             {coverImages.map((image, index) => (
               <div
                 key={index}
-                className={`group relative aspect-square rounded-xl overflow-hidden border-2 bg-slate-50 ${image.isThumbnail ? "border-indigo-500 ring-2 ring-indigo-100" : "border-slate-200"}`}
+                className={`group relative aspect-square rounded-xl overflow-hidden border-2 bg-slate-50 ${
+                  image.isThumbnail
+                    ? "border-indigo-500 ring-2 ring-indigo-100"
+                    : "border-slate-200"
+                }`}
               >
-                <img src={image.url} alt={`Ảnh ${index + 1}`} className="w-full h-full object-cover" />
+                <img
+                  src={image.url}
+                  alt={`Ảnh ${index + 1}`}
+                  className="w-full h-full object-cover"
+                />
+
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
 
                 <button
                   type="button"
                   onClick={() => handleSetThumbnail(index)}
-                  className={`absolute top-2 left-2 text-[10px] font-medium px-2 py-1 rounded-md shadow-sm transition ${image.isThumbnail ? "bg-indigo-600 text-white" : "bg-white text-slate-700 hover:bg-indigo-50"}`}
+                  className={`absolute top-2 left-2 text-[10px] font-medium px-2 py-1 rounded-md shadow-sm transition ${
+                    image.isThumbnail
+                      ? "bg-indigo-600 text-white"
+                      : "bg-white text-slate-700 hover:bg-indigo-50"
+                  }`}
                 >
                   {image.isThumbnail ? "Đại diện" : "Chọn"}
                 </button>
@@ -566,8 +809,8 @@ export default function CreateProduct() {
             ))}
           </div>
         ) : (
-          <div className="text-center text-sm text-red-500 py-6 font-medium">
-            Chưa có ảnh nào được chọn làm ảnh bìa.
+          <div className="text-center text-sm text-slate-400 py-8 border border-dashed border-slate-200 rounded-xl">
+            Chưa có ảnh nào được thêm
           </div>
         )}
       </div>
@@ -578,7 +821,16 @@ export default function CreateProduct() {
           <FileText size={18} className="text-indigo-600" />
           <h2 className="text-base font-bold text-slate-900">Mô tả chi tiết</h2>
         </div>
-        <ProductDescriptionEditor value={description} onChange={(value) => setValue("description", value)} />
+        <Controller
+          name="description"
+          control={control}
+          render={({ field }) => (
+            <ProductDescriptionEditor
+              value={field.value}
+              onChange={field.onChange}
+            />
+          )}
+        />
       </div>
     </form>
   );
