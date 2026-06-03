@@ -69,16 +69,21 @@ const seriesData: Series[] = [
 
 const initialForm: CreateBookForm = {
   name: "",
-  authorIds: [],
-  publisherId: undefined,
-  genreIds: [],
-  weight: 500,
-  publishYear: "2020-01-01",
-  pages: 200,
   originalPrice: 200000,
   price: 190000,
-  seriesId: undefined,
   quantity: 10,
+  weight: 500,
+  publishYear: "2020-01-01",
+  
+  pages: 200,
+  authorIds: [],
+    genreIds: [],
+  publisherId: undefined,
+
+
+
+  seriesId: undefined,
+
   status: "ACTIVE",
   coverImages: [] as CoverImage[],
   description: `
@@ -407,10 +412,18 @@ export default function CreateProduct() {
     });
   };
   // Đồng bộ dữ liệu form vào bảng "Thông Tin Sách" trong mô tả
-  const [authorIds, genreIds, publisherId, publishYear, pages, seriesId] = useWatch({
-    control,
-    name: ["authorIds", "genreIds", "publisherId", "publishYear", "pages", "seriesId"],
-  });
+  const [authorIds, genreIds, publisherId, publishYear, pages, seriesId] =
+    useWatch({
+      control,
+      name: [
+        "authorIds",
+        "genreIds",
+        "publisherId",
+        "publishYear",
+        "pages",
+        "seriesId",
+      ],
+    });
 
   useEffect(() => {
     const currentDesc = getValues("description");
@@ -479,16 +492,20 @@ export default function CreateProduct() {
     );
 
     // Series
-    const seriesRowRegex = /(<tr[^>]*>[\s\S]*?<td[^>]*>(?:<p[^>]*>)?\s*Series\s*(?:<\/p>)?<\/td>[\s\S]*?<\/tr>)/i;
+    const seriesRowRegex =
+      /(<tr[^>]*>[\s\S]*?<td[^>]*>(?:<p[^>]*>)?\s*Series\s*(?:<\/p>)?<\/td>[\s\S]*?<\/tr>)/i;
     const hasSeriesRow = seriesRowRegex.test(newDesc);
 
     if (seriesId) {
-      const seriesName = seriesOptions.find((s) => s.value === seriesId)?.label || "[Tên series]";
+      const seriesName =
+        seriesOptions.find((s) => s.value === seriesId)?.label ||
+        "[Tên series]";
       if (hasSeriesRow) {
         newDesc = updateTableData(newDesc, "Series", seriesName);
       } else {
         // Chèn vào ngay sau Số trang
-        const pagesRowRegex = /(<tr[^>]*>[\s\S]*?<td[^>]*>(?:<p[^>]*>)?\s*Số trang\s*(?:<\/p>)?<\/td>[\s\S]*?<\/tr>)/i;
+        const pagesRowRegex =
+          /(<tr[^>]*>[\s\S]*?<td[^>]*>(?:<p[^>]*>)?\s*Số trang\s*(?:<\/p>)?<\/td>[\s\S]*?<\/tr>)/i;
         newDesc = newDesc.replace(pagesRowRegex, (match) => {
           return `${match}\n    <tr>\n      <td>Series</td>\n      <td>${seriesName}</td>\n    </tr>`;
         });
@@ -929,12 +946,10 @@ export default function CreateProduct() {
         {isSubmitted && coverImages.length === 0 && (
           <div className="text-center text-sm py-8 border border-dashed rounded-xl border-red-500 text-red-500 bg-red-50">
             Chưa có ảnh nào được thêm
-              <p className="mt-2 text-xs font-medium text-red-500">
-                Vui lòng thêm ít nhất một ảnh sản phẩm!
-              </p>
-        
+            <p className="mt-2 text-xs font-medium text-red-500">
+              Vui lòng thêm ít nhất một ảnh sản phẩm!
+            </p>
           </div>
-         
         )}
       </div>
 

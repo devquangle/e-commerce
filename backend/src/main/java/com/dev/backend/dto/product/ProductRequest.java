@@ -1,5 +1,6 @@
 package com.dev.backend.dto.product;
 
+import java.util.Date;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -19,12 +20,12 @@ public class ProductRequest {
     private Integer quantity;
 
     private Integer weight;
-    private Integer publishYear;
-    private Integer pageCount;
-
-    private List<Integer> genreIds;
+    private Date publishYear;
+    private Integer pages;
     private List<Integer> authorIds;
 
+    private List<Integer> genreIds;
+    private Integer seriesId;
     private Integer publisherId;
     
     private String status;
