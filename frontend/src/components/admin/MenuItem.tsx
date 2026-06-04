@@ -1,4 +1,4 @@
-import { menuGroups } from "@/configs/admin.menu"
+import { menuGroups } from "@/components/admin/admin.menu"
 import { useAuth } from "@/context/useAuth"
 import type { RoleType } from "@/types/role"
 import { NavLink } from "react-router-dom"
