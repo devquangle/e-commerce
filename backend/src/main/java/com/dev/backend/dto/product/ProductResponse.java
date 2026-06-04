@@ -1,5 +1,7 @@
 package com.dev.backend.dto.product;
 
+import java.time.LocalDate;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,6 +19,6 @@ public class ProductResponse {
     private Integer quantity;
 
     private Integer weight;
-    private Integer publishYear;
-    private Integer pageCount;
+    private LocalDate publishYear;
+    private Integer pages;
 }

@@ -22,7 +22,6 @@ public abstract class BaseEntity<ID extends Serializable> implements Serializabl
         this.id = id;
     }
 
-    // ✅ equals chuẩn Hibernate
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

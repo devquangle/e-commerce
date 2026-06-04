@@ -14,43 +14,27 @@ import {
   RotateCcw,
   Pencil,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import type { AuthorResponse } from "@/types/author";
 import type { GenreResponse } from "@/types/genre";
 import SelectBox from "@/components/common/SelectedBox";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import InputField from "@/components/common/InputField";
-import { showWarningToast } from "@/utils/toastUtil";
+import {
+  showErrorToast,
+  showSuccessToast,
+  showWarningToast,
+} from "@/utils/toastUtil";
 import Button from "@/components/common/Button";
 import { useBookFormData } from "@/hooks/useBookFormData";
+import type { ImageProductRequest } from "@/types/image";
+import imageService from "@/services/imageService";
+import type { ProductRequest } from "@/types/product";
+import productService from "@/services/productService";
 
 type Series = {
   id: number;
   name: string;
-};
-
-type CoverImage = {
-  file?: File;
-  url: string;
-  isThumbnail: boolean;
-};
-
-type CreateBookForm = {
-  name: string;
-  authorIds: number[];
-  publisherId: number | undefined;
-  genreIds: number[];
-  weight: number;
-  publishYear: string;
-  pages: number;
-  price: number;
-  originalPrice: number;
-  quantity: number;
-  status: "INACTIVE" | "ACTIVE";
-  seriesId: number | undefined;
-
-  coverImages: CoverImage[];
-  description: string;
 };
 
 const seriesData: Series[] = [
@@ -68,25 +52,23 @@ const seriesData: Series[] = [
   { id: 12, name: "Dragon Ball" },
 ];
 
-const initialForm: CreateBookForm = {
+const initialForm: ProductRequest = {
   name: "",
   originalPrice: 200000,
   price: 190000,
   quantity: 10,
   weight: 500,
   publishYear: "2020-01-01",
-  
+
   pages: 200,
   authorIds: [],
-    genreIds: [],
+  genreIds: [],
   publisherId: undefined,
-
-
 
   seriesId: undefined,
 
   status: "ACTIVE",
-  coverImages: [] as CoverImage[],
+  coverImages: [] as ImageProductRequest[],
   description: `
 
 <h4><strong>Giới Thiệu Sách</strong></h4>
@@ -268,7 +250,7 @@ export default function CreateProduct() {
     control,
     trigger,
     formState: { errors, isSubmitted },
-  } = useForm<CreateBookForm>({
+  } = useForm<ProductRequest>({
     defaultValues: initialForm,
     mode: "onChange",
   });
@@ -313,12 +295,52 @@ export default function CreateProduct() {
     [],
   );
 
-  const onSubmit = (data: CreateBookForm) => {
-    if (coverImages.length === 0) {
-      showWarningToast("Vui lòng thêm ít nhất một ảnh sản phẩm!");
-      return;
+  const imagesUrl = async () => {
+    try {
+      if (!coverImages || coverImages.length === 0) {
+        return [];
+      }
+
+      const cleanImageResponses = await imageService.uploadImage(coverImages);
+      return cleanImageResponses;
+    } catch (error) {
+      console.error("Lỗi trong quá trình xử lý đồng bộ ảnh:", error);
+      throw error;
     }
-    console.log("Dữ liệu form hợp lệ:", data);
+  };
+  const navigate = useNavigate();
+
+  const onSubmit = async (data: ProductRequest) => {
+    try {
+      if (coverImages.length === 0) {
+        showWarningToast("Vui lòng thêm ít nhất một ảnh sản phẩm!");
+        return;
+      }
+
+      // Upload ảnh trước
+      const uploadedImages = await imagesUrl();
+
+      const payload: ProductRequest = {
+        ...data,
+        coverImages: uploadedImages,
+      };
+
+      const resp = await productService.add(payload);
+
+      if (resp) {
+        showSuccessToast("Thêm sản phẩm thành công!");
+
+        reset(initialForm);
+
+        navigate("/admin/products");
+      } else {
+        showErrorToast("Thêm sản phẩm thất bại!" + resp);
+      }
+    } catch (error) {
+      console.error("Lỗi tạo sản phẩm:", error);
+
+      showErrorToast("Thêm sản phẩm thất bại!" + error);
+    }
   };
 
   const onError = (formErrors: unknown) => {
@@ -343,7 +365,7 @@ export default function CreateProduct() {
     const availableSlots = MAX_IMAGES - coverImages.length;
     const filesToUpload = Array.from(files).slice(0, availableSlots);
 
-    const newImages: CoverImage[] = filesToUpload.map((file) => ({
+    const newImages: ImageProductRequest[] = filesToUpload.map((file) => ({
       file,
       url: URL.createObjectURL(file),
       isThumbnail: false,
@@ -377,7 +399,7 @@ export default function CreateProduct() {
       return;
     }
 
-    const newImage: CoverImage = {
+    const newImage: ImageProductRequest = {
       url: imageUrl.trim(),
       isThumbnail:
         coverImages.length === 0 || !coverImages.some((img) => img.isThumbnail),
@@ -400,7 +422,7 @@ export default function CreateProduct() {
 
   const handleRemoveImage = (index: number) => {
     const imageToRemove = coverImages[index];
-    if (imageToRemove.url.startsWith("blob:")) {
+    if (imageToRemove.url?.startsWith("blob:")) {
       URL.revokeObjectURL(imageToRemove.url);
     }
 
@@ -424,14 +446,14 @@ export default function CreateProduct() {
     const file = e.target.files?.[0];
     if (!file || replaceIndex === null) return;
 
-    const newImage: CoverImage = {
+    const newImage: ImageProductRequest = {
       file,
       url: URL.createObjectURL(file),
       isThumbnail: coverImages[replaceIndex].isThumbnail,
     };
 
     const oldImage = coverImages[replaceIndex];
-    if (oldImage.url.startsWith("blob:")) {
+    if (oldImage.url?.startsWith("blob:")) {
       URL.revokeObjectURL(oldImage.url);
     }
 
@@ -570,6 +592,11 @@ export default function CreateProduct() {
     getValues,
   ]);
   const handleReset = () => {
+    coverImages.forEach((img) => {
+      if (img.url?.startsWith("blob:")) {
+        URL.revokeObjectURL(img.url);
+      }
+    });
     reset(initialForm);
   };
 
@@ -585,7 +612,7 @@ export default function CreateProduct() {
   return (
     <form
       id="create-product-form"
-      onSubmit={handleSubmit(onSubmit, onError)}
+      onSubmit={handleSubmit(onSubmit)}
       className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch"
     >
       {/* HEADER ACTIONS */}
@@ -941,7 +968,7 @@ export default function CreateProduct() {
                 }`}
               >
                 <img
-                  src={image.url}
+                  src={image.url != null ? image.url : ""}
                   alt={`Ảnh ${index + 1}`}
                   className="w-full h-full object-cover"
                 />

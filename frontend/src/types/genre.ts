@@ -38,7 +38,3 @@ export type options = {
   size?: number;
 };
 
-export interface ChildGenreResponse {
-  id: number;
-  name: string;
-}

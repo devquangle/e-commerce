@@ -7,9 +7,9 @@ import com.dev.backend.entity.Product;
 
 @Component
 public class ProductMapper {
-    
-    public ProductResponse toDTO(Product product){
-        if (product==null) {
+
+    public ProductResponse toDTO(Product product) {
+        if (product == null) {
             return null;
         }
         ProductResponse dto = new ProductResponse();
@@ -17,6 +17,8 @@ public class ProductMapper {
         dto.setName(product.getName());
         dto.setOriginalPrice(product.getOriginalPrice());
         dto.setPrice(product.getPrice());
+        dto.setPublishYear(product.getPublishYear());
+
         return dto;
     }
 }

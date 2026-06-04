@@ -1,15 +1,11 @@
 package com.dev.backend.dto.product;
-
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.dev.backend.dto.image.ImageResponse;
 
-@AllArgsConstructor
-@NoArgsConstructor
+import lombok.Getter;
+import lombok.Setter;
 @Getter
 @Setter
 public class ProductRequest {
@@ -18,18 +14,21 @@ public class ProductRequest {
     private Integer originalPrice;
     private Integer price;
     private Integer quantity;
-
     private Integer weight;
-    private Date publishYear;
+    private LocalDate publishYear;
     private Integer pages;
-    private List<Integer> authorIds;
 
+    private List<Integer> authorIds;
     private List<Integer> genreIds;
-    private Integer seriesId;
+
     private Integer publisherId;
-    
+    private Integer seriesId;
+
     private String status;
 
+    private List<ImageResponse> coverImages;
+
     private String description;
+
 
 }

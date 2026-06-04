@@ -1,6 +1,17 @@
-export interface ImageResponse {
-    imageUrl: string;
-} 
-export interface ImageRequest {
-    input: string;
-}  
+export interface ImageGenrenResponse {
+  imageUrl: string;
+}
+export interface ImageGenreRequest {
+  input: string;
+}
+
+export interface ImageProductRequest {
+  file?: File | null;
+  url?: string | null;
+  isThumbnail: boolean;
+}
+
+export interface ImageProductResponse {
+  url: string;
+  isThumbnail: boolean;
+}

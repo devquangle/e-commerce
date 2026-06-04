@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.dev.backend.dto.image.ImageRequest;
 import com.dev.backend.dto.image.ImageResponse;
 import com.dev.backend.dto.image.ImageUploadForm;
 import com.dev.backend.response.ResponseData;

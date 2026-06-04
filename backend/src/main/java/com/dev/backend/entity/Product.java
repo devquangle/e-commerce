@@ -1,10 +1,16 @@
 package com.dev.backend.entity;
 
-import java.math.BigDecimal;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.dev.backend.constant.ProductStatus;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -34,12 +40,17 @@ public class Product {
 
     private String isbn;
 
-    private Integer publishYear;
-    private Integer pageCount;
+    private LocalDate publishYear;
+    private Integer pages;
 
     private Integer publisherId;
+    private Integer seriesId;
 
     private List<Integer> authorIds;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private ProductStatus status = ProductStatus.ACTIVE;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -55,4 +66,6 @@ public class Product {
 
     @OneToMany(mappedBy = "product")
     private List<PromotionProduct> promotionProducts;
+    @OneToMany(mappedBy = "product")
+    private List<ProductGenre> productGenres;
 }

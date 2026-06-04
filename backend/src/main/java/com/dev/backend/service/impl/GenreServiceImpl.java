@@ -1,6 +1,5 @@
 package com.dev.backend.service.impl;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import org.springframework.data.domain.Page;

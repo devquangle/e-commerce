@@ -25,7 +25,7 @@ public class Image {
     @Column(nullable = false)
     private String urlImage;
 
-    private boolean isDefault;
+    private boolean isThumbnail;
     
     @ManyToOne
     @JoinColumn(name = "product_id")
