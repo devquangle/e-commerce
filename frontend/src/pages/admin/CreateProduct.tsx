@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from "react";
-import ProductDescriptionEditor from "../../components/admin/ProductDescriptionEditor";
+import ProductDescriptionEditor from "../../components/admin/product/ProductDescriptionEditor";
 import SelectedMutil from "@/components/common/SelectedMutil";
 import {
   BookOpen,
@@ -333,8 +333,6 @@ export default function CreateProduct() {
         reset(initialForm);
 
         navigate("/admin/products");
-      } else {
-        showErrorToast("Thêm sản phẩm thất bại!" + resp);
       }
     } catch (error) {
       console.error("Lỗi tạo sản phẩm:", error);

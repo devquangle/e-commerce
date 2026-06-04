@@ -17,7 +17,7 @@ export interface Product {
 
 export interface ProductRequest {
   name: string;
-  authorIds: string[];
+  authorIds: number[];
   publisherId: number | undefined;
   genreIds: number[];
   weight: number;

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import ProductDescriptionEditor from "../../components/admin/ProductDescriptionEditor";
+import ProductDescriptionEditor from "../../components/admin/product/ProductDescriptionEditor";
 import SelectedMutil from "@/components/common/SelectedMutil";
 import { 
   BookOpen, 
