@@ -1,9 +1,11 @@
 package com.dev.backend.entity;
 
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import com.dev.backend.constant.ProductStatus;
 
@@ -35,6 +37,7 @@ public class Product {
     private Integer originalPrice;
     private Integer price;
 
+    @Column( columnDefinition = "LONGTEXT")
     private String description;
     private Integer weight;
 
@@ -46,7 +49,8 @@ public class Product {
     private Integer publisherId;
     private Integer seriesId;
 
-    private List<Integer> authorIds;
+    @Column(name = "author_ids", columnDefinition = "LONGTEXT")
+    private List<String> authorIds;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)

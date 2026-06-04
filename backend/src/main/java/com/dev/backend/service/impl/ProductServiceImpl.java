@@ -46,6 +46,9 @@ public class ProductServiceImpl implements ProductService {
         product.setPages(request.getPages());
         product.setStatus(ProductStatus.valueOf(request.getStatus()));
         product.setDescription(request.getDescription());
+        product.setAuthorIds(request.getAuthorIds());
+        product.setSeriesId(request.getSeriesId());
+        product.setPublisherId(request.getPublisherId());
         Product saved = save(product);
         log.debug("Saved product: {}", saved);
         List<ImageResponse> list = request.getCoverImages();
