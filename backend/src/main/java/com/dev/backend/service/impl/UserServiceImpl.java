@@ -161,11 +161,8 @@ public class UserServiceImpl implements UserService {
             if (!Objects.requireNonNull(image.getContentType()).startsWith("image/")) {
                 throw new RuntimeException("File không phải ảnh");
             }
-            try {
-                user.setImage(cloudinaryService.uploadImage(image));
-            } catch (IOException e) {
-                throw new RuntimeException("File " + e.getMessage());
-            }
+            user.setImage(cloudinaryService.uploadImage(image));
+
         }
     }
 

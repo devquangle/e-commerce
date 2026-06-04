@@ -1,50 +1,20 @@
 package com.dev.backend.service;
 
-import java.io.IOException;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+import java.util.List;
+
 import org.springframework.web.multipart.MultipartFile;
 
-import com.cloudinary.Cloudinary;
-import com.cloudinary.utils.ObjectUtils;
+import com.dev.backend.dto.image.ImageRequest;
+import com.dev.backend.dto.image.ImageResponse;
 
-import jakarta.annotation.PostConstruct;
+public interface CloudinaryService {
 
-@Service
-public class CloudinaryService {
-    @Value("${cloudinary.cloud-name}")
-    private String cloudName;
+        String uploadImage(MultipartFile file);
 
-    @Value("${cloudinary.api-key}")
-    private String apiKey;
+        String uploadImage(byte[] imageBytes);
 
-    @Value("${cloudinary.api-secret}")
-    private String apiSecret;
+        String uploadImageUrl(String imageUrl);
 
-    private Cloudinary cloudinary;
+        List<ImageResponse> imageResponses(List<ImageRequest> imageRequests);
 
-    @PostConstruct
-    public void init() {
-        cloudinary = new Cloudinary(ObjectUtils.asMap(
-                "cloud_name", cloudName,
-                "api_key", apiKey,
-                "api_secret", apiSecret));
-    }
-
-    public String uploadImage(MultipartFile file) throws IOException {
-        return (String) cloudinary.uploader()
-                .upload(file.getBytes(), ObjectUtils.emptyMap())
-                .get("secure_url");
-    }
-
-    public String uploadImage(byte[] imageBytes)
-            throws IOException {
-
-        return cloudinary.uploader()
-                .upload(
-                        imageBytes,
-                        ObjectUtils.emptyMap())
-                .get("secure_url")
-                .toString();
-    }
 }

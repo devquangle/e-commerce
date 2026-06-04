@@ -110,14 +110,12 @@ public class GenreServiceImpl implements GenreService {
                 // Trường hợp 1: Người dùng tự upload file ảnh từ máy tính lên
                 if (image != null && !image.isEmpty()) {
                         setImageCloudinary(genre, image);
-                }
-                else if (genreRequest.getPreviewImageUrl() != null && !genreRequest.getPreviewImageUrl().isEmpty()) {
-                     
+                } else if (genreRequest.getPreviewImageUrl() != null && !genreRequest.getPreviewImageUrl().isEmpty()) {
+
                         String finalCloudinaryUrl = geminiService.generateImage(genreRequest.getPreviewImageUrl());
                         genre.setUrlImage(finalCloudinaryUrl);
                         log.info("Saved AI Image to Cloudinary: " + finalCloudinaryUrl);
-                }
-                else {
+                } else {
                         genre.setUrlImage("https://via.placeholder.com/1024x1024.png?text=No+Image");
                 }
 
@@ -161,19 +159,11 @@ public class GenreServiceImpl implements GenreService {
                                         "File không phải ảnh");
                 }
 
-                try {
+                String imageUrl = cloudinaryService
+                                .uploadImage(image);
 
-                        String imageUrl = cloudinaryService
-                                        .uploadImage(image);
+                genre.setUrlImage(imageUrl);
 
-                        genre.setUrlImage(imageUrl);
-
-                } catch (IOException e) {
-
-                        throw new RuntimeException(
-                                        "Upload ảnh thất bại",
-                                        e);
-                }
         }
 
         @Override
