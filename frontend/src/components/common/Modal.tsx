@@ -31,24 +31,27 @@ export default function Modal({
     };
   }, [isOpen]);
 
-  
-
   if (!isOpen) return null;
+
+  // Thay đổi cấu trúc size: tăng max-width cho lg để form thoáng hơn nếu cần
   const sizeClass = {
     sm: "max-w-sm",
     md: "max-w-md",
-    lg: "max-w-2xl",
+    lg: "max-w-2xl", // Phù hợp cho form tác giả có ảnh preview
   };
+
   return (
     <div
-      className="fixed inset-0 z-999 flex items-center justify-center bg-black/40 p-4 "
+      className="fixed inset-0 z-999 flex items-center justify-center bg-black/40 p-4"
       onClick={onClose}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className={`bg-white w-full ${sizeClass[size]} rounded-xl shadow-xl p-6`}
+    
+        className={`bg-white w-full ${sizeClass[size]} rounded-xl shadow-xl p-6 flex flex-col max-h-[calc(100vh-2rem)]`}
       >
-        <div className="flex justify-between items-center mb-4">
+        {/* 1. Header cố định ở đỉnh */}
+        <div className="flex justify-between items-center mb-4 shrink-0">
           <h2 className="text-lg font-semibold">{title}</h2>
 
           <button
@@ -59,11 +62,14 @@ export default function Modal({
           </button>
         </div>
 
-        {content && <p className="text-gray-600 mb-4">{content}</p>}
+        
+        <div className="flex-1 overflow-y-auto pr-1 space-y-4">
+          {content && <p className="text-gray-600">{content}</p>}
+          {children}
+        </div>
 
-        {children}
-
-        <div className="flex justify-end gap-3 mt-6">
+        {/* 3. Footer chứa các nút bấm cố định ở đáy */}
+        <div className="flex justify-end gap-3 mt-6 shrink-0">
           <button
             onClick={onClose}
             className="px-4 py-2 rounded bg-gray-500 text-white hover:bg-gray-600 cursor-pointer"

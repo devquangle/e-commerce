@@ -15,6 +15,7 @@ import {
   Trash2,
   Eye,
   Wand2,
+  Upload,
 } from "lucide-react";
 import AuthorTable from "@/components/admin/author/AuthorTable";
 import AuthorMobileCard from "@/components/admin/author/AuthorMobileCard";
@@ -27,7 +28,9 @@ import {
   showErrorToast,
   showInfoToast,
   showSuccessToast,
+  showWarningToast,
 } from "@/utils/toastUtil";
+import SingleImageUpload from "@/components/common/SingleImageUpload";
 
 // Mock Data
 type AuthorStatus = "ACTIVE" | "INACTIVE";
@@ -73,8 +76,6 @@ const statusOptions = [
   { label: "Ngừng hoạt động", value: "INACTIVE" },
 ];
 
-
-
 export default function AuthorPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [keyword, setKeyword] = useState(
@@ -90,6 +91,11 @@ export default function AuthorPage() {
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
   const [selectItem, setSelectItem] = useState<Author | null>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string>("");
+  const [imageUploadMode, setImageUploadMode] = useState<"file" | "url">(
+    "file",
+  );
+  const [tempImageUrl, setTempImageUrl] = useState<string>("");
 
   const {
     register,
@@ -99,7 +105,13 @@ export default function AuthorPage() {
     control,
     formState: { errors },
   } = useForm({
-    defaultValues: { name: "", description: "", urlBio: "", status: "ACTIVE" },
+    defaultValues: {
+      name: "",
+      description: "",
+      urlBio: "",
+      urlImage: "",
+      status: "ACTIVE",
+    },
   });
 
   // Filter Logic (Mock)
@@ -122,42 +134,67 @@ export default function AuthorPage() {
     setSearchParams(new URLSearchParams());
   };
 
+  const handleAddImageUrl = () => {
+    if (!tempImageUrl.trim()) return;
+    try {
+      const url = new URL(tempImageUrl.trim());
+      if (!["http:", "https:"].includes(url.protocol)) throw new Error();
+    } catch {
+      showWarningToast("URL ảnh không hợp lệ.");
+      return;
+    }
+    setAvatarUrl(tempImageUrl.trim());
+    setFile(null);
+    setTempImageUrl("");
+  };
+
   const inputName = useWatch({ control, name: "name" });
-  const debouncedName = useDebounce(inputName, 1000);
-  const { data, isLoading, isFetching } = useWikipediaAuthor(debouncedName);
+  const debouncedName = useDebounce(inputName, 2000);
+  const { data, isFetching } = useWikipediaAuthor(debouncedName);
   useEffect(() => {
-    const wikiToastId = "wiki-status"
+    const wikiToastId = "wiki-status";
     // Trường hợp 1: Đang chạy ngầm fetch dữ liệu (khi người dùng viết tiếp)
     if (isFetching && debouncedName) {
-      showInfoToast("Đang tìm kiếm thông tin trên Wikipedia...",{id:wikiToastId});
+      showInfoToast("Đang tìm kiếm thông tin trên Wikipedia...", {
+        id: wikiToastId,
+      });
       return;
     }
 
     // Khi đã chạy xong và có kết quả trả về
     if (!isFetching) {
-
       if (data) {
-
-        setValue("urlBio",data.urlBio)
+        setValue("urlBio", data.urlBio);
         setValue("description", data.extract);
-           
-        showSuccessToast("Thông tin đã được điền",{id:wikiToastId});
+        if (data.urlImage) {
+          setAvatarUrl(data.urlImage);
+          setImageUploadMode("url");
+          setFile(null);
+        }
+
+        dismissToast(wikiToastId);
+        showSuccessToast("Thông tin đã được điền");
       } else if (debouncedName && debouncedName.trim() !== "") {
-        showErrorToast("Lỗi không tìm thấy thông tin tác giả " + debouncedName,{id:wikiToastId});
-      }
-      else{
-                   dismissToast(wikiToastId)
+        dismissToast(wikiToastId);
+        showErrorToast("Lỗi không tìm thấy thông tin tác giả " + debouncedName);
+      } else {
+        dismissToast(wikiToastId);
       }
     }
-  }, [data, isFetching, debouncedName, setValue]);
+  }, [data, isFetching, debouncedName, setValue, setFile]);
   const handleOpenAdd = () => {
     reset();
     setFile(null);
+    setAvatarUrl("");
+    setTempImageUrl("");
+    setImageUploadMode("file");
     setOpenAddModal(true);
   };
   const handleCloseAdd = () => {
     reset();
     setFile(null);
+    setAvatarUrl("");
+    setTempImageUrl("");
     setOpenAddModal(false);
   };
 
@@ -166,10 +203,22 @@ export default function AuthorPage() {
     setValue("name", item.name);
     setValue("description", item.description);
     setValue("status", item.status);
+    if (item.avatarUrl) {
+      setAvatarUrl(item.avatarUrl);
+      setImageUploadMode("url");
+    } else {
+      setAvatarUrl("");
+      setImageUploadMode("file");
+    }
+    setFile(null);
+    setTempImageUrl("");
     setOpenUpdateModal(true);
   };
   const handleCloseUpdate = () => {
     reset();
+    setFile(null);
+    setAvatarUrl("");
+    setTempImageUrl("");
     setOpenUpdateModal(false);
   };
 
@@ -182,11 +231,11 @@ export default function AuthorPage() {
   };
 
   const onSubmitAdd = (data: any) => {
-    alert("Thêm: " + JSON.stringify(data));
+    alert("Thêm: " + JSON.stringify({ ...data, file: file?.name, avatarUrl }));
     handleCloseAdd();
   };
   const onSubmitUpdate = (data: any) => {
-    alert("Sửa: " + JSON.stringify(data));
+    alert("Sửa: " + JSON.stringify({ ...data, file: file?.name, avatarUrl }));
     handleCloseUpdate();
   };
   const onSubmitDelete = () => {
@@ -298,14 +347,7 @@ export default function AuthorPage() {
             rules={{ required: "Tên tác giả là bắt buộc" }}
             error={errors?.name}
           />
-          <InputField
-            label="Link bio"
-            name="urlBio"
-            type="link"
-            placeholder="http://"
-            register={register}
-            error={errors?.urlBio}
-          />
+
           <TextAreaField
             label="Mô tả / Tiểu sử"
             name="description"
@@ -315,46 +357,12 @@ export default function AuthorPage() {
             error={errors?.description}
           />
 
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-700">
-              Ảnh đại diện
-            </label>
-            {!file ? (
-              <label className="flex cursor-pointer items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 p-8 bg-slate-50/50 hover:border-indigo-500 hover:bg-indigo-50/10">
-                <div className="flex flex-col items-center gap-2 text-sm text-slate-500">
-                  <span className="text-4xl">📁</span>
-                  <span className="font-semibold text-slate-700">
-                    Chọn ảnh hoặc kéo thả vào đây
-                  </span>
-                </div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) =>
-                    e.target.files?.[0] && setFile(e.target.files[0])
-                  }
-                />
-              </label>
-            ) : (
-              <div className="relative group rounded-2xl border border-slate-200 p-2 overflow-hidden bg-slate-50/30">
-                <img
-                  src={URL.createObjectURL(file)}
-                  alt="preview"
-                  className="h-44 w-full rounded-xl object-cover"
-                />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-slate-900/40 transition-all flex items-center justify-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setFile(null)}
-                    className="bg-rose-500 text-white p-2.5 rounded-xl hover:bg-rose-600 transition shadow-lg opacity-0 group-hover:opacity-100"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+          <SingleImageUpload
+            file={file}
+            setFile={setFile}
+            avatarUrl={avatarUrl}
+            setAvatarUrl={setAvatarUrl}
+          />
         </form>
       </Modal>
 
@@ -398,6 +406,13 @@ export default function AuthorPage() {
                 label="Trạng thái"
               />
             )}
+          />
+
+          <SingleImageUpload
+            file={file}
+            setFile={setFile}
+            avatarUrl={avatarUrl}
+            setAvatarUrl={setAvatarUrl}
           />
         </form>
       </Modal>
