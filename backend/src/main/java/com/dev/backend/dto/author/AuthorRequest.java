@@ -1,4 +1,4 @@
-package com.dev.backend.dto.wikipedia;
+package com.dev.backend.dto.author;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,12 +7,10 @@ import lombok.Setter;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
 @Setter
-public class WikipediaResponse {
-
+@Getter
+public class AuthorRequest {
     private String name;
-
     private String wikibaseItem;
     private String urlImage;
     private String urlBio;

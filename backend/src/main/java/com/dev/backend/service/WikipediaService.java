@@ -61,10 +61,7 @@ public class WikipediaService {
             return null;
         }
 
-        // Nếu người dùng nhập thẳng mã QID (Ví dụ: Q1354172)
-        if (name.trim().matches("^Q\\d+$")) {
-            return fetchByQidDirectly(name.trim().toUpperCase());
-        }
+      
 
         String text = Capitalize.capitalizeFully(name);
         String title = text.trim().replace(" ", "_");
@@ -105,7 +102,7 @@ public class WikipediaService {
 
         // Parse dữ liệu từ API sang DTO hệ thống
         WikipediaResponse res = new WikipediaResponse();
-        res.setTitle(api.getTitle());
+        res.setName(api.getTitle());
         res.setExtract(api.getExtract());
         res.setWikibaseItem(api.getWikibaseItem());
 
@@ -121,25 +118,13 @@ public class WikipediaService {
         if (qid != null && !qid.isEmpty()) {
             // ĐÃ NÂNG CẤP: Truyền thêm Description và Extract để kiểm tra từ khóa dự phòng
             if (!isAuthor(qid, api.getDescription(), api.getExtract())) {
-                log.warn("Thực thể '{}' ({}) không thuộc nhóm danh mục tác giả hợp lệ.", res.getTitle(), qid);
+                log.warn("Thực thể '{}' ({}) không thuộc nhóm danh mục tác giả hợp lệ.", res.getName(), qid);
                 throw new NotFoundException("Từ khóa tìm thấy trên Wikipedia không thuộc nhóm tác giả hợp lệ.");
             }
         }
         return res;
     }
 
-    private WikipediaResponse fetchByQidDirectly(String qid) {
-        // Đối với nạp trực tiếp bằng mã QID, ta chỉ check Wikidata (truyền null cho text)
-        if (!isAuthor(qid, null, null)) {
-            throw new NotFoundException("Mã QID " + qid + " cung cấp không phải là một thực thể tác giả hợp lệ.");
-        }
-        
-        WikipediaResponse res = new WikipediaResponse();
-        res.setWikibaseItem(qid);
-        res.setTitle(qid);
-        res.setExtract("Dữ liệu nạp thủ công bằng mã định danh Wikidata " + qid + ". Hệ thống đã xác thực ngành nghề hợp lệ.");
-        return res;
-    }
 
     private boolean isAuthor(String qid, String description, String extract) {
         // 👉 BƯỚC 1: KIỂM TRA NHANH BẰNG TỪ KHÓA (Giải quyết triệt để các trang đổi hướng như Q3376801)
