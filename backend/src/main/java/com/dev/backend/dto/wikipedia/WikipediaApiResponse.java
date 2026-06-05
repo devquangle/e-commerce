@@ -1,8 +1,5 @@
 package com.dev.backend.dto.wikipedia;
 
-import com.dev.backend.dto.wikipedia.WikipediaApiResponse.ContentUrls;
-import com.dev.backend.dto.wikipedia.WikipediaApiResponse.Desktop;
-import com.dev.backend.dto.wikipedia.WikipediaApiResponse.Titles;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -21,6 +18,8 @@ public class WikipediaApiResponse {
 
     @JsonProperty("wikibase_item")
     private String wikibaseItem;
+
+    private String description;
 
     private Thumbnail thumbnail;
 
