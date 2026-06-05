@@ -110,7 +110,7 @@ export default function Pagination({
     <nav
       aria-label="Pagination"
       className={cn(
-        "flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between",
+        "flex flex-col gap-3 border-t p-4 sm:flex-row sm:items-center sm:justify-between",
         className
       )}
     >

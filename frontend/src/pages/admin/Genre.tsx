@@ -269,7 +269,10 @@ export default function Genre() {
 
   const handleStatusChange = (value: GenreStatus | null) => {
     setStatus(value);
-    updateSearchParams({ ...options, status: value ?? undefined, page: 1 }, false);
+    updateSearchParams(
+      { ...options, status: value ?? undefined, page: 1 },
+      false,
+    );
   };
 
   const handlePageChange = (page: number) => {
@@ -307,9 +310,8 @@ export default function Genre() {
 
   return (
     <>
-      <div className="flex-1 p-4 md:p-6 space-y-6">
-        {/* HEADER */}
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div className="flex-1 grid grid-cols-1 gap-4 auto-rows-max ">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between card-custom">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <div className="rounded-lg bg-indigo-50 p-2 text-indigo-600">
@@ -332,12 +334,9 @@ export default function Genre() {
             Thêm thể loại
           </button>
         </div>
-
-        {/* FILTER & TABLE CONTAINER */}
-        <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm shadow-slate-100/50">
-          <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-center">
-            {/* Search input */}
-            <div className="relative flex-1">
+        <div className="card-custom">
+          <div className="mb-5 grid grid-cols-1 gap-3 md:grid-cols-4 md:items-center">
+            <div className="relative md:col-span-2">
               <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
@@ -348,10 +347,8 @@ export default function Genre() {
               />
             </div>
 
-            {/* Status dropdown */}
-            <div className="w-full md:w-56">
+            <div className="w-full">
               <SelectBox<GenreStatus | null>
-              
                 options={statusOptions}
                 value={status}
                 onChange={handleStatusChange}
@@ -359,9 +356,8 @@ export default function Genre() {
               />
             </div>
 
-            {/* Reset Button */}
             <button
-              className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all active:scale-95 cursor-pointer"
+              className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all active:scale-95 cursor-pointer w-full"
               onClick={handleResetFilter}
             >
               <RotateCcw size={16} />
@@ -369,23 +365,27 @@ export default function Genre() {
             </button>
           </div>
 
-          <GenreTable
-            genres={genres}
-            onEdit={handleOpenUpdateGenreModal}
-            onDelete={handleOpenDeleteGenreModal}
-          />
+          {/* TABLE (DESKTOP) */}
+          <div className="hidden md:block">
+            <GenreTable
+              genres={genres}
+              onEdit={handleOpenUpdateGenreModal}
+              onDelete={handleOpenDeleteGenreModal}
+            />
+          </div>
 
-          {/* ===================== MOBILE CARD ===================== */}
-          
-          <GenreMobileCard
-            genres={genres}
-            onEdit={handleOpenUpdateGenreModal}
-            onDelete={handleOpenDeleteGenreModal}
-          />
-        </div> 
+          {/* MOBILE CARD */}
+          <div className="block md:hidden">
+            <GenreMobileCard
+              genres={genres}
+              onEdit={handleOpenUpdateGenreModal}
+              onDelete={handleOpenDeleteGenreModal}
+            />
+          </div>
+        </div>
 
         {/* PAGINATION */}
-        <div className="mt-4">
+        <div className="w-full">
           <Pagination
             currentPage={(data?.page ?? 0) + 1}
             totalPages={Math.max(data?.totalPages ?? 0, 1)}
@@ -411,9 +411,7 @@ export default function Genre() {
         size="lg"
       >
         <div>
-          {createMutation.isPending && (
-            <Loading />
-          )}
+          {createMutation.isPending && <Loading />}
           <form className="space-y-4">
             <InputField
               label="Tên thể loại"

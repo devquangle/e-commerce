@@ -61,7 +61,7 @@ export const menuGroups: MenuGroup[] = [
       {
         id: 24,
         label: "Nhà xuất bản",
-        path: "/admin/genres",
+        path: "/admin/publishers",
         icon: Building2,
         role: [Role.SUPER_ADMIN, Role.ADMIN, Role.PRODUCT_MANAGER],
       },

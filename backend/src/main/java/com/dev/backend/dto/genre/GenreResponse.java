@@ -13,13 +13,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class GenreResponse {
     private Integer id;
-
     private String name;
-
     private int totalProduct;
-
     private GenreStatus status;
-
-   
-
 }

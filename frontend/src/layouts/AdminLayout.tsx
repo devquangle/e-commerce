@@ -24,7 +24,7 @@ export default function AdminLayout() {
 
       {/* MAIN CONTENT */}
       <main className="h-[calc(100vh-60px)] w-full overflow-y-auto sm:pl-64">
-        <Container className="px-2 md:px-4 py-4">
+        <Container className="p-4">
           <Outlet />
         </Container>
       </main>

@@ -40,7 +40,7 @@ export default function Header() {
   return (
     <>
       <header className="sticky top-0 z-30 border-b bg-white/80 backdrop-blur">
-        <Container className="px-2 md:px-4 md:pr-8">
+        <Container className="px-4 md:pr-8">
           <nav className="flex justify-between items-center h-15 gap-2">
             <Logo />
             <button

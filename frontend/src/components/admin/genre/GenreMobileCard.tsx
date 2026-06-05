@@ -20,7 +20,7 @@ const GenreMobileCard = ({
       {genres.map((genre) => (
         <div
           key={genre.id}
-          className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+          className="space-y-3 card-custom"
         >
           {/* TITLE */}
           <div className="flex items-start justify-between">

@@ -11,6 +11,8 @@ import Chat from "@/pages/admin/Chat";
 import CreateProduct from "@/pages/admin/CreateProduct";
 import UpdateProduct from "@/pages/admin/UpdateProduct";
 import AuthorPage from "@/pages/admin/AuthorPage";
+import PublisherPage from "@/pages/admin/PublisherPage";
+import SeriesPage from "@/pages/admin/SeriesPage";
 
 const adminRouter = [
   {
@@ -64,7 +66,15 @@ const adminRouter = [
   {
     path: "/admin/authors",
     element: <AuthorPage />,
-  }
+  },
+  {
+    path: "/admin/publishers",
+    element: <PublisherPage />,
+  },
+  {
+    path: "/admin/collections",
+    element: <SeriesPage />,
+  },
 ];
 
 export default adminRouter;
