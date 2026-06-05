@@ -34,6 +34,7 @@ import {
 import imageService from "@/services/imageService";
 import GenreTable from "@/components/admin/genre/GenreTable";
 import GenreMobileCard from "@/components/admin/genre/GenreMobileCard";
+import Button from "@/components/common/Button";
 
 const initialFilterOptions: GenreOptions = {
   keyword: "",
@@ -325,14 +326,16 @@ export default function Genre() {
               Phân loại sách và quản lý các danh mục sản phẩm của cửa hàng.
             </p>
           </div>
-
-          <button
-            className="flex items-center justify-center gap-2 rounded-xl bg-linear-to-r from-indigo-600 to-violet-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-indigo-600/10 hover:shadow-lg hover:shadow-indigo-600/20 hover:from-indigo-500 hover:to-violet-500 transition-all duration-300 transform active:scale-95 cursor-pointer"
+          <Button
+            type="button"
+            color="primary"
+            className="w-full sm:w-auto cursor-pointer"
             onClick={() => setOpenAddGenreModal(true)}
           >
-            <Plus size={18} />
-            Thêm thể loại
-          </button>
+            <Plus size={18} /> Thêm thể loại
+          </Button>
+
+        
         </div>
         <div className="card-custom">
           <div className="mb-5 grid grid-cols-1 gap-3 md:grid-cols-4 md:items-center">
