@@ -27,11 +27,12 @@ export default function TextAreaField<T extends FieldValues>({
 }: TextAreaFieldProps<T>) {
     return (
         <div>
-            <label className="block text-sm font-medium mb-1">
+            <label htmlFor="text" className="block text-sm font-medium mb-1" >
                 {label} <span className="text-red-500">*</span>
             </label>
 
             <textarea
+                id="text"
                 rows={rows}
                 placeholder={placeholder}
                 {...register(name, rules)}

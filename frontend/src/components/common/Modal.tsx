@@ -63,7 +63,7 @@ export default function Modal({
         </div>
 
         
-        <div className="flex-1 overflow-y-auto pr-1 space-y-4">
+        <div className="flex-1 overflow-y-auto p-2 space-y-4">
           {content && <p className="text-gray-600">{content}</p>}
           {children}
         </div>

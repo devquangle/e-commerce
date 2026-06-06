@@ -17,7 +17,9 @@ export interface AuthorRes {
 }
 export interface AuthorReq {
   name: string;
-  urlImage?: string;
-  description?: string;
-  bio?: string;
+  wikibaseItem: string;
+  urlImage: string;
+  urlBio: string;
+  extract: string;
+  status: BaseStatus;
 }

@@ -28,4 +28,11 @@ public class UploadImageController {
         List<ImageResponse> imageResponses = cloudinaryService.imageResponses(form.imageRequests());
         return ResponseUtil.success("Tải ảnh thành công", imageResponses);
     }
+
+    @PostMapping("/upload")
+    public ResponseEntity<ResponseData<List<ImageResponse>>> upload(
+            @ModelAttribute ImageUploadForm form) {
+        List<ImageResponse> imageResponses = cloudinaryService.imageResponses(form.imageRequests());
+        return ResponseUtil.success("Tải ảnh thành công", imageResponses);
+    }
 }

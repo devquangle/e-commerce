@@ -1,6 +1,7 @@
 package com.dev.backend.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -13,6 +14,8 @@ import com.dev.backend.constant.BaseStatus;
 import com.dev.backend.dto.author.AuthorRequest;
 import com.dev.backend.dto.author.AuthorResponse;
 import com.dev.backend.entity.Author;
+import com.dev.backend.exception.DuplicateFieldException;
+import com.dev.backend.exception.NotFoundException;
 import com.dev.backend.mapper.AuthorMapper;
 import com.dev.backend.repository.AuthorRepository;
 import com.dev.backend.response.PageResponse;
@@ -31,27 +34,39 @@ public class AuthorServiceImpl implements AuthorService {
     private final AuthorMapper authorMapper;
 
     @Override
-    public Author add(AuthorRequest authorRequest) {
+    public AuthorResponse add(AuthorRequest authorRequest) {
+        validate(authorRequest);
         Author author = new Author();
         author.setName(authorRequest.getName());
+        author.setWikibaseItem(authorRequest.getWikibaseItem());
         author.setSlug(TextUtils.toSlug(authorRequest.getName()));
         author.setUrlBio(authorRequest.getUrlBio());
         author.setUrlImage(authorRequest.getUrlImage());
         author.setDescription(authorRequest.getExtract());
-        author.setStatus(authorRequest.getStatus());
-        return save(author);
+        author.setStatus(authorRequest.getStatus() != null ? authorRequest.getStatus() : BaseStatus.ACTIVE);
+        return authorMapper.toDTO(save(author));
     }
 
     @Override
-    public boolean existsByName(String name) {
-        // TODO Auto-generated method stub
-        return false;
+    public Author findById(Integer id) {
+        return authorRepository.findById(id).orElseThrow(
+                () -> new NotFoundException("Không tìm thấy tác giả với ID: " + id));
     }
 
     @Override
-    public boolean existsBySlug(String slug) {
-        // TODO Auto-generated method stub
-        return false;
+    public AuthorResponse update(Integer id, AuthorRequest authorRequest) {
+        Author author = findById(id);
+        if (!author.getName().equals(authorRequest.getName().trim())) {
+            validate(authorRequest);
+        }
+        author.setName(authorRequest.getName());
+        author.setWikibaseItem(authorRequest.getWikibaseItem());
+        author.setSlug(TextUtils.toSlug(authorRequest.getName()));
+        author.setUrlBio(authorRequest.getUrlBio());
+        author.setUrlImage(authorRequest.getUrlImage());
+        author.setDescription(authorRequest.getExtract());
+        author.setStatus(authorRequest.getStatus() != null ? authorRequest.getStatus() : BaseStatus.ACTIVE);
+        return authorMapper.toDTO(save(author));
     }
 
     @Override
@@ -84,8 +99,24 @@ public class AuthorServiceImpl implements AuthorService {
     }
 
     @Override
-    public void validate() {
-        // TODO Auto-generated method stub
+    public boolean existsByName(String name) {
+        return authorRepository.existsByName(name);
+    }
+
+    @Override
+    public boolean existsBySlug(String slug) {
+        return authorRepository.existsBySlug(slug);
+    }
+
+    @Override
+    public void validate(AuthorRequest authorRequest) {
+        DuplicateFieldException errors = new DuplicateFieldException(new HashMap<>());
+        if (existsByName(authorRequest.getName())) {
+            errors.addError("name", "Tên tác giả đã tồn tại.");
+        }
+        if (!errors.getErrors().isEmpty()) {
+            throw errors;
+        }
 
     }
 

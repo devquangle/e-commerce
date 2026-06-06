@@ -20,9 +20,14 @@ import {
   showWarningToast,
 } from "@/utils/toastUtil";
 import SingleImageUpload from "@/components/common/SingleImageUpload";
-import type { AuthorRes } from "@/types/author";
+import type { AuthorReq, AuthorRes } from "@/types/author";
 import { BaseStatus, getBaseStatusLabel } from "@/types/status";
-import { useFilterAuthor } from "@/hooks/useAuthor";
+import {
+  useCreateAuthor,
+  useFilterAuthor,
+  useUpdateAuthor,
+} from "@/hooks/useAuthor";
+import { mapServerErrors } from "@/utils/mapServerErrors";
 
 const initialFilterOptions = { keyword: "", status: "", page: 1, size: 10 };
 
@@ -34,7 +39,23 @@ export default function AuthorPage() {
   const [status, setStatus] = useState<BaseStatus | null>(
     (searchParams.get("status") as BaseStatus) ?? null,
   );
+  const [page, setPage] = useState<number>(
+    Number(searchParams.get("page")) || initialFilterOptions.page,
+  );
+  const [size, setSize] = useState<number>(
+    Number(searchParams.get("size")) || initialFilterOptions.size,
+  );
+
   const debouncedKeyword = useDebounce(keyword, 500);
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (debouncedKeyword) params.set("keyword", debouncedKeyword);
+    if (status) params.set("status", status);
+    if (page !== initialFilterOptions.page) params.set("page", page.toString());
+    if (size !== initialFilterOptions.size) params.set("size", size.toString());
+    setSearchParams(params, { replace: true });
+  }, [debouncedKeyword, status, page, size, setSearchParams]);
 
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [onpenSaveModal, setOpenSaveModal] = useState(false);
@@ -52,15 +73,16 @@ export default function AuthorPage() {
     handleSubmit,
     reset,
     setValue,
+    setError,
     control,
     formState: { errors },
-  } = useForm({
+  } = useForm<AuthorReq>({
     defaultValues: {
       name: "",
-      description: "",
+      extract: "",
       urlBio: "",
       urlImage: "",
-      status: "ACTIVE",
+      status: BaseStatus.ACTIVE,
     },
   });
 
@@ -77,19 +99,31 @@ export default function AuthorPage() {
 
   const {
     data: authors,
-    isPending,
+    isPending: isPendingAuthor,
     isFetching: isAuthorsFetching,
-  } = useFilterAuthor();
+  } = useFilterAuthor({
+    keyword: debouncedKeyword,
+    status: status || undefined,
+    page,
+    size,
+  });
 
   const filterAuthor = authors?.items || [];
 
   // Handlers
-  const handleKeywordChange = (val: string) => setKeyword(val);
-  const handleStatusChange = (val: any) => setStatus(val);
+  const handleKeywordChange = (val: string) => {
+    setKeyword(val);
+    setPage(1);
+  };
+  const handleStatusChange = (val: any) => {
+    setStatus(val);
+    setPage(1);
+  };
   const handleResetFilter = () => {
     setKeyword("");
     setStatus(null);
-    setSearchParams(new URLSearchParams());
+    setPage(initialFilterOptions.page);
+    setSize(initialFilterOptions.size);
   };
 
   const handleAddImageUrl = () => {
@@ -112,6 +146,7 @@ export default function AuthorPage() {
     useWikipediaAuthor(debouncedName);
 
   useEffect(() => {
+    if (selectItem) return;
     const wikiToastId = "wiki-status";
 
     if (isWikiFetching && debouncedName) {
@@ -124,9 +159,10 @@ export default function AuthorPage() {
     if (!isWikiFetching) {
       if (wikiData) {
         setValue("urlBio", wikiData.urlBio);
-        setValue("description", wikiData.extract);
+        setValue("extract", wikiData.extract);
 
         if (wikiData.urlImage) {
+          setValue("urlImage", wikiData.urlImage);
           setAvatarUrl(wikiData.urlImage);
           setImageUploadMode("url");
           setFile(null);
@@ -141,7 +177,7 @@ export default function AuthorPage() {
         dismissToast(wikiToastId);
       }
     }
-  }, [wikiData, isWikiFetching, debouncedName, setValue]);
+  }, [wikiData, isWikiFetching, debouncedName, setValue, selectItem]);
 
   const handleOpenDelete = (item: AuthorRes) => {
     setSelectItem(item);
@@ -150,14 +186,36 @@ export default function AuthorPage() {
   const handleCloseDelete = () => {
     setOpenDeleteModal(false);
   };
+  const createMutation = useCreateAuthor();
+  const updateMutation = useUpdateAuthor();
 
-  const onSubmitAdd = (data: any) => {
-    alert("Thêm: " + JSON.stringify({ ...data, file: file?.name, avatarUrl }));
-    handleCloseSaveModal();
+  const onSubmitAdd = async (req: AuthorReq) => {
+    if (createMutation.isPending) return;
+    try {
+      const payload: AuthorReq = {
+        ...req,
+        urlImage: avatarUrl || req.urlImage,
+      };
+      await createMutation.mutateAsync(payload);
+      handleCloseSaveModal();
+    } catch (error: unknown) {
+      mapServerErrors(error, setError, showErrorToast);
+    }
   };
-  const onSubmitUpdate = (data: any) => {
-    alert("Sửa: " + JSON.stringify({ ...data, file: file?.name, avatarUrl }));
-    handleCloseSaveModal();
+  const onSubmitUpdate = async (req: AuthorReq) => {
+    if (updateMutation.isPending) return;
+    try {
+      if (selectItem) {
+        const payload: AuthorReq = {
+        ...req,
+        urlImage: avatarUrl || req.urlImage,
+      };
+        await updateMutation.mutateAsync({ id: selectItem?.id ?? 0,req: payload });
+        handleCloseSaveModal();
+      }
+    } catch (error: unknown) {
+      mapServerErrors(error, setError, showErrorToast);
+    }
   };
   const onSubmitDelete = () => {
     alert("Xoá: " + selectItem?.name);
@@ -165,11 +223,13 @@ export default function AuthorPage() {
   };
 
   const handleOpenSaveModal = (item: AuthorRes | null) => {
-    setSelectItem(item);
     if (item) {
+      setSelectItem(item);
       setValue("name", item.name);
-      setValue("description", item.description);
+      setValue("extract", item.description);
       setValue("status", item.status);
+      setValue("urlBio", item.urlBio || ""); // ✨ Bổ sung đổ lại urlBio cũ vào form
+      setValue("urlImage", item.urlImage || "");
       if (item.urlImage) {
         setAvatarUrl(item.urlImage);
         setImageUploadMode("url");
@@ -191,6 +251,7 @@ export default function AuthorPage() {
 
   const handleCloseSaveModal = () => {
     reset();
+    setSelectItem(null);
     setFile(null);
     setAvatarUrl("");
     setTempImageUrl("");
@@ -271,12 +332,15 @@ export default function AuthorPage() {
         {/* PAGINATION */}
         <div className="mt-4">
           <Pagination
-            currentPage={1}
-            totalPages={1}
-            onPageChange={() => {}}
-            totalItems={filterAuthor.length}
-            pageSize={10}
-            onPageSizeChange={() => {}}
+            currentPage={page}
+            totalPages={authors?.totalPages || 1}
+            onPageChange={(p) => setPage(p)}
+            totalItems={authors?.totalItems || 0}
+            pageSize={size}
+            onPageSizeChange={(s) => {
+              setSize(s);
+              setPage(1);
+            }}
           />
         </div>
       </div>
@@ -306,11 +370,11 @@ export default function AuthorPage() {
 
           <TextAreaField
             label="Mô tả / Tiểu sử"
-            name="description"
+            name="extract"
             placeholder="Nhập mô tả..."
             rows={4}
             register={register}
-            error={errors?.description}
+            error={errors?.extract}
           />
 
           <SingleImageUpload
