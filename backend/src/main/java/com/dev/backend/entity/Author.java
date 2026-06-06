@@ -4,6 +4,8 @@ import com.dev.backend.constant.BaseStatus;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -30,6 +32,8 @@ public class Author {
     private String urlBio;
     @Column(columnDefinition = "TEXT")
     private String description;
-
+    
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private BaseStatus status = BaseStatus.ACTIVE;
 }

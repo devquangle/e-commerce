@@ -18,6 +18,6 @@ public interface AuthorService {
 
     Author add(AuthorRequest authorRequest);
 
-    PageResponse<AuthorResponse> pageGenre(int page, int size, String keyword);
+    PageResponse<AuthorResponse> pages(int page, int size, String keyword,String status);
 
 }

@@ -21,7 +21,6 @@ import AuthorTable from "@/components/admin/author/AuthorTable";
 import AuthorMobileCard from "@/components/admin/author/AuthorMobileCard";
 import Button from "@/components/common/Button";
 import { useWikipediaAuthor } from "@/hooks/useWikipediaAuthor";
-import Loading from "@/components/common/Loading";
 import TextAreaField from "@/components/common/TextAreaField";
 import {
   dismissToast,
@@ -31,65 +30,26 @@ import {
   showWarningToast,
 } from "@/utils/toastUtil";
 import SingleImageUpload from "@/components/common/SingleImageUpload";
+import type { AuthorRes } from "@/types/author";
+import { BaseStatus, getBaseStatusLabel } from "@/types/status";
+import { useFilterAuthor } from "@/hooks/useAuthor";
 
-// Mock Data
-type AuthorStatus = "ACTIVE" | "INACTIVE";
-type Author = {
-  id: number;
-  name: string;
-  description: string;
-  avatarUrl: string;
-  bookCount: number;
-  status: AuthorStatus;
-};
-const demoAuthors: Author[] = [
-  {
-    id: 1,
-    name: "Nguyễn Nhật Ánh",
-    description: "Nhà văn nổi tiếng với các tác phẩm thiếu nhi",
-    avatarUrl: "https://placehold.co/100x100?text=NNA",
-    bookCount: 45,
-    status: "ACTIVE",
-  },
-  {
-    id: 2,
-    name: "Tô Hoài",
-    description: "Tác giả của Dế Mèn Phiêu Lưu Ký",
-    avatarUrl: "https://placehold.co/100x100?text=TH",
-    bookCount: 32,
-    status: "ACTIVE",
-  },
-  {
-    id: 3,
-    name: "Nam Cao",
-    description: "Nhà văn hiện thực phê phán",
-    avatarUrl: "https://placehold.co/100x100?text=NC",
-    bookCount: 18,
-    status: "ACTIVE",
-  },
-];
-
-const initialFilterOptions = { keyword: "", page: 1, size: 10 };
-const statusOptions = [
-  { label: "Tất cả trạng thái", value: null },
-  { label: "Hoạt động", value: "ACTIVE" },
-  { label: "Ngừng hoạt động", value: "INACTIVE" },
-];
+const initialFilterOptions = { keyword: "", status: "", page: 1, size: 10 };
 
 export default function AuthorPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [keyword, setKeyword] = useState(
     searchParams.get("keyword") ?? initialFilterOptions.keyword,
   );
-  const [status, setStatus] = useState<string | null>(
-    searchParams.get("status") ?? null,
+  const [status, setStatus] = useState<BaseStatus | null>(
+    (searchParams.get("status") as BaseStatus) ?? null,
   );
   const debouncedKeyword = useDebounce(keyword, 500);
 
   const [openAddModal, setOpenAddModal] = useState(false);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
-  const [selectItem, setSelectItem] = useState<Author | null>(null);
+  const [selectItem, setSelectItem] = useState<AuthorRes | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string>("");
   const [imageUploadMode, setImageUploadMode] = useState<"file" | "url">(
@@ -113,18 +73,24 @@ export default function AuthorPage() {
       status: "ACTIVE",
     },
   });
+  const statusOptions = useMemo(
+  () => [
+    { label: "Tất cả trạng thái", value: null as BaseStatus | null },
+    ...(Object.values(BaseStatus) as BaseStatus[]).map((value) => ({
+      label: getBaseStatusLabel(value),
+      value,
+    })),
+  ],
+  [],
+);
 
-  // Filter Logic (Mock)
-  const filteredData = useMemo(() => {
-    let result = demoAuthors;
-    if (debouncedKeyword)
-      result = result.filter((a) =>
-        a.name.toLowerCase().includes(debouncedKeyword.toLowerCase()),
-      );
-    if (status) result = result.filter((a) => a.status === status);
-    return result;
-  }, [debouncedKeyword, status]);
+  const {
+    data: authors,
+    isPending,
+    isFetching: isAuthorsFetching,
+  } = useFilterAuthor();
 
+  const filterAuthor = authors?.items || [];
   // Handlers
   const handleKeywordChange = (val: string) => setKeyword(val);
   const handleStatusChange = (val: any) => setStatus(val);
@@ -150,38 +116,41 @@ export default function AuthorPage() {
 
   const inputName = useWatch({ control, name: "name" });
   const debouncedName = useDebounce(inputName, 2000);
-  const { data, isFetching } = useWikipediaAuthor(debouncedName);
+  const { data: wikiData, isFetching: isWikiFetching } =
+    useWikipediaAuthor(debouncedName);
+
   useEffect(() => {
     const wikiToastId = "wiki-status";
-    // Trường hợp 1: Đang chạy ngầm fetch dữ liệu (khi người dùng viết tiếp)
-    if (isFetching && debouncedName) {
+
+    if (isWikiFetching && debouncedName) {
       showInfoToast("Đang tìm kiếm thông tin trên Wikipedia...", {
         id: wikiToastId,
       });
       return;
     }
 
-    // Khi đã chạy xong và có kết quả trả về
-    if (!isFetching) {
-      if (data) {
-        setValue("urlBio", data.urlBio);
-        setValue("description", data.extract);
-        if (data.urlImage) {
-          setAvatarUrl(data.urlImage);
+    if (!isWikiFetching) {
+      if (wikiData) {
+        setValue("urlBio", wikiData.urlBio);
+        setValue("description", wikiData.extract);
+
+        if (wikiData.urlImage) {
+          setAvatarUrl(wikiData.urlImage);
           setImageUploadMode("url");
           setFile(null);
         }
 
         dismissToast(wikiToastId);
         showSuccessToast("Thông tin đã được điền");
-      } else if (debouncedName && debouncedName.trim() !== "") {
+      } else if (debouncedName?.trim()) {
         dismissToast(wikiToastId);
         showErrorToast("Lỗi không tìm thấy thông tin tác giả " + debouncedName);
       } else {
         dismissToast(wikiToastId);
       }
     }
-  }, [data, isFetching, debouncedName, setValue, setFile]);
+  }, [wikiData, isWikiFetching, debouncedName, setValue]);
+
   const handleOpenAdd = () => {
     reset();
     setFile(null);
@@ -287,7 +256,7 @@ export default function AuthorPage() {
               />
             </div>
             <div className="w-full md:w-56">
-              <SelectBox
+              <SelectBox<BaseStatus | null>
                 options={statusOptions}
                 value={status}
                 onChange={handleStatusChange}
@@ -303,12 +272,12 @@ export default function AuthorPage() {
           </div>
 
           <AuthorTable
-            authors={filteredData}
+            authors={filterAuthor}
             onEdit={handleOpenUpdate}
             onDelete={handleOpenDelete}
           />
           <AuthorMobileCard
-            authors={filteredData}
+            authors={filterAuthor}
             onEdit={handleOpenUpdate}
             onDelete={handleOpenDelete}
           />
@@ -320,7 +289,7 @@ export default function AuthorPage() {
             currentPage={1}
             totalPages={1}
             onPageChange={() => {}}
-            totalItems={filteredData.length}
+            totalItems={filterAuthor.length}
             pageSize={10}
             onPageSizeChange={() => {}}
           />

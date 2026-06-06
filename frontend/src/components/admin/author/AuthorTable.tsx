@@ -1,9 +1,10 @@
 import { BookOpen } from "lucide-react";
 import AuthorStatusBadge from "./AuthorStatusBadge";
 import AuthorActionButtons from "./AuthorActionButtons";
+import type { AuthorRes } from "@/types/author";
 
 type Props = {
-  authors: any[];
+  authors: AuthorRes[];
   onEdit: (author: any) => void;
   onDelete: (author: any) => void;
 };
@@ -38,11 +39,11 @@ export default function AuthorTable({ authors, onEdit, onDelete }: Props) {
               <td className="py-4 px-4">
                 <div className="flex items-center gap-3">
                   <img
-                    src={author.avatarUrl}
-                    alt={author.name}
+                    src={author?.urlImage}
+                    alt={author?.name}
                     className="w-10 h-10 rounded-full object-cover border border-slate-200"
                   />
-                  <span className="font-semibold text-slate-900">{author.name}</span>
+                  <span className="font-semibold text-slate-900">{author?.name}</span>
                 </div>
               </td>
               <td className="py-4 px-4 text-slate-500 text-xs max-w-[200px] truncate">
@@ -51,7 +52,7 @@ export default function AuthorTable({ authors, onEdit, onDelete }: Props) {
               <td className="py-4 px-4 text-slate-600">
                 <span className="inline-flex items-center gap-1 bg-slate-100 text-slate-800 text-xs px-2.5 py-1 rounded-md font-semibold">
                   <BookOpen size={13} className="text-slate-500" />
-                  {author.bookCount || 0} cuốn
+                
                 </span>
               </td>
               <td className="py-4 px-4">

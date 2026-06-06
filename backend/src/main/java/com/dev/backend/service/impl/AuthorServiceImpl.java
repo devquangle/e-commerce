@@ -3,12 +3,17 @@ package com.dev.backend.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.dev.backend.constant.BaseStatus;
 import com.dev.backend.dto.author.AuthorRequest;
 import com.dev.backend.dto.author.AuthorResponse;
 import com.dev.backend.entity.Author;
+import com.dev.backend.mapper.AuthorMapper;
 import com.dev.backend.repository.AuthorRepository;
 import com.dev.backend.response.PageResponse;
 import com.dev.backend.service.AuthorService;
@@ -23,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthorServiceImpl implements AuthorService {
 
     private final AuthorRepository authorRepository;
+    private final AuthorMapper authorMapper;
 
     @Override
     public Author add(AuthorRequest authorRequest) {
@@ -46,6 +52,41 @@ public class AuthorServiceImpl implements AuthorService {
     public boolean existsBySlug(String slug) {
         // TODO Auto-generated method stub
         return false;
+    }
+
+    @Override
+    public PageResponse<AuthorResponse> pages(int page, int size, String keyword, String status) {
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by(Sort.Direction.DESC, "id"));
+
+        BaseStatus baseStatus = (status == null || status.isBlank())
+                ? null
+                : BaseStatus.valueOf(status);
+
+        Page<Author> authorPage = authorRepository
+                .findByNameContainingIgnoreCase(keyword == null ? "" : keyword, baseStatus, pageable);
+
+        List<AuthorResponse> items = authorPage.getContent().stream().map(authorMapper::toDTO).toList();
+
+        return new PageResponse<>(
+                items,
+                authorPage.getNumber(),
+                authorPage.getSize(),
+                authorPage.getTotalElements(),
+                authorPage.getTotalPages());
+    }
+
+    @Override
+    public Author save(Author author) {
+        return authorRepository.save(author);
+    }
+
+    @Override
+    public void validate() {
+        // TODO Auto-generated method stub
+
     }
 
     @Override
@@ -99,22 +140,4 @@ public class AuthorServiceImpl implements AuthorService {
         }
 
     }
-
-    @Override
-    public PageResponse<AuthorResponse> pageGenre(int page, int size, String keyword) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Author save(Author author) {
-        return authorRepository.save(author);
-    }
-
-    @Override
-    public void validate() {
-        // TODO Auto-generated method stub
-
-    }
-
 }
