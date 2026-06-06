@@ -1,22 +1,12 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Modal from "@/components/common/Modal";
-import { useForm, Controller, useWatch, set } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import InputField from "@/components/common/InputField";
 import Pagination from "@/components/common/Pagination";
 import { useSearchParams } from "react-router-dom";
 import useDebounce from "@/hooks/useDebounce";
 import SelectBox from "@/components/common/SelectedBox";
-import {
-  Plus,
-  RotateCcw,
-  Search,
-  Users,
-  Edit,
-  Trash2,
-  Eye,
-  Wand2,
-  Upload,
-} from "lucide-react";
+import { Plus, RotateCcw, Search, Users } from "lucide-react";
 import AuthorTable from "@/components/admin/author/AuthorTable";
 import AuthorMobileCard from "@/components/admin/author/AuthorMobileCard";
 import Button from "@/components/common/Button";
@@ -46,9 +36,9 @@ export default function AuthorPage() {
   );
   const debouncedKeyword = useDebounce(keyword, 500);
 
-  const [openAddModal, setOpenAddModal] = useState(false);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
-  const [openUpdateModal, setOpenUpdateModal] = useState(false);
+  const [onpenSaveModal, setOpenSaveModal] = useState(false);
+
   const [selectItem, setSelectItem] = useState<AuthorRes | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string>("");
@@ -73,16 +63,17 @@ export default function AuthorPage() {
       status: "ACTIVE",
     },
   });
+
   const statusOptions = useMemo(
-  () => [
-    { label: "Tất cả trạng thái", value: null as BaseStatus | null },
-    ...(Object.values(BaseStatus) as BaseStatus[]).map((value) => ({
-      label: getBaseStatusLabel(value),
-      value,
-    })),
-  ],
-  [],
-);
+    () => [
+      { label: "Tất cả trạng thái", value: null as BaseStatus | null },
+      ...(Object.values(BaseStatus) as BaseStatus[]).map((value) => ({
+        label: getBaseStatusLabel(value),
+        value,
+      })),
+    ],
+    [],
+  );
 
   const {
     data: authors,
@@ -91,6 +82,7 @@ export default function AuthorPage() {
   } = useFilterAuthor();
 
   const filterAuthor = authors?.items || [];
+
   // Handlers
   const handleKeywordChange = (val: string) => setKeyword(val);
   const handleStatusChange = (val: any) => setStatus(val);
@@ -151,47 +143,7 @@ export default function AuthorPage() {
     }
   }, [wikiData, isWikiFetching, debouncedName, setValue]);
 
-  const handleOpenAdd = () => {
-    reset();
-    setFile(null);
-    setAvatarUrl("");
-    setTempImageUrl("");
-    setImageUploadMode("file");
-    setOpenAddModal(true);
-  };
-  const handleCloseAdd = () => {
-    reset();
-    setFile(null);
-    setAvatarUrl("");
-    setTempImageUrl("");
-    setOpenAddModal(false);
-  };
-
-  const handleOpenUpdate = (item: Author) => {
-    setSelectItem(item);
-    setValue("name", item.name);
-    setValue("description", item.description);
-    setValue("status", item.status);
-    if (item.avatarUrl) {
-      setAvatarUrl(item.avatarUrl);
-      setImageUploadMode("url");
-    } else {
-      setAvatarUrl("");
-      setImageUploadMode("file");
-    }
-    setFile(null);
-    setTempImageUrl("");
-    setOpenUpdateModal(true);
-  };
-  const handleCloseUpdate = () => {
-    reset();
-    setFile(null);
-    setAvatarUrl("");
-    setTempImageUrl("");
-    setOpenUpdateModal(false);
-  };
-
-  const handleOpenDelete = (item: Author) => {
+  const handleOpenDelete = (item: AuthorRes) => {
     setSelectItem(item);
     setOpenDeleteModal(true);
   };
@@ -201,20 +153,53 @@ export default function AuthorPage() {
 
   const onSubmitAdd = (data: any) => {
     alert("Thêm: " + JSON.stringify({ ...data, file: file?.name, avatarUrl }));
-    handleCloseAdd();
+    handleCloseSaveModal();
   };
   const onSubmitUpdate = (data: any) => {
     alert("Sửa: " + JSON.stringify({ ...data, file: file?.name, avatarUrl }));
-    handleCloseUpdate();
+    handleCloseSaveModal();
   };
   const onSubmitDelete = () => {
     alert("Xoá: " + selectItem?.name);
     handleCloseDelete();
   };
 
+  const handleOpenSaveModal = (item: AuthorRes | null) => {
+    setSelectItem(item);
+    if (item) {
+      setValue("name", item.name);
+      setValue("description", item.description);
+      setValue("status", item.status);
+      if (item.urlImage) {
+        setAvatarUrl(item.urlImage);
+        setImageUploadMode("url");
+      } else {
+        setAvatarUrl("");
+        setImageUploadMode("file");
+      }
+      setFile(null);
+      setTempImageUrl("");
+    } else {
+      reset();
+      setFile(null);
+      setAvatarUrl("");
+      setTempImageUrl("");
+      setImageUploadMode("file");
+    }
+    setOpenSaveModal(true);
+  };
+
+  const handleCloseSaveModal = () => {
+    reset();
+    setFile(null);
+    setAvatarUrl("");
+    setTempImageUrl("");
+    setOpenSaveModal(false);
+  };
+
   return (
     <>
-      <div className="flex-1 grid grid-cols-1 gap-4 auto-rows-max ">
+      <div className="flex-1 grid grid-cols-1 gap-4 auto-rows-max">
         {/* HEADER */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between card-custom">
           <div className="space-y-1">
@@ -235,7 +220,7 @@ export default function AuthorPage() {
             type="button"
             color="primary"
             className="w-full sm:w-auto cursor-pointer"
-            onClick={handleOpenAdd}
+            onClick={() => handleOpenSaveModal(null)}
           >
             <Plus size={18} />
             Thêm tác giả
@@ -273,12 +258,12 @@ export default function AuthorPage() {
 
           <AuthorTable
             authors={filterAuthor}
-            onEdit={handleOpenUpdate}
+            onEdit={handleOpenSaveModal}
             onDelete={handleOpenDelete}
           />
           <AuthorMobileCard
             authors={filterAuthor}
-            onEdit={handleOpenUpdate}
+            onEdit={handleOpenSaveModal}
             onDelete={handleOpenDelete}
           />
         </div>
@@ -296,17 +281,19 @@ export default function AuthorPage() {
         </div>
       </div>
 
-      {/* CREATE MODAL */}
+      {/* SAVE MODAL */}
       <Modal
-        isOpen={openAddModal}
-        onClose={handleCloseAdd}
-        title="Thêm tác giả mới"
-        onConfirm={handleSubmit(onSubmitAdd)}
-        confirmText="Thêm tác giả"
+        isOpen={onpenSaveModal}
+        onClose={handleCloseSaveModal}
+        title={selectItem ? "Cập nhật tác giả" : "Thêm tác giả"}
+        onConfirm={
+          selectItem ? handleSubmit(onSubmitUpdate) : handleSubmit(onSubmitAdd)
+        }
+        confirmText={selectItem ? "Cập nhật tác giả" : "Thêm tác giả"}
         cancelText="Hủy"
         size="lg"
       >
-        <form className="space-y-4">
+        <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
           <InputField
             label="Tên tác giả"
             name="name"
@@ -324,57 +311,6 @@ export default function AuthorPage() {
             rows={4}
             register={register}
             error={errors?.description}
-          />
-
-          <SingleImageUpload
-            file={file}
-            setFile={setFile}
-            avatarUrl={avatarUrl}
-            setAvatarUrl={setAvatarUrl}
-          />
-        </form>
-      </Modal>
-
-      {/* UPDATE MODAL */}
-      <Modal
-        isOpen={openUpdateModal}
-        onClose={handleCloseUpdate}
-        title="Cập nhật tác giả"
-        onConfirm={handleSubmit(onSubmitUpdate)}
-        confirmText="Lưu thay đổi"
-        cancelText="Hủy"
-        size="lg"
-      >
-        <form className="space-y-4">
-          <InputField
-            label="Tên tác giả"
-            name="name"
-            type="text"
-            placeholder="Nhập tên tác giả"
-            register={register}
-            rules={{ required: "Tên tác giả là bắt buộc" }}
-            error={errors?.name}
-          />
-          <InputField
-            label="Mô tả / Tiểu sử"
-            name="description"
-            type="text"
-            placeholder="Nhập mô tả..."
-            register={register}
-            error={errors?.description}
-          />
-          <Controller
-            name="status"
-            control={control}
-            render={({ field }) => (
-              <SelectBox
-                options={statusOptions.filter((o) => o.value !== null)}
-                value={field.value}
-                onChange={field.onChange}
-                searchable={false}
-                label="Trạng thái"
-              />
-            )}
           />
 
           <SingleImageUpload
