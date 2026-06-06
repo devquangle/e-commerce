@@ -1,12 +1,15 @@
 package com.dev.backend.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.dev.backend.dto.image.ImageResponse;
 import com.dev.backend.dto.image.ImageUploadForm;
@@ -30,9 +33,10 @@ public class UploadImageController {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<ResponseData<List<ImageResponse>>> upload(
-            @ModelAttribute ImageUploadForm form) {
-        List<ImageResponse> imageResponses = cloudinaryService.imageResponses(form.imageRequests());
-        return ResponseUtil.success("Tải ảnh thành công", imageResponses);
+    public ResponseEntity<ResponseData<Map<String, String>>> upload(
+            @RequestParam(value = "file", required = false) MultipartFile file,
+            @RequestParam(value = "url", required = false) String url) {
+        Map<String, String> data = cloudinaryService.map(file, url);
+        return ResponseUtil.success("Tải ảnh thành công", data);
     }
 }

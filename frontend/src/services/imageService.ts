@@ -26,12 +26,9 @@ const imageService = {
       if (img.file) {
         formData.append(`imageRequests[${index}].file`, img.file);
       } else {
-        // SỬA TẠI ĐÂY: Thêm '?? ""' để nếu url bị null/undefined, nó sẽ truyền vào chuỗi rỗng ""
-        // Hoặc có thể viết: formData.append(`imageRequests[${index}].url`, img.url || "");
         formData.append(`imageRequests[${index}].url`, img.url ?? "");
       }
       
-      // SỬA TẠI ĐÂY: Để an toàn, nếu cờ isThumbnail bị undefined thì mặc định là "false"
       formData.append(
         `imageRequests[${index}].isThumbnail`,
         String(img.isThumbnail ?? false),
@@ -54,6 +51,7 @@ const imageService = {
     }
     return res.data.data;
   },
+  
 };
 
 export default imageService;

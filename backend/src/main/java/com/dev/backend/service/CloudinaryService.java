@@ -1,6 +1,7 @@
 package com.dev.backend.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,5 +17,8 @@ public interface CloudinaryService {
         String uploadImageUrl(String imageUrl);
 
         List<ImageResponse> imageResponses(List<ImageRequest> imageRequests);
+
+        Map<String, String> map(MultipartFile file,String imageUrl);
+
 
 }

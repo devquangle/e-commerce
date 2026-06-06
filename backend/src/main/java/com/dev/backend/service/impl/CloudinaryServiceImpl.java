@@ -2,6 +2,7 @@ package com.dev.backend.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -47,10 +48,7 @@ public class CloudinaryServiceImpl implements CloudinaryService {
                     .upload(file.getBytes(), ObjectUtils.emptyMap())
                     .get("secure_url");
         } catch (Exception e) {
-            // Log lỗi ra console để dev dễ theo dõi bẫy lỗi
             System.err.println("Lỗi khi upload MultipartFile lên Cloudinary: " + e.getMessage());
-            // Ném ra RuntimeException để Spring Boot có thể handle hoặc rollback
-            // transaction nếu cần
             throw new RuntimeException("Upload ảnh thất bại: " + e.getMessage(), e);
         }
     }
@@ -81,27 +79,39 @@ public class CloudinaryServiceImpl implements CloudinaryService {
                     .upload(imageUrl.strip(), ObjectUtils.emptyMap())
                     .get("secure_url");
         } catch (Exception e) {
-            System.err.println("Lỗi khi upload từ URL: " + e.getMessage());
             throw new RuntimeException("Upload ảnh từ URL thất bại: " + e.getMessage(), e);
         }
     }
 
     @Override
+    public Map<String, String> map(MultipartFile file, String imageUrl) {
+        String urlImage;
+        if (file != null && !file.isEmpty()) {
+            urlImage = uploadImage(file);
+        } else if (imageUrl != null && !imageUrl.trim().isEmpty()) {
+            urlImage = uploadImageUrl(imageUrl.trim());
+        } else {
+            urlImage = "https://ui-avatars.com/api/?name=Kh%C3%A1c&background=random&color=fff&size=128";
+        }
+
+        return Map.of("urlImage", urlImage);
+    }
+
+    @Override
     public List<ImageResponse> imageResponses(List<ImageRequest> imageRequests) {
         List<ImageResponse> responses = new ArrayList<>();
-        
+
         if (imageRequests == null || imageRequests.isEmpty()) {
             return responses;
         }
 
         for (ImageRequest req : imageRequests) {
-            String finalUrl = req.url(); 
+            String finalUrl = req.url();
             if (req.file() != null && !req.file().isEmpty()) {
                 finalUrl = this.uploadImage(req.file());
-            } 
-            else if (finalUrl != null && !finalUrl.strip().isEmpty()) {
+            } else if (finalUrl != null && !finalUrl.strip().isEmpty()) {
                 String trimmedUrl = finalUrl.strip();
-                
+
                 if (!trimmedUrl.contains("res.cloudinary.com/" + cloudName)) {
                     finalUrl = this.uploadImageUrl(trimmedUrl);
                 }
