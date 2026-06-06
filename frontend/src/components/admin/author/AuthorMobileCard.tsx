@@ -1,46 +1,87 @@
-import { BookOpen } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import AuthorStatusBadge from "./AuthorStatusBadge";
 import AuthorActionButtons from "./AuthorActionButtons";
+import { useState } from "react";
+import type { AuthorRes } from "@/types/author";
 
 type Props = {
-  authors: any[];
-  onEdit: (author: any) => void;
-  onDelete: (author: any) => void;
+  authors: AuthorRes[];
+  onEdit: (author: AuthorRes) => void;
+  onDelete: (author: AuthorRes) => void;
 };
 
 const AuthorMobileCard = ({ authors, onEdit, onDelete }: Props) => {
+  const [expandedId, setExpandedId] = useState<number | null>(null);
+
+  const toggle = (id: number) => {
+    setExpandedId((prev) => (prev === id ? null : id));
+  };
   return (
     <div className="space-y-4 md:hidden">
       {authors.map((author) => (
         <div key={author.id} className="space-y-3 card-custom">
           {/* TITLE */}
-          <div className="flex items-start justify-between">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <img
-                src={author.avatarUrl}
+                src={author.urlImage || "/default-avatar.png"}
                 alt={author.name}
-                className="w-10 h-10 rounded-full object-cover border border-slate-200"
+                className="w-10 h-10 rounded-full object-cover border border-slate-200 shadow-sm"
               />
-              <div className="text-base font-bold text-slate-800">{author.name}</div>
+
+              <div className="flex flex-col">
+                {author.urlBio ? (
+                  <a
+                    href={author.urlBio}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex items-center gap-1 font-semibold text-slate-900 hover:text-indigo-600 transition-colors"
+                  >
+                    <span>{author.name}</span>
+
+                    <ExternalLink
+                      size={14}
+                      className="text-slate-400 group-hover:text-indigo-500 transition-colors"
+                    />
+                  </a>
+                ) : (
+                  <span className="font-semibold text-slate-900">
+                    {author.name}
+                  </span>
+                )}
+              </div>
             </div>
             <AuthorStatusBadge status={author.status} />
           </div>
 
-          <div className="text-sm text-slate-500 line-clamp-2">
-            {author.description}
-          </div>
+          <div className="py-4 px-4 text-slate-500 text-xs max-w-[260px]">
+            <div className="space-y-1">
+              <p
+                className={`text-xs text-slate-500 leading-relaxed wrap-break-word ${
+                  expandedId === author.id ? "" : "line-clamp-2"
+                }`}
+              >
+                {author.description}
+              </p>
 
-          {/* INFO */}
-          <div className="flex items-center justify-between border-t border-slate-100 pt-2 text-sm text-slate-600">
-            <span className="font-medium text-slate-500">Số lượng sách:</span>
-            <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-800">
-              <BookOpen size={13} className="text-slate-500" />
-              {author.bookCount || 0} cuốn
-            </span>
+              {author.description && author.description.length > 120 && (
+                <button
+                  onClick={() => toggle(author.id)}
+                  className="text-xs font-medium text-indigo-500 hover:text-indigo-600 hover:underline transition-colors mt-1 focus:outline-none"
+                >
+                  {expandedId === author.id ? "Thu gọn" : "Xem thêm"}
+                </button>
+              )}
+            </div>
           </div>
 
           {/* ACTION */}
-          <AuthorActionButtons item={author} onEdit={onEdit} onDelete={onDelete} mobile />
+          <AuthorActionButtons
+            item={author}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            mobile
+          />
         </div>
       ))}
     </div>

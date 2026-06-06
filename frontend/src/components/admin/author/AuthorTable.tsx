@@ -1,33 +1,39 @@
-import { BookOpen } from "lucide-react";
 import AuthorStatusBadge from "./AuthorStatusBadge";
 import AuthorActionButtons from "./AuthorActionButtons";
 import type { AuthorRes } from "@/types/author";
+import { ExternalLink } from "lucide-react";
+import { useState } from "react";
 
 type Props = {
   authors: AuthorRes[];
-  onEdit: (author: any) => void;
-  onDelete: (author: any) => void;
+  onEdit: (author: AuthorRes) => void;
+  onDelete: (author: AuthorRes) => void;
 };
 
 export default function AuthorTable({ authors, onEdit, onDelete }: Props) {
+  const [expandedId, setExpandedId] = useState<number | null>(null);
+
+  const toggle = (id: number) => {
+    setExpandedId((prev) => (prev === id ? null : id));
+  };
   return (
     <div className="hidden md:block overflow-x-auto">
-      <table className="w-full text-left text-sm border-collapse">
-        <thead>
-          <tr className="border-b border-slate-100 text-slate-500">
-            <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50 first:rounded-l-lg last:rounded-r-lg">
+      <table className="w-full text-left text-sm">
+        <thead className="bg-slate-50">
+          <tr className="text-slate-500">
+            <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider">
               Tác giả
             </th>
-            <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50">
+
+            <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider">
               Mô tả
             </th>
-            <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50">
-              Số sách
-            </th>
-            <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50">
+
+            <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider">
               Trạng thái
             </th>
-            <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50 text-right">
+
+            <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider text-right">
               Thao tác
             </th>
           </tr>
@@ -35,33 +41,77 @@ export default function AuthorTable({ authors, onEdit, onDelete }: Props) {
 
         <tbody className="divide-y divide-slate-100">
           {authors.map((author) => (
-            <tr key={author.id} className="hover:bg-slate-50/50 transition-colors">
+            <tr
+              key={author?.id}
+              className="hover:bg-slate-50/60 transition-colors"
+            >
+              {/* AUTHOR */}
               <td className="py-4 px-4">
                 <div className="flex items-center gap-3">
                   <img
-                    src={author?.urlImage}
-                    alt={author?.name}
-                    className="w-10 h-10 rounded-full object-cover border border-slate-200"
+                    src={author.urlImage || "/default-avatar.png"}
+                    alt={author.name}
+                    className="w-10 h-10 rounded-full object-cover border border-slate-200 shadow-sm"
                   />
-                  <span className="font-semibold text-slate-900">{author?.name}</span>
+
+                  <div className="flex flex-col">
+                    {author.urlBio ? (
+                      <a
+                        href={author.urlBio}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group flex items-center gap-1 font-semibold text-slate-900 hover:text-indigo-600 transition-colors"
+                      >
+                        <span>{author.name}</span>
+
+                        <ExternalLink
+                          size={14}
+                          className="text-slate-400 group-hover:text-indigo-500 transition-colors"
+                        />
+                      </a>
+                    ) : (
+                      <span className="font-semibold text-slate-900">
+                        {author.name}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </td>
-              <td className="py-4 px-4 text-slate-500 text-xs max-w-[200px] truncate">
-                {author.description}
+
+              {/* DESCRIPTION */}
+              <td className="py-4 px-4 text-slate-500 text-xs max-w-[260px]">
+                <div className="space-y-1">
+                  <p
+                    className={`text-xs text-slate-500 leading-relaxed wrap-break-word ${
+                      expandedId === author.id ? "" : "line-clamp-2"
+                    }`}
+                  >
+                    {author.description}
+                  </p>
+
+                  {author.description && author.description.length > 120 && (
+                    <button
+                      onClick={() => toggle(author.id)}
+                      className="text-xs font-medium text-indigo-500 hover:text-indigo-600 hover:underline transition-colors mt-1 focus:outline-none"
+                    >
+                      {expandedId === author.id ? "Thu gọn" : "Xem thêm"}
+                    </button>
+                  )}
+                </div>
               </td>
-              <td className="py-4 px-4 text-slate-600">
-                <span className="inline-flex items-center gap-1 bg-slate-100 text-slate-800 text-xs px-2.5 py-1 rounded-md font-semibold">
-                  <BookOpen size={13} className="text-slate-500" />
-                
-                </span>
-              </td>
+
+              {/* STATUS */}
               <td className="py-4 px-4">
-                <AuthorStatusBadge status={author.status} />
+                <AuthorStatusBadge status={author?.status} />
               </td>
+
+              {/* ACTION */}
               <td className="py-4 px-4 text-right">
-                <div className="inline-flex gap-2">
-                  <AuthorActionButtons item={author} onEdit={onEdit} onDelete={onDelete} />
-                </div>
+                <AuthorActionButtons
+                  item={author}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                />
               </td>
             </tr>
           ))}
