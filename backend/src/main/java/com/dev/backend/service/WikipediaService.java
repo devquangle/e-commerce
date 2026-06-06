@@ -12,7 +12,7 @@ import org.springframework.web.client.RestTemplate;
 import com.dev.backend.dto.wikipedia.WikipediaApiResponse;
 import com.dev.backend.dto.wikipedia.WikipediaResponse;
 import com.dev.backend.exception.NotFoundException;
-import com.dev.backend.util.Capitalize;
+import com.dev.backend.util.TextUtils;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -63,7 +63,7 @@ public class WikipediaService {
 
       
 
-        String text = Capitalize.capitalizeFully(name);
+        String text = TextUtils.capitalizeFully(name);
         String title = text.trim().replace(" ", "_");
 
         WikipediaResponse viResult = callWiki(URL_VI, title);

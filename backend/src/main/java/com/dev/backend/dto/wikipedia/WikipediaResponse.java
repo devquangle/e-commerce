@@ -12,7 +12,6 @@ import lombok.Setter;
 public class WikipediaResponse {
 
     private String name;
-
     private String wikibaseItem;
     private String urlImage;
     private String urlBio;

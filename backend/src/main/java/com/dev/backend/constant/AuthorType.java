@@ -43,7 +43,7 @@ public enum AuthorType {
     JACK_LONDON("Jack London", 23);
 
     private final String displayName;
-    private final int id;
+    private final Integer id;
 
     AuthorType(String displayName, Integer id) {
         this.displayName = displayName;

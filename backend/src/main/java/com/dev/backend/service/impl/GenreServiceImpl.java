@@ -9,7 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.dev.backend.constant.GenreStatus;
+import com.dev.backend.constant.BaseStatus;
 import com.dev.backend.dto.genre.GenreRequest;
 import com.dev.backend.dto.genre.GenreResponse;
 import com.dev.backend.entity.Genre;
@@ -63,17 +63,17 @@ public class GenreServiceImpl implements GenreService {
 
                 Genre novel = Genre.builder()
                                 .name("Tiểu thuyết")
-                                .status(GenreStatus.ACTIVE)
+                                .status(BaseStatus.ACTIVE)
                                 .build();
 
                 Genre manga = Genre.builder()
                                 .name("Manga")
-                                .status(GenreStatus.ACTIVE)
+                                .status(BaseStatus.ACTIVE)
                                 .build();
 
                 Genre economy = Genre.builder()
                                 .name("Kinh tế")
-                                .status(GenreStatus.ACTIVE)
+                                .status(BaseStatus.ACTIVE)
                                 .build();
 
                 genreRepository.saveAll(List.of(
@@ -180,7 +180,7 @@ public class GenreServiceImpl implements GenreService {
                 Genre genre = findById(id);
                 boolean hasProducts = productGenreService.existsByGenreId(id);
                 if (hasProducts) {
-                        genre.setStatus(GenreStatus.DELETED);
+                        genre.setStatus(BaseStatus.DELETED);
                         save(genre);
                         return;
                 }

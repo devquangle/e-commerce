@@ -1,6 +1,6 @@
 package com.dev.backend.constant;
 
-public enum GenreStatus {
+public enum BaseStatus {
     ACTIVE,
     INACTIVE,
     DELETED

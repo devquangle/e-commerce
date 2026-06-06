@@ -1,6 +1,6 @@
 package com.dev.backend.dto.genre;
 
-import com.dev.backend.constant.GenreStatus;
+import com.dev.backend.constant.BaseStatus;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,5 +15,5 @@ public class GenreResponse {
     private Integer id;
     private String name;
     private int totalProduct;
-    private GenreStatus status;
+    private BaseStatus status;
 }

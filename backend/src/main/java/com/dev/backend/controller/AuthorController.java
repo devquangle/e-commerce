@@ -33,4 +33,11 @@ public class AuthorController {
 
         return ResponseUtil.success("Lấy danh sách tác giả thành công", authorResponses);
     }
+
+    @GetMapping("/authors/filter")
+    public ResponseEntity<ResponseData<List<AuthorResponse>>> filter() {
+
+        return ResponseUtil.success("Lấy danh sách tác giả thành công", null);
+    }
+
 }

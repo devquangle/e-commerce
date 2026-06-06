@@ -13,7 +13,7 @@ export interface AuthorRes {
 }
 export interface AuthorReq {
   name: string;
-  urlImage: string;
+  urlImage?: string;
   description?: string;
   bio?: string;
 }

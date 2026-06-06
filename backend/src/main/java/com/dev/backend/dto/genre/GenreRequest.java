@@ -1,7 +1,6 @@
 package com.dev.backend.dto.genre;
 
-import com.dev.backend.constant.GenreStatus;
-
+import com.dev.backend.constant.BaseStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,6 +12,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class GenreRequest {
     private String name;
-    private GenreStatus status = GenreStatus.ACTIVE;
+    private BaseStatus status = BaseStatus.ACTIVE;
     private String previewImageUrl;
 }

@@ -9,6 +9,7 @@ import com.dev.backend.constant.PermissionEnum;
 import com.dev.backend.constant.RoleName;
 import com.dev.backend.entity.Permission;
 import com.dev.backend.entity.Role;
+import com.dev.backend.service.AuthorService;
 import com.dev.backend.service.GenreService;
 import com.dev.backend.service.PermissionService;
 import com.dev.backend.service.RegisterService;
@@ -26,9 +27,11 @@ public class LoadData implements ApplicationRunner {
     private final RolePermissionService rolePermissionService;
 
     private final UserService userService;
-    private final  RegisterService registerService;
+    private final RegisterService registerService;
 
     private final GenreService genreService;
+
+    private final AuthorService authorService;
 
     @Override
     public void run(org.springframework.boot.ApplicationArguments args) throws Exception {
@@ -62,7 +65,7 @@ public class LoadData implements ApplicationRunner {
             }
         }
 
-        if (rolePermissionService.isEmpty()){
+        if (rolePermissionService.isEmpty()) {
             roleService.findAll().forEach(role -> {
                 switch (RoleName.valueOf(role.getName())) {
                     case SUPER_ADMIN, ADMIN -> {
@@ -99,7 +102,8 @@ public class LoadData implements ApplicationRunner {
                     case SUPPORT -> {
                         rolePermissionService.addPermission(role, permissionService.findByCode("ORDER_READ"));
                         rolePermissionService.addPermission(role, permissionService.findByCode("SUPPORT_TASK"));
-                        rolePermissionService.addPermission(role, permissionService.findByCode("CUSTOMER_RESET_PASSWORD"));
+                        rolePermissionService.addPermission(role,
+                                permissionService.findByCode("CUSTOMER_RESET_PASSWORD"));
                     }
                     case CUSTOMER -> {
 
@@ -108,14 +112,12 @@ public class LoadData implements ApplicationRunner {
             });
         }
 
-        if (userService.isEmpty()){
+        if (userService.isEmpty()) {
             registerService.setUp();
         }
 
         genreService.demoData();
-
-
-      
+        authorService.insertData();
 
     }
 

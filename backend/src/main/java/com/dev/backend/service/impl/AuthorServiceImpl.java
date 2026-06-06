@@ -1,0 +1,120 @@
+package com.dev.backend.service.impl;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import com.dev.backend.constant.BaseStatus;
+import com.dev.backend.dto.author.AuthorRequest;
+import com.dev.backend.dto.author.AuthorResponse;
+import com.dev.backend.entity.Author;
+import com.dev.backend.repository.AuthorRepository;
+import com.dev.backend.response.PageResponse;
+import com.dev.backend.service.AuthorService;
+import com.dev.backend.util.TextUtils;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Service
+@Slf4j
+@RequiredArgsConstructor
+public class AuthorServiceImpl implements AuthorService {
+
+    private final AuthorRepository authorRepository;
+
+    @Override
+    public Author add(AuthorRequest authorRequest) {
+        Author author = new Author();
+        author.setName(authorRequest.getName());
+        author.setSlug(TextUtils.toSlug(authorRequest.getName()));
+        author.setUrlBio(authorRequest.getUrlBio());
+        author.setUrlImage(authorRequest.getUrlImage());
+        author.setDescription(authorRequest.getExtract());
+        author.setStatus(authorRequest.getStatus());
+        return save(author);
+    }
+
+    @Override
+    public boolean existsByName(String name) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean existsBySlug(String slug) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public void insertData() {
+
+        List<Author> authors = List.of(
+
+                new Author(
+                        null,
+                        "Khác",
+                        TextUtils.toSlug("Khác"),
+                        null,
+                        null,
+                        null,
+                        "Tác giả không xác định hoặc nhóm khác",
+                        BaseStatus.ACTIVE),
+
+                new Author(
+                        null,
+                        "Nguyễn Nhật Ánh",
+                        TextUtils.toSlug("Nguyễn Nhật Ánh"),
+                        "Q7022893",
+                        "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Nguyen_Nhat_Anh_in_January_2019.png/330px-Nguyen_Nhat_Anh_in_January_2019.png",
+                        "https://vi.wikipedia.org/wiki/Nguy%E1%BB%85n_Nh%E1%BA%ADt_%C3%81nh",
+                        "Nguyễn Nhật Ánh là nhà văn Việt Nam nổi tiếng với các tác phẩm về tuổi thơ và thanh thiếu niên.",
+                        BaseStatus.ACTIVE),
+
+                new Author(
+                        null,
+                        "Nam Cao",
+                        TextUtils.toSlug("Nam Cao"),
+                        "Q11760",
+                        "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Portrait_of_Nam_Cao.jpg/330px-Portrait_of_Nam_Cao.jpg",
+                        "https://vi.wikipedia.org/wiki/Nam_Cao",
+                        "Nam Cao là một nhà văn, nhà báo và cũng là một chiến sĩ, liệt sĩ, Anh hùng Lực lượng vũ trang nhân dân Việt Nam. Ông là nhà văn hiện thực lớn trước Cách mạng Tháng Tám, một nhà báo kháng chiến sau khi Cách mạng thành công và là một trong những nhà văn người Việt Nam tiêu biểu nhất thế kỷ 20. Nam Cao có nhiều đóng góp quan trọng đối với việc hoàn thiện phong cách truyện ngắn và tiểu thuyết Việt Nam ở nửa đầu thế kỷ 20.",
+                        BaseStatus.ACTIVE),
+
+                new Author(
+                        null,
+                        "Tô Hoài",
+                        TextUtils.toSlug("Tô Hoài"),
+                        "Q13127",
+                        "https://upload.wikimedia.org/wikipedia/vi/thumb/7/73/Nhavan_t%C3%B4_ho%C3%A0i.jpg/330px-Nhavan_t%C3%B4_ho%C3%A0i.jpg",
+                        "https://vi.wikipedia.org/wiki/T%C3%B4_Ho%C3%A0i",
+                        "Tô Hoài là một nhà văn Việt Nam được tặng Giải thưởng Hồ Chí Minh về Văn học Nghệ thuật năm 1996. Ông là Tổng Thư ký đầu tiên của Hội Nhà văn Việt Nam (1957-1963). Dế Mèn phiêu lưu ký là tác phẩm được nhiều người biết đến nhất của ông dành cho thiếu nhi.",
+                        BaseStatus.ACTIVE)
+
+        );
+        if (authorRepository.count() == 0) {
+            authorRepository.saveAll(authors);
+        }
+
+    }
+
+    @Override
+    public PageResponse<AuthorResponse> pageGenre(int page, int size, String keyword) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Author save(Author author) {
+        return authorRepository.save(author);
+    }
+
+    @Override
+    public void validate() {
+        // TODO Auto-generated method stub
+
+    }
+
+}
