@@ -6,6 +6,7 @@ import com.dev.backend.entity.Author;
 import com.dev.backend.response.PageResponse;
 
 public interface AuthorService {
+
     void validate(AuthorRequest authorRequest);
 
     void insertData();
@@ -21,6 +22,8 @@ public interface AuthorService {
     AuthorResponse add(AuthorRequest authorRequest);
 
     AuthorResponse update(Integer id, AuthorRequest authorRequest);
+
+    void delete(Integer id);
 
     PageResponse<AuthorResponse> pages(int page, int size, String keyword, String status);
 

@@ -70,6 +70,13 @@ public class AuthorServiceImpl implements AuthorService {
     }
 
     @Override
+    public void delete(Integer id) {
+        Author author = findById(id);
+        author.setStatus(BaseStatus.DELETED);
+        save(author);
+    }
+
+    @Override
     public PageResponse<AuthorResponse> pages(int page, int size, String keyword, String status) {
         Pageable pageable = PageRequest.of(
                 page,

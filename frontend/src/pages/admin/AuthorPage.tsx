@@ -182,6 +182,7 @@ export default function AuthorPage() {
     setOpenDeleteModal(true);
   };
   const handleCloseDelete = () => {
+    setSelectItem(null);
     setOpenDeleteModal(false);
   };
   const createMutation = useCreateAuthor();
