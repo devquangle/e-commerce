@@ -15,3 +15,7 @@ export interface ImageProductResponse {
   url: string;
   isThumbnail: boolean;
 }
+
+export interface UrlImageResponse {
+  urlImage: string;
+}

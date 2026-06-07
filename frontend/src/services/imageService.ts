@@ -5,6 +5,7 @@ import type {
   ImageGenreRequest,
   ImageProductRequest,
   ImageProductResponse,
+  UrlImageResponse,
 } from "@/types/image";
 
 const imageService = {
@@ -21,14 +22,14 @@ const imageService = {
 
   async uploadImage(items: ImageProductRequest[]) {
     const formData = new FormData();
-    
+
     items.forEach((img, index) => {
       if (img.file) {
         formData.append(`imageRequests[${index}].file`, img.file);
       } else {
         formData.append(`imageRequests[${index}].url`, img.url ?? "");
       }
-      
+
       formData.append(
         `imageRequests[${index}].isThumbnail`,
         String(img.isThumbnail ?? false),
@@ -40,10 +41,9 @@ const imageService = {
       formData,
       {
         headers: {
-          // Nên thêm config này để Axios hiểu đúng định dạng gửi đi của Form có file
           "Content-Type": "multipart/form-data",
         },
-      }
+      },
     );
 
     if (!res.data.success || !res.data.data) {
@@ -51,7 +51,34 @@ const imageService = {
     }
     return res.data.data;
   },
-  
+
+  async upload(req: { url: string }) {
+    const res = await apiAuth.post<ApiResponse<UrlImageResponse>>(
+      "/admin/upload",
+      null,
+      { params: { url: req.url } },
+    );
+
+    if (!res.data.success || !res.data.data) {
+      throw new Error(res.data.message || "Failed to upload image");
+    }
+    return res.data.data;
+  },
+  async uploadFile(file: File) {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await apiAuth.post<ApiResponse<UrlImageResponse>>(
+      "/admin/upload",
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } },
+    );
+
+    if (!res.data.success || !res.data.data) {
+      throw new Error(res.data.message || "Failed to upload file");
+    }
+    return res.data.data;
+  },
 };
 
 export default imageService;

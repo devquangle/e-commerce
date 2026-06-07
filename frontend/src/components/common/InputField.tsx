@@ -7,14 +7,16 @@ import type {
 } from "react-hook-form";
 import { useState } from "react";
 
-interface InputFieldProps<T extends FieldValues>
-  extends React.InputHTMLAttributes<HTMLInputElement> {
+interface InputFieldProps<
+  T extends FieldValues,
+> extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   name: Path<T>;
   register: UseFormRegister<T>;
   rules?: RegisterOptions<T, Path<T>>;
   error?: FieldError;
   required?: boolean;
+  autoComplete?: string;
 }
 
 export default function InputField<T extends FieldValues>({
@@ -25,6 +27,7 @@ export default function InputField<T extends FieldValues>({
   register,
   rules,
   error,
+  autoComplete,
   required = false,
   disabled = false,
   className = "",
@@ -34,11 +37,7 @@ export default function InputField<T extends FieldValues>({
 
   const isPassword = type === "password";
 
-  const inputType = isPassword
-    ? showPassword
-      ? "text"
-      : "password"
-    : type;
+  const inputType = isPassword ? (showPassword ? "text" : "password") : type;
 
   const hasRequiredRule = rules?.required !== undefined;
 
@@ -65,11 +64,7 @@ export default function InputField<T extends FieldValues>({
               ? "border-red-500 bg-red-50"
               : "border-slate-300 bg-white focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-100"
           }
-          ${
-            disabled
-              ? "bg-slate-100 opacity-70"
-              : ""
-          }
+          ${disabled ? "bg-slate-100 opacity-70" : ""}
         `}
       >
         <input
@@ -77,6 +72,7 @@ export default function InputField<T extends FieldValues>({
           type={inputType}
           disabled={disabled}
           placeholder={placeholder}
+          autoComplete={autoComplete || (isPassword ? "current-password" : "on")}
           {...register(name, rules)}
           {...rest}
           className={`
@@ -91,9 +87,7 @@ export default function InputField<T extends FieldValues>({
         {isPassword && (
           <button
             type="button"
-            onClick={() =>
-              setShowPassword((prev) => !prev)
-            }
+            onClick={() => setShowPassword((prev) => !prev)}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
           >
             {showPassword ? "🙈" : "👁"}
@@ -101,11 +95,7 @@ export default function InputField<T extends FieldValues>({
         )}
       </div>
 
-      {error && (
-        <p className="text-sm text-red-500">
-          {error.message}
-        </p>
-      )}
+      {error && <p className="text-sm text-red-500">{error.message}</p>}
     </div>
   );
 }

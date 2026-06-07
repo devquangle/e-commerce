@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import Modal from "@/components/common/Modal";
-import { useForm, useWatch } from "react-hook-form";
+import { set, useForm, useWatch } from "react-hook-form";
 import InputField from "@/components/common/InputField";
 import Pagination from "@/components/common/Pagination";
 import { useSearchParams } from "react-router-dom";
@@ -17,7 +17,6 @@ import {
   showErrorToast,
   showInfoToast,
   showSuccessToast,
-  showWarningToast,
 } from "@/utils/toastUtil";
 import SingleImageUpload from "@/components/common/SingleImageUpload";
 import type { AuthorReq, AuthorRes } from "@/types/author";
@@ -26,8 +25,10 @@ import {
   useCreateAuthor,
   useFilterAuthor,
   useUpdateAuthor,
+  useDeleteAuthor,
 } from "@/hooks/useAuthor";
 import { mapServerErrors } from "@/utils/mapServerErrors";
+import imageService from "@/services/imageService";
 
 const initialFilterOptions = { keyword: "", status: "", page: 1, size: 10 };
 
@@ -58,15 +59,11 @@ export default function AuthorPage() {
   }, [debouncedKeyword, status, page, size, setSearchParams]);
 
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
-  const [onpenSaveModal, setOpenSaveModal] = useState(false);
+  const [openSaveModal, setOpenSaveModal] = useState(false);
 
   const [selectItem, setSelectItem] = useState<AuthorRes | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string>("");
-  const [imageUploadMode, setImageUploadMode] = useState<"file" | "url">(
-    "file",
-  );
-  const [tempImageUrl, setTempImageUrl] = useState<string>("");
 
   const {
     register,
@@ -74,6 +71,7 @@ export default function AuthorPage() {
     reset,
     setValue,
     setError,
+    getValues,
     control,
     formState: { errors },
   } = useForm<AuthorReq>({
@@ -81,6 +79,7 @@ export default function AuthorPage() {
       name: "",
       extract: "",
       urlBio: "",
+      wikibaseItem: "",
       urlImage: "",
       status: BaseStatus.ACTIVE,
     },
@@ -97,11 +96,7 @@ export default function AuthorPage() {
     [],
   );
 
-  const {
-    data: authors,
-    isPending: isPendingAuthor,
-    isFetching: isAuthorsFetching,
-  } = useFilterAuthor({
+  const { data: authors } = useFilterAuthor({
     keyword: debouncedKeyword,
     status: status || undefined,
     page,
@@ -115,7 +110,7 @@ export default function AuthorPage() {
     setKeyword(val);
     setPage(1);
   };
-  const handleStatusChange = (val: any) => {
+  const handleStatusChange = (val: BaseStatus | null) => {
     setStatus(val);
     setPage(1);
   };
@@ -126,59 +121,62 @@ export default function AuthorPage() {
     setSize(initialFilterOptions.size);
   };
 
-  const handleAddImageUrl = () => {
-    if (!tempImageUrl.trim()) return;
-    try {
-      const url = new URL(tempImageUrl.trim());
-      if (!["http:", "https:"].includes(url.protocol)) throw new Error();
-    } catch {
-      showWarningToast("URL ảnh không hợp lệ.");
-      return;
-    }
-    setAvatarUrl(tempImageUrl.trim());
-    setFile(null);
-    setTempImageUrl("");
-  };
-
   const inputName = useWatch({ control, name: "name" });
   const debouncedName = useDebounce(inputName, 2000);
-  const { data: wikiData, isFetching: isWikiFetching } =
-    useWikipediaAuthor(debouncedName);
+  const { data: wikiData, isFetching: isWikiFetching } = useWikipediaAuthor(
+    debouncedName,
+    openSaveModal,
+  );
 
   useEffect(() => {
-    if (selectItem) return;
-    const wikiToastId = "wiki-status";
+    if (!openSaveModal || isWikiFetching) return;
 
-    if (isWikiFetching && debouncedName) {
-      showInfoToast("Đang tìm kiếm thông tin trên Wikipedia...", {
-        id: wikiToastId,
-      });
+    if (wikiData) {
+      setTimeout(() => {
+        const currentValues = getValues();
+        let hasFieldBeenUpdated = false;
+
+        if (!currentValues.urlBio?.trim() && wikiData.urlBio) {
+          setValue("urlBio", wikiData.urlBio);
+          hasFieldBeenUpdated = true;
+        }
+        if (!currentValues.wikibaseItem?.trim() && wikiData.wikibaseItem) {
+          setValue("wikibaseItem", wikiData.wikibaseItem);
+          hasFieldBeenUpdated = true;
+        }
+
+        if (!currentValues.extract?.trim() && wikiData.extract) {
+          setValue("extract", wikiData.extract);
+          hasFieldBeenUpdated = true;
+        }
+
+        if (!currentValues.urlImage?.trim() && wikiData.urlImage) {
+          setValue("urlImage", wikiData.urlImage);
+          setAvatarUrl(wikiData.urlImage);
+          setFile(null);
+          hasFieldBeenUpdated = true;
+        }
+
+        if (hasFieldBeenUpdated) {
+          showSuccessToast(
+            "Đã tự động điền các trường thông tin còn thiếu từ Wikipedia!",
+          );
+        }
+      }, 0);
       return;
     }
 
-    if (!isWikiFetching) {
-      if (wikiData) {
-        setValue("urlBio", wikiData.urlBio);
-        setValue("extract", wikiData.extract);
-
-        if (wikiData.urlImage) {
-          setValue("urlImage", wikiData.urlImage);
-          setAvatarUrl(wikiData.urlImage);
-          setImageUploadMode("url");
-          setFile(null);
-        }
-
-        dismissToast(wikiToastId);
-        showSuccessToast("Thông tin đã được điền");
-      } else if (debouncedName?.trim()) {
-        dismissToast(wikiToastId);
-        showErrorToast("Lỗi không tìm thấy thông tin tác giả " + debouncedName);
-      } else {
-        dismissToast(wikiToastId);
-      }
+    if (debouncedName?.trim() && !wikiData) {
+      showErrorToast(`Không tìm thấy thông tin cho tác giả "${debouncedName}"`);
     }
-  }, [wikiData, isWikiFetching, debouncedName, setValue, selectItem]);
-
+  }, [
+    wikiData,
+    isWikiFetching,
+    debouncedName,
+    openSaveModal,
+    setValue,
+    getValues,
+  ]);
   const handleOpenDelete = (item: AuthorRes) => {
     setSelectItem(item);
     setOpenDeleteModal(true);
@@ -188,13 +186,25 @@ export default function AuthorPage() {
   };
   const createMutation = useCreateAuthor();
   const updateMutation = useUpdateAuthor();
+  const deleteMutation = useDeleteAuthor();
 
   const onSubmitAdd = async (req: AuthorReq) => {
     if (createMutation.isPending) return;
     try {
+      let uploadedImageUrl = "";
+
+      if (file) {
+        const uploadRes = await imageService.uploadFile(file);
+        uploadedImageUrl = uploadRes.urlImage;
+      } else if (avatarUrl) {
+        // Thay vì check req.urlImage (có thể rỗng), check trực tiếp avatarUrl hiển thị trên giao diện
+        const uploadRes = await imageService.upload({ url: avatarUrl });
+        uploadedImageUrl = uploadRes.urlImage;
+      }
+
       const payload: AuthorReq = {
         ...req,
-        urlImage: avatarUrl || req.urlImage,
+        urlImage: uploadedImageUrl, // Được bảo đảm luôn lấy link từ Cloudinary hoặc ảnh mặc định từ backend map trả về
       };
       await createMutation.mutateAsync(payload);
       handleCloseSaveModal();
@@ -202,23 +212,45 @@ export default function AuthorPage() {
       mapServerErrors(error, setError, showErrorToast);
     }
   };
+
   const onSubmitUpdate = async (req: AuthorReq) => {
     if (updateMutation.isPending) return;
     try {
-      if (selectItem) {
-        const payload: AuthorReq = {
-        ...req,
-        urlImage: avatarUrl || req.urlImage,
-      };
-        await updateMutation.mutateAsync({ id: selectItem?.id ?? 0,req: payload });
-        handleCloseSaveModal();
+      if (!selectItem) return;
+
+      let uploadedImageUrl = selectItem.urlImage || "";
+
+      if (file) {
+        const uploadRes = await imageService.uploadFile(file);
+        uploadedImageUrl = uploadRes.urlImage;
       }
+      else if (avatarUrl && avatarUrl !== selectItem.urlImage) {
+        const uploadRes = await imageService.upload({ url: avatarUrl });
+        uploadedImageUrl = uploadRes.urlImage;
+      }
+      else if (!avatarUrl && selectItem.urlImage) {
+        uploadedImageUrl = "";
+      }
+
+      const payload: AuthorReq = {
+        ...req,
+        urlImage: uploadedImageUrl,
+      };
+
+      await updateMutation.mutateAsync({
+        id: selectItem.id ?? 0,
+        req: payload,
+      });
+
+      handleCloseSaveModal();
     } catch (error: unknown) {
       mapServerErrors(error, setError, showErrorToast);
     }
   };
-  const onSubmitDelete = () => {
-    alert("Xoá: " + selectItem?.name);
+
+  const onSubmitDelete = async () => {
+    if (!selectItem?.id) return;
+    await deleteMutation.mutateAsync(selectItem.id);
     handleCloseDelete();
   };
 
@@ -228,33 +260,41 @@ export default function AuthorPage() {
       setValue("name", item.name);
       setValue("extract", item.description);
       setValue("status", item.status);
-      setValue("urlBio", item.urlBio || ""); // ✨ Bổ sung đổ lại urlBio cũ vào form
+      setValue("urlBio", item.urlBio || "");
+      setValue("wikibaseItem",item.wikibaseItem)
       setValue("urlImage", item.urlImage || "");
       if (item.urlImage) {
         setAvatarUrl(item.urlImage);
-        setImageUploadMode("url");
       } else {
         setAvatarUrl("");
-        setImageUploadMode("file");
       }
-      setFile(null);
-      setTempImageUrl("");
     } else {
-      reset();
-      setFile(null);
+      reset({
+        name: "",
+        extract: "",
+        urlBio: "",
+        urlImage: "",
+        wikibaseItem: "",
+        status: BaseStatus.ACTIVE,
+      });
       setAvatarUrl("");
-      setTempImageUrl("");
-      setImageUploadMode("file");
     }
+    setFile(null);
     setOpenSaveModal(true);
   };
 
   const handleCloseSaveModal = () => {
-    reset();
+    reset({
+      name: "",
+      extract: "",
+      urlBio: "",
+      urlImage: "",
+      wikibaseItem: "",
+      status: BaseStatus.ACTIVE,
+    });
     setSelectItem(null);
     setFile(null);
     setAvatarUrl("");
-    setTempImageUrl("");
     setOpenSaveModal(false);
   };
 
@@ -347,7 +387,7 @@ export default function AuthorPage() {
 
       {/* SAVE MODAL */}
       <Modal
-        isOpen={onpenSaveModal}
+        isOpen={openSaveModal}
         onClose={handleCloseSaveModal}
         title={selectItem ? "Cập nhật tác giả" : "Thêm tác giả"}
         onConfirm={
@@ -376,6 +416,23 @@ export default function AuthorPage() {
             register={register}
             error={errors?.extract}
           />
+
+          <div className="space-y-1">
+            <label className="block text-sm font-medium text-slate-700">
+              Trạng thái
+            </label>
+            <SelectBox<BaseStatus>
+              options={(Object.values(BaseStatus) as BaseStatus[]).map(
+                (value) => ({
+                  label: getBaseStatusLabel(value),
+                  value,
+                }),
+              )}
+              value={useWatch({ control, name: "status" })}
+              onChange={(val) => setValue("status", val)}
+              searchable={false}
+            />
+          </div>
 
           <SingleImageUpload
             file={file}

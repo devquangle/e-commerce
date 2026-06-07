@@ -46,6 +46,16 @@ const AuthorService = {
     console.log(res);
     return res.data.data;
   },
+
+  async delete(id: number) {
+    const res = await apiAuth.delete<ApiResponse<null>>(
+      `/admin/authors/${id}`
+    );
+    if (!res.data.success) {
+      throw new Error(res.data.message || "Delete author failed");
+    }
+    return res.data;
+  },
 };
 
 export default AuthorService;
