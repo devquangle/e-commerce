@@ -3,20 +3,15 @@ package com.dev.backend.dto.publisher;
 import com.dev.backend.constant.BaseStatus;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-@NoArgsConstructor
 @AllArgsConstructor
-@Getter
+@NoArgsConstructor
 @Setter
-@Builder
-public class PublisherResponse {
-    private Integer id;
+@Getter
+public class PublisherRequest {
     private String name;
-    private String slug;
     private String street;
     private BaseStatus status;
 }

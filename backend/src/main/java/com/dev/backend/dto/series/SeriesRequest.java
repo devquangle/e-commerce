@@ -1,22 +1,17 @@
-package com.dev.backend.dto.publisher;
+package com.dev.backend.dto.series;
 
 import com.dev.backend.constant.BaseStatus;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Getter;
 import lombok.Setter;
-
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
-@Builder
-public class PublisherResponse {
-    private Integer id;
+public class SeriesRequest {
     private String name;
-    private String slug;
-    private String street;
+    private String description;
     private BaseStatus status;
 }

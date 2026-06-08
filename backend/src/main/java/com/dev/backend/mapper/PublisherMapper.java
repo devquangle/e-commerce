@@ -1,18 +1,22 @@
 package com.dev.backend.mapper;
 
-import com.dev.backend.constant.PublisherType;
-import com.dev.backend.dto.publisher.PublisherResponse;
+import org.springframework.stereotype.Component;
 
+import com.dev.backend.dto.publisher.PublisherResponse;
+import com.dev.backend.entity.Publisher;
+@Component
 public class PublisherMapper {
-    public static PublisherResponse toDTO(PublisherType publisherType) {
-        if (publisherType == null) {
+    public  PublisherResponse toDTO(Publisher publisher) {
+        if (publisher == null) {
             return null;
         }
-        return new PublisherResponse(
-                publisherType.getId(),
-                publisherType.name(),
-                publisherType.getDisplayName()
-        );
+        return PublisherResponse.builder()
+                .id(publisher.getId())
+                .slug(publisher.getSlug())
+                .status(publisher.getStatus())
+                .street(publisher.getStreet())
+                .build();
+
     }
 
 }

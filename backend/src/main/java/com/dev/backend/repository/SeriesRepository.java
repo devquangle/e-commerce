@@ -1,0 +1,32 @@
+package com.dev.backend.repository;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import com.dev.backend.constant.BaseStatus;
+import com.dev.backend.entity.Author;
+import com.dev.backend.entity.Series;
+
+@Repository
+public interface SeriesRepository extends JpaRepository<Series, Integer> {
+    @Query("""
+            SELECT a
+            FROM Series a
+            WHERE LOWER(a.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            AND (:status IS NULL OR a.status = :status)
+            """)
+    Page<Series> findByNameContainingIgnoreCase(
+            @Param("keyword") String keyword,
+            @Param("status") BaseStatus status,
+            Pageable pageable);
+
+    @Query("SELECT COUNT(a) > 0 FROM Series a WHERE a.name = :name")
+    boolean existsByName(@Param("name") String name);
+
+    @Query("SELECT COUNT(a) > 0 FROM Series a WHERE a.slug = :slug")
+    boolean existsBySlug(@Param("slug") String slug);
+}

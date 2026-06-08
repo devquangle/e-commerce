@@ -12,9 +12,11 @@ import com.dev.backend.entity.Role;
 import com.dev.backend.service.AuthorService;
 import com.dev.backend.service.GenreService;
 import com.dev.backend.service.PermissionService;
+import com.dev.backend.service.PublisherService;
 import com.dev.backend.service.RegisterService;
 import com.dev.backend.service.RolePermissionService;
 import com.dev.backend.service.RoleService;
+import com.dev.backend.service.SeriesService;
 import com.dev.backend.service.UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -32,6 +34,9 @@ public class LoadData implements ApplicationRunner {
     private final GenreService genreService;
 
     private final AuthorService authorService;
+    private final PublisherService publisherService;
+
+    private final SeriesService seriesService; 
 
     @Override
     public void run(org.springframework.boot.ApplicationArguments args) throws Exception {
@@ -118,6 +123,9 @@ public class LoadData implements ApplicationRunner {
 
         genreService.demoData();
         authorService.insertData();
+        publisherService.insertData();
+
+        seriesService.insertData();
 
     }
 

@@ -1,0 +1,28 @@
+package com.dev.backend.service;
+
+import com.dev.backend.dto.publisher.PublisherRequest;
+import com.dev.backend.dto.publisher.PublisherResponse;
+import com.dev.backend.entity.Publisher;
+import com.dev.backend.response.PageResponse;
+
+public interface PublisherService {
+    void validate(PublisherRequest publisherRequest);
+
+    void insertData();
+
+    boolean existsByName(String name);
+
+    boolean existsBySlug(String slug);
+
+    Publisher save(Publisher publisher);
+
+    Publisher findById(Integer id);
+
+    PublisherResponse add(PublisherRequest publisherRequest);
+
+    PublisherResponse update(Integer id, PublisherRequest publisherRequest);
+
+    void delete(Integer id);
+
+    PageResponse<PublisherResponse> pages(int page, int size, String keyword, String status);
+}
