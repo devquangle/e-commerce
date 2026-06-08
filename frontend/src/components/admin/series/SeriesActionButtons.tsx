@@ -1,9 +1,10 @@
+import type { SeriesResponse } from "@/types/series";
 import { Edit, Trash2 } from "lucide-react";
 
 type Props = {
-  onEdit: (item: any) => void;
-  onDelete: (item: any) => void;
-  item: any;
+  onEdit: (item: SeriesResponse) => void;
+  onDelete: (item: SeriesResponse) => void;
+  item: SeriesResponse;
   mobile?: boolean;
 };
 

@@ -87,12 +87,12 @@ export default function SelectBox<T>({
   return (
     <div ref={ref} className="relative w-full space-y-1.5">
       {label && (
-        <label className="block text-xs font-bold text-slate-600 uppercase tracking-wide">
+        <label className="block text-sm font-bold text-slate-600  tracking-wide">
           {label} {required && <span className="ml-1 text-red-500">*</span>}
         </label>
       )}
 
-      {/* Trigger Button */}
+
       <div
         onClick={() => !disabled && setOpen((prev) => !prev)}
         className={`

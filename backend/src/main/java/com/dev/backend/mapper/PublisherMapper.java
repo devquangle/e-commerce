@@ -12,6 +12,7 @@ public class PublisherMapper {
         }
         return PublisherResponse.builder()
                 .id(publisher.getId())
+                .name(publisher.getName())
                 .slug(publisher.getSlug())
                 .status(publisher.getStatus())
                 .street(publisher.getStreet())

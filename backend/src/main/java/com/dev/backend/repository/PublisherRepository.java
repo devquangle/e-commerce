@@ -14,7 +14,7 @@ import com.dev.backend.entity.Publisher;
 public interface PublisherRepository extends JpaRepository<Publisher, Integer> {
     @Query("""
             SELECT a
-            FROM Series a
+            FROM Publisher a
             WHERE LOWER(a.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
             AND (:status IS NULL OR a.status = :status)
             """)

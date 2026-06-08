@@ -1,9 +1,10 @@
+import type { PublisherResponse } from "@/types/publisher";
 import { Edit, Trash2 } from "lucide-react";
 
 type Props = {
-  onEdit: (item: any) => void;
-  onDelete: (item: any) => void;
-  item: any;
+  onEdit: (item: PublisherResponse) => void;
+  onDelete: (item: PublisherResponse) => void;
+  item: PublisherResponse;
   mobile?: boolean;
 };
 

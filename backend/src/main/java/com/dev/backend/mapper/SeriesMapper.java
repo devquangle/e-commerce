@@ -13,6 +13,7 @@ public class SeriesMapper {
         }
         return SeriesResponse.builder()
                 .id(series.getId())
+                .name(series.getName())
                 .slug(series.getSlug())
                 .status(series.getStatus())
                 .description(series.getDescription())

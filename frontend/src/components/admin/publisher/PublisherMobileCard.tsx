@@ -1,46 +1,84 @@
-import { BookOpen, Building2 } from "lucide-react";
+import { Building2, SearchX } from "lucide-react";
 import PublisherStatusBadge from "./PublisherStatusBadge";
 import PublisherActionButtons from "./PublisherActionButtons";
+import { useState } from "react";
+import type { PublisherResponse } from "@/types/publisher";
 
 type Props = {
-  publishers: any[];
-  onEdit: (publisher: any) => void;
-  onDelete: (publisher: any) => void;
+  publishers: PublisherResponse[];
+  onEdit: (publisher: PublisherResponse) => void;
+  onDelete: (publisher: PublisherResponse) => void;
 };
 
 const PublisherMobileCard = ({ publishers, onEdit, onDelete }: Props) => {
+  const [expandedId, setExpandedId] = useState<number | null>(null);
+
+  const toggle = (id: number) => {
+    setExpandedId((prev) => (prev === id ? null : id));
+  };
+
   return (
     <div className="space-y-4 md:hidden">
-      {publishers.map((publisher) => (
-        <div key={publisher.id} className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-          {/* TITLE */}
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-amber-100 text-amber-600 border border-slate-200">
-                 <Building2 size={18} />
+      {publishers && publishers.length > 0 ? (
+        publishers.map((publisher) => (
+          <div key={publisher.id} className="space-y-3 card-custom">
+            {/* TITLE */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-amber-100 text-amber-600 border border-slate-200">
+                  <Building2 size={18} />
+                </div>
+                <div className="text-base font-bold text-slate-800">
+                  {publisher.name}
+                </div>
               </div>
-              <div className="text-base font-bold text-slate-800">{publisher.name}</div>
+              <PublisherStatusBadge status={publisher.status} />
             </div>
-            <PublisherStatusBadge status={publisher.status} />
-          </div>
 
-          <div className="text-sm text-slate-500 line-clamp-2">
-            {publisher.address}
-          </div>
+            {/* ADDRESS */}
+            <div className="py-4 px-4 text-slate-500 text-xs max-w-[260px]">
+              <div className="space-y-1">
+                <p
+                  className={`text-xs text-slate-500 leading-relaxed wrap-break-word ${
+                    expandedId === publisher.id ? "" : "line-clamp-2"
+                  }`}
+                >
+                  {publisher.street}
+                </p>
 
-          {/* INFO */}
-          <div className="flex items-center justify-between border-t border-slate-100 pt-2 text-sm text-slate-600">
-            <span className="font-medium text-slate-500">Số lượng sách:</span>
-            <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-800">
-              <BookOpen size={13} className="text-slate-500" />
-              {publisher.bookCount || 0} cuốn
-            </span>
-          </div>
+                {publisher.street && publisher.street.length > 120 && (
+                  <button
+                    onClick={() => toggle(publisher.id)}
+                    className="text-xs font-medium text-indigo-500 hover:text-indigo-600 hover:underline transition-colors mt-1 focus:outline-none"
+                  >
+                    {expandedId === publisher.id ? "Thu gọn" : "Xem thêm"}
+                  </button>
+                )}
+              </div>
+            </div>
 
-          {/* ACTION */}
-          <PublisherActionButtons item={publisher} onEdit={onEdit} onDelete={onDelete} mobile />
+            {/* ACTION */}
+            <PublisherActionButtons
+              item={publisher}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              mobile
+            />
+          </div>
+        ))
+      ) : (
+        <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+          <div className="p-3 bg-slate-50 rounded-full text-slate-400 mb-2">
+            <SearchX size={32} strokeWidth={1.5} />
+          </div>
+          <span className="text-sm font-medium text-slate-600">
+            Không tìm thấy nhà xuất bản nào
+          </span>
+          <p className="text-xs text-slate-400 max-w-60 mt-1 leading-relaxed">
+            Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc xem sao nhé.
+          </p>
         </div>
-      ))}
+      )}
     </div>
   );
 };
