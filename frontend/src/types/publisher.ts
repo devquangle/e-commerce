@@ -1,6 +1,15 @@
+import type { BaseStatus } from "./status";
 
 export interface PublisherResponse {
     id: number;
     name: string;
-    displayName: string;
+    slug: string;
+    street:string;
+    status:BaseStatus;
+}
+
+export interface PublisherRequest {
+    name: string;
+    street:string;
+    status:BaseStatus;
 }
