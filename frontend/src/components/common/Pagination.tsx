@@ -110,23 +110,28 @@ export default function Pagination({
     <nav
       aria-label="Pagination"
       className={cn(
-        "flex flex-col gap-3 border-t p-4 sm:flex-row sm:items-center sm:justify-between",
+        "flex flex-col items-center gap-4 border-t p-4 sm:flex-row sm:justify-between",
         className
       )}
     >
+      {/* TEXT SUMMARY: Đẩy xuống làm dòng phụ ở mobile (order-2), lên desktop đứng trước (sm:order-1) */}
       {showSummary ? (
-        <p className="text-sm text-gray-500">
-          Showing {startItem}-{endItem} of {totalItems}
+        <p className="order-2 text-xs text-gray-500 sm:order-1 sm:text-sm">
+          Showing <span className="font-medium text-gray-700">{startItem}-{endItem}</span> of{" "}
+          <span className="font-medium text-gray-700">{totalItems}</span>
         </p>
       ) : (
-        <p className="text-sm text-gray-500">
+        <p className="order-2 text-xs text-gray-500 sm:order-1 sm:text-sm">
           Page {safeCurrentPage} / {safeTotalPages}
         </p>
       )}
 
-      <div className="flex flex-wrap items-center gap-2">
+      {/* Đống nút bấm điều hướng */}
+      <div className="order-1 flex items-center gap-1.5 sm:order-2 sm:gap-2">
+        
+        {/* DROP-DOWN SIZE: Ẩn hoàn toàn trên mobile (`hidden`), chỉ hiện từ màn hình tablet/desktop trở lên (`sm:flex`) */}
         {canChangePageSize && (
-          <label className="flex items-center gap-2 text-sm text-gray-500">
+          <label className="hidden items-center gap-2 text-sm text-gray-500 sm:flex mr-1">
             <span>Size</span>
             <select
               value={safePageSize}
@@ -143,16 +148,18 @@ export default function Pagination({
           </label>
         )}
 
+        {/* Nút Previous */}
         <button
           type="button"
           aria-label="Previous page"
           disabled={!canGoPrevious}
           onClick={() => handlePageChange(safeCurrentPage - 1)}
-          className="inline-flex h-9 w-9 items-center justify-center rounded-md border text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-md border bg-white text-gray-600 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
 
+        {/* Danh sách các số trang */}
         {pages.map((item) =>
           typeof item === "number" ? (
             <button
@@ -162,10 +169,10 @@ export default function Pagination({
               disabled={disabled}
               onClick={() => handlePageChange(item)}
               className={cn(
-                "inline-flex h-9 min-w-9 items-center justify-center rounded-md border px-3 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50",
+                "inline-flex h-9 min-w-9 items-center justify-center rounded-md border px-3 text-sm font-medium shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50",
                 item === safeCurrentPage
-                  ? "border-indigo-600 bg-indigo-600 text-white"
-                  : "text-gray-700 hover:bg-gray-50"
+                  ? "border-indigo-600 bg-indigo-600 text-white font-semibold"
+                  : "bg-white text-gray-700 hover:bg-gray-50"
               )}
             >
               {item}
@@ -173,19 +180,20 @@ export default function Pagination({
           ) : (
             <span
               key={item}
-              className="inline-flex h-9 w-9 items-center justify-center text-gray-400"
+              className="inline-flex h-9 w-8 items-center justify-center text-gray-400"
             >
               <MoreHorizontal className="h-4 w-4" />
             </span>
           )
         )}
 
+        {/* Nút Next */}
         <button
           type="button"
           aria-label="Next page"
           disabled={!canGoNext}
           onClick={() => handlePageChange(safeCurrentPage + 1)}
-          className="inline-flex h-9 w-9 items-center justify-center rounded-md border text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-md border bg-white text-gray-600 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <ChevronRight className="h-4 w-4" />
         </button>

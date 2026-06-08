@@ -36,10 +36,8 @@ export function mapServerErrors<T extends FieldValues>(
       return; 
     }
 
-    // Nếu không có lỗi field, show toast
    showErrorToast?.(serverData?.message ?? "Có lỗi xảy ra");
   } else {
-    // Lỗi không phải Axios, show toast
     showErrorToast?.(getErrorMessage(error));
   }
 }

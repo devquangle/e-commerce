@@ -56,10 +56,13 @@ public class AuthorServiceImpl implements AuthorService {
     @Override
     public AuthorResponse update(Integer id, AuthorRequest authorRequest) {
         Author author = findById(id);
-        if (!author.getName().equals(authorRequest.getName().trim())) {
+        String oldName = author.getName() != null ? author.getName().trim() : "";
+        String newName = authorRequest.getName() != null ? authorRequest.getName().trim() : oldName;
+
+        authorRequest.setName(newName);
+        if (!oldName.equalsIgnoreCase(newName)) {
             validate(authorRequest);
         }
-        author.setName(authorRequest.getName());
         author.setWikibaseItem(authorRequest.getWikibaseItem());
         author.setSlug(TextUtils.toSlug(authorRequest.getName()));
         author.setUrlBio(authorRequest.getUrlBio());

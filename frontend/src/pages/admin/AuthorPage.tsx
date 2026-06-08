@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import Modal from "@/components/common/Modal";
-import { set, useForm, useWatch } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import InputField from "@/components/common/InputField";
 import Pagination from "@/components/common/Pagination";
 import { useSearchParams } from "react-router-dom";
@@ -12,12 +12,7 @@ import AuthorMobileCard from "@/components/admin/author/AuthorMobileCard";
 import Button from "@/components/common/Button";
 import { useWikipediaAuthor } from "@/hooks/useWikipediaAuthor";
 import TextAreaField from "@/components/common/TextAreaField";
-import {
-  dismissToast,
-  showErrorToast,
-  showInfoToast,
-  showSuccessToast,
-} from "@/utils/toastUtil";
+import { showErrorToast, showSuccessToast } from "@/utils/toastUtil";
 import SingleImageUpload from "@/components/common/SingleImageUpload";
 import type { AuthorReq, AuthorRes } from "@/types/author";
 import { BaseStatus, getBaseStatusLabel } from "@/types/status";
@@ -31,6 +26,14 @@ import { mapServerErrors } from "@/utils/mapServerErrors";
 import imageService from "@/services/imageService";
 
 const initialFilterOptions = { keyword: "", status: "", page: 1, size: 10 };
+const initAuthor: AuthorReq = {
+  name: "",
+  extract: "",
+  urlBio: "",
+  wikibaseItem: "",
+  urlImage: "",
+  status: BaseStatus.ACTIVE,
+};
 
 export default function AuthorPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -75,14 +78,7 @@ export default function AuthorPage() {
     control,
     formState: { errors },
   } = useForm<AuthorReq>({
-    defaultValues: {
-      name: "",
-      extract: "",
-      urlBio: "",
-      wikibaseItem: "",
-      urlImage: "",
-      status: BaseStatus.ACTIVE,
-    },
+    defaultValues: initAuthor,
   });
 
   const statusOptions = useMemo(
@@ -105,7 +101,7 @@ export default function AuthorPage() {
 
   const filterAuthor = authors?.items || [];
 
-  // Handlers
+  // Handlers Filter
   const handleKeywordChange = (val: string) => {
     setKeyword(val);
     setPage(1);
@@ -123,60 +119,49 @@ export default function AuthorPage() {
 
   const inputName = useWatch({ control, name: "name" });
   const debouncedName = useDebounce(inputName, 2000);
+
+  // Cập nhật: Chỉ fetch Wiki khi Thêm mới HOẶC khi Cập nhật mà người dùng sửa đổi tên tác giả
+  const isNameChanged = selectItem ? debouncedName?.trim() !== selectItem.name : true;
+  const shouldFetchWiki = openSaveModal && !!debouncedName?.trim() && isNameChanged;
   const { data: wikiData, isFetching: isWikiFetching } = useWikipediaAuthor(
-    debouncedName,
+    shouldFetchWiki ? debouncedName : "",
     openSaveModal,
   );
 
-  useEffect(() => {
-    if (!openSaveModal || isWikiFetching) return;
+  const handleSyncToForm = () => {
+    if (!wikiData) return;
 
-    if (wikiData) {
-      setTimeout(() => {
-        const currentValues = getValues();
-        let hasFieldBeenUpdated = false;
+    const currentValues = getValues();
+    let hasFieldBeenUpdated = false;
 
-        if (!currentValues.urlBio?.trim() && wikiData.urlBio) {
-          setValue("urlBio", wikiData.urlBio);
-          hasFieldBeenUpdated = true;
-        }
-        if (!currentValues.wikibaseItem?.trim() && wikiData.wikibaseItem) {
-          setValue("wikibaseItem", wikiData.wikibaseItem);
-          hasFieldBeenUpdated = true;
-        }
-
-        if (!currentValues.extract?.trim() && wikiData.extract) {
-          setValue("extract", wikiData.extract);
-          hasFieldBeenUpdated = true;
-        }
-
-        if (!currentValues.urlImage?.trim() && wikiData.urlImage) {
-          setValue("urlImage", wikiData.urlImage);
-          setAvatarUrl(wikiData.urlImage);
-          setFile(null);
-          hasFieldBeenUpdated = true;
-        }
-
-        if (hasFieldBeenUpdated) {
-          showSuccessToast(
-            "Đã tự động điền các trường thông tin còn thiếu từ Wikipedia!",
-          );
-        }
-      }, 0);
-      return;
+    if (!currentValues.urlBio?.trim() && wikiData.urlBio) {
+      setValue("urlBio", wikiData.urlBio);
+      hasFieldBeenUpdated = true;
+    }
+    if (!currentValues.wikibaseItem?.trim() && wikiData.wikibaseItem) {
+      setValue("wikibaseItem", wikiData.wikibaseItem);
+      hasFieldBeenUpdated = true;
+    }
+    if (!currentValues.extract?.trim() && wikiData.extract) {
+      setValue("extract", wikiData.extract);
+      hasFieldBeenUpdated = true;
+    }
+    if (!currentValues.urlImage?.trim() && wikiData.urlImage) {
+      setValue("urlImage", wikiData.urlImage);
+      setAvatarUrl(wikiData.urlImage);
+      setFile(null);
+      hasFieldBeenUpdated = true;
     }
 
-    if (debouncedName?.trim() && !wikiData) {
-      showErrorToast(`Không tìm thấy thông tin cho tác giả "${debouncedName}"`);
+    if (hasFieldBeenUpdated) {
+      showSuccessToast(
+        "Đã tự động điền các trường thông tin còn thiếu từ Wikipedia!",
+      );
+    } else {
+      showSuccessToast("Các trường thông tin trên Form đã đầy đủ dữ liệu.");
     }
-  }, [
-    wikiData,
-    isWikiFetching,
-    debouncedName,
-    openSaveModal,
-    setValue,
-    getValues,
-  ]);
+  };
+
   const handleOpenDelete = (item: AuthorRes) => {
     setSelectItem(item);
     setOpenDeleteModal(true);
@@ -185,6 +170,7 @@ export default function AuthorPage() {
     setSelectItem(null);
     setOpenDeleteModal(false);
   };
+
   const createMutation = useCreateAuthor();
   const updateMutation = useUpdateAuthor();
   const deleteMutation = useDeleteAuthor();
@@ -198,14 +184,13 @@ export default function AuthorPage() {
         const uploadRes = await imageService.uploadFile(file);
         uploadedImageUrl = uploadRes.urlImage;
       } else if (avatarUrl) {
-        // Thay vì check req.urlImage (có thể rỗng), check trực tiếp avatarUrl hiển thị trên giao diện
         const uploadRes = await imageService.upload({ url: avatarUrl });
         uploadedImageUrl = uploadRes.urlImage;
       }
 
       const payload: AuthorReq = {
         ...req,
-        urlImage: uploadedImageUrl, // Được bảo đảm luôn lấy link từ Cloudinary hoặc ảnh mặc định từ backend map trả về
+        urlImage: uploadedImageUrl,
       };
       await createMutation.mutateAsync(payload);
       handleCloseSaveModal();
@@ -224,12 +209,10 @@ export default function AuthorPage() {
       if (file) {
         const uploadRes = await imageService.uploadFile(file);
         uploadedImageUrl = uploadRes.urlImage;
-      }
-      else if (avatarUrl && avatarUrl !== selectItem.urlImage) {
+      } else if (avatarUrl && avatarUrl !== selectItem.urlImage) {
         const uploadRes = await imageService.upload({ url: avatarUrl });
         uploadedImageUrl = uploadRes.urlImage;
-      }
-      else if (!avatarUrl && selectItem.urlImage) {
+      } else if (!avatarUrl && selectItem.urlImage) {
         uploadedImageUrl = "";
       }
 
@@ -258,26 +241,17 @@ export default function AuthorPage() {
   const handleOpenSaveModal = (item: AuthorRes | null) => {
     if (item) {
       setSelectItem(item);
-      setValue("name", item.name);
-      setValue("extract", item.description);
-      setValue("status", item.status);
-      setValue("urlBio", item.urlBio || "");
-      setValue("wikibaseItem",item.wikibaseItem)
-      setValue("urlImage", item.urlImage || "");
-      if (item.urlImage) {
-        setAvatarUrl(item.urlImage);
-      } else {
-        setAvatarUrl("");
-      }
-    } else {
       reset({
-        name: "",
-        extract: "",
-        urlBio: "",
-        urlImage: "",
-        wikibaseItem: "",
-        status: BaseStatus.ACTIVE,
+        name: item.name,
+        extract: item.description || "",
+        status: item.status,
+        urlBio: item.urlBio || "",
+        wikibaseItem: item.wikibaseItem || "",
+        urlImage: item.urlImage || "",
       });
+      setAvatarUrl(item.urlImage || "");
+    } else {
+      reset(initAuthor);
       setAvatarUrl("");
     }
     setFile(null);
@@ -285,14 +259,7 @@ export default function AuthorPage() {
   };
 
   const handleCloseSaveModal = () => {
-    reset({
-      name: "",
-      extract: "",
-      urlBio: "",
-      urlImage: "",
-      wikibaseItem: "",
-      status: BaseStatus.ACTIVE,
-    });
+    reset(initAuthor);
     setSelectItem(null);
     setFile(null);
     setAvatarUrl("");
@@ -370,20 +337,17 @@ export default function AuthorPage() {
           />
         </div>
 
-        {/* PAGINATION */}
-        <div className="mt-4">
-          <Pagination
-            currentPage={page}
-            totalPages={authors?.totalPages || 1}
-            onPageChange={(p) => setPage(p)}
-            totalItems={authors?.totalItems || 0}
-            pageSize={size}
-            onPageSizeChange={(s) => {
-              setSize(s);
-              setPage(1);
-            }}
-          />
-        </div>
+        <Pagination
+          currentPage={page}
+          totalPages={authors?.totalPages || 1}
+          onPageChange={(p) => setPage(p)}
+          totalItems={authors?.totalItems || 0}
+          pageSize={size}
+          onPageSizeChange={(s) => {
+            setSize(s);
+            setPage(1);
+          }}
+        />
       </div>
 
       {/* SAVE MODAL */}
@@ -399,15 +363,67 @@ export default function AuthorPage() {
         size="lg"
       >
         <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-          <InputField
-            label="Tên tác giả"
-            name="name"
-            type="text"
-            placeholder="Nhập tên tác giả để tìm kiếm trên Wikipedia..."
-            register={register}
-            rules={{ required: "Tên tác giả là bắt buộc" }}
-            error={errors?.name}
-          />
+          {/* Đăng ký các input ẩn để react-hook-form nhận giá trị khi submit */}
+          <input type="hidden" {...register("urlBio")} />
+          <input type="hidden" {...register("wikibaseItem")} />
+          <input type="hidden" {...register("urlImage")} />
+
+          {/* Ô Nhập Tên Tác Giả & Quản lý trạng thái tự động */}
+          <div className="space-y-1 relative group">
+            <div className="relative w-full">
+              <InputField
+                label="Tên tác giả"
+                name="name"
+                type="text"
+                placeholder="Nhập tên tác giả để tìm kiếm trên Wikipedia..."
+                register={register}
+                rules={{ required: "Tên tác giả là bắt buộc" }}
+                error={errors?.name}
+              />
+
+              {/* Icon Loading góc phải ô nhập liệu */}
+              {isWikiFetching && (
+                <div className="absolute right-3 bottom-3 flex items-center z-10">
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-indigo-500 border-t-transparent" />
+                </div>
+              )}
+            </div>
+
+            {/* BANNER 1: Tìm thấy dữ liệu */}
+            {wikiData && (
+              <div className="mt-2 flex items-center justify-between p-2.5 bg-emerald-50 rounded-lg border border-emerald-100 animate-in fade-in slide-in-from-top-1 duration-200">
+                <div className="flex items-center gap-2 text-xs text-emerald-700">
+                  <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-left">
+                    Đã tìm thấy dữ liệu chuẩn của tác giả{" "}
+                    <strong>{wikiData.name || debouncedName}</strong>!
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleSyncToForm}
+                  className="text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 rounded-md shadow-sm transition-all shrink-0 ml-2 cursor-pointer active:scale-95 select-none"
+                >
+                  Đồng bộ vào Form
+                </button>
+              </div>
+            )}
+
+            {/* BANNER 2: Không tìm thấy dữ liệu */}
+            {shouldFetchWiki &&
+              debouncedName?.trim() && !wikiData && !isWikiFetching && (
+              <div className="mt-2 flex items-center p-2.5 bg-amber-50 rounded-lg border border-amber-100 animate-in fade-in slide-in-from-top-1 duration-200">
+                <div className="flex items-center gap-2 text-xs text-amber-700 text-left">
+                  <span className="flex h-2 w-2 rounded-full bg-amber-400" />
+                  <span>
+                    Không tìm thấy thông tin cho tác giả "
+                    <strong>{debouncedName}</strong>" trên Wikipedia. Bạn có thể
+                    tự điền tay tiểu sử ở dưới.
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
 
           <TextAreaField
             label="Mô tả / Tiểu sử"
