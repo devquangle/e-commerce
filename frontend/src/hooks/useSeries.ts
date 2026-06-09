@@ -9,7 +9,7 @@ import axios from "axios";
 export const useSeries = () => {
   return useQuery<SeriesResponse[]>({
     queryKey: ["series"],
-    queryFn: SeriesService.getSeries,
+    queryFn: SeriesService.fetchSeries,
   });
 };
 

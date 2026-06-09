@@ -3,21 +3,26 @@ import { useQueries } from "@tanstack/react-query";
 import AuthorService from "@/services/authorService";
 import GenreService from "@/services/genreService"; // Thay đổi theo đường dẫn thực tế của bạn
 import PublisherService from "@/services/publisherService"; // Thay đổi theo đường dẫn thực tế của bạn
+import SeriesService from "@/services/seriesService";
 
 export const useBookFormData = () => {
   const results = useQueries({
     queries: [
-      { 
-        queryKey: ['genres'], 
-        queryFn: GenreService.fetchGenre
+      {
+        queryKey: ["genres"],
+        queryFn: GenreService.fetchGenre,
       },
-      { 
-        queryKey: ['authors'], 
-        queryFn: AuthorService.fetchAuthor 
+      {
+        queryKey: ["authors"],
+        queryFn: AuthorService.fetchAuthor,
       },
-      { 
-        queryKey: ['publishers'], 
-        queryFn: PublisherService.fetchPublisher
+      {
+        queryKey: ["publishers"],
+        queryFn: PublisherService.fetchPublisher,
+      },
+      {
+        queryKey: ["series"],
+        queryFn: SeriesService.fetchSeries,
       },
     ],
   });
@@ -29,6 +34,7 @@ export const useBookFormData = () => {
     genresData: results[0].data ?? [],
     authorsData: results[1].data ?? [],
     publishersData: results[2].data ?? [],
+    seriesData: results[3].data ?? [],
     isLoading,
     isError,
   };

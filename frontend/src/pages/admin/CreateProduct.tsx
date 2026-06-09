@@ -31,26 +31,17 @@ import type { ImageProductRequest } from "@/types/image";
 import imageService from "@/services/imageService";
 import type { ProductRequest } from "@/types/product";
 import productService from "@/services/productService";
+import SearchInput from "@/components/common/SearchInput";
 
-type Series = {
+
+interface BookType {
   id: number;
   name: string;
-};
+  author: string;
+}
 
-const seriesData: Series[] = [
-  { id: 1, name: "Sách kỹ năng sống" },
-  { id: 2, name: "Sách văn học" },
-  { id: 3, name: "Sách lịch sử" },
-  { id: 4, name: "Sách khoa học" },
-  { id: 5, name: "Sách ngoại ngữ" },
-  { id: 6, name: "Sách kinh tế" },
-  { id: 7, name: "Sách tâm lý" },
-  { id: 8, name: "Sách thiếu nhi" },
-  { id: 9, name: "Sách văn hóa" },
-  { id: 10, name: "Naruto" },
-  { id: 11, name: "One Piece" },
-  { id: 12, name: "Dragon Ball" },
-];
+
+// Ví dụ data bạn có (có thể lấy từ API)
 
 const initialForm: ProductRequest = {
   name: "",
@@ -259,6 +250,7 @@ export default function CreateProduct() {
     genresData = [],
     authorsData = [],
     publishersData = [],
+    seriesData =[],
     isLoading,
     isError,
   } = useBookFormData();
@@ -272,6 +264,11 @@ export default function CreateProduct() {
   const replaceFileInputRef = useRef<HTMLInputElement>(null);
 
   const coverImages = useWatch({ name: "coverImages", control }) || [];
+const listBooks = [
+  { id: 1, name: "Đắc Nhân Tâm", author: "Dale Carnegie" },
+  { id: 2, name: "Nhà Giả Kim", author: "Paulo Coelho" },
+  { id: 3, name: "Tội Ác Và Hình Phạt", author: "Fyodor Dostoevsky" },
+] as BookType[];
 
   const genreOptions = useMemo(
     () =>
@@ -292,7 +289,7 @@ export default function CreateProduct() {
   );
   const seriesOptions = useMemo(
     () => seriesData.map((s) => ({ label: s.name, value: s.id })),
-    [],
+    [seriesData],
   );
 
   const imagesUrl = async () => {
@@ -664,7 +661,7 @@ export default function CreateProduct() {
             </div>
 
             <div className="grid gap-4 mt-4">
-              <InputField
+              <SearchInput
                 label="Tên sách"
                 name="name"
                 type="text"
@@ -672,6 +669,14 @@ export default function CreateProduct() {
                 register={register}
                 rules={{ required: "Tên sách là bắt buộc" }}
                 error={errors?.name}
+                dataOptions={listBooks} 
+                displayKey="name" 
+                onSelect={(selectedItem) => {
+                  // selectedItem chính là toàn bộ object sách mà user vừa click chọn
+                  console.log("Sách được chọn:", selectedItem);
+
+                  setValue("name", selectedItem.name);
+                }}
               />
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

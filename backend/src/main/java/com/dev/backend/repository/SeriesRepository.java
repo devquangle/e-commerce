@@ -8,7 +8,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.dev.backend.constant.BaseStatus;
-import com.dev.backend.entity.Author;
 import com.dev.backend.entity.Series;
 
 @Repository

@@ -34,6 +34,11 @@ public class SeriesServiceImpl implements SeriesService {
     private final SeriesMapper seriesMapper;
 
     @Override
+    public List<SeriesResponse> findAll() {
+        return seriesRepository.findAll().stream().map(seriesMapper::toDTO).toList();
+    }
+
+    @Override
     @Transactional
     public SeriesResponse add(SeriesRequest seriesRequest) {
         log.info("Đang thêm bộ series sách mới: {}", seriesRequest.getName());

@@ -4,6 +4,8 @@ import com.dev.backend.constant.RoleName;
 import com.dev.backend.security.CustomAccessDeniedHandler;
 import com.dev.backend.security.CustomUserDetailsService;
 import com.dev.backend.security.jwt.JwtAuthenticationFilter;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -144,4 +146,9 @@ public class SecurityConfig {
         return new StandardServletMultipartResolver();
     }
 
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
+    }
 }

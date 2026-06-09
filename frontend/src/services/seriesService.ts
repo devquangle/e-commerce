@@ -5,7 +5,7 @@ import type { Pagination } from "@/types/pagination";
 import type { options } from "@/types/genre";
 
 const SeriesService = {
-  async getSeries() {
+  async fetchSeries() {
     const res =
       await apiAuth.get<ApiResponse<SeriesResponse[]>>("/admin/series");
     if (!res.data.success || !res.data.data) {
