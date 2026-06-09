@@ -1,6 +1,6 @@
 package com.dev.backend.controller;
 
-
+import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,6 +27,12 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/admin")
 public class PublisherController {
     private final PublisherService publisherService;
+
+    @GetMapping("/publishers")
+    public ResponseEntity<ResponseData<List<PublisherResponse>>> list() {
+        List<PublisherResponse> list = publisherService.findAll();
+        return ResponseUtil.success("Lấy danh nhà xuất bản thành công", list);
+    }
 
     @GetMapping("/publishers/filter")
     public ResponseEntity<ResponseData<PageResponse<PublisherResponse>>> filter(

@@ -1,5 +1,7 @@
 package com.dev.backend.controller;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +28,14 @@ import lombok.RequiredArgsConstructor;
 public class AuthorController {
 
     private final AuthorService authorService;
+
+
+     @GetMapping("/authors")
+    public ResponseEntity<ResponseData<List<AuthorResponse>>> list() {
+        List<AuthorResponse> list = authorService.findAll();
+        return ResponseUtil.success("Lấy danh sách tác giả thành công", list);
+    }
+
 
     @GetMapping("/authors/filter")
     public ResponseEntity<ResponseData<PageResponse<AuthorResponse>>> filter(

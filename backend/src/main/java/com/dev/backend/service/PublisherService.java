@@ -1,5 +1,7 @@
 package com.dev.backend.service;
 
+import java.util.List;
+
 import com.dev.backend.dto.publisher.PublisherRequest;
 import com.dev.backend.dto.publisher.PublisherResponse;
 import com.dev.backend.entity.Publisher;
@@ -7,7 +9,7 @@ import com.dev.backend.response.PageResponse;
 
 public interface PublisherService {
     void validate(PublisherRequest publisherRequest);
-
+    List<PublisherResponse> findAll();
     void insertData();
 
     boolean existsByName(String name);

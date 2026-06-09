@@ -12,7 +12,7 @@ import com.dev.backend.response.PageResponse;
 public interface GenreService {
     boolean isEmpty();
 
-    List<GenreResponse> getAllGenre();
+    List<GenreResponse> findAll();
 
     Genre save(Genre genre);
 

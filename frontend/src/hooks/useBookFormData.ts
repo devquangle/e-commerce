@@ -9,15 +9,15 @@ export const useBookFormData = () => {
     queries: [
       { 
         queryKey: ['genres'], 
-        queryFn: GenreService.getGenres
+        queryFn: GenreService.fetchGenre
       },
       { 
         queryKey: ['authors'], 
-        queryFn: AuthorService.getAuthors 
+        queryFn: AuthorService.fetchAuthor 
       },
       { 
         queryKey: ['publishers'], 
-        queryFn: PublisherService.getPublishers
+        queryFn: PublisherService.fetchPublisher
       },
     ],
   });

@@ -1,12 +1,7 @@
 import type { BaseStatus } from "./status";
 
-export interface AuthorResponse {
-  id: number;
-  name: string;
-  displayName: string;
-}
 
-export interface AuthorRes {
+export interface AuthorResponse {
   id: number;
   name: string;
   wikibaseItem: string;
@@ -15,7 +10,7 @@ export interface AuthorRes {
   urlBio: string;
   status: BaseStatus;
 }
-export interface AuthorReq {
+export interface AuthorRequest {
   name: string;
   wikibaseItem: string;
   urlImage: string;

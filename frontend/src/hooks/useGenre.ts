@@ -6,7 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 export const useGenre = () => {
   return useQuery<GenreResponse[]>({
     queryKey: ["genres"],
-    queryFn: genreService.getGenres,
+    queryFn: genreService.fetchGenre,
   });
 };
 

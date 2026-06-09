@@ -4,7 +4,7 @@ import type { GenreRequest, GenreResponse, options } from "@/types/genre";
 import type { Pagination } from "@/types/pagination";
 
 const genreService = {
-  async getGenres() {
+  async fetchGenre() {
     const res =
       await apiAuth.get<ApiResponse<GenreResponse[]>>("/admin/genres");
     if (!res.data.success || !res.data.data) {

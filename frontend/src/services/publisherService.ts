@@ -5,7 +5,7 @@ import type { Pagination } from "@/types/pagination";
 import type { options } from "@/types/genre";
 
 const PublisherService = {
-  async getPublishers() {
+  async fetchPublisher() {
     const res =
       await apiAuth.get<ApiResponse<PublisherResponse[]>>("/admin/publishers");
     if (!res.data.success || !res.data.data) {

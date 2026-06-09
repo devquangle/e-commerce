@@ -1,11 +1,11 @@
 import { apiAuth } from "@/configs/axios";
 import type { ApiResponse } from "@/types/api-response";
-import type { AuthorReq, AuthorRes, AuthorResponse } from "@/types/author";
+import type { AuthorRequest, AuthorResponse  } from "@/types/author";
 import type { Pagination } from "@/types/pagination";
 import type { options } from "@/types/genre";
 
 const AuthorService = {
-  async getAuthors() {
+  async fetchAuthor() {
     const res =
       await apiAuth.get<ApiResponse<AuthorResponse[]>>("/admin/authors");
     if (!res.data.success || !res.data.data) {
@@ -13,8 +13,8 @@ const AuthorService = {
     }
     return res.data.data;
   },
-  async create(data: AuthorReq) {
-    const res = await apiAuth.post<ApiResponse<AuthorRes>>(
+  async create(data: AuthorRequest) {
+    const res = await apiAuth.post<ApiResponse<AuthorResponse>>(
       "/admin/authors",
       data,
     );
@@ -24,8 +24,8 @@ const AuthorService = {
     return res.data.data;
   },
 
-   async update(id:number,data: AuthorReq) {
-    const res = await apiAuth.put<ApiResponse<AuthorRes>>(
+   async update(id:number,data: AuthorRequest) {
+    const res = await apiAuth.put<ApiResponse<AuthorResponse>>(
       `/admin/authors/${id}`,
       data,
     );
@@ -36,7 +36,7 @@ const AuthorService = {
   },
 
   async filterAuthor(options?: options) {
-    const res = await apiAuth.get<ApiResponse<Pagination<AuthorRes>>>(
+    const res = await apiAuth.get<ApiResponse<Pagination<AuthorResponse>>>(
       "/admin/authors/filter",
       { params: options },
     );

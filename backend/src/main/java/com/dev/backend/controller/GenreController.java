@@ -31,8 +31,8 @@ public class GenreController {
     private final GenreService genreService;
 
     @GetMapping("/genres")
-    public ResponseEntity<ResponseData<List<GenreResponse>>> listGenre() {
-        List<GenreResponse> listGenre = genreService.getAllGenre();
+    public ResponseEntity<ResponseData<List<GenreResponse>>> list() {
+        List<GenreResponse> listGenre = genreService.findAll();
         return ResponseUtil.success("Lấy danh sách thể loại thành công", listGenre);
     }
 

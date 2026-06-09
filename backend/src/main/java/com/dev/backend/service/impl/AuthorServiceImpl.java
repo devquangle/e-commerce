@@ -33,6 +33,11 @@ public class AuthorServiceImpl implements AuthorService {
     private final AuthorMapper authorMapper;
 
     @Override
+    public List<AuthorResponse> findAll() {
+        return authorRepository.findAll().stream().map(authorMapper::toDTO).toList();
+    }
+
+    @Override
     public AuthorResponse add(AuthorRequest authorRequest) {
         validate(authorRequest);
         Author author = new Author();

@@ -9,7 +9,7 @@ import axios from "axios";
 export const usePublisher = () => {
   return useQuery<PublisherResponse[]>({
     queryKey: ["publishers"],
-    queryFn: PublisherService.getPublishers,
+    queryFn: PublisherService.fetchPublisher,
   });
 };
 

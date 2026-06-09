@@ -1,11 +1,16 @@
 package com.dev.backend.service;
 
+import java.util.List;
+
 import com.dev.backend.dto.author.AuthorRequest;
 import com.dev.backend.dto.author.AuthorResponse;
 import com.dev.backend.entity.Author;
 import com.dev.backend.response.PageResponse;
 
 public interface AuthorService {
+
+    List<AuthorResponse> findAll();
+
 
     void validate(AuthorRequest authorRequest);
 

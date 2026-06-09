@@ -33,6 +33,13 @@ public class PublisherServiceImpl implements PublisherService {
     private final PublisherRepository publisherRepository;
     private final PublisherMapper publisherMapper;
 
+
+
+    @Override
+    public List<PublisherResponse> findAll() {
+        return publisherRepository.findAll().stream().map(publisherMapper::toDTO).toList();
+    }
+
     @Override
     @Transactional
     public PublisherResponse add(PublisherRequest publisherRequest) {

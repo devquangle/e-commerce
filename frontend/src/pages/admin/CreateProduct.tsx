@@ -281,13 +281,13 @@ export default function CreateProduct() {
   const authorOptions = useMemo(
     () =>
       authorsData.map((a: AuthorResponse) => ({
-        label: a.displayName,
+        label: a.name,
         value: a.id,
       })),
     [authorsData],
   );
   const publisherOptions = useMemo(
-    () => publishersData.map((p) => ({ label: p.displayName, value: p.id })),
+    () => publishersData.map((p) => ({ label: p.name, value: p.id })),
     [publishersData],
   );
   const seriesOptions = useMemo(

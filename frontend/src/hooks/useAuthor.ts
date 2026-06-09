@@ -1,5 +1,5 @@
 import AuthorService from "@/services/authorService";
-import type { AuthorReq, AuthorRes } from "@/types/author";
+import type { AuthorRequest, AuthorResponse } from "@/types/author";
 import type { Pagination } from "@/types/pagination";
 import type { options } from "@/types/genre";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -9,11 +9,11 @@ import axios from "axios";
 export const useAuthor = () => {
   return useQuery<AuthorResponse[]>({
     queryKey: ["authors"],
-    queryFn: AuthorService.getAuthors,
+    queryFn: AuthorService.fetchAuthor,
   });
 };
 export const useFilterAuthor = (options?: options) => {
-  return useQuery<Pagination<AuthorRes>>({
+  return useQuery<Pagination<AuthorResponse>>({
     queryKey: ["authors", options],
     queryFn: () => AuthorService.filterAuthor(options),
   });
@@ -23,7 +23,7 @@ export const useCreateAuthor = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (req: AuthorReq) => AuthorService.create(req),
+    mutationFn: (req: AuthorRequest) => AuthorService.create(req),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["authors"] });
 
@@ -45,7 +45,7 @@ export const useUpdateAuthor = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({id,req}:{id:number,req: AuthorReq}) => AuthorService.update(id,req),
+    mutationFn: ({id,req}:{id:number,req: AuthorRequest}) => AuthorService.update(id,req),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["authors"] });
 
