@@ -1,9 +1,36 @@
 package com.dev.backend.dto.googlebook;
 
+import java.util.List;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class GoogleBookResponse {
-    private String name;
-    private Integer pages;
-    private String date;
-    private String ibsn;
+     private String volumeId;
+
+    private String title;
+    List<String> authors;
+   
+    private String publisher;
+
+    private String publishedDate;
+
     private String description;
+
+    private Integer pageCount;
+
+    private String isbn;
+
+    private String thumbnail;
+
+    private Double listPrice;
+
+    private Double retailPrice;
+
 }

@@ -25,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 public class WikipediaService {
 
     private final RestTemplate restTemplate;
-    private final ObjectMapper objectMapper; // Bổ sung ObjectMapper để parse chuẩn xác
+    private final ObjectMapper objectMapper;
 
     private static final Set<String> BOOK_AUTHOR_QIDS = Set.of(
             "Q36180", "Q4853732", "Q49757", "Q6625963", "Q333634", "Q214917", "Q11774201",

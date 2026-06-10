@@ -1,49 +1,29 @@
 package com.dev.backend.controller;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.dev.backend.dto.googlebook.GoogleBookResponse;
+import com.dev.backend.response.ResponseData;
 import com.dev.backend.response.ResponseUtil;
-
-import jakarta.validation.Valid;
+import com.dev.backend.service.GoogleBookService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/resource")
+@RequestMapping("/public")
 @RequiredArgsConstructor
 public class ApiGoogleBookController {
 
+    private final GoogleBookService bookService;
 
-    @GetMapping
-    public ResponseEntity<?> getAll() {
-        return ResponseUtil.success("Lấy danh sách đối tượng thành công", null);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getById(@PathVariable Integer id) {
-        return ResponseUtil.success("Lấy chi tiết đối tượng thành công", null);
-    }
-
-    @PostMapping
-    public ResponseEntity<?> create(@Valid @RequestBody Object request) {
-        return ResponseUtil.success("Thêm đối tượng thành công", null);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable Integer id, @Valid @RequestBody Object request) {
-        return ResponseUtil.success("Cập nhật đối tượng thành công", null);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Integer id) {
-       
-        return ResponseUtil.success("Xóa đối tượng thành công", null);
+    @GetMapping("/google-books")
+    public ResponseEntity<ResponseData<List<GoogleBookResponse>>> search(@RequestParam String query) {
+        List<GoogleBookResponse> response = bookService.searchBooks(query);
+        return ResponseUtil.success("Lấy dữ liệu thành công", response);
     }
 }
