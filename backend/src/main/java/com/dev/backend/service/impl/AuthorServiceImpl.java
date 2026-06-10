@@ -41,7 +41,7 @@ public class AuthorServiceImpl implements AuthorService {
     public AuthorResponse add(AuthorRequest authorRequest) {
         validate(authorRequest);
         Author author = new Author();
-        author.setName(authorRequest.getName());
+        author.setName(TextUtils.capitalizeFully(authorRequest.getName()));
         author.setWikibaseItem(authorRequest.getWikibaseItem());
         author.setSlug(TextUtils.toSlug(authorRequest.getName()));
         author.setUrlBio(authorRequest.getUrlBio());
@@ -63,7 +63,7 @@ public class AuthorServiceImpl implements AuthorService {
         String oldName = author.getName() != null ? author.getName().trim() : "";
         String newName = authorRequest.getName() != null ? authorRequest.getName().trim() : oldName;
 
-        authorRequest.setName(newName);
+        author.setName(TextUtils.capitalizeFully(newName));
         if (!oldName.equalsIgnoreCase(newName)) {
             validate(authorRequest);
         }

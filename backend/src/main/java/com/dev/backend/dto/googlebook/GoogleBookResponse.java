@@ -12,12 +12,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GoogleBookResponse {
-     private String volumeId;
+    private String volumeId;
 
-    private String title;
+    private String name;
     List<String> authors;
-   
-    private String publisher;
 
     private String publishedDate;
 

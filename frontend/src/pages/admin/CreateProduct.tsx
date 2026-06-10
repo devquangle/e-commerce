@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, use } from "react";
 import ProductDescriptionEditor from "../../components/admin/product/ProductDescriptionEditor";
 import SelectedMutil from "@/components/common/SelectedMutil";
 import {
@@ -32,16 +32,11 @@ import imageService from "@/services/imageService";
 import type { ProductRequest } from "@/types/product";
 import productService from "@/services/productService";
 import SearchInput from "@/components/common/SearchInput";
+import useDebounce from "@/hooks/useDebounce";
+import GoogleBookService from "@/services/googlebookService";
+import type { GoogleBookResponse } from "@/types/googlebook";
 
 
-interface BookType {
-  id: number;
-  name: string;
-  author: string;
-}
-
-
-// Ví dụ data bạn có (có thể lấy từ API)
 
 const initialForm: ProductRequest = {
   name: "",
@@ -77,16 +72,13 @@ const initialForm: ProductRequest = {
 
 
 <img
-
   src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=600"
-
   alt="Ảnh bìa sách"
-
+  style="width: 40%; max-width: 100%; height: auto;"
+  class="block mx-auto"
 />
 
-
-
-<p style="text-align:center">
+<p style="text-align:center; font-size: 14px; color: #666;">
 
   <em>Hình ảnh minh họa cho cuốn sách</em>
 
@@ -250,7 +242,7 @@ export default function CreateProduct() {
     genresData = [],
     authorsData = [],
     publishersData = [],
-    seriesData =[],
+    seriesData = [],
     isLoading,
     isError,
   } = useBookFormData();
@@ -264,11 +256,67 @@ export default function CreateProduct() {
   const replaceFileInputRef = useRef<HTMLInputElement>(null);
 
   const coverImages = useWatch({ name: "coverImages", control }) || [];
-const listBooks = [
-  { id: 1, name: "Đắc Nhân Tâm", author: "Dale Carnegie" },
-  { id: 2, name: "Nhà Giả Kim", author: "Paulo Coelho" },
-  { id: 3, name: "Tội Ác Và Hình Phạt", author: "Fyodor Dostoevsky" },
-] as BookType[];
+
+  const inputName = useWatch({ control, name: "name" }) || "";
+  const debouncedName = useDebounce(inputName, 1000);
+  const [googleBooks, setGoogleBook] = useState<GoogleBookResponse[] | null>(
+    null,
+  );
+  const [isSearching, setIsSearching] = useState(false);
+
+  useEffect(() => {
+    if (!debouncedName?.trim()) {
+      setGoogleBook([]);
+      return;
+    }
+
+    const fetchBooks = async () => {
+      setIsSearching(true);
+      try {
+        const books = await GoogleBookService.filter(debouncedName);
+        setGoogleBook(books);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsSearching(false);
+      }
+    };
+
+    fetchBooks();
+  }, [debouncedName, setGoogleBook]);
+
+  // Trạng thái loading: chỉ hiện loading khi thực sự đang gọi API (sau khi debounce)
+  const isLoadingGoogleBooks = isSearching;
+
+  // Hàm escape ký tự đặc biệt trong regex
+  const escapeRegex = (str: string) =>
+    str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+  // Hàm highlight text trùng khớp
+  const renderHighlightedText = (text: string, highlight: string) => {
+    if (!highlight.trim()) return text;
+    try {
+      const escaped = escapeRegex(highlight);
+      const parts = text.split(new RegExp(`(${escaped})`, "gi"));
+      return (
+        <>
+          {parts.map((part, i) =>
+            part.toLowerCase() === highlight.toLowerCase() ? (
+              <mark key={i} className="bg-transparent font-bold text-indigo-700">
+                {part}
+              </mark>
+            ) : (
+              <span key={i}>{part}</span>
+            ),
+          )}
+        </>
+      );
+    } catch {
+      return text;
+    }
+  };
+
+
 
   const genreOptions = useMemo(
     () =>
@@ -661,21 +709,138 @@ const listBooks = [
             </div>
 
             <div className="grid gap-4 mt-4">
-              <SearchInput
+              <SearchInput<ProductRequest, GoogleBookResponse>
                 label="Tên sách"
                 name="name"
-                type="text"
+                value={inputName}
+                inputType="text"
                 placeholder="Nhập tên sách.."
                 register={register}
                 rules={{ required: "Tên sách là bắt buộc" }}
                 error={errors?.name}
-                dataOptions={listBooks} 
-                displayKey="name" 
+                dataOptions={googleBooks ?? []}
+                displayKey="name"
+                valueKey="volumeId"
+                disableLocalFilter={true}
+                isLoading={isLoadingGoogleBooks}
+                loadingMessage="Đang tìm kiếm trên Google Books..."
+                defaultMessage="Nhập tên sách để tìm trên Google Books..."
+                emptyMessage={`Không tìm thấy sách nào cho "${inputName}"`}
+                renderItem={(item) => {
+                  // Kiểm tra xem item có đầy đủ dữ liệu không
+                  const hasAllData =
+                    !!item.name &&
+                    item.authors?.length > 0 &&
+                    !!item.thumbnail &&
+                    !!item.description &&
+                    item.pageCount !== null;
+
+                  return (
+                    <div className="flex items-center gap-3 w-full">
+                      {/* Thumbnail nhỏ nếu có */}
+                      {item.thumbnail ? (
+                        <img
+                          src={item.thumbnail}
+                          alt={item.name}
+                          className="h-10 w-7 shrink-0 rounded object-cover shadow-sm"
+                        />
+                      ) : (
+                        <div className="flex h-10 w-7 shrink-0 items-center justify-center rounded bg-slate-100 text-slate-400">
+                          <BookOpen size={14} />
+                        </div>
+                      )}
+
+                      <div className="flex min-w-0 flex-1 flex-col">
+                        <span className={hasAllData ? "font-bold text-slate-900" : "font-medium text-slate-700"}>
+                          {renderHighlightedText(item.name, debouncedName)}
+                        </span>
+                        <span className="truncate text-xs text-slate-500">
+                          {item.authors?.length > 0
+                            ? item.authors.join(", ")
+                            : "Không rõ tác giả"}
+                        </span>
+                      </div>
+
+                      {/* Badge đầy đủ dữ liệu */}
+                      {hasAllData && (
+                        <span className="shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+                          Đầy đủ
+                        </span>
+                      )}
+                    </div>
+                  );
+                }}
                 onSelect={(selectedItem) => {
-                  // selectedItem chính là toàn bộ object sách mà user vừa click chọn
                   console.log("Sách được chọn:", selectedItem);
 
-                  setValue("name", selectedItem.name);
+                  // Tên sách
+                  setValue("name", selectedItem.name, { shouldDirty: true });
+
+                  // Số trang
+                  if (selectedItem.pageCount) {
+                    setValue("pages", selectedItem.pageCount, { shouldDirty: true });
+                  }
+
+                  // Ngày xuất bản (chuyển đổi format nếu cần)
+                  if (selectedItem.publishedDate) {
+                    // Google Books trả về dạng "2020-01-01" hoặc "2020"
+                    let dateValue = selectedItem.publishedDate;
+                    if (/^\d{4}$/.test(dateValue)) {
+                      dateValue = `${dateValue}-01-01`;
+                    } else if (/^\d{4}-\d{2}$/.test(dateValue)) {
+                      dateValue = `${dateValue}-01`;
+                    }
+                    setValue("publishYear", dateValue, { shouldDirty: true });
+                  }
+
+                  // Giá bán
+                  if (selectedItem.listPrice) {
+                    setValue("price", selectedItem.listPrice, { shouldDirty: true });
+                  }
+
+                  // Giá nhập
+                  if (selectedItem.retailPrice) {
+                    setValue("originalPrice", selectedItem.retailPrice, { shouldDirty: true });
+                  }
+
+                  // Mô tả - chèn vào phần giới thiệu và thay thế ảnh mặc định
+                  if (selectedItem.description || selectedItem.thumbnail) {
+                    const currentDesc = getValues("description");
+                    let updatedDesc = currentDesc;
+
+                    // Thay thế phần placeholder giới thiệu
+                    if (selectedItem.description) {
+                      updatedDesc = updatedDesc.replace(
+                        /Nhập phần giới thiệu ngắn gọn về cuốn sách tại đây\. Mô tả nội dung chính,[\s\S]*?thông điệp nổi bật hoặc giá trị mà cuốn sách mang lại cho người đọc\./,
+                        selectedItem.description
+                      );
+                    }
+
+                    // Thay thế ảnh bìa mặc định trong editor
+                    if (selectedItem.thumbnail) {
+                      updatedDesc = updatedDesc.replace(
+                        /src="https:\/\/images\.unsplash\.com\/photo-1544947950-fa07a98d237f\?q=80&w=600"/,
+                        `src="${selectedItem.thumbnail}"`
+                      );
+                    }
+
+                    if (updatedDesc !== currentDesc) {
+                      setValue("description", updatedDesc, { shouldDirty: true });
+                    }
+                  }
+
+                  // Ảnh bìa
+                  if (selectedItem.thumbnail && coverImages.length === 0) {
+                    const newImage: ImageProductRequest = {
+                      url: selectedItem.thumbnail,
+                      isThumbnail: true,
+                    };
+                    setValue("coverImages", [newImage], {
+                      shouldDirty: true,
+                      shouldValidate: true,
+                    });
+                  }
+                  trigger(["price", "originalPrice"]);
                 }}
               />
 

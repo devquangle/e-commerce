@@ -5,40 +5,54 @@ import type {
   UseFormRegister,
   RegisterOptions,
 } from "react-hook-form";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
+import { Search, X } from "lucide-react";
 
-// Đổi tên T1 -> TForm, T2 -> TOption để code tường minh, không bị nhầm lẫn
 interface SearchInputProps<TForm extends FieldValues, TOption>
   extends Omit<
     React.InputHTMLAttributes<HTMLInputElement>,
-    "name" | "onChange" | "onSelect"
+    "name" | "onChange" | "onSelect" | "type"
   > {
   label?: string;
-  type?: string;
+  inputType?: string;
   name: Path<TForm>;
   register: UseFormRegister<TForm>;
   rules?: RegisterOptions<TForm, Path<TForm>>;
   error?: FieldError;
   required?: boolean;
-  dataOptions: TOption[]; 
+  dataOptions: TOption[];
   displayKey: keyof TOption;
+  valueKey?: keyof TOption;
   onSelect?: (item: TOption) => void;
+  renderItem?: (item: TOption) => React.ReactNode;
+  isLoading?: boolean;
+  loadingMessage?: string;
+  emptyMessage?: string;
+  defaultMessage?: string;
+  disableLocalFilter?: boolean;
 }
 
 export default function SearchInput<TForm extends FieldValues, TOption>({
   label,
   name,
-  placeholder,
+  placeholder = "Tìm kiếm...",
   register,
-  type = "text",
+  inputType = "text",
   rules,
   error,
   required = false,
   disabled = false,
   className = "",
-  dataOptions,
+  dataOptions = [],
   displayKey,
+  valueKey,
   onSelect,
+  renderItem,
+  isLoading = false,
+  loadingMessage = "Đang tìm kiếm...",
+  emptyMessage = "Không tìm thấy kết quả phù hợp",
+  defaultMessage = "Nhập từ khóa để tìm kiếm...",
+  disableLocalFilter = false,
   ...rest
 }: SearchInputProps<TForm, TOption>) {
   const hasRequiredRule = rules?.required !== undefined;
@@ -46,21 +60,33 @@ export default function SearchInput<TForm extends FieldValues, TOption>({
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [highlightIndex, setHighlightIndex] = useState(-1);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const { ref: registerRef, onChange: _onChange, ...registerRest } = register(name, rules);
 
-  // Lọc danh sách theo query người dùng gõ
-  const filtered =
-    query.trim() === ""
-      ? dataOptions
-      : dataOptions.filter((item) =>
-          String(item[displayKey])
-            .toLowerCase()
-            .includes(query.toLowerCase())
-        );
+  const {
+    ref: registerRef,
+    onChange: _onChange,
+    ...registerRest
+  } = register(name, rules);
 
-  // Đóng dropdown khi click ra ngoài container
+  // Xử lý trường hợp component cha truyền null vào
+  const safeDataOptions = useMemo(() => dataOptions || [], [dataOptions]);
+
+  // Đồng bộ với value từ bên ngoài (nếu có, ví dụ từ react-hook-form useWatch)
+  const currentValue = rest.value !== undefined ? String(rest.value) : query;
+
+  // Lọc danh sách theo query có tối ưu hiệu suất (chỉ tính toán lại khi data hoặc currentValue thay đổi)
+  const filtered = useMemo(() => {
+    if (disableLocalFilter) return safeDataOptions;
+    if (currentValue.trim() === "") return safeDataOptions;
+    const lowerQuery = currentValue.toLowerCase();
+    return safeDataOptions.filter((item) =>
+      String(item[displayKey]).toLowerCase().includes(lowerQuery)
+    );
+  }, [currentValue, safeDataOptions, displayKey, disableLocalFilter]);
+
+  // Xử lý click ra ngoài
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (
@@ -74,50 +100,66 @@ export default function SearchInput<TForm extends FieldValues, TOption>({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  /** Xử lý khi chọn 1 item trong dropdown */
-  // 💡 FIX: Đổi từ `item: T` thành `item: TOption` để khớp định nghĩa component
-  function handleSelect(item: TOption) {
-    const newValue = String(item[displayKey]);
-    setQuery(newValue);
+  const handleSelect = useCallback(
+    (item: TOption) => {
+      const newValue = String(item[displayKey]);
+      if (rest.value === undefined) setQuery(newValue);
+      setIsOpen(false);
+      setHighlightIndex(-1);
+
+      // Lưu ID duy nhất của item được chọn
+      const uniqueId = valueKey ? String(item[valueKey]) : `${String(item[displayKey])}-${safeDataOptions.indexOf(item)}`;
+      setSelectedId(uniqueId);
+
+      _onChange({
+        target: { name, value: newValue },
+        type: "change",
+      });
+
+      onSelect?.(item);
+    },
+    [displayKey, valueKey, name, rest.value, _onChange, onSelect, safeDataOptions]
+  );
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (!isOpen) {
+        if (e.key === "ArrowDown" || e.key === "ArrowUp") setIsOpen(true);
+        return;
+      }
+      switch (e.key) {
+        case "ArrowDown":
+          e.preventDefault();
+          setHighlightIndex((prev) => Math.min(prev + 1, filtered.length - 1));
+          break;
+        case "ArrowUp":
+          e.preventDefault();
+          setHighlightIndex((prev) => Math.max(prev - 1, 0));
+          break;
+        case "Enter":
+          e.preventDefault();
+          if (highlightIndex >= 0 && filtered[highlightIndex]) {
+            handleSelect(filtered[highlightIndex]);
+          }
+          break;
+        case "Escape":
+          setIsOpen(false);
+          setHighlightIndex(-1);
+          break;
+      }
+    },
+    [isOpen, filtered, highlightIndex, handleSelect]
+  );
+
+  const handleClear = useCallback(() => {
+    if (rest.value === undefined) setQuery("");
     setIsOpen(false);
     setHighlightIndex(-1);
-    
-    // Báo cho react-hook-form biết giá trị đã thay đổi
     _onChange({
-      target: { name, value: newValue },
+      target: { name, value: "" },
       type: "change",
     });
-
-    onSelect?.(item);
-  }
-
-  /** Điều hướng keyboard trong dropdown */
-  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (!isOpen) {
-      if (e.key === "ArrowDown" || e.key === "ArrowUp") setIsOpen(true);
-      return;
-    }
-    switch (e.key) {
-      case "ArrowDown":
-        e.preventDefault();
-        setHighlightIndex((prev) => Math.min(prev + 1, filtered.length - 1));
-        break;
-      case "ArrowUp":
-        e.preventDefault();
-        setHighlightIndex((prev) => Math.max(prev - 1, 0));
-        break;
-      case "Enter":
-        if (highlightIndex >= 0 && filtered[highlightIndex]) {
-          e.preventDefault();
-          handleSelect(filtered[highlightIndex]);
-        }
-        break;
-      case "Escape":
-        setIsOpen(false);
-        setHighlightIndex(-1);
-        break;
-    }
-  }
+  }, [rest.value, name, _onChange]);
 
   return (
     <div className="w-full space-y-1.5" ref={containerRef}>
@@ -125,7 +167,7 @@ export default function SearchInput<TForm extends FieldValues, TOption>({
       {label && (
         <label
           htmlFor={name}
-          className="block text-sm font-medium text-slate-700"
+          className="block text-xs font-bold uppercase tracking-wide text-slate-600"
         >
           {label}
           {(required || hasRequiredRule) && (
@@ -134,47 +176,33 @@ export default function SearchInput<TForm extends FieldValues, TOption>({
         </label>
       )}
 
-      {/* Input wrapper */}
+      {/* Vùng chứa Input và Dropdown */}
       <div className="relative">
         <div
           className={`
-            flex h-11 items-center rounded-xl border transition-all
+            relative flex h-11 w-full mb-1.5 items-center rounded-xl border bg-white px-3 transition-all
             ${
               error
                 ? "border-red-500 bg-red-50"
-                : "border-slate-300 bg-white focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-100"
+                : "border-slate-300 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-100 hover:border-slate-400"
             }
-            ${disabled ? "bg-slate-100 opacity-70" : ""}
+            ${disabled ? "cursor-not-allowed bg-slate-100 opacity-70" : ""}
           `}
         >
-          {/* Search icon */}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="ml-3 h-4 w-4 flex-shrink-0 text-slate-400"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"
-            />
-          </svg>
+          <Search size={16} className="shrink-0 text-slate-400" />
 
           <input
             id={name}
-            type={type}
+            type={inputType}
             disabled={disabled}
             placeholder={placeholder}
             autoComplete="off"
-            value={query}
+            value={currentValue}
             onChange={(e) => {
-              setQuery(e.target.value);
+              if (rest.value === undefined) setQuery(e.target.value);
               setIsOpen(true);
               setHighlightIndex(-1);
-              _onChange(e); 
+              _onChange(e);
             }}
             onFocus={() => {
               if (!disabled) setIsOpen(true);
@@ -184,79 +212,78 @@ export default function SearchInput<TForm extends FieldValues, TOption>({
             {...registerRest}
             {...rest}
             className={`
-              h-full w-full bg-transparent px-3 text-sm
-              text-slate-900 placeholder:text-slate-400
-              outline-none
+              h-full w-full bg-transparent px-2 text-sm text-slate-900 outline-none placeholder:text-slate-400
               ${className}
             `}
           />
 
-          {/* Clear button */}
-          {query && !disabled && (
+          {currentValue && !disabled && (
             <button
               type="button"
-              onClick={() => {
-                setQuery("");
-                setIsOpen(false);
-                setHighlightIndex(-1);
-                _onChange({
-                  target: { name, value: "" },
-                  type: "change",
-                });
-              }}
-              className="mr-3 flex-shrink-0 text-slate-400 hover:text-slate-600 transition-colors"
-              aria-label="Xóa tìm kiếm"
+              onClick={handleClear}
+              className="flex shrink-0 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 p-1"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
+              <X size={14} />
             </button>
           )}
         </div>
 
-        {/* Dropdown suggestions */}
-        {isOpen && !disabled && filtered.length > 0 && (
-          <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-60 overflow-auto rounded-xl border border-slate-200 bg-white shadow-lg">
-            {filtered.map((item, idx) => (
-              <div
-                key={`${String(item[displayKey])}-${idx}`}
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  handleSelect(item);
-                }}
-                onMouseEnter={() => setHighlightIndex(idx)}
-                className={`
-                  cursor-pointer select-none px-4 py-2.5 text-sm transition-colors
-                  ${
-                    idx === highlightIndex
-                      ? "bg-indigo-50 text-indigo-700 font-medium"
-                      : "text-slate-700 hover:bg-slate-50"
-                  }
-                `}
-              >
-                {String(item[displayKey])}
+        {/* Dropdown danh sách */}
+        <div
+          className={`
+            absolute left-0 right-0 z-50 mt-1.5 origin-top overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg transition-all
+            ${isOpen && !disabled ? "pointer-events-auto scale-100 opacity-100" : "pointer-events-none scale-95 opacity-0"}
+          `}
+        >
+          <div className="max-h-60 overflow-y-auto p-1.5">
+            {isLoading ? (
+              <div className="py-6 flex items-center justify-center text-sm italic text-slate-500">
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                {loadingMessage}
               </div>
-            ))}
-          </div>
-        )}
+            ) : currentValue.trim() === "" && safeDataOptions.length === 0 ? (
+              <div className="py-6 text-center text-sm italic text-slate-400">
+                {defaultMessage}
+              </div>
+            ) : filtered.length > 0 ? (
+              filtered.map((item, idx) => {
+                const isHighlighted = idx === highlightIndex;
+                const itemId = valueKey ? String(item[valueKey]) : `${String(item[displayKey])}-${safeDataOptions.indexOf(item)}`;
+                const isSelected = selectedId === itemId;
 
-        {/* Không tìm thấy kết quả */}
-        {isOpen && !disabled && query.trim() !== "" && filtered.length === 0 && (
-          <div className="absolute left-0 right-0 top-full z-50 mt-1 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-400 shadow-lg">
-            Không tìm thấy kết quả cho &quot;{query}&quot;
+                return (
+                  <div
+                    key={`${String(item[displayKey])}-${idx}`}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      handleSelect(item);
+                    }}
+                    onMouseEnter={() => setHighlightIndex(idx)}
+                    className={`
+                      flex cursor-pointer select-none items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors
+                      ${
+                        isHighlighted
+                          ? "bg-indigo-100 text-indigo-900"
+                          : isSelected
+                            ? "bg-indigo-50 font-medium text-indigo-900"
+                            : "text-slate-700 hover:bg-slate-50"
+                      }
+                    `}
+                  >
+                    {renderItem ? renderItem(item) : <span>{String(item[displayKey])}</span>}
+                  </div>
+                );
+              })
+            ) : (
+              <div className="py-6 text-center text-sm italic text-slate-400">
+                {emptyMessage}
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
       {/* Error message */}

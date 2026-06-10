@@ -115,7 +115,10 @@ export default function ResizableImageNodeView({
 
   return (
     <NodeViewWrapper as="div" className="w-full" ref={wrapperRef}>
-      <div className={`${imageAlignClass} relative w-fit`}>
+      <div 
+        className={`${imageAlignClass} relative`}
+        style={{ width: `${imageWidth}%`, maxWidth: "100%" }}
+      >
         <div className={`absolute -top-10 right-0 z-10 items-center gap-1 rounded-md border bg-white p-1 shadow-sm ${selected ? 'flex' : 'hidden'}`}>
           <button
             type="button"
@@ -229,10 +232,8 @@ export default function ResizableImageNodeView({
         src={attrs.src}
         alt={attrs.alt ?? ""}
         title={attrs.title ?? ""}
-        className={`${imageAlignClass} rounded-md max-w-full ${selected ? "ring-2 ring-violet-400" : ""}`}
+        className={`w-full rounded-md ${selected ? "ring-2 ring-violet-400" : ""}`}
         style={{
-          width: `${imageWidth}%`,
-          maxWidth: "100%",
           height: "auto",
         }}
       />

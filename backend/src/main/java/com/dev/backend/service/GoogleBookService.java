@@ -74,7 +74,7 @@ public class GoogleBookService {
 
             GoogleBookApiResponse.VolumeInfo volumeInfo = item.getVolumeInfo();
 
-            response.setTitle(volumeInfo.getTitle());
+            response.setName(volumeInfo.getTitle());
 
             response.setAuthors(volumeInfo.getAuthors());
             response.setPublishedDate(volumeInfo.getPublishedDate());

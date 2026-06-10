@@ -14,7 +14,7 @@ import { useWikipediaAuthor } from "@/hooks/useWikipediaAuthor";
 import TextAreaField from "@/components/common/TextAreaField";
 import { showErrorToast, showSuccessToast } from "@/utils/toastUtil";
 import SingleImageUpload from "@/components/common/SingleImageUpload";
-import type { AuthorReq, AuthorRes } from "@/types/author";
+import type { AuthorRequest, AuthorResponse } from "@/types/author";
 import { BaseStatus, getBaseStatusLabel } from "@/types/status";
 import {
   useCreateAuthor,
@@ -26,7 +26,7 @@ import { mapServerErrors } from "@/utils/mapServerErrors";
 import imageService from "@/services/imageService";
 
 const initialFilterOptions = { keyword: "", status: "", page: 1, size: 10 };
-const initAuthor: AuthorReq = {
+const initAuthor: AuthorRequest = {
   name: "",
   extract: "",
   urlBio: "",
@@ -64,7 +64,7 @@ export default function AuthorPage() {
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [openSaveModal, setOpenSaveModal] = useState(false);
 
-  const [selectItem, setSelectItem] = useState<AuthorRes | null>(null);
+  const [selectItem, setSelectItem] = useState<AuthorResponse | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string>("");
 
@@ -77,7 +77,7 @@ export default function AuthorPage() {
     getValues,
     control,
     formState: { errors },
-  } = useForm<AuthorReq>({
+  } = useForm<AuthorRequest>({
     defaultValues: initAuthor,
   });
 
@@ -162,7 +162,7 @@ export default function AuthorPage() {
     }
   };
 
-  const handleOpenDelete = (item: AuthorRes) => {
+  const handleOpenDelete = (item: AuthorResponse) => {
     setSelectItem(item);
     setOpenDeleteModal(true);
   };
@@ -175,7 +175,7 @@ export default function AuthorPage() {
   const updateMutation = useUpdateAuthor();
   const deleteMutation = useDeleteAuthor();
 
-  const onSubmitAdd = async (req: AuthorReq) => {
+  const onSubmitAdd = async (req: AuthorRequest) => {
     if (createMutation.isPending) return;
     try {
       let uploadedImageUrl = "";
@@ -188,7 +188,7 @@ export default function AuthorPage() {
         uploadedImageUrl = uploadRes.urlImage;
       }
 
-      const payload: AuthorReq = {
+      const payload: AuthorRequest = {
         ...req,
         urlImage: uploadedImageUrl,
       };
@@ -199,7 +199,7 @@ export default function AuthorPage() {
     }
   };
 
-  const onSubmitUpdate = async (req: AuthorReq) => {
+  const onSubmitUpdate = async (req: AuthorRequest) => {
     if (updateMutation.isPending) return;
     try {
       if (!selectItem) return;
@@ -216,7 +216,7 @@ export default function AuthorPage() {
         uploadedImageUrl = "";
       }
 
-      const payload: AuthorReq = {
+      const payload: AuthorRequest = {
         ...req,
         urlImage: uploadedImageUrl,
       };
@@ -238,7 +238,7 @@ export default function AuthorPage() {
     handleCloseDelete();
   };
 
-  const handleOpenSaveModal = (item: AuthorRes | null) => {
+  const handleOpenSaveModal = (item: AuthorResponse | null) => {
     if (item) {
       setSelectItem(item);
       reset({
