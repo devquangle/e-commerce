@@ -15,7 +15,7 @@ public class GoogleBookResponse {
     private String volumeId;
 
     private String name;
-    List<String> authors;
+    private List<String> authors;
 
     private String publishedDate;
 
