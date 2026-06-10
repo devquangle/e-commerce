@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef, use } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import ProductDescriptionEditor from "../../components/admin/product/ProductDescriptionEditor";
 import SelectedMutil from "@/components/common/SelectedMutil";
 import {
@@ -33,10 +33,9 @@ import type { ProductRequest } from "@/types/product";
 import productService from "@/services/productService";
 import SearchInput from "@/components/common/SearchInput";
 import useDebounce from "@/hooks/useDebounce";
-import GoogleBookService from "@/services/googlebookService";
+import { useFilterGoogleBook } from "@/hooks/useGoogleBook";
+import { useGroqBook } from "@/hooks/useGroq";
 import type { GoogleBookResponse } from "@/types/googlebook";
-
-
 
 const initialForm: ProductRequest = {
   name: "",
@@ -216,7 +215,7 @@ const initialForm: ProductRequest = {
 
 <p>
 
-  Giới thiệu ngắn gọn về tác giả, quá trình sáng tác và các tác phẩm nổi bật khác.
+  Giới thiệu ngắn gọn về tác giả
 
 </p>
 
@@ -259,34 +258,10 @@ export default function CreateProduct() {
 
   const inputName = useWatch({ control, name: "name" }) || "";
   const debouncedName = useDebounce(inputName, 1000);
-  const [googleBooks, setGoogleBook] = useState<GoogleBookResponse[] | null>(
-    null,
-  );
-  const [isSearching, setIsSearching] = useState(false);
 
-  useEffect(() => {
-    if (!debouncedName?.trim()) {
-      setGoogleBook([]);
-      return;
-    }
-
-    const fetchBooks = async () => {
-      setIsSearching(true);
-      try {
-        const books = await GoogleBookService.filter(debouncedName);
-        setGoogleBook(books);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setIsSearching(false);
-      }
-    };
-
-    fetchBooks();
-  }, [debouncedName, setGoogleBook]);
-
-  // Trạng thái loading: chỉ hiện loading khi thực sự đang gọi API (sau khi debounce)
-  const isLoadingGoogleBooks = isSearching;
+  const { data: googleBooks = [], isFetching: isLoadingGoogleBooks } =
+    useFilterGoogleBook(debouncedName);
+  const { mutateAsync: generateGroqDescription } = useGroqBook();
 
   // Hàm escape ký tự đặc biệt trong regex
   const escapeRegex = (str: string) =>
@@ -302,7 +277,10 @@ export default function CreateProduct() {
         <>
           {parts.map((part, i) =>
             part.toLowerCase() === highlight.toLowerCase() ? (
-              <mark key={i} className="bg-transparent font-bold text-indigo-700">
+              <mark
+                key={i}
+                className="bg-transparent font-bold text-indigo-700"
+              >
                 {part}
               </mark>
             ) : (
@@ -315,8 +293,6 @@ export default function CreateProduct() {
       return text;
     }
   };
-
-
 
   const genreOptions = useMemo(
     () =>
@@ -617,6 +593,28 @@ export default function CreateProduct() {
       }
     }
 
+    // Cập nhật phần 5. Về Tác Giả
+    const selectedAuthors = ((authorIds as number[]) || [])
+      .map((id) => authorsData.find((a: AuthorResponse) => a.id === id))
+      .filter(Boolean);
+
+    if (selectedAuthors.length > 0) {
+      const authorDescriptions = selectedAuthors
+        .map(
+          (a) =>
+            `- ${a?.name || "Chưa rõ"}: ${a?.description || "Chưa có mô tả."}`,
+        )
+        .join("<br/>\n");
+      const authorSectionRegex =
+        /(<h5><strong>5\. Về Tác Giả<\/strong><\/h5>\s*)<p>[\s\S]*?<\/p>/i;
+      if (authorSectionRegex.test(newDesc)) {
+        newDesc = newDesc.replace(
+          authorSectionRegex,
+          `$1<p>\n${authorDescriptions}\n</p>`,
+        );
+      }
+    }
+
     if (newDesc !== currentDesc) {
       setValue("description", newDesc, { shouldDirty: true });
     }
@@ -631,6 +629,7 @@ export default function CreateProduct() {
     genreOptions,
     publisherOptions,
     seriesOptions,
+    authorsData,
     setValue,
     getValues,
   ]);
@@ -725,7 +724,11 @@ export default function CreateProduct() {
                 isLoading={isLoadingGoogleBooks}
                 loadingMessage="Đang tìm kiếm trên Google Books..."
                 defaultMessage="Nhập tên sách để tìm trên Google Books..."
-                emptyMessage={`Không tìm thấy sách nào cho "${inputName}"`}
+                emptyMessage={
+                  inputName !== debouncedName
+                    ? "Đang chờ tìm kiếm..."
+                    : `Không tìm thấy sách nào cho "${inputName}"`
+                }
                 renderItem={(item) => {
                   // Kiểm tra xem item có đầy đủ dữ liệu không
                   const hasAllData =
@@ -751,7 +754,13 @@ export default function CreateProduct() {
                       )}
 
                       <div className="flex min-w-0 flex-1 flex-col">
-                        <span className={hasAllData ? "font-bold text-slate-900" : "font-medium text-slate-700"}>
+                        <span
+                          className={
+                            hasAllData
+                              ? "font-bold text-slate-900"
+                              : "font-medium text-slate-700"
+                          }
+                        >
                           {renderHighlightedText(item.name, debouncedName)}
                         </span>
                         <span className="truncate text-xs text-slate-500">
@@ -778,7 +787,9 @@ export default function CreateProduct() {
 
                   // Số trang
                   if (selectedItem.pageCount) {
-                    setValue("pages", selectedItem.pageCount, { shouldDirty: true });
+                    setValue("pages", selectedItem.pageCount, {
+                      shouldDirty: true,
+                    });
                   }
 
                   // Ngày xuất bản (chuyển đổi format nếu cần)
@@ -795,39 +806,95 @@ export default function CreateProduct() {
 
                   // Giá bán
                   if (selectedItem.listPrice) {
-                    setValue("price", selectedItem.listPrice, { shouldDirty: true });
+                    setValue("price", selectedItem.listPrice, {
+                      shouldDirty: true,
+                    });
                   }
 
                   // Giá nhập
                   if (selectedItem.retailPrice) {
-                    setValue("originalPrice", selectedItem.retailPrice, { shouldDirty: true });
+                    setValue("originalPrice", selectedItem.retailPrice, {
+                      shouldDirty: true,
+                    });
                   }
 
-                  // Mô tả - chèn vào phần giới thiệu và thay thế ảnh mặc định
-                  if (selectedItem.description || selectedItem.thumbnail) {
-                    const currentDesc = getValues("description");
-                    let updatedDesc = currentDesc;
-
-                    // Thay thế phần placeholder giới thiệu
-                    if (selectedItem.description) {
-                      updatedDesc = updatedDesc.replace(
-                        /Nhập phần giới thiệu ngắn gọn về cuốn sách tại đây\. Mô tả nội dung chính,[\s\S]*?thông điệp nổi bật hoặc giá trị mà cuốn sách mang lại cho người đọc\./,
-                        selectedItem.description
-                      );
-                    }
-
-                    // Thay thế ảnh bìa mặc định trong editor
-                    if (selectedItem.thumbnail) {
-                      updatedDesc = updatedDesc.replace(
-                        /src="https:\/\/images\.unsplash\.com\/photo-1544947950-fa07a98d237f\?q=80&w=600"/,
-                        `src="${selectedItem.thumbnail}"`
-                      );
-                    }
-
-                    if (updatedDesc !== currentDesc) {
-                      setValue("description", updatedDesc, { shouldDirty: true });
-                    }
+                  // Cập nhật ảnh đại diện ngay lập tức
+                  if (selectedItem.thumbnail) {
+                    let updatedDesc = getValues("description");
+                    updatedDesc = updatedDesc.replace(
+                      /src="https:\/\/images\.unsplash\.com\/photo-1544947950-fa07a98d237f\?q=80&w=600"/,
+                      `src="${selectedItem.thumbnail}"`,
+                    );
+                    setValue("description", updatedDesc, { shouldDirty: true });
                   }
+
+                  // Cập nhật Giới Thiệu Sách bằng mô tả từ Google Books
+                  if (selectedItem.description) {
+                    let updatedDesc = getValues("description");
+                    updatedDesc = updatedDesc.replace(
+                      /<p>\s*Nhập phần giới thiệu ngắn gọn[\s\S]*?<\/p>/,
+                      `<p>${selectedItem.description}</p>`,
+                    );
+                    setValue("description", updatedDesc, { shouldDirty: true });
+                  }
+
+                  // Gọi AI để tạo mô tả chi tiết từ Groq
+                  const handleGroqBook = async () => {
+                    try {
+                      showSuccessToast("Đang dùng AI tạo mô tả chi tiết...");
+                      const metadata = await generateGroqDescription({
+                        name: selectedItem.name,
+                        description: selectedItem.description || "",
+                      });
+
+                      let newDesc = getValues("description");
+
+                      // 1. Thay thế Nội Dung Chính (summary)
+                      if (metadata.summary) {
+                        newDesc = newDesc.replace(
+                          /<p>\s*Mô tả ngắn gọn cốt truyện[\s\S]*?<\/p>/,
+                          `<p>${metadata.summary}</p>`,
+                        );
+                      }
+
+                      // 2. Thay thế Điểm nổi bật (highlights)
+                      if (
+                        metadata.highlights &&
+                        metadata.highlights.length > 0
+                      ) {
+                        const highlightsHtml = `<p>\n${metadata.highlights.join(", <br/>\n")}\n</p>`;
+                        newDesc = newDesc.replace(
+                          /<ul>\s*<li>Nội dung hấp dẫn[\s\S]*?<\/ul>/,
+                          highlightsHtml,
+                        );
+                      }
+
+                      // 3. Thay thế Đối tượng độc giả (targetAudience)
+                      if (
+                        metadata.targetAudience &&
+                        metadata.targetAudience.length > 0
+                      ) {
+                        const audienceText =
+                          metadata.targetAudience.join(", <br/>\n");
+                        newDesc = newDesc.replace(
+                          /<p>\s*Cuốn sách phù hợp với những người quan tâm[\s\S]*?<\/p>/,
+                          `<p>${audienceText}</p>`,
+                        );
+                      }
+
+                      setValue("description", newDesc, { shouldDirty: true });
+                      showSuccessToast(
+                        "Đã tự động tạo mô tả bằng AI thành công!",
+                      );
+                    } catch (error) {
+                      console.log(error);
+                      showErrorToast(
+                        "Không thể tạo mô tả bằng AI. Đang dùng mô tả gốc.",
+                      );
+                    }
+                  };
+
+                  handleGroqBook();
 
                   // Ảnh bìa
                   if (selectedItem.thumbnail && coverImages.length === 0) {

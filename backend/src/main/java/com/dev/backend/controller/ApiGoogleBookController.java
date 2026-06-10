@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dev.backend.dto.googlebook.GoogleBookResponse;
+import com.dev.backend.dto.grop.BookMetadataRequest;
 import com.dev.backend.dto.grop.BookMetadataResponse;
 import com.dev.backend.response.ResponseData;
 import com.dev.backend.response.ResponseUtil;
@@ -18,7 +19,6 @@ import com.dev.backend.service.GroqService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-
 
 @RestController
 @RequestMapping("/public")
@@ -33,10 +33,18 @@ public class ApiGoogleBookController {
         List<GoogleBookResponse> response = bookService.searchBooks(query);
         return ResponseUtil.success("Lấy dữ liệu thành công", response);
     }
+
     @PostMapping("/book-metadata")
-    public ResponseEntity<ResponseData<BookMetadataResponse>> filter(@RequestParam String name ,@RequestParam List<String> authors,@RequestParam String description) {
-        BookMetadataResponse response=groqService.generateMetadata(name, authors, description);
-        return ResponseUtil.success("Lấy dữ liệu thành công", response);
+    public ResponseEntity<ResponseData<BookMetadataResponse>> filter(
+            @RequestBody BookMetadataRequest request) {
+
+        BookMetadataResponse response = groqService.generateMetadata(
+                request.name(),
+                request.description());
+
+        return ResponseUtil.success(
+                "Lấy dữ liệu thành công",
+                response);
     }
-    
+
 }

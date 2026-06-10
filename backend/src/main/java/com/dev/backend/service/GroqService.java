@@ -1,11 +1,11 @@
 package com.dev.backend.service;
 
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -17,47 +17,69 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class GroqService {
+
         private final RestTemplate restTemplate;
         private final ObjectMapper objectMapper;
+        @Value("${app.groq.api-key}")
+        private String groqApiKey;
+        private static final String PROMPT_TEMPLATE = """
+                        Bạn là chuyên gia metadata sách.
 
-        private static final String grop_key = "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";
+                        INPUT
+
+                        Title: _TITLE_
+
+                        Description: _DESC_
+
+                        NHIỆM VỤ
+
+                        1. Tạo summary ngắn gọn và chính xác về cuốn sách.
+                        2. Trích xuất 3-8 highlights quan trọng.
+                        3. Xác định nhóm độc giả phù hợp.
+
+                        QUY TẮC
+
+                        - Summary tối đa 300 từ.
+                        - Highlights phải ngắn gọn.
+                        - TargetAudience là các nhóm độc giả.
+                        - Không giải thích.
+                        - Không markdown.
+                        - Chỉ trả về JSON hợp lệ.
+
+                        OUTPUT
+
+                        {
+                          "summary": "",
+                          "highlights": [],
+                          "targetAudience": []
+                        }
+                        """;
 
         public BookMetadataResponse generateMetadata(
                         String title,
-                        List<String> authors,
                         String description) {
+
                 try {
-                        String prompt = """
-                                        Dựa trên thông tin sách sau:
 
-                                        Tên sách: %s
-                                        Tác giả: %s
-                                        Mô tả: %s
-
-                                        Hãy trả về JSON hợp lệ:
-
-                                        {
-                                          "summary": "",
-                                          "highlights": [],
-                                          "targetAudience": [],
-                                          "notableWorks": []
-                                        }
-
-                                        Chỉ trả về JSON.
-                                        """
-                                        .formatted(title,  String.join(", ", authors), description);
+                        String prompt = PROMPT_TEMPLATE
+                                        .replace("_TITLE_", safe(title))
+                                        .replace("_DESC_", safe(description));
 
                         GroqRequest request = new GroqRequest(
-                                        "openai/gpt-oss-20b",
-                                        List.of(
+                                        "openai/gpt-oss-120b",
+                                        List.of(new Message(
+                                                        "system",
+                                                        "Bạn là chuyên gia metadata sách. Chỉ trả về JSON hợp lệ. Không markdown. Không giải thích."),
                                                         new Message("user", prompt)));
 
                         HttpHeaders headers = new HttpHeaders();
-                        headers.setBearerAuth(grop_key);
+                        headers.setBearerAuth(groqApiKey);
                         headers.setContentType(MediaType.APPLICATION_JSON);
 
                         HttpEntity<GroqRequest> entity = new HttpEntity<>(request, headers);
@@ -69,20 +91,60 @@ public class GroqService {
 
                         JsonNode root = objectMapper.readTree(response.getBody());
 
-                        String content = root
-                                        .path("choices")
-                                        .get(0)
-                                        .path("message")
-                                        .path("content")
-                                        .asText();
+                        JsonNode contentNode = root.at("/choices/0/message/content");
 
-                        return objectMapper.readValue(
-                                        content,
-                                        BookMetadataResponse.class);
+                        if (contentNode.isMissingNode() || contentNode.isNull()) {
+                                throw new RuntimeException("Invalid Groq response structure");
+                        }
+
+                        String content = contentNode.asText();
+
+                        log.debug("Groq raw response length={}", content.length());
+
+                        String cleaned = extractJson(content);
+
+                        JsonNode jsonNode = objectMapper.readTree(cleaned);
+
+                        return objectMapper.treeToValue(jsonNode, BookMetadataResponse.class);
+
                 } catch (Exception e) {
-                        e.printStackTrace();
-                        return null;
+
+                        log.error("Groq metadata generation failed", e);
+
+                        return new BookMetadataResponse(
+                                        "",
+                                        List.of(),
+                                        List.of());
+                }
+        }
+
+        /**
+         * Extract JSON safely from LLM response
+         */
+        private String extractJson(String content) {
+
+                if (content == null)
+                        return "{}";
+
+                String cleaned = content
+                                .replaceAll("(?s)```json", "")
+                                .replaceAll("(?s)```", "")
+                                .trim();
+
+                int start = cleaned.indexOf("{");
+                int end = cleaned.lastIndexOf("}");
+
+                if (start >= 0 && end > start) {
+                        return cleaned.substring(start, end + 1);
                 }
 
+                return "{}";
+        }
+
+        /**
+         * Prevent null injection into prompt
+         */
+        private String safe(String input) {
+                return input == null ? "" : input;
         }
 }

@@ -6,7 +6,7 @@ import java.util.List;
 public record BookMetadataResponse(
         String summary,
         List<String> highlights,
-        List<String> targetAudience,
-        List<AuthorInfo> authorsInfo
+        List<String> targetAudience
+
 ) {
 }

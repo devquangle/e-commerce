@@ -4,6 +4,8 @@ import com.dev.backend.dto.googlebook.GoogleBookApiResponse;
 import com.dev.backend.dto.googlebook.GoogleBookResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -19,8 +21,8 @@ public class GoogleBookService {
     private final RestTemplate restTemplate;
 
     private static final String GOOGLE_BOOK_API = "https://www.googleapis.com/books/v1/volumes";
-
-    private final String apiKey = "AIzaSyCII7LDF1TrOtjymE4SWf1Di9rqryKIIe4";
+    @Value("${app.google.books.api-key}")
+    private String googleBooksApiKey;
 
     public List<GoogleBookResponse> searchBooks(String query) {
 
@@ -37,7 +39,7 @@ public class GoogleBookService {
                     url,
                     GoogleBookApiResponse.class,
                     query.trim(),
-                    apiKey);
+                    googleBooksApiKey);
 
             if (apiResponse == null
                     || apiResponse.getItems() == null
@@ -79,7 +81,7 @@ public class GoogleBookService {
             response.setAuthors(volumeInfo.getAuthors());
             response.setPublishedDate(volumeInfo.getPublishedDate());
 
-            response.setDescription(volumeInfo.getDescription() != null ? volumeInfo.getDescription(): "");
+            response.setDescription(volumeInfo.getDescription() != null ? volumeInfo.getDescription() : "");
 
             response.setPageCount(volumeInfo.getPageCount());
 

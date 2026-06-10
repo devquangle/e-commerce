@@ -1,6 +1,8 @@
 import { apiGuest } from "@/configs/axios";
 import type { ApiResponse } from "@/types/api-response";
-import type { GoogleBookResponse } from "@/types/googlebook";
+import type {
+  GoogleBookResponse,
+} from "@/types/googlebook";
 
 const GoogleBookService = {
   async filter(req: string) {
@@ -17,5 +19,6 @@ const GoogleBookService = {
     }
     return res.data.data;
   },
+  
 };
 export default GoogleBookService;

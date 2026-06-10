@@ -3,13 +3,13 @@ spring:
     url: jdbc:mysql://localhost:3306/ecom_store
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
-    password: ""
+    password:
 
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
+    show-sql: true
     hibernate:
       ddl-auto: update
-    show-sql: true
     properties:
       hibernate:
         format_sql: true
@@ -17,11 +17,12 @@ spring:
         default_batch_fetch_size: 50
         jdbc:
           time_zone: UTC
+
   mail:
     host: smtp.gmail.com
     port: 587
     username: lehqpc07896@fpt.edu.vn
-    password: "wkax fhjt mrlp qpmf"
+    password: ${MAIL_APP_PASSWORD}
     default-encoding: UTF-8
     properties:
       mail:
@@ -31,26 +32,33 @@ spring:
             enable: true
             required: true
           ssl:
-            trust: smtp.gmail.com        
+            '[trust]': smtp.gmail.com
 
 logging:
   level:
-    org.springframework.web: DEBUG
-    org.springframework: INFO
     root: INFO
+    org.springframework: INFO
+    org.springframework.web: DEBUG
     com.fpt.java.controllers: DEBUG
 
+app:
+  jwt:
+    secret: ${JWT_SECRET}
 
-jwt:
-  secret: ${JWT_SECRET}
+  cloudinary:
+    cloud-name: ${CLOUDINARY_CLOUD_NAME}
+    api-key: ${CLOUDINARY_API_KEY}
+    api-secret: ${CLOUDINARY_API_SECRET}
 
-cloudinary:
-  cloud-name: ${CLOUDINARY_CLOUD_NAME}
-  api-key: ${CLOUDINARY_API_KEY}
-  api-secret: ${CLOUDINARY_API_SECRET}
+  openai:
+    api-key: ${OPENAI_API_KEY}
 
-openai:
-  api-key: ${OPENAI_API_KEY}
+  gemini:
+    api-key: ${GEMINI_API_KEY}
 
-gemini:
-  api-key: ${GEMINI_API_KEY}
+  groq:
+    api-key: ${GROQ_API_KEY}
+
+  google:
+    books:
+      api-key: ${GOOGLE_BOOK_API_KEY}

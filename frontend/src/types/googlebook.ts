@@ -10,3 +10,9 @@ export interface GoogleBookResponse {
   listPrice: number | null;
   retailPrice: number | null;
 }
+
+export interface BookMetadataResponse {
+  summary: string;
+  highlights: string[];
+  targetAudience: string[];
+}
