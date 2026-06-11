@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import Modal from "@/components/common/Modal";
 import { useForm, useWatch } from "react-hook-form";
 import InputField from "@/components/common/InputField";
@@ -24,6 +24,7 @@ import {
 } from "@/hooks/useAuthor";
 import { mapServerErrors } from "@/utils/mapServerErrors";
 import imageService from "@/services/imageService";
+import Loading from "@/components/common/Loading";
 
 const initialFilterOptions = { keyword: "", status: "", page: 1, size: 10 };
 const initAuthor: AuthorRequest = {
@@ -38,16 +39,16 @@ const initAuthor: AuthorRequest = {
 export default function AuthorPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [keyword, setKeyword] = useState(
-    searchParams.get("keyword") ?? initialFilterOptions.keyword,
+    () => searchParams.get("keyword") ?? initialFilterOptions.keyword,
   );
   const [status, setStatus] = useState<BaseStatus | null>(
-    (searchParams.get("status") as BaseStatus) ?? null,
+    () => (searchParams.get("status") as BaseStatus) ?? null,
   );
   const [page, setPage] = useState<number>(
-    Number(searchParams.get("page")) || initialFilterOptions.page,
+    () => Number(searchParams.get("page")) || initialFilterOptions.page,
   );
   const [size, setSize] = useState<number>(
-    Number(searchParams.get("size")) || initialFilterOptions.size,
+    () => Number(searchParams.get("size")) || initialFilterOptions.size,
   );
 
   const debouncedKeyword = useDebounce(keyword, 500);
@@ -83,7 +84,7 @@ export default function AuthorPage() {
 
   const statusOptions = useMemo(
     () => [
-      { label: "Tất cả trạng thái", value: null as BaseStatus | null },
+      { label: "Tất cả trạng thái", value: null },
       ...(Object.values(BaseStatus) as BaseStatus[]).map((value) => ({
         label: getBaseStatusLabel(value),
         value,
@@ -101,34 +102,39 @@ export default function AuthorPage() {
 
   const filterAuthor = authors?.items || [];
 
-  // Handlers Filter
-  const handleKeywordChange = (val: string) => {
+  // TỐI ƯU: Sử dụng useCallback cho các Filter Handlers để tránh re-render Table
+  const handleKeywordChange = useCallback((val: string) => {
     setKeyword(val);
     setPage(1);
-  };
-  const handleStatusChange = (val: BaseStatus | null) => {
+  }, []);
+
+  const handleStatusChange = useCallback((val: BaseStatus | null) => {
     setStatus(val);
     setPage(1);
-  };
-  const handleResetFilter = () => {
+  }, []);
+
+  const handleResetFilter = useCallback(() => {
     setKeyword("");
     setStatus(null);
     setPage(initialFilterOptions.page);
     setSize(initialFilterOptions.size);
-  };
+  }, []);
 
   const inputName = useWatch({ control, name: "name" });
-  const debouncedName = useDebounce(inputName, 2000);
+  const debouncedName = useDebounce(inputName, 1500); // 1.5s là vừa đủ cho trải nghiệm người dùng
 
-  // Cập nhật: Chỉ fetch Wiki khi Thêm mới HOẶC khi Cập nhật mà người dùng sửa đổi tên tác giả
-  const isNameChanged = selectItem ? debouncedName?.trim() !== selectItem.name : true;
-  const shouldFetchWiki = openSaveModal && !!debouncedName?.trim() && isNameChanged;
+  const isNameChanged = selectItem
+    ? debouncedName?.trim() !== selectItem.name
+    : true;
+  const shouldFetchWiki =
+    openSaveModal && !!debouncedName?.trim() && isNameChanged;
+
   const { data: wikiData, isFetching: isWikiFetching } = useWikipediaAuthor(
     shouldFetchWiki ? debouncedName : "",
     openSaveModal,
   );
 
-  const handleSyncToForm = () => {
+  const handleSyncToForm = useCallback(() => {
     if (!wikiData) return;
 
     const currentValues = getValues();
@@ -160,39 +166,43 @@ export default function AuthorPage() {
     } else {
       showSuccessToast("Các trường thông tin trên Form đã đầy đủ dữ liệu.");
     }
-  };
+  }, [wikiData, getValues, setValue]);
 
-  const handleOpenDelete = (item: AuthorResponse) => {
+  const handleOpenDelete = useCallback((item: AuthorResponse) => {
     setSelectItem(item);
     setOpenDeleteModal(true);
-  };
-  const handleCloseDelete = () => {
+  }, []);
+
+  const handleCloseDelete = useCallback(() => {
     setSelectItem(null);
     setOpenDeleteModal(false);
-  };
+  }, []);
 
   const createMutation = useCreateAuthor();
   const updateMutation = useUpdateAuthor();
   const deleteMutation = useDeleteAuthor();
 
+  // TỐI ƯU: Helper xử lý ảnh dùng chung cho cả Add và Update để tránh trùng lặp code (DRY)
+  const processImageUpload = async (currentUrl: string = "") => {
+    if (file) {
+      const uploadRes = await imageService.uploadFile(file);
+      return uploadRes.urlImage;
+    }
+    if (avatarUrl && avatarUrl !== currentUrl) {
+      const uploadRes = await imageService.upload({ url: avatarUrl });
+      return uploadRes.urlImage;
+    }
+    if (!avatarUrl && currentUrl) {
+      return "";
+    }
+    return currentUrl;
+  };
+
   const onSubmitAdd = async (req: AuthorRequest) => {
     if (createMutation.isPending) return;
     try {
-      let uploadedImageUrl = "";
-
-      if (file) {
-        const uploadRes = await imageService.uploadFile(file);
-        uploadedImageUrl = uploadRes.urlImage;
-      } else if (avatarUrl) {
-        const uploadRes = await imageService.upload({ url: avatarUrl });
-        uploadedImageUrl = uploadRes.urlImage;
-      }
-
-      const payload: AuthorRequest = {
-        ...req,
-        urlImage: uploadedImageUrl,
-      };
-      await createMutation.mutateAsync(payload);
+      const uploadedImageUrl = await processImageUpload();
+      await createMutation.mutateAsync({ ...req, urlImage: uploadedImageUrl });
       handleCloseSaveModal();
     } catch (error: unknown) {
       mapServerErrors(error, setError, showErrorToast);
@@ -203,29 +213,14 @@ export default function AuthorPage() {
     if (updateMutation.isPending) return;
     try {
       if (!selectItem) return;
-
-      let uploadedImageUrl = selectItem.urlImage || "";
-
-      if (file) {
-        const uploadRes = await imageService.uploadFile(file);
-        uploadedImageUrl = uploadRes.urlImage;
-      } else if (avatarUrl && avatarUrl !== selectItem.urlImage) {
-        const uploadRes = await imageService.upload({ url: avatarUrl });
-        uploadedImageUrl = uploadRes.urlImage;
-      } else if (!avatarUrl && selectItem.urlImage) {
-        uploadedImageUrl = "";
-      }
-
-      const payload: AuthorRequest = {
-        ...req,
-        urlImage: uploadedImageUrl,
-      };
+      const uploadedImageUrl = await processImageUpload(
+        selectItem.urlImage || "",
+      );
 
       await updateMutation.mutateAsync({
         id: selectItem.id ?? 0,
-        req: payload,
+        req: { ...req, urlImage: uploadedImageUrl },
       });
-
       handleCloseSaveModal();
     } catch (error: unknown) {
       mapServerErrors(error, setError, showErrorToast);
@@ -238,36 +233,40 @@ export default function AuthorPage() {
     handleCloseDelete();
   };
 
-  const handleOpenSaveModal = (item: AuthorResponse | null) => {
-    if (item) {
-      setSelectItem(item);
-      reset({
-        name: item.name,
-        extract: item.description || "",
-        status: item.status,
-        urlBio: item.urlBio || "",
-        wikibaseItem: item.wikibaseItem || "",
-        urlImage: item.urlImage || "",
-      });
-      setAvatarUrl(item.urlImage || "");
-    } else {
-      reset(initAuthor);
-      setAvatarUrl("");
-    }
-    setFile(null);
-    setOpenSaveModal(true);
-  };
+  const handleOpenSaveModal = useCallback(
+    (item: AuthorResponse | null) => {
+      if (item) {
+        setSelectItem(item);
+        reset({
+          name: item.name,
+          extract: item.description || "",
+          status: item.status,
+          urlBio: item.urlBio || "",
+          wikibaseItem: item.wikibaseItem || "",
+          urlImage: item.urlImage || "",
+        });
+        setAvatarUrl(item.urlImage || "");
+      } else {
+        reset(initAuthor);
+        setAvatarUrl("");
+      }
+      setFile(null);
+      setOpenSaveModal(true);
+    },
+    [reset],
+  );
 
-  const handleCloseSaveModal = () => {
-    reset(initAuthor);
+  const handleCloseSaveModal = useCallback(() => {
+    setOpenSaveModal(false);
     setSelectItem(null);
     setFile(null);
     setAvatarUrl("");
-    setOpenSaveModal(false);
-  };
-
+    reset(initAuthor);
+  }, [reset]);
+  const isSubmitting = createMutation.isPending || updateMutation.isPending;
   return (
     <>
+      {isSubmitting && <Loading />}
       <div className="flex-1 grid grid-cols-1 gap-4 auto-rows-max">
         {/* HEADER */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between card-custom">
@@ -340,7 +339,7 @@ export default function AuthorPage() {
         <Pagination
           currentPage={page}
           totalPages={authors?.totalPages || 1}
-          onPageChange={(p) => setPage(p)}
+          onPageChange={setPage}
           totalItems={authors?.totalItems || 0}
           pageSize={size}
           onPageSizeChange={(s) => {
@@ -363,12 +362,10 @@ export default function AuthorPage() {
         size="lg"
       >
         <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-          {/* Đăng ký các input ẩn để react-hook-form nhận giá trị khi submit */}
           <input type="hidden" {...register("urlBio")} />
           <input type="hidden" {...register("wikibaseItem")} />
           <input type="hidden" {...register("urlImage")} />
 
-          {/* Ô Nhập Tên Tác Giả & Quản lý trạng thái tự động */}
           <div className="space-y-1 relative group">
             <div className="relative w-full">
               <InputField
@@ -381,7 +378,6 @@ export default function AuthorPage() {
                 error={errors?.name}
               />
 
-              {/* Icon Loading góc phải ô nhập liệu */}
               {isWikiFetching && (
                 <div className="absolute right-3 bottom-3 flex items-center z-10">
                   <div className="animate-spin rounded-full h-4 w-4 border-2 border-indigo-500 border-t-transparent" />
@@ -389,7 +385,6 @@ export default function AuthorPage() {
               )}
             </div>
 
-            {/* BANNER 1: Tìm thấy dữ liệu */}
             {wikiData && (
               <div className="mt-2 flex items-center justify-between p-2.5 bg-emerald-50 rounded-lg border border-emerald-100 animate-in fade-in slide-in-from-top-1 duration-200">
                 <div className="flex items-center gap-2 text-xs text-emerald-700">
@@ -409,20 +404,21 @@ export default function AuthorPage() {
               </div>
             )}
 
-            {/* BANNER 2: Không tìm thấy dữ liệu */}
             {shouldFetchWiki &&
-              debouncedName?.trim() && !wikiData && !isWikiFetching && (
-              <div className="mt-2 flex items-center p-2.5 bg-amber-50 rounded-lg border border-amber-100 animate-in fade-in slide-in-from-top-1 duration-200">
-                <div className="flex items-center gap-2 text-xs text-amber-700 text-left">
-                  <span className="flex h-2 w-2 rounded-full bg-amber-400" />
-                  <span>
-                    Không tìm thấy thông tin cho tác giả "
-                    <strong>{debouncedName}</strong>" trên Wikipedia. Bạn có thể
-                    tự điền tay tiểu sử ở dưới.
-                  </span>
+              debouncedName?.trim() &&
+              !wikiData &&
+              !isWikiFetching && (
+                <div className="mt-2 flex items-center p-2.5 bg-amber-50 rounded-lg border border-amber-100 animate-in fade-in slide-in-from-top-1 duration-200">
+                  <div className="flex items-center gap-2 text-xs text-amber-700 text-left">
+                    <span className="flex h-2 w-2 rounded-full bg-amber-400" />
+                    <span>
+                      Không tìm thấy thông tin cho tác giả "
+                      <strong>{debouncedName}</strong>" trên Wikipedia. Bạn có
+                      thể tự điền tay tiểu sử ở dưới.
+                    </span>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
           </div>
 
           <TextAreaField

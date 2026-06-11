@@ -13,6 +13,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class WikipediaApiResponse {
+    private String type;
     private String title;
     private String extract;
 
