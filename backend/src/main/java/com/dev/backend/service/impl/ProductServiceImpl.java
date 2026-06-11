@@ -1,15 +1,22 @@
 package com.dev.backend.service.impl;
 
 import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.dev.backend.constant.BaseStatus;
 import com.dev.backend.constant.ProductStatus;
 import com.dev.backend.dto.product.ProductRequest;
 import com.dev.backend.dto.product.ProductResponse;
 import com.dev.backend.entity.Product;
 import com.dev.backend.mapper.ProductMapper;
 import com.dev.backend.repository.ProductRepository;
+import com.dev.backend.response.PageResponse;
 import com.dev.backend.service.ImageService;
 import com.dev.backend.service.ProductAuthorService;
 import com.dev.backend.service.ProductGenreService;
@@ -89,6 +96,11 @@ public class ProductServiceImpl implements ProductService {
         // TODO Auto-generated method stub
         return null;
     }
+    @Override
+    public Product findBySlug(String slug) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
     @Override
     public Product save(Product product) {
@@ -106,6 +118,30 @@ public class ProductServiceImpl implements ProductService {
     public void validate(ProductRequest productRequest) {
         // TODO Auto-generated method stub
 
+    }
+
+    @Override
+    public PageResponse<ProductResponse> pages(int page, int size, String keyword, String status) {
+      Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by(Sort.Direction.DESC, "id"));
+
+        BaseStatus baseStatus = (status == null || status.isBlank())
+                ? null
+                : BaseStatus.valueOf(status);
+
+        Page<Product> productPage = productRepository
+                .findByNameContainingIgnoreCase(keyword == null ? "" : keyword, baseStatus, pageable);
+
+        List<ProductResponse> items = productPage.getContent().stream().map(productMapper::toDTO).toList();
+
+        return new PageResponse<>(
+                items,
+                productPage.getNumber(),
+                productPage.getSize(),
+                productPage.getTotalElements(),
+                productPage.getTotalPages());
     }
 
 }

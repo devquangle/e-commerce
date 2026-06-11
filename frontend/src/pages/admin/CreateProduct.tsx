@@ -55,6 +55,7 @@ const INITIAL_FORM: ProductRequest = {
   genreIds: [],
   publisherId: undefined,
   seriesId: undefined,
+  isbn:"0000000000000",
   status: "ACTIVE",
   coverImages: [],
   description: `
@@ -644,6 +645,12 @@ export default function CreateProduct() {
                     setValue("publishYear", dateValue, { shouldDirty: true });
                   }
 
+                  if (selectedItem.isbn) {
+                      setValue("isbn", selectedItem.isbn, {
+                      shouldDirty: true,
+                    });
+                  }
+
                   if (selectedItem.listPrice)
                     setValue("price", selectedItem.listPrice, {
                       shouldDirty: true,
@@ -786,6 +793,16 @@ export default function CreateProduct() {
                       onChange={field.onChange}
                     />
                   )}
+                />
+                <InputField
+                  label="Isbn"
+                  name="isbn"
+                  type="text"
+                  register={register}
+                  rules={{
+                    required: "Isbn là bắt buộc",
+                  }}
+                  error={errors?.isbn}
                 />
               </div>
             </div>
