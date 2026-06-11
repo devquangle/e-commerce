@@ -6,6 +6,8 @@ import {
   Calendar,
   FileText,
   Weight,
+  Building2,
+  Layers,
 } from "lucide-react";
 import ProductStatusBadge from "./ProductStatusBadge";
 import ProductActionButtons from "./ProductActionButtons";
@@ -33,10 +35,10 @@ export default function ProductTable({ products, onDelete }: Props) {
             <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider min-w-[400px]">
               Thông tin sản phẩm chung
             </th>
-            <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider w-32">
+            <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider w-36">
               Giá nhập
             </th>
-            <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider w-32">
+            <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider w-36">
               Giá bán
             </th>
             <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider w-24 text-center">
@@ -64,22 +66,22 @@ export default function ProductTable({ products, onDelete }: Props) {
                 </td>
 
                 {/* ── THÔNG TIN SẢN PHẨM CHUNG ── */}
-                <td className="py-3 px-4">
-                  <div className="flex gap-3 h-full">
+                <td className="py-3 px-4 align-middle">
+                  <div className="flex gap-3 items-stretch">
 
-                    {/* Ảnh bìa — kéo cao bằng nội dung */}
-                    <div className="shrink-0 self-stretch">
+                    {/* Ảnh bìa — chiều cao bằng nội dung */}
+                    <div className="shrink-0 flex">
                       {product.urlImageDefault ? (
                         <img
                           src={product.urlImageDefault}
                           alt={product.name}
-                          className="h-full w-16 rounded-lg object-cover border border-slate-200 shadow-sm group-hover:shadow-md transition-shadow"
-                          style={{ minHeight: "96px" }}
+                          className="w-20 rounded-lg object-cover border border-slate-200 shadow-sm group-hover:shadow-md transition-shadow self-stretch"
+                          style={{ minHeight: "88px" }}
                         />
                       ) : (
                         <div
-                          className="h-full w-16 rounded-lg border border-dashed border-slate-200 bg-slate-50 flex items-center justify-center"
-                          style={{ minHeight: "96px" }}
+                          className="w-20 rounded-lg border border-dashed border-slate-200 bg-slate-50 flex items-center justify-center self-stretch"
+                          style={{ minHeight: "88px" }}
                         >
                           <BookOpen size={18} className="text-slate-300" />
                         </div>
@@ -87,9 +89,9 @@ export default function ProductTable({ products, onDelete }: Props) {
                     </div>
 
                     {/* Nội dung 3 nhóm */}
-                    <div className="flex-1 min-w-0 flex flex-col gap-2 py-0.5">
+                    <div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5 py-0.5">
 
-                      {/* ➊ Tên · ISBN · NXB · Series */}
+                      {/* ➊ Tên + ISBN */}
                       <div className="flex flex-col gap-0.5">
                         <p
                           className="font-semibold text-slate-900 text-sm leading-snug line-clamp-2"
@@ -99,22 +101,30 @@ export default function ProductTable({ products, onDelete }: Props) {
                         </p>
                         {product.isbn && (
                           <span className="text-[11px] text-slate-400 font-mono">
-                            ISBN: {product.isbn}
-                          </span>
-                        )}
-                        {product.publisher && (
-                          <span className="text-[11px] text-slate-500">
-                            {product.publisher}
-                          </span>
-                        )}
-                        {product.series && (
-                          <span className="inline-block text-[11px] text-violet-600 bg-violet-50 border border-violet-100 px-1.5 py-0.5 rounded w-fit">
-                            Series: {product.series}
+                            {product.isbn}
                           </span>
                         )}
                       </div>
 
-                      {/* ➋ Chip tác giả + chip thể loại (cùng hàng, wrapping) */}
+                      {/* NXB + Series — cùng 1 hàng, badge màu khác nhau */}
+                      {(product.publisherName || product.seriesName) && (
+                        <div className="flex flex-wrap gap-1">
+                          {product.publisherName && (
+                            <span className="inline-flex items-center gap-1 bg-teal-50 text-teal-700 border border-teal-200 px-2 py-0.5 rounded-full text-[11px] font-medium">
+                              <Building2 size={9} />
+                              {product.publisherName}
+                            </span>
+                          )}
+                          {product.seriesName && (
+                            <span className="inline-flex items-center gap-1 bg-violet-50 text-violet-700 border border-violet-200 px-2 py-0.5 rounded-full text-[11px] font-medium">
+                              <Layers size={9} />
+                              {product.seriesName}
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      {/* ➋ Chip tác giả (indigo + BookOpen) + chip thể loại (slate + Tag) */}
                       <div className="flex flex-wrap gap-1">
                         {product.productAuthors && product.productAuthors.length > 0
                           ? product.productAuthors.map((a) => (
@@ -127,15 +137,13 @@ export default function ProductTable({ products, onDelete }: Props) {
                               </span>
                             ))
                           : (
-                            <span className="text-[11px] text-slate-300 italic">
-                              Chưa có tác giả
-                            </span>
+                            <span className="text-[11px] text-slate-300 italic">Chưa có tác giả</span>
                           )}
-                        {product.productGenres && product.productGenres.length > 0 &&
+                        {product.productGenres &&
                           product.productGenres.map((g) => (
                             <span
                               key={g.id}
-                              className="inline-flex items-center gap-1 bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded-full text-[11px]"
+                              className="inline-flex items-center gap-1 bg-slate-100 text-slate-500 border border-slate-200 px-2 py-0.5 rounded-full text-[11px]"
                             >
                               <Tag size={9} />
                               {g.name}

@@ -590,6 +590,9 @@ export default function CreateProduct() {
                     item.authors?.length > 0 &&
                     !!item.thumbnail &&
                     !!item.description &&
+                    !!item.isbn && 
+                    !!item.description &&
+                    !!item.isbn&&
                     item.pageCount !== null;
                   return (
                     <div className="flex items-center gap-3 w-full">

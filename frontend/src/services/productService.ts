@@ -33,6 +33,16 @@ const productService = {
     return res.data.data;
   },
 
+  async getById(id: number) {
+    const res = await apiAuth.get<ApiResponse<ProductResponse>>(
+      `/admin/products/${id}`,
+    );
+    if (!res.data.success || !res.data.data) {
+      throw new Error(res.data.message || "Failed to fetch product");
+    }
+    return res.data.data;
+  },
+
   async filter(options?: ProductFilterOptions) {
     const res = await apiAuth.get<ApiResponse<Pagination<ProductResponse>>>(
       "/admin/products/filter",
@@ -56,4 +66,3 @@ const productService = {
 };
 
 export default productService;
-

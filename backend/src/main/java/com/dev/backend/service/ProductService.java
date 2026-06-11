@@ -26,6 +26,8 @@ public interface ProductService {
 
     ProductResponse update(Integer id, ProductRequest productRequest);
 
+    ProductResponse edit(Integer id);
+
     void delete(Integer id);
 
     void validate(ProductRequest productRequest);

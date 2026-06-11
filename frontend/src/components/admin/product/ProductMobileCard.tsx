@@ -57,14 +57,14 @@ const ProductMobileCard = ({ products, onDelete }: Props) => {
                     </div>
                   </div>
 
+                  {product.publisherName && (
+                    <span className="text-xs text-slate-500">
+                      {product.publisherName}
+                    </span>
+                  )}
                   {product.isbn && (
                     <span className="text-[11px] text-slate-400 font-mono bg-slate-50 px-1.5 py-0.5 rounded w-fit">
                       {product.isbn}
-                    </span>
-                  )}
-                  {product.publisherName && (
-                    <span className="text-xs text-slate-500 truncate">
-                      {product.publisherName}
                     </span>
                   )}
                   {product.seriesName && (

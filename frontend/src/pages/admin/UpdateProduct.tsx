@@ -1,932 +1,1112 @@
-import { useState, useRef, useEffect, useMemo } from "react";
-import ProductDescriptionEditor from "../../components/admin/product/ProductDescriptionEditor";
-import SelectedMutil from "@/components/common/SelectedMutil";
-import { 
-  BookOpen, 
-  Save, 
-  Plus, 
-  Trash2, 
-  DollarSign, 
-  FileText, 
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { Controller, useForm, useWatch } from "react-hook-form";
+import {
+  BookOpen,
+  Save,
+  Trash2,
+  DollarSign,
+  FileText,
   Image as ImageIcon,
   ArrowLeft,
-  ChevronRight,
-  Sparkles,
-  Percent,
-  Loader2,
-  Building2,
-  Globe,
-  Calendar,
-  Hash,
-  Check,
-  ChevronDown,
-  BookMarked,
-  X
+  Upload,
+  Eye,
+  RotateCcw,
+  Pencil,
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import { useFilterGenre } from "@/hooks/useGenre";
-import { showSuccessToast, showErrorToast } from "@/utils/toastUtil";
-import type { GenreResponse } from "@/types/genre";
 
-type UpdateBookForm = {
-  title: string;
-  slug: string;
-  sku: string;
-  author: string[];
-  publisher: string;
-  genre: string[];
-  language: string;
-  publishYear: string;
-  pages: string;
-  price: string;
-  compareAtPrice: string;
-  stock: string;
-  status: "DRAFT" | "ACTIVE" | "OUT_OF_STOCK";
-  shortDescription: string;
-  description: string;
-  coverImages: string[];
+import ProductDescriptionEditor from "../../components/admin/product/ProductDescriptionEditor";
+import SelectedMutil from "@/components/common/SelectedMutil";
+import SelectBox from "@/components/common/SelectedBox";
+import InputField from "@/components/common/InputField";
+import SearchInput from "@/components/common/SearchInput";
+import Button from "@/components/common/Button";
+
+import { useBookFormData } from "@/hooks/useBookFormData";
+import { useFilterGoogleBook } from "@/hooks/useGoogleBook";
+import { useGroqBook } from "@/hooks/useGroq";
+import useDebounce from "@/hooks/useDebounce";
+import { useProductById, useUpdateProduct } from "@/hooks/useProduct";
+
+import imageService from "@/services/imageService";
+import {
+  showErrorToast,
+  showSuccessToast,
+  showWarningToast,
+} from "@/utils/toastUtil";
+
+import type { AuthorResponse } from "@/types/author";
+import type { GenreResponse } from "@/types/genre";
+import type { ImageProductRequest } from "@/types/image";
+import type { ProductRequest } from "@/types/product.type";
+import type { GoogleBookResponse } from "@/types/googlebook";
+
+const MAX_IMAGES = 6;
+
+const INITIAL_FORM: ProductRequest = {
+  name: "",
+  originalPrice: 200000,
+  price: 190000,
+  quantity: 10,
+  weight: 500,
+  publishYear: "2020-01-01",
+  pages: 200,
+  authorIds: [],
+  genreIds: [],
+  publisherId: undefined,
+  seriesId: undefined,
+  isbn:"0000000000000",
+  status: "ACTIVE",
+  coverImages: [],
+  description: `
+    <h4><strong>Giới Thiệu Sách</strong></h4>
+    <p>Nhập phần giới thiệu ngắn gọn về cuốn sách tại đây. Mô tả nội dung chính, thông điệp nổi bật hoặc giá trị mà cuốn sách mang lại cho người đọc.</p>
+    <img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=600" alt="Ảnh bìa sách" style="width: 40%; max-width: 100%; height: auto;" class="block mx-auto" />
+    <p style="text-align:center; font-size: 14px; color: #666;"><em>Hình ảnh minh họa cho cuốn sách</em></p>
+    <hr />
+    <h5><strong>1. Nội Dung Chính</strong></h5>
+    <p>Mô tả ngắn gọn cốt truyện, kiến thức hoặc chủ đề chính của cuốn sách. Có thể chia thành nhiều đoạn văn để người đọc dễ theo dõi.</p>
+    <h5><strong>2. Điểm Nổi Bật</strong></h5>
+    <ul>
+      <li>Nội dung hấp dẫn và dễ tiếp cận.</li>
+      <li>Thông tin được trình bày rõ ràng, logic.</li>
+      <li>Phù hợp với nhiều nhóm độc giả.</li>
+      <li>Mang lại giá trị thực tiễn cho người đọc.</li>
+    </ul>
+    <hr />
+    <h5><strong>3. Thông Tin Sách</strong></h5>
+    <table>
+      <tbody>
+        <tr><th>Thuộc tính</th><th>Thông tin</th></tr>
+        <tr><td>Tác giả</td><td>[Tên tác giả]</td></tr>
+        <tr><td>Thể loại</td><td>[Tên thể loại]</td></tr>
+        <tr><td>Nhà xuất bản</td><td>[Tên nhà xuất bản]</td></tr>
+        <tr><td>Ngày xuất bản</td><td>[Ngày xuất bản]</td></tr>
+        <tr><td>Số trang</td><td>[Số trang]</td></tr>
+      </tbody>
+    </table>
+    <hr />
+    <h5><strong>4. Đối Tượng Độc Giả</strong></h5>
+    <p>Cuốn sách phù hợp với những người quan tâm đến chủ đề này, học sinh, sinh viên hoặc người đi làm muốn mở rộng kiến thức.</p>
+    <hr />
+    <h5><strong>5. Về Tác Giả</strong></h5>
+    <p>Giới thiệu ngắn gọn về tác giả</p>
+  `,
 };
 
-const POPULAR_PUBLISHERS = [
-  "NXB Trẻ",
-  "NXB Kim Đồng",
-  "Nhã Nam",
-  "NXB Hội Nhà Văn",
-  "NXB Phụ Nữ Việt Nam",
-  "NXB Tổng hợp TP.HCM",
-  "NXB Chính trị Quốc gia Sự thật",
-  "NXB Giáo Dục Việt Nam",
-  "NXB Lao Động",
-  "NXB Mỹ Thuật"
-];
-
-const POPULAR_AUTHORS = [
-  "Paulo Coelho",
-  "Dale Carnegie",
-  "Nguyễn Nhật Ánh",
-  "Haruki Murakami",
-  "Tony Buổi Sáng",
-  "Stephen Hawking",
-  "Napoleon Hill",
-  "J.K. Rowling",
-  "Nguyễn Du",
-  "Tô Hoài",
-  "Victor Hugo",
-  "Hồ Chí Minh",
-  "Nam Cao",
-  "Xuân Diệu",
-  "Trần Đăng Khoa"
-];
-
-const existingBook: UpdateBookForm = {
-  title: "Nhà Giả Kim",
-  slug: "nha-gia-kim",
-  sku: "BK1024",
-  author: ["Paulo Coelho"],
-  publisher: "NXB Hội Nhà Văn",
-  genre: ["Văn học"],
-  language: "Tiếng Việt",
-  publishYear: "2024",
-  pages: "228",
-  price: "92000",
-  compareAtPrice: "120000",
-  stock: "120",
-  status: "ACTIVE",
-  shortDescription: "Hành trình theo đuổi giấc mơ và kho báu của mỗi người.",
-  description:
-    "Nhà Giả Kim kể về chàng chăn cừu Santiago trên hành trình tìm kiếm kho báu và khám phá ý nghĩa cuộc đời.",
-  coverImages: [
-    "https://salt.tikicdn.com/cache/750x750/ts/product/2f/c9/09/cf3c47f3352ef6b09f0cde9e07f77f0e.jpg",
-    "https://salt.tikicdn.com/cache/750x750/ts/product/7f/26/c7/ef2c585f6a65443d0556bd20e709d898.jpg",
-  ],
+// Helper cập nhật HTML table gọn gàng hơn
+const updateTableHtml = (html: string, rowLabel: string, newValue: string) => {
+  const regex = new RegExp(
+    `(<td[^>]*>(?:<p[^>]*>)?\\s*${rowLabel}\\s*(?:<\\/p>)?<\\/td>\\s*<td[^>]*>(?:<p[^>]*>)?)([\\s\\S]*?)(<\\/p>)?(<\\/td>)`,
+    "i",
+  );
+  return html.replace(
+    regex,
+    (_, p1, __, p3, p4) => `${p1}${newValue}${p3 || ""}${p4}`,
+  );
 };
 
 export default function UpdateProduct() {
-  const [form, setForm] = useState<UpdateBookForm>(existingBook);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isPublisherDropdownOpen, setIsPublisherDropdownOpen] = useState(false);
-  const [publisherSearch, setPublisherSearch] = useState("");
-  const publisherDropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const productId = id ? Number(id) : undefined;
+  const replaceFileInputRef = useRef<HTMLInputElement>(null);
 
-  // Fetch active genres from DB using hook
-  const { data: genresData } = useFilterGenre({ size: 100 });
-  const genresList = genresData?.items || [];
+  const [imageUploadMode, setImageUploadMode] = useState<"file" | "url">(
+    "file",
+  );
+  const [imageUrl, setImageUrl] = useState("");
+  const [replaceIndex, setReplaceIndex] = useState<number | null>(null);
 
-  const fallbackGenres = [
-    "Văn học",
-    "Kinh tế - Kỹ năng",
-    "Tâm lý học",
-    "Khoa học - Công nghệ",
-    "Lịch sử - Địa lý",
-    "Thiếu nhi",
-    "Ngoại ngữ",
-    "Tiểu thuyết - Truyện ngắn"
-  ];
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    getValues,
+    control,
+    trigger,
+    formState: { errors, isSubmitted },
+  } = useForm<ProductRequest>({
+    defaultValues: INITIAL_FORM,
+    mode: "onChange",
+  });
 
-  const activeGenres = genresList.length > 0 ? genresList.map((g: GenreResponse) => g.name) : fallbackGenres;
+  const {
+    genresData = [],
+    authorsData = [],
+    publishersData = [],
+    seriesData = [],
+    isLoading: isFormLoading,
+    isError,
+  } = useBookFormData();
 
-  // Map genres to Options for SelectedMutil
-  const genreOptions = useMemo(() => {
-    return activeGenres.map((gName) => ({
-      label: gName,
-      value: gName,
-    }));
-  }, [activeGenres]);
+  const { data: productData, isLoading: isProductLoading } = useProductById(productId);
+  const updateMutation = useUpdateProduct();
+  const isLoading = isFormLoading || isProductLoading;
 
-  // Map authors to Options for SelectedMutil
-  const authorOptions = useMemo(() => {
-    return POPULAR_AUTHORS.map((authName) => ({
-      label: authName,
-      value: authName,
-    }));
-  }, []);
+  // Watch các trường dữ liệu
+  const coverImagesRaw = useWatch({ name: "coverImages", control });
+  const coverImages = useMemo(() => coverImagesRaw || [], [coverImagesRaw]);
+  const inputName = useWatch({ control, name: "name" }) || "";
+  const debouncedName = useDebounce(inputName, 1000);
 
-  // Close dropdowns when clicking outside
+  // Watch riêng biệt nhóm dữ liệu đồng bộ Table để tối ưu re-render qua debounce
+  const taxonomyWatch = useWatch({
+    control,
+    name: [
+      "authorIds",
+      "genreIds",
+      "publisherId",
+      "publishYear",
+      "pages",
+      "seriesId",
+    ],
+  });
+  const debouncedTaxonomy = useDebounce(taxonomyWatch, 800); // Tránh băm nát CPU khi user đang chọn liên tục
+
+  const { data: googleBooks = [], isFetching: isLoadingGoogleBooks } =
+    useFilterGoogleBook(debouncedName);
+  const { mutateAsync: generateGroqDescription } = useGroqBook();
+
+  // Khởi tạo Options sử dụng useMemo ổn định
+  const genreOptions = useMemo(
+    () =>
+      genresData.map((g: GenreResponse) => ({ label: g.name, value: g.id })),
+    [genresData],
+  );
+  const authorOptions = useMemo(
+    () =>
+      authorsData.map((a: AuthorResponse) => ({ label: a.name, value: a.id })),
+    [authorsData],
+  );
+  const publisherOptions = useMemo(
+    () => publishersData.map((p) => ({ label: p.name, value: p.id })),
+    [publishersData],
+  );
+  const seriesOptions = useMemo(
+    () => seriesData.map((s) => ({ label: s.name, value: s.id })),
+    [seriesData],
+  );
+
+  // Load dữ liệu sản phẩm vào form khi productData sẵn sàng
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (publisherDropdownRef.current && !publisherDropdownRef.current.contains(event.target as Node)) {
-        setIsPublisherDropdownOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+    if (!productData) return;
+    const formValues: typeof INITIAL_FORM = {
+      name: productData.name,
+      isbn: productData.isbn,
+      originalPrice: productData.originalPrice,
+      price: productData.price,
+      quantity: productData.quantity,
+      weight: productData.weight,
+      publishYear: productData.publishYear,
+      pages: productData.pages,
+      authorIds: productData.productAuthors?.map((a) => a.id) ?? [],
+      genreIds: productData.productGenres?.map((g) => g.id) ?? [],
+      publisherId: productData.publisherId ?? undefined,
+      seriesId: productData.seriesId ?? undefined,
+      status: "ACTIVE",
+      coverImages: productData.coverImages?.map((img) => ({
+        url: img.url,
+        isThumbnail: img.isThumbnail,
+      })) ?? [],
+      description: productData.description,
     };
-  }, []);
+    reset(formValues);
+  }, [productData, reset]);
 
-  // Auto-generate clean slug URL from title
-  const convertToSlug = (text: string) => {
-    return text
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "") // remove accents
-      .replace(/đ/g, "d")
-      .replace(/Đ/g, "d")
-      .replace(/[^a-z0-9\s-]/g, "") // remove special chars
-      .trim()
-      .replace(/\s+/g, "-") // replace spaces with hyphens
-      .replace(/-+/g, "-"); // remove double hyphens
+  // Clean up Object URL tránh tràn bộ nhớ (Memory Leak)
+  useEffect(() => {
+    return () => {
+      coverImages.forEach((img) => {
+        if (img.url?.startsWith("blob:")) URL.revokeObjectURL(img.url);
+      });
+    };
+  }, [coverImages]);
+
+  // Tách hàm gọi AI tạo mô tả bằng Groq ra ngoài độc lập
+  const handleAIGenerateDescription = useCallback(
+    async (name: string, originalDesc: string) => {
+      try {
+        showSuccessToast("Đang dùng AI tạo mô tả chi tiết...");
+        const metadata = await generateGroqDescription({
+          name,
+          description: originalDesc,
+        });
+
+        let newDesc = getValues("description") || "";
+
+        if (metadata.summary) {
+          newDesc = newDesc.replace(
+            /<p>\s*Mô tả ngắn gọn cốt truyện[\s\S]*?<\/p>/,
+            `<p>${metadata.summary}</p>`,
+          );
+        }
+        if (metadata.highlights?.length) {
+          newDesc = newDesc.replace(
+            /<ul>\s*<li>Nội dung hấp dẫn[\s\S]*?<\/ul>/,
+            `<p>\n${metadata.highlights.join(", <br/>\n")}\n</p>`,
+          );
+        }
+        if (metadata.targetAudience?.length) {
+          newDesc = newDesc.replace(
+            /<p>\s*Cuốn sách phù hợp với những người quan tâm[\s\S]*?<\/p>/,
+            `<p>${metadata.targetAudience.join(", <br/>\n")}</p>`,
+          );
+        }
+
+        setValue("description", newDesc, { shouldDirty: true });
+        showSuccessToast("Đã tự động tạo mô tả bằng AI thành công!");
+      } catch {
+        showErrorToast("Không thể tạo mô tả bằng AI. Đang dùng mô tả gốc.");
+      }
+    },
+    [generateGroqDescription, getValues, setValue],
+  );
+
+  // Đồng bộ thông tin Sách vào HTML Table (Đã bọc Debounce 800ms cực mượt)
+  useEffect(() => {
+    const [authorIds, genreIds, publisherId, publishYear, pages, seriesId] =
+      debouncedTaxonomy;
+    const currentDesc = getValues("description");
+    if (!currentDesc) return;
+
+    let newDesc = currentDesc;
+
+    // Tác giả
+    const authorNames = ((authorIds as number[]) || [])
+      .map((id) => authorOptions.find((a) => a.value === id)?.label)
+      .filter(Boolean)
+      .join(", ");
+    newDesc = updateTableHtml(
+      newDesc,
+      "Tác giả",
+      authorNames || "[Tên tác giả]",
+    );
+
+    // Thể loại
+    const genreNames = ((genreIds as number[]) || [])
+      .map((id) => genreOptions.find((g) => g.value === id)?.label)
+      .filter(Boolean)
+      .join(", ");
+    newDesc = updateTableHtml(
+      newDesc,
+      "Thể loại",
+      genreNames || "[Tên thể loại]",
+    );
+
+    // Nhà xuất bản
+    const publisherName = publisherOptions.find(
+      (p) => p.value === publisherId,
+    )?.label;
+    newDesc = updateTableHtml(
+      newDesc,
+      "Nhà xuất bản",
+      publisherName || "[Tên nhà xuất bản]",
+    );
+
+    // Ngày xuất bản & Số trang
+    newDesc = updateTableHtml(
+      newDesc,
+      "Ngày xuất bản",
+      (publishYear as string) || "[Ngày xuất bản]",
+    );
+    newDesc = updateTableHtml(
+      newDesc,
+      "Số trang",
+      pages ? String(pages) : "[Số trang]",
+    );
+
+    // Xử lý hàng Series
+    const seriesRowRegex =
+      /(<tr[^>]*>[\s\S]*?<td[^>]*>(?:<p[^>]*>)?\s*Series\s*(?:<\/p>)?<\/td>[\s\S]*?<\/tr>)/i;
+    const hasSeriesRow = seriesRowRegex.test(newDesc);
+
+    if (seriesId) {
+      const seriesName =
+        seriesOptions.find((s) => s.value === seriesId)?.label ||
+        "[Tên series]";
+      if (hasSeriesRow) {
+        newDesc = updateTableHtml(newDesc, "Series", seriesName);
+      } else {
+        const pagesRowRegex =
+          /(<tr[^>]*>[\s\S]*?<td[^>]*>(?:<p[^>]*>)?\s*Số trang\s*(?:<\/p>)?<\/td>[\s\S]*?<\/tr>)/i;
+        newDesc = newDesc.replace(
+          pagesRowRegex,
+          (match) =>
+            `${match}\n    <tr>\n      <td>Series</td>\n      <td>${seriesName}</td>\n    </tr>`,
+        );
+      }
+    } else if (hasSeriesRow) {
+      newDesc = newDesc.replace(seriesRowRegex, "");
+    }
+
+    // Cập nhật mô tả chi tiết Tác giả ở phần 5
+    const selectedAuthors = ((authorIds as number[]) || [])
+      .map((id) => authorsData.find((a) => a.id === id))
+      .filter(Boolean);
+    if (selectedAuthors.length > 0) {
+      const authorDescriptions = selectedAuthors
+        .map(
+          (a) =>
+            `- ${a?.name || "Chưa rõ"}: ${a?.description || "Chưa có mô tả."}`,
+        )
+        .join("<br/>\n");
+      newDesc = newDesc.replace(
+        /(<h5><strong>5\. Về Tác Giả<\/strong><\/h5>\s*)<p>[\s\S]*?<\/p>/i,
+        `$1<p>\n${authorDescriptions}\n</p>`,
+      );
+    }
+
+    if (newDesc !== currentDesc) {
+      setValue("description", newDesc, { shouldDirty: true });
+    }
+  }, [
+    debouncedTaxonomy,
+    authorOptions,
+    genreOptions,
+    publisherOptions,
+    seriesOptions,
+    authorsData,
+    setValue,
+    getValues,
+  ]);
+
+  // Xử lý Submit Form chính
+  const onSubmit = async (data: ProductRequest) => {
+    if (!productId) return;
+    try {
+      if (!coverImages.length) {
+        showWarningToast("Vui lòng thêm ít nhất một ảnh sản phẩm!");
+        return;
+      }
+
+      // Chỉ upload những ảnh mới (blob:) — ảnh cũ (https:) giữ nguyên URL
+      const uploadedImages: ImageProductRequest[] = await Promise.all(
+        coverImages.map(async (img) => {
+          if (img.file || img.url?.startsWith("blob:")) {
+            const results = await imageService.uploadImage([img]);
+            return results[0];
+          }
+          return img;
+        }),
+      );
+
+      await updateMutation.mutateAsync({
+        id: productId,
+        req: { ...data, coverImages: uploadedImages },
+      });
+
+      navigate("/admin/products");
+    } catch {
+      // lỗi đã được xử lý trong hook useUpdateProduct
+    }
   };
 
-  const handleChange = <K extends keyof UpdateBookForm>(key: K, value: UpdateBookForm[K]) => {
-    setForm((prev) => ({ ...prev, [key]: value }));
-  };
+  // Các hàm quản lý File Hình Ảnh
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files?.length) return;
 
-  const handleTitleChange = (val: string) => {
-    handleChange("title", val);
-    handleChange("slug", convertToSlug(val));
-  };
-
-  // Media Management
-  const handleCoverImageChange = (index: number, value: string) => {
-    const nextImages = [...form.coverImages];
-    nextImages[index] = value;
-    handleChange("coverImages", nextImages);
-  };
-
-  const handleAddCoverImage = () => {
-    handleChange("coverImages", [...form.coverImages, ""]);
-  };
-
-  const handleRemoveCoverImage = (index: number) => {
-    if (form.coverImages.length === 1) {
-      handleChange("coverImages", [""]);
+    if (coverImages.length >= MAX_IMAGES) {
+      showWarningToast(
+        `Bạn chỉ được phép tải lên tối đa ${MAX_IMAGES} hình ảnh.`,
+      );
       return;
     }
-    handleChange(
-      "coverImages",
-      form.coverImages.filter((_, i) => i !== index)
+
+    const availableSlots = MAX_IMAGES - coverImages.length;
+    const filesToUpload = Array.from(files).slice(0, availableSlots);
+
+    const newImages: ImageProductRequest[] = filesToUpload.map((file) => ({
+      file,
+      url: URL.createObjectURL(file),
+      isThumbnail: false,
+    }));
+
+    if (!coverImages.some((img) => img.isThumbnail) && newImages.length > 0) {
+      newImages[0].isThumbnail = true;
+    }
+
+    setValue("coverImages", [...coverImages, ...newImages], {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+    e.target.value = "";
+  };
+
+  const handleAddImageUrl = () => {
+    const trimmedUrl = imageUrl.trim();
+    if (!trimmedUrl) return;
+
+    try {
+      const url = new URL(trimmedUrl);
+      if (!["http:", "https:"].includes(url.protocol)) throw new Error();
+    } catch {
+      showWarningToast("URL ảnh không hợp lệ.");
+      return;
+    }
+
+    if (coverImages.length >= MAX_IMAGES) {
+      showWarningToast(`Danh sách đã đạt tối đa ${MAX_IMAGES} hình ảnh.`);
+      return;
+    }
+
+    const newImage: ImageProductRequest = {
+      url: trimmedUrl,
+      isThumbnail:
+        coverImages.length === 0 || !coverImages.some((img) => img.isThumbnail),
+    };
+
+    setValue("coverImages", [...coverImages, newImage], {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+    setImageUrl("");
+  };
+
+  const handleRemoveImage = (index: number) => {
+    const imageToRemove = coverImages[index];
+    if (imageToRemove.url?.startsWith("blob:")) {
+      URL.revokeObjectURL(imageToRemove.url);
+    }
+
+    const updatedImages = coverImages.filter((_, i) => i !== index);
+    if (imageToRemove.isThumbnail && updatedImages.length > 0) {
+      updatedImages[0].isThumbnail = true;
+    }
+
+    setValue("coverImages", updatedImages, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  };
+
+  const handleReplaceFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || replaceIndex === null) return;
+
+    const oldImage = coverImages[replaceIndex];
+    if (oldImage.url?.startsWith("blob:")) {
+      URL.revokeObjectURL(oldImage.url);
+    }
+
+    const newImage: ImageProductRequest = {
+      file,
+      url: URL.createObjectURL(file),
+      isThumbnail: oldImage.isThumbnail,
+    };
+
+    const updatedImages = [...coverImages];
+    updatedImages[replaceIndex] = newImage;
+
+    setValue("coverImages", updatedImages, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+    setReplaceIndex(null);
+    e.target.value = "";
+  };
+
+  const handleReset = () => {
+    coverImages.forEach((img) => {
+      if (img.url?.startsWith("blob:")) URL.revokeObjectURL(img.url);
+    });
+    reset(INITIAL_FORM);
+  };
+
+  // Highlight văn bản tìm kiếm trùng khớp ngắn gọn
+  const renderHighlightedText = (text: string, highlight: string) => {
+    if (!highlight.trim()) return text;
+    const parts = text.split(
+      new RegExp(`(${highlight.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi"),
+    );
+    return (
+      <>
+        {parts.map((part, i) =>
+          part.toLowerCase() === highlight.toLowerCase() ? (
+            <mark key={i} className="bg-transparent font-bold text-indigo-700">
+              {part}
+            </mark>
+          ) : (
+            <span key={i}>{part}</span>
+          ),
+        )}
+      </>
     );
   };
 
-  // Discount calculator
-  const getDiscountPercentage = () => {
-    const p = parseFloat(form.price);
-    const cp = parseFloat(form.compareAtPrice);
-    if (p && cp && cp > p) {
-      return Math.round(((cp - p) / cp) * 100);
-    }
-    return 0;
-  };
-
-  // Filter publishers based on search
-  const filteredPublishers = POPULAR_PUBLISHERS.filter((pub) =>
-    pub.toLowerCase().includes(publisherSearch.toLowerCase())
-  );
-
-  // Form submission handler
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Basic validation
-    if (!form.title.trim()) {
-      showErrorToast("Vui lòng nhập tên sách!");
-      return;
-    }
-    if (form.author.length === 0) {
-      showErrorToast("Vui lòng nhập hoặc chọn ít nhất một tác giả!");
-      return;
-    }
-    if (form.genre.length === 0) {
-      showErrorToast("Vui lòng chọn ít nhất một thể loại sách!");
-      return;
-    }
-    if (!form.price.trim() || isNaN(Number(form.price)) || Number(form.price) <= 0) {
-      showErrorToast("Vui lòng nhập giá bán hợp lệ!");
-      return;
-    }
-    if (!form.stock.trim() || isNaN(Number(form.stock)) || Number(form.stock) < 0) {
-      showErrorToast("Vui lòng nhập số lượng tồn kho hợp lệ!");
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      // Simulate API call for updating product
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-      showSuccessToast("Cập nhật thông tin sách thành công!");
-      
-      setTimeout(() => {
-        navigate("/admin/products");
-      }, 1000);
-    } catch {
-      showErrorToast("Có lỗi xảy ra, vui lòng thử lại!");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const currentDiscount = getDiscountPercentage();
+  if (isLoading)
+    return <div className="p-6 text-center">Đang tải dữ liệu form...</div>;
+  if (isError)
+    return (
+      <div className="p-6 text-center text-red-500">
+        Có lỗi xảy ra khi tải dữ liệu.
+      </div>
+    );
 
   return (
-    <section className="space-y-6 p-4 md:p-6 flex-1 max-w-7xl mx-auto w-full">
-      {/* HEADER BREADCRUMB - STICKY FOR PREMIUM CONTROLS */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between pb-4 border-b border-slate-200/60">
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-            <Link to="/admin/products" className="hover:text-indigo-600 transition">Sách</Link>
-            <ChevronRight size={12} />
-            <span className="text-slate-600">Chỉnh sửa</span>
-          </div>
-          <div className="flex items-center gap-2.5">
-            <Link 
-              to="/admin/products" 
-              className="rounded-xl border border-slate-200 bg-white p-2 text-slate-500 hover:bg-slate-50 active:scale-95 transition cursor-pointer shadow-sm hover:text-slate-800"
-              title="Quay lại"
+    <form
+      id="create-product-form"
+      onSubmit={handleSubmit(onSubmit)}
+      className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch"
+    >
+      {/* 1. HEADER ACTIONS */}
+      <div className="col-span-12 bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <Link
+              to="/admin/products"
+              className="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors"
             >
-              <ArrowLeft size={16} />
+              <ArrowLeft size={18} />
             </Link>
-            <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Cập nhật sách</h1>
+            <h1 className="text-xl font-bold text-slate-900 tracking-tight">
+              Cập nhật sản phẩm{productData ? ` — ${productData.name}` : ""}
+            </h1>
           </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex items-center gap-2.5">
-          <Link 
-            to="/admin/products" 
-            className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 active:scale-95 transition-all cursor-pointer shadow-sm"
-          >
-            <X size={16} />
-            Hủy bỏ
-          </Link>
-          <button 
-            type="button"
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            className="flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-indigo-600/15 hover:shadow-lg hover:shadow-indigo-600/25 hover:from-indigo-500 hover:to-violet-500 active:scale-95 transition-all duration-250 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-          >
-            {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-            {isSubmitting ? "Đang lưu..." : "Lưu thay đổi"}
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              color="secondary"
+              className="w-full sm:w-auto"
+            >
+              <Eye size={15} /> Xem nháp
+            </Button>
+            <Button
+              type="button"
+              onClick={handleReset}
+              color="warning"
+              className="w-full sm:w-auto"
+            >
+              <RotateCcw size={15} /> Đặt lại
+            </Button>
+            <Button
+              type="submit"
+              color="primary"
+              className="w-full sm:w-auto"
+              disabled={updateMutation.isPending}
+            >
+              <Save size={15} />
+              {updateMutation.isPending ? "Đang lưu..." : "Lưu thay đổi"}
+            </Button>
+          </div>
         </div>
       </div>
 
-      {/* FORM BODY */}
-      <form id="update-product-form" className="grid gap-6 lg:grid-cols-3 align-start" onSubmit={handleSubmit}>
-        
-        {/* LEFT COLUMN (2/3 width on large screens) */}
-        <div className="lg:col-span-2 space-y-6">
-          
-          {/* BASIC INFORMATION */}
-          <div className="rounded-2xl border border-slate-200/60 bg-gradient-to-tr from-slate-50 to-white p-5 md:p-6 shadow-sm space-y-5">
-            <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-              <div className="rounded-xl bg-indigo-50 p-2 text-indigo-600">
-                <BookOpen size={20} />
-              </div>
-              <div>
-                <h2 className="text-base font-bold text-slate-900">Thông tin sách cơ bản</h2>
-                <p className="text-xs text-slate-500">Mô tả đặc điểm, thuộc tính chính của tác phẩm</p>
-              </div>
+      {/* 2. LEFT COLUMN: BASIC INFO */}
+      <div className="col-span-12 xl:col-span-7 space-y-6 xl:h-full">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-5 xl:h-full flex flex-col justify-between">
+          <div>
+            <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
+              <BookOpen size={18} className="text-indigo-600" />
+              <h2 className="text-base font-bold text-slate-900">
+                Thông tin sách cơ bản
+              </h2>
             </div>
-            
-            <div className="grid gap-5 md:grid-cols-2">
-              
-              {/* Tên sách */}
-              <div className="md:col-span-2 space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-slate-600 uppercase tracking-wide flex items-center gap-1">
-                    Tên sách <span className="text-rose-500">*</span>
-                  </label>
-                  <span className={`text-[10px] font-semibold ${form.title.length > 100 ? "text-rose-500" : "text-slate-400"}`}>
-                    {form.title.length}/120 ký tự
-                  </span>
-                </div>
-                <div className="relative">
-                  <div className="absolute left-4 top-3.5 text-slate-400 pointer-events-none">
-                    <BookMarked size={16} />
-                  </div>
-                  <input
-                    type="text"
-                    required
-                    maxLength={120}
-                    value={form.title}
-                    onChange={(event) => handleTitleChange(event.target.value)}
-                    placeholder="Nhập tên đầy đủ của tác phẩm sách..."
-                    className="w-full rounded-xl border border-slate-200 bg-white/70 pl-10 pr-4 py-3 text-sm placeholder-slate-400 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100"
-                  />
-                </div>
-              </div>
 
-              {/* Slug URL */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-slate-600 uppercase tracking-wide flex items-center gap-1">
-                    Đường dẫn thân thiện (Slug URL)
-                  </label>
-                  <span className="text-[10px] text-indigo-500 font-semibold flex items-center gap-0.5"><Sparkles size={10} /> Tự động</span>
-                </div>
-                <div className="relative">
-                  <div className="absolute left-4 top-3 text-[11px] text-slate-400 font-semibold bg-slate-100/80 px-2 py-0.5 rounded border border-slate-200 pointer-events-none">
-                    /books/
-                  </div>
-                  <input
-                    type="text"
-                    value={form.slug}
-                    onChange={(event) => handleChange("slug", event.target.value)}
-                    placeholder="nha-gia-kim"
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-20 pr-4 py-2.5 text-xs placeholder-slate-400 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100 font-mono text-slate-600"
-                  />
-                </div>
-              </div>
-
-              {/* SKU Code */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-600 uppercase tracking-wide flex items-center gap-1">
-                  Mã định danh (SKU)
-                </label>
-                <div className="relative">
-                  <div className="absolute left-4 top-3 text-slate-400 pointer-events-none">
-                    <Hash size={15} />
-                  </div>
-                  <input
-                    type="text"
-                    value={form.sku}
-                    onChange={(event) => handleChange("sku", event.target.value)}
-                    placeholder="Ví dụ: BK-DACNHANTAM-01"
-                    className="w-full rounded-xl border border-slate-200 bg-white/70 pl-10 pr-4 py-2.5 text-sm placeholder-slate-400 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100"
-                  />
-                </div>
-              </div>
-
-              {/* Tác giả (Chọn nhiều dùng component SelectedMutil với Filter) */}
-              <div className="md:col-span-2">
-                <SelectedMutil
-                  label="Tác giả / Dịch giả *"
-                  options={authorOptions}
-                  value={form.author}
-                  onChange={(val) => handleChange("author", val)}
-                  placeholder="Chọn hoặc gõ tìm kiếm tác giả (chọn nhiều)..."
-                />
-              </div>
-
-              {/* Thể loại (Chọn nhiều dùng component SelectedMutil với Filter) */}
-              <div>
-                <SelectedMutil
-                  label="Thể loại sách *"
-                  options={genreOptions}
-                  value={form.genre}
-                  onChange={(val) => handleChange("genre", val)}
-                  placeholder="Chọn thể loại (chọn nhiều)..."
-                />
-              </div>
-
-              {/* Nhà xuất bản (Chọn duy nhất 1) */}
-              <div className="space-y-1.5 relative" ref={publisherDropdownRef}>
-                <label className="text-xs font-bold text-slate-600 uppercase tracking-wide flex items-center gap-1">
-                  Nhà xuất bản
-                </label>
-                
-                <div 
-                  onClick={() => setIsPublisherDropdownOpen(!isPublisherDropdownOpen)}
-                  className="flex items-center justify-between rounded-xl border border-slate-200 bg-white/70 px-4 py-2.5 text-sm cursor-pointer hover:border-slate-300 transition min-h-[44px]"
-                >
-                  <div className="flex items-center gap-2 text-slate-700">
-                    <Building2 size={15} className="text-slate-400" />
-                    <span>{form.publisher || "Chọn Nhà xuất bản..."}</span>
-                  </div>
-                  <ChevronDown size={16} className={`text-slate-400 transition-transform duration-200 ${isPublisherDropdownOpen ? "rotate-180" : ""}`} />
-                </div>
-
-                {isPublisherDropdownOpen && (
-                  <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-50 p-2 space-y-2">
-                    <input
-                      type="text"
-                      placeholder="Tìm nhà xuất bản..."
-                      value={publisherSearch}
-                      onChange={(e) => setPublisherSearch(e.target.value)}
-                      className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-200 outline-none focus:border-indigo-500"
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                    <div className="max-h-48 overflow-y-auto space-y-0.5">
-                      {filteredPublishers.length > 0 ? (
-                        filteredPublishers.map((pub) => (
-                          <div 
-                            key={pub}
-                            onClick={() => {
-                              handleChange("publisher", pub);
-                              setIsPublisherDropdownOpen(false);
-                            }}
-                            className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm cursor-pointer select-none transition ${
-                              form.publisher === pub ? "bg-indigo-50 text-indigo-900 font-semibold" : "hover:bg-slate-50 text-slate-700"
-                            }`}
-                          >
-                            <span>{pub}</span>
-                            {form.publisher === pub && <Check size={14} className="text-indigo-600" />}
-                          </div>
-                        ))
+            <div className="grid gap-4 mt-4">
+              <SearchInput<ProductRequest, GoogleBookResponse>
+                label="Tên sách"
+                name="name"
+                value={inputName}
+                inputType="text"
+                placeholder="Nhập tên sách.."
+                register={register}
+                rules={{ required: "Tên sách là bắt buộc" }}
+                error={errors?.name}
+                dataOptions={googleBooks ?? []}
+                displayKey="name"
+                valueKey="volumeId"
+                disableLocalFilter
+                isLoading={isLoadingGoogleBooks}
+                loadingMessage="Đang tìm kiếm trên Google Books..."
+                defaultMessage="Nhập tên sách để tìm trên Google Books..."
+                emptyMessage={
+                  inputName !== debouncedName
+                    ? "Đang chờ tìm kiếm..."
+                    : `Không tìm thấy sách nào cho "${inputName}"`
+                }
+                renderItem={(item) => {
+                  const hasAllData =
+                    !!item.name &&
+                    item.authors?.length > 0 &&
+                    !!item.thumbnail &&
+                    !!item.description &&
+                    item.pageCount !== null;
+                  return (
+                    <div className="flex items-center gap-3 w-full">
+                      {item.thumbnail ? (
+                        <img
+                          src={item.thumbnail}
+                          alt={item.name}
+                          className="h-10 w-7 shrink-0 rounded object-cover shadow-sm"
+                        />
                       ) : (
-                        <div 
-                          onClick={() => {
-                            handleChange("publisher", publisherSearch);
-                            setIsPublisherDropdownOpen(false);
-                          }}
-                          className="px-3 py-2 rounded-lg text-xs text-indigo-600 hover:bg-slate-50 cursor-pointer italic text-center"
-                        >
-                          Dùng nhà xuất bản tùy chỉnh: "{publisherSearch}"
+                        <div className="flex h-10 w-7 shrink-0 items-center justify-center rounded bg-slate-100 text-slate-400">
+                          <BookOpen size={14} />
                         </div>
                       )}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Ngôn ngữ */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-600 uppercase tracking-wide">Ngôn ngữ</label>
-                <div className="relative">
-                  <div className="absolute left-4 top-3 text-slate-400 pointer-events-none">
-                    <Globe size={15} />
-                  </div>
-                  <input
-                    type="text"
-                    value={form.language}
-                    onChange={(event) => handleChange("language", event.target.value)}
-                    placeholder="Ví dụ: Tiếng Việt, Tiếng Anh..."
-                    className="w-full rounded-xl border border-slate-200 bg-white/70 pl-10 pr-4 py-2.5 text-sm placeholder-slate-400 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100"
-                  />
-                </div>
-              </div>
-
-              {/* Năm xuất bản */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-600 uppercase tracking-wide">Năm xuất bản</label>
-                <div className="relative">
-                  <div className="absolute left-4 top-3 text-slate-400 pointer-events-none">
-                    <Calendar size={15} />
-                  </div>
-                  <input
-                    type="number"
-                    value={form.publishYear}
-                    onChange={(event) => handleChange("publishYear", event.target.value)}
-                    placeholder="Ví dụ: 2026"
-                    className="w-full rounded-xl border border-slate-200 bg-white/70 pl-10 pr-4 py-2.5 text-sm placeholder-slate-400 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100"
-                  />
-                </div>
-              </div>
-
-              {/* Số trang */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-600 uppercase tracking-wide">Số trang</label>
-                <div className="relative">
-                  <div className="absolute left-4 top-3 text-slate-400 pointer-events-none">
-                    <FileText size={15} />
-                  </div>
-                  <input
-                    type="number"
-                    value={form.pages}
-                    onChange={(event) => handleChange("pages", event.target.value)}
-                    placeholder="Ví dụ: 350"
-                    className="w-full rounded-xl border border-slate-200 bg-white/70 pl-10 pr-4 py-2.5 text-sm placeholder-slate-400 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* PRODUCT DESCRIPTION */}
-          <div className="rounded-2xl border border-slate-200/60 bg-gradient-to-tr from-slate-50 to-white p-5 md:p-6 shadow-sm space-y-4">
-            <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-              <div className="rounded-xl bg-indigo-50 p-2 text-indigo-600">
-                <FileText size={20} />
-              </div>
-              <div>
-                <h2 className="text-base font-bold text-slate-900">Mô tả chi tiết</h2>
-                <p className="text-xs text-slate-500">Giới thiệu ngắn gọn và tóm tắt nội dung cốt lõi của sách</p>
-              </div>
-            </div>
-            
-            <div className="space-y-5">
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-slate-600 uppercase tracking-wide">Mô tả ngắn</label>
-                  <span className={`text-[10px] font-semibold ${form.shortDescription.length > 220 ? "text-rose-500" : "text-slate-400"}`}>
-                    {form.shortDescription.length}/250 ký tự
-                  </span>
-                </div>
-                <textarea
-                  rows={2}
-                  maxLength={250}
-                  value={form.shortDescription}
-                  onChange={(event) => handleChange("shortDescription", event.target.value)}
-                  placeholder="Mô tả tóm tắt nội dung sách hiển thị ở trang kết quả tìm kiếm..."
-                  className="w-full rounded-xl border border-slate-200 bg-white/70 px-4 py-3 text-sm placeholder-slate-400 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100 resize-none"
-                />
-              </div>
-              
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-600 uppercase tracking-wide">Mô tả đầy đủ (Tiptap Rich Text)</label>
-                <div className="bg-white rounded-xl overflow-hidden shadow-xs border border-slate-100">
-                  <ProductDescriptionEditor
-                    value={form.description}
-                    onChange={(value) => handleChange("description", value)}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* RIGHT COLUMN (1/3 width on large screens) */}
-        <div className="space-y-6">
-          
-          {/* PRICE AND STOCK */}
-          <div className="rounded-2xl border border-slate-200/60 bg-gradient-to-tr from-slate-50 to-white p-5 md:p-6 shadow-sm space-y-4">
-            <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-              <div className="rounded-xl bg-indigo-50 p-2 text-indigo-600">
-                <DollarSign size={20} />
-              </div>
-              <div>
-                <h2 className="text-base font-bold text-slate-900">Giá bán & Tồn kho</h2>
-                <p className="text-xs text-slate-500">Thiết lập giá và số lượng trong kho</p>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              {/* Giá bán lẻ */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-slate-600 uppercase tracking-wide flex items-center gap-1">
-                    Giá bán thực tế (VND) <span className="text-rose-500">*</span>
-                  </label>
-                  {currentDiscount > 0 && (
-                    <span className="inline-flex items-center gap-0.5 rounded-full bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-rose-600 border border-rose-100 animate-pulse">
-                      <Percent size={10} /> Giảm {currentDiscount}%
-                    </span>
-                  )}
-                </div>
-                <div className="relative">
-                  <div className="absolute right-4 top-2.5 text-slate-400 text-xs font-bold">VND</div>
-                  <input
-                    type="number"
-                    required
-                    value={form.price}
-                    onChange={(event) => handleChange("price", event.target.value)}
-                    placeholder="Ví dụ: 95000"
-                    className="w-full rounded-xl border border-slate-200 bg-white/70 pl-4 pr-12 py-2.5 text-sm placeholder-slate-400 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100 font-semibold text-slate-800"
-                  />
-                </div>
-              </div>
-
-              {/* Giá so sánh */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-600 uppercase tracking-wide">Giá gốc / So sánh (VND)</label>
-                <div className="relative">
-                  <div className="absolute right-4 top-2.5 text-slate-400 text-xs font-bold">VND</div>
-                  <input
-                    type="number"
-                    value={form.compareAtPrice}
-                    onChange={(event) => handleChange("compareAtPrice", event.target.value)}
-                    placeholder="Ví dụ: 120000"
-                    className="w-full rounded-xl border border-slate-200 bg-white/70 pl-4 pr-12 py-2.5 text-sm placeholder-slate-400 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100 text-slate-500 font-medium"
-                  />
-                </div>
-              </div>
-
-              {/* Số lượng tồn kho */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-600 uppercase tracking-wide flex items-center gap-1">
-                  Số lượng trong kho <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="number"
-                  required
-                  value={form.stock}
-                  onChange={(event) => handleChange("stock", event.target.value)}
-                  placeholder="Ví dụ: 100"
-                  className="w-full rounded-xl border border-slate-200 bg-white/70 px-4 py-2.5 text-sm placeholder-slate-400 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100"
-                />
-              </div>
-
-              {/* Trạng thái - Bằng Radio Cards cao cấp */}
-              <div className="space-y-2 pt-2">
-                <label className="text-xs font-bold text-slate-600 uppercase tracking-wide">Trạng thái phát hành</label>
-                
-                <div className="space-y-2">
-                  {/* Bản nháp (DRAFT) */}
-                  <div 
-                    onClick={() => handleChange("status", "DRAFT")}
-                    className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer select-none transition-all ${
-                      form.status === "DRAFT" 
-                        ? "border-slate-800 bg-slate-50 shadow-sm" 
-                        : "border-slate-200 hover:bg-slate-50/50"
-                    }`}
-                  >
-                    <div className="h-4.5 w-4.5 rounded-full border border-slate-300 flex items-center justify-center bg-white shrink-0">
-                      {form.status === "DRAFT" && <div className="h-2 w-2 rounded-full bg-slate-800" />}
-                    </div>
-                    <div className="space-y-0.5">
-                      <div className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                        <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
-                        Bản nháp (Draft)
-                      </div>
-                      <div className="text-[10px] text-slate-500">Chỉ quản trị viên mới thấy sách này.</div>
-                    </div>
-                  </div>
-
-                  {/* Đang bán (ACTIVE) */}
-                  <div 
-                    onClick={() => handleChange("status", "ACTIVE")}
-                    className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer select-none transition-all ${
-                      form.status === "ACTIVE" 
-                        ? "border-emerald-500 bg-emerald-50/40 shadow-sm" 
-                        : "border-slate-200 hover:bg-slate-50/50"
-                    }`}
-                  >
-                    <div className="h-4.5 w-4.5 rounded-full border border-slate-300 flex items-center justify-center bg-white shrink-0">
-                      {form.status === "ACTIVE" && <div className="h-2 w-2 rounded-full bg-emerald-600" />}
-                    </div>
-                    <div className="space-y-0.5">
-                      <div className="text-xs font-bold text-emerald-800 flex items-center gap-1.5">
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        Đang bán lẻ (Active)
-                      </div>
-                      <div className="text-[10px] text-emerald-600/80">Hiển thị công khai lên cửa hàng ngay.</div>
-                    </div>
-                  </div>
-
-                  {/* Hết hàng (OUT_OF_STOCK) */}
-                  <div 
-                    onClick={() => handleChange("status", "OUT_OF_STOCK")}
-                    className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer select-none transition-all ${
-                      form.status === "OUT_OF_STOCK" 
-                        ? "border-rose-500 bg-rose-50/40 shadow-sm" 
-                        : "border-slate-200 hover:bg-slate-50/50"
-                    }`}
-                  >
-                    <div className="h-4.5 w-4.5 rounded-full border border-slate-300 flex items-center justify-center bg-white shrink-0">
-                      {form.status === "OUT_OF_STOCK" && <div className="h-2 w-2 rounded-full bg-rose-600" />}
-                    </div>
-                    <div className="space-y-0.5">
-                      <div className="text-xs font-bold text-rose-800 flex items-center gap-1.5">
-                        <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
-                        Tạm hết hàng
-                      </div>
-                      <div className="text-[10px] text-rose-600/80">Khóa đặt hàng trên website.</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* PRODUCT IMAGES (Hỗ trợ nhiều ảnh) */}
-          <div className="rounded-2xl border border-slate-200/60 bg-gradient-to-tr from-slate-50 to-white p-5 md:p-6 shadow-sm space-y-4">
-            <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-              <div className="rounded-xl bg-indigo-50 p-2 text-indigo-600">
-                <ImageIcon size={20} />
-              </div>
-              <div>
-                <h2 className="text-base font-bold text-slate-900">Ảnh bìa & Minh họa</h2>
-                <p className="text-xs text-slate-500">Thêm nhiều ảnh để hiển thị chi tiết (Dán URL)</p>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className="space-y-3">
-                {form.coverImages.map((image, index) => (
-                  <div key={index} className="space-y-1">
-                    <div className="flex gap-2 items-center">
-                      <div className="relative shrink-0">
-                        {image ? (
-                          <img 
-                            src={image} 
-                            alt="" 
-                            className="h-10 w-10 rounded-xl object-cover border border-slate-200 bg-slate-50 shadow-xs" 
-                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                          />
-                        ) : (
-                          <div className="h-10 w-10 rounded-xl border border-dashed border-slate-200 bg-slate-100/50 flex items-center justify-center text-slate-400">
-                            <ImageIcon size={14} />
-                          </div>
-                        )}
-                        {index === 0 && (
-                          <span className="absolute -top-1 -left-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-indigo-600 text-[8px] font-bold text-white shadow-xs" title="Ảnh đại diện chính">
-                            ★
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex-1 relative">
-                        <input
-                          type="text"
-                          value={image}
-                          onChange={(event) => handleCoverImageChange(index, event.target.value)}
-                          placeholder={index === 0 ? "Dán URL Ảnh bìa chính... (Bắt buộc)" : `Dán URL Ảnh minh họa thứ ${index + 1}...`}
-                          className="w-full rounded-xl border border-slate-200 bg-white/70 pl-3 pr-8 py-2 text-xs placeholder-slate-400 outline-none transition-all focus:border-indigo-500 focus:bg-white"
-                        />
-                        {index === 0 && (
-                          <span className="absolute right-3 top-2 text-[9px] font-bold text-indigo-500 uppercase tracking-wide bg-indigo-50 px-1 rounded border border-indigo-100">Ảnh chính</span>
-                        )}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveCoverImage(index)}
-                        className="rounded-xl border border-slate-200 bg-white p-2 text-slate-500 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-100 active:scale-95 transition cursor-pointer flex items-center justify-center shrink-0 shadow-xs"
-                        title="Xóa liên kết này"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <button
-                type="button"
-                onClick={handleAddCoverImage}
-                className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl border border-dashed border-indigo-200 bg-indigo-50/20 px-3 py-2.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 transition cursor-pointer active:scale-98"
-              >
-                <Plus size={14} />
-                Thêm URL ảnh minh họa
-              </button>
-
-              {/* Cover previews grid with dynamic responsive cards */}
-              <div className="grid grid-cols-3 gap-2.5 pt-2">
-                {form.coverImages.filter(Boolean).length > 0 ? (
-                  form.coverImages
-                    .filter(Boolean)
-                    .map((image, index) => (
-                      <div
-                        key={`${image}-${index}`}
-                        className="group relative h-20 flex items-center justify-center rounded-xl border border-slate-100 bg-white p-1.5 overflow-hidden shadow-xs"
-                      >
-                        <img 
-                          src={image} 
-                          alt={`Preview ${index + 1}`} 
-                          className="h-full w-full object-contain rounded-lg transition duration-300 group-hover:scale-105" 
-                        />
-                        {index === 0 && (
-                          <div className="absolute top-1 left-1 bg-indigo-600 text-white font-extrabold text-[8px] px-1 py-0.5 rounded shadow-xs">
-                            Bìa chính
-                          </div>
-                        )}
-                        <div className="absolute inset-0 bg-slate-950/20 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                          <span className="text-[8px] bg-slate-900/80 text-white font-semibold px-1.5 py-0.5 rounded-full">Ảnh {index + 1}</span>
-                        </div>
-                      </div>
-                    ))
-                ) : (
-                  <div className="col-span-3 text-center text-xs text-slate-400 py-6 border border-dashed border-slate-100 bg-slate-50/50 rounded-xl">
-                    Chưa có ảnh xem trước.
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* DYNAMIC LIVE STOREFRONT PREVIEW (WOW FACTOR) */}
-          <div className="rounded-2xl border border-indigo-100 bg-gradient-to-tr from-indigo-50/20 to-purple-50/20 p-5 md:p-6 shadow-sm space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-indigo-100/50">
-              <div className="flex items-center gap-2">
-                <div className="rounded-xl bg-indigo-600 p-2 text-white shadow-sm shadow-indigo-600/20">
-                  <Sparkles size={16} />
-                </div>
-                <div>
-                  <h2 className="text-sm font-extrabold text-slate-900">Xem trước hiển thị (Live Preview)</h2>
-                  <p className="text-[10px] text-slate-500">Mô phỏng thực tế thẻ sách khách hàng sẽ thấy</p>
-                </div>
-              </div>
-              <span className="bg-indigo-600/10 text-indigo-700 text-[9px] font-extrabold px-2 py-0.5 rounded-full border border-indigo-200/50 uppercase tracking-wide">
-                Live Storefront
-              </span>
-            </div>
-
-            {/* Simulated Bookstore Card */}
-            <div className="flex justify-center py-2">
-              <div className="w-56 bg-white rounded-2xl border border-slate-150 overflow-hidden shadow-md hover:shadow-lg transition-all duration-300">
-                {/* Book Cover Image Slot */}
-                <div className="relative h-64 bg-slate-50 flex items-center justify-center overflow-hidden border-b border-slate-100">
-                  {form.coverImages[0] ? (
-                    <img 
-                      src={form.coverImages[0]} 
-                      alt="" 
-                      className="h-full w-full object-cover transition-transform duration-500 hover:scale-105" 
-                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                    />
-                  ) : (
-                    <div className="flex flex-col items-center gap-2 text-slate-300 p-4">
-                      <div className="h-12 w-12 rounded-full bg-slate-100/80 flex items-center justify-center border border-dashed border-slate-200">
-                        <BookMarked size={20} className="text-slate-400" />
-                      </div>
-                      <span className="text-[10px] font-bold text-slate-400 italic">Chưa nhập ảnh bìa</span>
-                    </div>
-                  )}
-                  {/* Discount Badge */}
-                  {currentDiscount > 0 && (
-                    <div className="absolute top-3 right-3 bg-rose-600 text-white font-extrabold text-xs px-2 py-0.5 rounded-lg shadow-sm shadow-rose-600/20">
-                      -{currentDiscount}%
-                    </div>
-                  )}
-                  {/* Status Pill on Preview */}
-                  <div className="absolute bottom-2.5 left-2.5">
-                    {form.status === "ACTIVE" && (
-                      <span className="bg-emerald-500/90 text-white font-extrabold text-[8px] px-2 py-0.5 rounded shadow-sm border border-emerald-400/20 flex items-center gap-0.5">
-                        <span className="h-1 w-1 rounded-full bg-white animate-pulse" /> ĐANG BÁN
-                      </span>
-                    )}
-                    {form.status === "DRAFT" && (
-                      <span className="bg-slate-700/90 text-white font-extrabold text-[8px] px-2 py-0.5 rounded shadow-sm flex items-center gap-0.5">
-                        BẢN NHÁP
-                      </span>
-                    )}
-                    {form.status === "OUT_OF_STOCK" && (
-                      <span className="bg-rose-600/90 text-white font-extrabold text-[8px] px-2 py-0.5 rounded shadow-sm flex items-center gap-0.5">
-                        HẾT HÀNG
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Card Details */}
-                <div className="p-4 space-y-2">
-                  {/* Genres Row */}
-                  <div className="flex flex-wrap gap-1 max-h-5 overflow-hidden">
-                    {form.genre.length > 0 ? (
-                      form.genre.slice(0, 2).map((g) => (
-                        <span key={g} className="bg-slate-100 text-slate-600 text-[8px] font-bold px-1.5 py-0.5 rounded">
-                          {g}
+                      <div className="flex min-w-0 flex-1 flex-col">
+                        <span
+                          className={
+                            hasAllData
+                              ? "font-bold text-slate-900"
+                              : "font-medium text-slate-700"
+                          }
+                        >
+                          {renderHighlightedText(item.name, debouncedName)}
                         </span>
-                      ))
-                    ) : (
-                      <span className="text-slate-300 text-[8px] italic">Chưa chọn thể loại</span>
-                    )}
-                  </div>
+                        <span className="truncate text-xs text-slate-500">
+                          {item.authors?.length > 0
+                            ? item.authors.join(", ")
+                            : "Không rõ tác giả"}
+                        </span>
+                      </div>
+                      {hasAllData && (
+                        <span className="shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+                          Đầy đủ
+                        </span>
+                      )}
+                    </div>
+                  );
+                }}
+                onSelect={(selectedItem) => {
+                  setValue("name", selectedItem.name, { shouldDirty: true });
 
-                  {/* Title */}
-                  <h3 className="font-bold text-slate-800 text-xs leading-tight line-clamp-2 h-8" title={form.title}>
-                    {form.title.trim() || <span className="text-slate-400 font-medium italic">Chưa nhập tên tác phẩm...</span>}
-                  </h3>
+                  if (selectedItem.pageCount)
+                    setValue("pages", selectedItem.pageCount, {
+                      shouldDirty: true,
+                    });
 
-                  {/* Authors */}
-                  <p className="text-[10px] text-slate-500 truncate">
-                    {form.author.length > 0 ? (
-                      `Bởi ${form.author.join(", ")}`
-                    ) : (
-                      <span className="text-slate-300 italic">Khuyết danh</span>
-                    )}
-                  </p>
+                  if (selectedItem.publishedDate) {
+                    let dateValue = selectedItem.publishedDate;
+                    if (/^\d{4}$/.test(dateValue))
+                      dateValue = `${dateValue}-01-01`;
+                    else if (/^\d{4}-\d{2}$/.test(dateValue))
+                      dateValue = `${dateValue}-01`;
+                    setValue("publishYear", dateValue, { shouldDirty: true });
+                  }
 
-                  {/* Pricing */}
-                  <div className="pt-1 flex items-baseline gap-1.5">
-                    {form.price ? (
-                      <span className="text-indigo-600 font-extrabold text-sm">
-                        {Number(form.price).toLocaleString("vi-VN")}đ
-                      </span>
-                    ) : (
-                      <span className="text-slate-400 font-bold text-xs italic">Liên hệ</span>
-                    )}
-                    {form.price && form.compareAtPrice && Number(form.compareAtPrice) > Number(form.price) && (
-                      <span className="text-slate-400 text-[10px] line-through">
-                        {Number(form.compareAtPrice).toLocaleString("vi-VN")}đ
-                      </span>
-                    )}
-                  </div>
-                </div>
+                  if (selectedItem.isbn) {
+                      setValue("isbn", selectedItem.isbn, {
+                      shouldDirty: true,
+                    });
+                  }
+
+                  if (selectedItem.listPrice)
+                    setValue("price", selectedItem.listPrice, {
+                      shouldDirty: true,
+                    });
+                  if (selectedItem.retailPrice)
+                    setValue("originalPrice", selectedItem.retailPrice, {
+                      shouldDirty: true,
+                    });
+
+                  let updatedDesc = getValues("description") || "";
+                  if (selectedItem.thumbnail) {
+                    updatedDesc = updatedDesc.replace(
+                      /src="https:\/\/images\.unsplash\.com\/photo-1544947950-fa07a98d237f\?q=80&w=600"/,
+                      `src="${selectedItem.thumbnail}"`,
+                    );
+                  }
+                  if (selectedItem.description) {
+                    updatedDesc = updatedDesc.replace(
+                      /<p>\s*Nhập phần giới thiệu ngắn gọn[\s\S]*?<\/p>/,
+                      `<p>${selectedItem.description}</p>`,
+                    );
+                  }
+                  setValue("description", updatedDesc, { shouldDirty: true });
+
+                  // Gọi hàm AI Groq riêng biệt gọn gàng
+                  handleAIGenerateDescription(
+                    selectedItem.name,
+                    selectedItem.description || "",
+                  );
+
+                  if (selectedItem.thumbnail && coverImages.length === 0) {
+                    setValue(
+                      "coverImages",
+                      [{ url: selectedItem.thumbnail, isThumbnail: true }],
+                      { shouldDirty: true, shouldValidate: true },
+                    );
+                  }
+                  trigger(["price", "originalPrice"]);
+                }}
+              />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <InputField
+                  label="Giá nhập"
+                  name="originalPrice"
+                  type="number"
+                  placeholder="Nhập giá nhập.."
+                  register={register}
+                  rules={{
+                    required: "Giá nhập là bắt buộc",
+                    valueAsNumber: true,
+                    min: {
+                      value: 0,
+                      message: "Giá nhập phải lớn hơn hoặc bằng 0",
+                    },
+                    validate: (value) =>
+                      !getValues("price") ||
+                      Number(value) <= Number(getValues("price")) ||
+                      "Giá nhập không được lớn hơn giá bán",
+                    onChange: () => trigger("price"),
+                  }}
+                  error={errors.originalPrice}
+                />
+
+                <InputField
+                  label="Giá bán"
+                  name="price"
+                  type="number"
+                  placeholder="Nhập giá bán.."
+                  register={register}
+                  rules={{
+                    required: "Giá bán là bắt buộc",
+                    valueAsNumber: true,
+                    min: {
+                      value: 0,
+                      message: "Giá bán phải lớn hơn hoặc bằng 0",
+                    },
+                    validate: (value) =>
+                      !getValues("originalPrice") ||
+                      Number(value) >= Number(getValues("originalPrice")) ||
+                      "Giá bán không được nhỏ hơn giá nhập",
+                    onChange: () => trigger("originalPrice"),
+                  }}
+                  error={errors.price}
+                />
+
+                <InputField
+                  label="Số lượng"
+                  name="quantity"
+                  type="number"
+                  placeholder="Nhập số lượng.."
+                  register={register}
+                  rules={{
+                    required: "Số lượng là bắt buộc",
+                    valueAsNumber: true,
+                    min: {
+                      value: 0,
+                      message: "Số lượng phải lớn hơn hoặc bằng 0",
+                    },
+                  }}
+                  error={errors?.quantity}
+                />
+
+                <InputField
+                  label="Số trang"
+                  name="pages"
+                  type="number"
+                  placeholder="Nhập số trang.."
+                  register={register}
+                  error={errors?.pages}
+                />
+                <InputField
+                  label="Trọng lượng (g)"
+                  name="weight"
+                  type="number"
+                  placeholder="Nhập trọng lượng.."
+                  register={register}
+                  error={errors?.weight}
+                />
+                <InputField
+                  label="Ngày xuất bản"
+                  name="publishYear"
+                  type="date"
+                  register={register}
+                  error={errors?.publishYear}
+                />
+
+                <Controller
+                  name="status"
+                  control={control}
+                  render={({ field }) => (
+                    <SelectBox<"ACTIVE" | "INACTIVE">
+                      searchable={false}
+                      label="Trạng thái"
+                      options={[
+                        { label: "Hoạt động", value: "ACTIVE" },
+                        { label: "Không hoạt động", value: "INACTIVE" },
+                      ]}
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  )}
+                />
+                <InputField
+                  label="Isbn"
+                  name="isbn"
+                  type="text"
+                  register={register}
+                  rules={{
+                    required: "Isbn là bắt buộc",
+                  }}
+                  error={errors?.isbn}
+                />
               </div>
             </div>
           </div>
         </div>
-      </form>
-    </section>
+      </div>
+
+      {/* 3. RIGHT COLUMN: TAXONOMY */}
+      <div className="col-span-12 xl:col-span-5 space-y-6 xl:h-full">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-4 xl:h-full">
+          <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
+            <DollarSign size={18} className="text-indigo-600" />
+            <h2 className="text-base font-bold text-slate-900">Thuộc tính</h2>
+          </div>
+
+          <div className="space-y-5">
+            <Controller
+              name="genreIds"
+              control={control}
+              rules={{ required: "Vui lòng chọn thể loại" }}
+              render={({ field, fieldState }) => (
+                <div>
+                  <SelectedMutil<number>
+                    label="Thể loại"
+                    placeholder="Chọn thể loại..."
+                    options={genreOptions}
+                    value={field.value}
+                    onChange={field.onChange}
+                    required
+                  />
+                  {fieldState.error && (
+                    <p className="text-red-600 text-xs mt-1">
+                      {fieldState.error.message}
+                    </p>
+                  )}
+                </div>
+              )}
+            />
+
+            <Controller
+              name="authorIds"
+              control={control}
+              rules={{ required: "Vui lòng chọn tác giả" }}
+              render={({ field, fieldState }) => (
+                <div>
+                  <SelectedMutil<number>
+                    label="Tác giả"
+                    placeholder="Chọn tác giả..."
+                    options={authorOptions}
+                    value={field.value}
+                    onChange={field.onChange}
+                    required
+                  />
+                  {fieldState.error && (
+                    <p className="text-red-600 text-xs mt-1">
+                      {fieldState.error.message}
+                    </p>
+                  )}
+                </div>
+              )}
+            />
+
+            <Controller
+              name="publisherId"
+              control={control}
+              rules={{ required: "Vui lòng chọn nhà xuất bản" }}
+              render={({ field, fieldState }) => (
+                <div>
+                  <SelectBox<number>
+                    label="Nhà xuất bản"
+                    options={publisherOptions}
+                    placeholder="Chọn nhà xuất bản..."
+                    value={field.value}
+                    onChange={field.onChange}
+                    required
+                  />
+                  {fieldState.error && (
+                    <p className="text-red-600 text-xs mt-1">
+                      {fieldState.error.message}
+                    </p>
+                  )}
+                </div>
+              )}
+            />
+
+            <Controller
+              name="seriesId"
+              control={control}
+              render={({ field }) => (
+                <SelectBox<number>
+                  searchable
+                  label="Series"
+                  options={seriesOptions}
+                  value={field.value}
+                  placeholder="Chọn series..."
+                  onChange={field.onChange}
+                />
+              )}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* 4. IMAGE UPLOAD SECTION */}
+      <div className="col-span-12 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+        <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
+          <ImageIcon size={18} className="text-indigo-600" />
+          <h2 className="text-base font-bold text-slate-900">Ảnh sản phẩm</h2>
+        </div>
+
+        <div className="flex rounded-lg bg-slate-100 p-1">
+          <button
+            type="button"
+            onClick={() => setImageUploadMode("file")}
+            className={`flex-1 py-2 rounded-md text-sm transition ${imageUploadMode === "file" ? "bg-white shadow text-indigo-600 font-semibold" : "text-slate-500"}`}
+          >
+            Tải tệp ảnh
+          </button>
+          <button
+            type="button"
+            onClick={() => setImageUploadMode("url")}
+            className={`flex-1 py-2 rounded-md text-sm transition ${imageUploadMode === "url" ? "bg-white shadow text-indigo-600 font-semibold" : "text-slate-500"}`}
+          >
+            Nhập URL
+          </button>
+        </div>
+
+        {imageUploadMode === "file" ? (
+          <label className="flex flex-col items-center justify-center h-36 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:border-indigo-500 transition">
+            <Upload size={28} className="text-slate-400 mb-2" />
+            <span className="text-sm text-slate-600">Chọn ảnh từ máy tính</span>
+            <span className="text-xs text-slate-400 mt-1">PNG, JPG, WEBP</span>
+            <input
+              type="file"
+              multiple
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileChange}
+            />
+          </label>
+        ) : (
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleAddImageUrl();
+                }
+              }}
+              placeholder="https://example.com/image.jpg"
+              className="flex-1 h-11 rounded-xl border border-slate-200 px-4 text-sm outline-none focus:border-indigo-500"
+            />
+            <button
+              type="button"
+              onClick={handleAddImageUrl}
+              className="px-4 rounded-xl bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700"
+            >
+              Thêm
+            </button>
+          </div>
+        )}
+
+        {coverImages.length > 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+            {coverImages.map((image, index) => (
+              <div
+                key={index}
+                className={`group relative aspect-square rounded-xl overflow-hidden border-2 bg-slate-50 ${image.isThumbnail ? "border-indigo-500 ring-2 ring-indigo-100" : "border-slate-200"}`}
+              >
+                <img
+                  src={image.url || ""}
+                  alt={`Ảnh ${index + 1}`}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setValue(
+                      "coverImages",
+                      coverImages.map((img, i) => ({
+                        ...img,
+                        isThumbnail: i === index,
+                      })),
+                      { shouldDirty: true },
+                    )
+                  }
+                  className={`absolute top-2 left-2 text-[10px] font-medium px-2 py-1 rounded-md shadow-sm transition ${image.isThumbnail ? "bg-indigo-600 text-white" : "bg-white text-slate-700 hover:bg-indigo-50"}`}
+                >
+                  {image.isThumbnail ? "Đại diện" : "Chọn"}
+                </button>
+                <div className="absolute top-2 right-2 flex gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition">
+                  <button
+                    type="button"
+                    title="Thay thế ảnh"
+                    onClick={() => {
+                      setReplaceIndex(index);
+                      replaceFileInputRef.current?.click();
+                    }}
+                    className="flex items-center justify-center w-7 h-7 rounded-full bg-blue-500 text-white hover:bg-blue-600 shadow-sm"
+                  >
+                    <Pencil size={12} />
+                  </button>
+                  {!image.isThumbnail && (
+                    <button
+                      type="button"
+                      title="Xóa ảnh"
+                      onClick={() => handleRemoveImage(index)}
+                      className="flex items-center justify-center w-7 h-7 rounded-full bg-red-500 text-white hover:bg-red-600 shadow-sm"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  )}
+                </div>
+                <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                  {index + 1}/{MAX_IMAGES}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <input
+          type="file"
+          ref={replaceFileInputRef}
+          hidden
+          accept="image/*"
+          onChange={handleReplaceFileChange}
+        />
+
+        {isSubmitted && coverImages.length === 0 && (
+          <div className="text-center text-sm py-8 border border-dashed rounded-xl border-red-500 text-red-500 bg-red-50">
+            Chưa có ảnh nào được thêm
+            <p className="mt-2 text-xs font-medium text-red-500">
+              Vui lòng thêm ít nhất một ảnh sản phẩm!
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* 5. DESCRIPTION */}
+      <div className="col-span-12 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+        <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
+          <FileText size={18} className="text-indigo-600" />
+          <h2 className="text-base font-bold text-slate-900">Mô tả chi tiết</h2>
+        </div>
+
+        <Controller
+          name="description"
+          control={control}
+          render={({ field }) => (
+            <ProductDescriptionEditor
+              value={field.value}
+              onChange={field.onChange}
+            />
+          )}
+        />
+      </div>
+    </form>
   );
 }

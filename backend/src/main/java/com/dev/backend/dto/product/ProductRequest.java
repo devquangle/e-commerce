@@ -13,6 +13,7 @@ import lombok.Setter;
 public class ProductRequest {
 
     private String name;
+    private String isbn;
     private Integer originalPrice;
     private Integer price;
     private Integer quantity;
@@ -20,17 +21,14 @@ public class ProductRequest {
     private LocalDate publishYear;
     private Integer pages;
 
+    private Integer publisherId;
+    private Integer seriesId;
+    private String status;
+    private String description;
+
     private List<Integer> authorIds;
     private List<Integer> genreIds;
 
-    private Integer publisherId;
-    private Integer seriesId;
-
-    private String status;
-    private String isbn;
-
     private List<ImageResponse> coverImages;
-
-    private String description;
 
 }

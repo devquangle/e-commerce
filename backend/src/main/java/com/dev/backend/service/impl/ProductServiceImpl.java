@@ -14,6 +14,7 @@ import com.dev.backend.constant.ProductStatus;
 import com.dev.backend.dto.product.ProductRequest;
 import com.dev.backend.dto.product.ProductResponse;
 import com.dev.backend.entity.Product;
+import com.dev.backend.exception.NotFoundException;
 import com.dev.backend.mapper.ProductMapper;
 import com.dev.backend.repository.ProductRepository;
 import com.dev.backend.response.PageResponse;
@@ -54,7 +55,7 @@ public class ProductServiceImpl implements ProductService {
 
         Product product = new Product();
         product.setName(TextUtils.capitalizeFully(request.getName().strip()));
-         product.setSlug(TextUtils.toSlug(request.getName().strip()));
+        product.setSlug(TextUtils.toSlug(request.getName().strip()));
         product.setOriginalPrice(request.getOriginalPrice());
         product.setPrice(request.getPrice());
         product.setQuantity(request.getQuantity());
@@ -73,10 +74,16 @@ public class ProductServiceImpl implements ProductService {
         productGenreService.saveProductGenres(saved, request.getGenreIds());
         productAuthorService.saveProductAuthors(saved, request.getAuthorIds());
         imageService.saveProductImages(saved, request.getCoverImages());
-     
+
         log.debug("Saved product: {}", saved);
 
         return productMapper.toDTO(saved);
+    }
+
+    @Override
+    public ProductResponse edit(Integer id) {
+        ProductResponse productResponse = productMapper.toDTO(findById(id));
+        return productResponse;
     }
 
     @Override
@@ -87,8 +94,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product findById(Integer id) {
-        // TODO Auto-generated method stub
-        return null;
+        return productRepository.findById(id).orElseThrow(
+                () -> new NotFoundException("Không tìm thấy sản phẩm với ID: " + id));
     }
 
     @Override
@@ -96,6 +103,7 @@ public class ProductServiceImpl implements ProductService {
         // TODO Auto-generated method stub
         return null;
     }
+
     @Override
     public Product findBySlug(String slug) {
         // TODO Auto-generated method stub
@@ -122,7 +130,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public PageResponse<ProductResponse> pages(int page, int size, String keyword, String status) {
-      Pageable pageable = PageRequest.of(
+        Pageable pageable = PageRequest.of(
                 page,
                 size,
                 Sort.by(Sort.Direction.DESC, "id"));

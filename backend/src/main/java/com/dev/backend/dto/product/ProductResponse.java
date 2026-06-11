@@ -1,6 +1,5 @@
 package com.dev.backend.dto.product;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,10 +24,18 @@ public class ProductResponse {
     private Integer weight;
     private String publishYear;
     private Integer pages;
+
+    private Integer seriesId;
+    private Integer publisherId;
+    private String status;
+    private String description;
+
+    private List<Integer> authorIds;
+    private List<Integer> genreIds;
     private String publisherName;
     private String seriesName;
     private String urlImageDefault;
-
-    private List<ProductAuthorResponse> productAuthors = new ArrayList<>();
-    private List<ProductGenreResponse> productGenres = new ArrayList<>();
+    private List<ProductImageResponse> coverImages;
+    private List<ProductAuthorResponse> productAuthors;
+    private List<ProductGenreResponse> productGenres;
 }

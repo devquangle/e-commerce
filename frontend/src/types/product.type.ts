@@ -28,7 +28,7 @@ export interface ProductRequest {
   quantity: number;
   status: "INACTIVE" | "ACTIVE";
   seriesId: number | undefined;
-  isbn:string;
+  isbn: string;
   coverImages: ImageProductRequest[];
   description: string;
 }
@@ -47,9 +47,13 @@ export interface ProductResponse {
 
   publisherName: string;
   seriesName: string;
+  publisherId: number | null;
+  seriesId: number | null;
   urlImageDefault: string;
+  description: string;
   productGenres: ProductGenreResponse[] | [];
   productAuthors: ProductAuthorResponse[] | [];
+  coverImages: ProductImageResponse[] | [];
 }
 export interface ProductGenreResponse {
   id: number;
@@ -58,4 +62,9 @@ export interface ProductGenreResponse {
 export interface ProductAuthorResponse {
   id: number;
   name: string;
+}
+
+export interface ProductImageResponse {
+  url: string;
+  isThumbnail: boolean;
 }
