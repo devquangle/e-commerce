@@ -1,6 +1,6 @@
 import { apiAuth } from "@/configs/axios";
 import type { ApiResponse } from "@/types/api-response";
-import type { ProductRequest, ProductResponse } from "@/types/product";
+import type { ProductRequest, ProductResponse } from "@/types/product.type";
 
 const productService = {
   async add(req: ProductRequest) {

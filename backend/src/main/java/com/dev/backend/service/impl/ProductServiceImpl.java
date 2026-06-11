@@ -2,17 +2,21 @@ package com.dev.backend.service.impl;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.dev.backend.constant.ProductStatus;
-import com.dev.backend.dto.image.ImageResponse;
 import com.dev.backend.dto.product.ProductRequest;
 import com.dev.backend.dto.product.ProductResponse;
-import com.dev.backend.entity.Image;
 import com.dev.backend.entity.Product;
 import com.dev.backend.mapper.ProductMapper;
 import com.dev.backend.repository.ProductRepository;
 import com.dev.backend.service.ImageService;
+import com.dev.backend.service.ProductAuthorService;
+import com.dev.backend.service.ProductGenreService;
 import com.dev.backend.service.ProductService;
+import com.dev.backend.service.PublisherService;
+import com.dev.backend.service.SeriesService;
+import com.dev.backend.util.TextUtils;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -25,6 +29,10 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
     private final ImageService imageService;
+    private final SeriesService seriesService;
+    private final PublisherService publisherService;
+    private final ProductGenreService productGenreService;
+    private final ProductAuthorService productAuthorService;
 
     @Override
     public List<ProductResponse> findAll() {
@@ -34,31 +42,32 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
     public ProductResponse add(ProductRequest request) {
 
         Product product = new Product();
-        product.setName(request.getName().strip());
+        product.setName(TextUtils.capitalizeFully(request.getName().strip()));
+         product.setSlug(TextUtils.toSlug(request.getName().strip()));
         product.setOriginalPrice(request.getOriginalPrice());
         product.setPrice(request.getPrice());
         product.setQuantity(request.getQuantity());
         product.setWeight(request.getWeight());
         product.setPublishYear(request.getPublishYear());
         product.setPages(request.getPages());
+        product.setIsbn(request.getIsbn());
         product.setStatus(ProductStatus.valueOf(request.getStatus()));
         product.setDescription(request.getDescription());
-        product.setAuthorIds(request.getAuthorIds());
-        product.setSeriesId(request.getSeriesId());
-        product.setPublisherId(request.getPublisherId());
-        Product saved = save(product);
-        log.debug("Saved product: {}", saved);
-        List<ImageResponse> list = request.getCoverImages();
-        for (ImageResponse item : list) {
-            Image image = new Image();
-            image.setUrlImage(item.url());
-            image.setThumbnail(item.isThumbnail());
-            image.setProduct(saved);
-            imageService.save(image);
+        if (request.getSeriesId() != null) {
+            product.setSeries(seriesService.findById(request.getSeriesId()));
         }
+        product.setPublisher(publisherService.findById(request.getPublisherId()));
+
+        Product saved = save(product);
+        productGenreService.saveProductGenres(saved, request.getGenreIds());
+        productAuthorService.saveProductAuthors(saved, request.getAuthorIds());
+        imageService.saveProductImages(saved, request.getCoverImages());
+     
+        log.debug("Saved product: {}", saved);
 
         return productMapper.toDTO(saved);
     }

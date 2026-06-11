@@ -1,6 +1,6 @@
-import { useState, useMemo, useEffect, useRef } from "react";
-import ProductDescriptionEditor from "../../components/admin/product/ProductDescriptionEditor";
-import SelectedMutil from "@/components/common/SelectedMutil";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import {
   BookOpen,
   Save,
@@ -14,215 +14,107 @@ import {
   RotateCcw,
   Pencil,
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import type { AuthorResponse } from "@/types/author";
-import type { GenreResponse } from "@/types/genre";
+
+import ProductDescriptionEditor from "../../components/admin/product/ProductDescriptionEditor";
+import SelectedMutil from "@/components/common/SelectedMutil";
 import SelectBox from "@/components/common/SelectedBox";
-import { Controller, useForm, useWatch } from "react-hook-form";
 import InputField from "@/components/common/InputField";
+import SearchInput from "@/components/common/SearchInput";
+import Button from "@/components/common/Button";
+
+import { useBookFormData } from "@/hooks/useBookFormData";
+import { useFilterGoogleBook } from "@/hooks/useGoogleBook";
+import { useGroqBook } from "@/hooks/useGroq";
+import useDebounce from "@/hooks/useDebounce";
+
+import imageService from "@/services/imageService";
+import productService from "@/services/productService";
 import {
   showErrorToast,
   showSuccessToast,
   showWarningToast,
 } from "@/utils/toastUtil";
-import Button from "@/components/common/Button";
-import { useBookFormData } from "@/hooks/useBookFormData";
+
+import type { AuthorResponse } from "@/types/author";
+import type { GenreResponse } from "@/types/genre";
 import type { ImageProductRequest } from "@/types/image";
-import imageService from "@/services/imageService";
-import type { ProductRequest } from "@/types/product";
-import productService from "@/services/productService";
-import SearchInput from "@/components/common/SearchInput";
-import useDebounce from "@/hooks/useDebounce";
-import { useFilterGoogleBook } from "@/hooks/useGoogleBook";
-import { useGroqBook } from "@/hooks/useGroq";
+import type { ProductRequest } from "@/types/product.type";
 import type { GoogleBookResponse } from "@/types/googlebook";
 
-const initialForm: ProductRequest = {
+const MAX_IMAGES = 6;
+
+const INITIAL_FORM: ProductRequest = {
   name: "",
   originalPrice: 200000,
   price: 190000,
   quantity: 10,
   weight: 500,
   publishYear: "2020-01-01",
-
   pages: 200,
   authorIds: [],
   genreIds: [],
   publisherId: undefined,
-
   seriesId: undefined,
-
   status: "ACTIVE",
-  coverImages: [] as ImageProductRequest[],
+  coverImages: [],
   description: `
-
-<h4><strong>Giới Thiệu Sách</strong></h4>
-
-
-
-<p>
-
-  Nhập phần giới thiệu ngắn gọn về cuốn sách tại đây. Mô tả nội dung chính,
-
-  thông điệp nổi bật hoặc giá trị mà cuốn sách mang lại cho người đọc.
-
-</p>
-
-
-
-<img
-  src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=600"
-  alt="Ảnh bìa sách"
-  style="width: 40%; max-width: 100%; height: auto;"
-  class="block mx-auto"
-/>
-
-<p style="text-align:center; font-size: 14px; color: #666;">
-
-  <em>Hình ảnh minh họa cho cuốn sách</em>
-
-</p>
-
-
-
-<hr />
-
-
-
-<h5><strong>1. Nội Dung Chính</strong></h5>
-
-
-
-<p>
-
-  Mô tả ngắn gọn cốt truyện, kiến thức hoặc chủ đề chính của cuốn sách.
-
-  Có thể chia thành nhiều đoạn văn để người đọc dễ theo dõi.
-
-</p>
-
-
-
-<h5><strong>2. Điểm Nổi Bật</strong></h5>
-
-
-
-<ul>
-
-  <li>Nội dung hấp dẫn và dễ tiếp cận.</li>
-
-  <li>Thông tin được trình bày rõ ràng, logic.</li>
-
-  <li>Phù hợp với nhiều nhóm độc giả.</li>
-
-  <li>Mang lại giá trị thực tiễn cho người đọc.</li>
-
-</ul>
-
-
-
-<hr />
-
-
-
-<h5><strong>3. Thông Tin Sách</strong></h5>
-
-
-
-<table>
-
-  <tbody>
-
-    <tr>
-
-      <th>Thuộc tính</th>
-
-      <th>Thông tin</th>
-
-    </tr>
-
-    <tr>
-
-      <td>Tác giả</td>
-
-      <td>[Tên tác giả]</td>
-
-    </tr>
-
-    <tr>
-
-      <td>Thể loại</td>
-
-      <td>[Tên thể loại]</td>
-
-    </tr>
-
-    <tr>
-
-      <td>Nhà xuất bản</td>
-
-      <td>[Tên nhà xuất bản]</td>
-
-    </tr>
-
-    <tr>
-
-      <td>Ngày xuất bản</td>
-
-      <td>[Ngày xuất bản]</td>
-
-    </tr>
-
-    <tr>
-
-      <td>Số trang</td>
-
-      <td>[Số trang]</td>
-
-    </tr>
-
-  </tbody>
-
-</table>
-
-
-
-<hr />
-
-
-
-<h5><strong>4. Đối Tượng Độc Giả</strong></h5>
-
-
-
-<p>
-
-  Cuốn sách phù hợp với những người quan tâm đến chủ đề này,
-
-  học sinh, sinh viên hoặc người đi làm muốn mở rộng kiến thức.
-
-</p>
-
-
-
-<hr />
-
-
-
-<h5><strong>5. Về Tác Giả</strong></h5>
-
-
-
-<p>
-
-  Giới thiệu ngắn gọn về tác giả
-
-</p>
-
-`,
+    <h4><strong>Giới Thiệu Sách</strong></h4>
+    <p>Nhập phần giới thiệu ngắn gọn về cuốn sách tại đây. Mô tả nội dung chính, thông điệp nổi bật hoặc giá trị mà cuốn sách mang lại cho người đọc.</p>
+    <img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=600" alt="Ảnh bìa sách" style="width: 40%; max-width: 100%; height: auto;" class="block mx-auto" />
+    <p style="text-align:center; font-size: 14px; color: #666;"><em>Hình ảnh minh họa cho cuốn sách</em></p>
+    <hr />
+    <h5><strong>1. Nội Dung Chính</strong></h5>
+    <p>Mô tả ngắn gọn cốt truyện, kiến thức hoặc chủ đề chính của cuốn sách. Có thể chia thành nhiều đoạn văn để người đọc dễ theo dõi.</p>
+    <h5><strong>2. Điểm Nổi Bật</strong></h5>
+    <ul>
+      <li>Nội dung hấp dẫn và dễ tiếp cận.</li>
+      <li>Thông tin được trình bày rõ ràng, logic.</li>
+      <li>Phù hợp với nhiều nhóm độc giả.</li>
+      <li>Mang lại giá trị thực tiễn cho người đọc.</li>
+    </ul>
+    <hr />
+    <h5><strong>3. Thông Tin Sách</strong></h5>
+    <table>
+      <tbody>
+        <tr><th>Thuộc tính</th><th>Thông tin</th></tr>
+        <tr><td>Tác giả</td><td>[Tên tác giả]</td></tr>
+        <tr><td>Thể loại</td><td>[Tên thể loại]</td></tr>
+        <tr><td>Nhà xuất bản</td><td>[Tên nhà xuất bản]</td></tr>
+        <tr><td>Ngày xuất bản</td><td>[Ngày xuất bản]</td></tr>
+        <tr><td>Số trang</td><td>[Số trang]</td></tr>
+      </tbody>
+    </table>
+    <hr />
+    <h5><strong>4. Đối Tượng Độc Giả</strong></h5>
+    <p>Cuốn sách phù hợp với những người quan tâm đến chủ đề này, học sinh, sinh viên hoặc người đi làm muốn mở rộng kiến thức.</p>
+    <hr />
+    <h5><strong>5. Về Tác Giả</strong></h5>
+    <p>Giới thiệu ngắn gọn về tác giả</p>
+  `,
+};
+
+// Helper cập nhật HTML table gọn gàng hơn
+const updateTableHtml = (html: string, rowLabel: string, newValue: string) => {
+  const regex = new RegExp(
+    `(<td[^>]*>(?:<p[^>]*>)?\\s*${rowLabel}\\s*(?:<\\/p>)?<\\/td>\\s*<td[^>]*>(?:<p[^>]*>)?)([\\s\\S]*?)(<\\/p>)?(<\\/td>)`,
+    "i",
+  );
+  return html.replace(
+    regex,
+    (_, p1, __, p3, p4) => `${p1}${newValue}${p3 || ""}${p4}`,
+  );
 };
 
 export default function CreateProduct() {
+  const navigate = useNavigate();
+  const replaceFileInputRef = useRef<HTMLInputElement>(null);
+
+  const [imageUploadMode, setImageUploadMode] = useState<"file" | "url">(
+    "file",
+  );
+  const [imageUrl, setImageUrl] = useState("");
+  const [replaceIndex, setReplaceIndex] = useState<number | null>(null);
+
   const {
     register,
     handleSubmit,
@@ -233,7 +125,7 @@ export default function CreateProduct() {
     trigger,
     formState: { errors, isSubmitted },
   } = useForm<ProductRequest>({
-    defaultValues: initialForm,
+    defaultValues: INITIAL_FORM,
     mode: "onChange",
   });
 
@@ -246,54 +138,31 @@ export default function CreateProduct() {
     isError,
   } = useBookFormData();
 
-  const MAX_IMAGES = 6;
-  const [imageUploadMode, setImageUploadMode] = useState<"file" | "url">(
-    "file",
-  );
-  const [imageUrl, setImageUrl] = useState("");
-  const [replaceIndex, setReplaceIndex] = useState<number | null>(null);
-  const replaceFileInputRef = useRef<HTMLInputElement>(null);
-
-  const coverImages = useWatch({ name: "coverImages", control }) || [];
-
+  // Watch các trường dữ liệu
+  const coverImagesRaw = useWatch({ name: "coverImages", control });
+  const coverImages = useMemo(() => coverImagesRaw || [], [coverImagesRaw]);
   const inputName = useWatch({ control, name: "name" }) || "";
   const debouncedName = useDebounce(inputName, 1000);
+
+  // Watch riêng biệt nhóm dữ liệu đồng bộ Table để tối ưu re-render qua debounce
+  const taxonomyWatch = useWatch({
+    control,
+    name: [
+      "authorIds",
+      "genreIds",
+      "publisherId",
+      "publishYear",
+      "pages",
+      "seriesId",
+    ],
+  });
+  const debouncedTaxonomy = useDebounce(taxonomyWatch, 800); // Tránh băm nát CPU khi user đang chọn liên tục
 
   const { data: googleBooks = [], isFetching: isLoadingGoogleBooks } =
     useFilterGoogleBook(debouncedName);
   const { mutateAsync: generateGroqDescription } = useGroqBook();
 
-  // Hàm escape ký tự đặc biệt trong regex
-  const escapeRegex = (str: string) =>
-    str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-  // Hàm highlight text trùng khớp
-  const renderHighlightedText = (text: string, highlight: string) => {
-    if (!highlight.trim()) return text;
-    try {
-      const escaped = escapeRegex(highlight);
-      const parts = text.split(new RegExp(`(${escaped})`, "gi"));
-      return (
-        <>
-          {parts.map((part, i) =>
-            part.toLowerCase() === highlight.toLowerCase() ? (
-              <mark
-                key={i}
-                className="bg-transparent font-bold text-indigo-700"
-              >
-                {part}
-              </mark>
-            ) : (
-              <span key={i}>{part}</span>
-            ),
-          )}
-        </>
-      );
-    } catch {
-      return text;
-    }
-  };
-
+  // Khởi tạo Options sử dụng useMemo ổn định
   const genreOptions = useMemo(
     () =>
       genresData.map((g: GenreResponse) => ({ label: g.name, value: g.id })),
@@ -301,10 +170,7 @@ export default function CreateProduct() {
   );
   const authorOptions = useMemo(
     () =>
-      authorsData.map((a: AuthorResponse) => ({
-        label: a.name,
-        value: a.id,
-      })),
+      authorsData.map((a: AuthorResponse) => ({ label: a.name, value: a.id })),
     [authorsData],
   );
   const publisherOptions = useMemo(
@@ -316,59 +182,190 @@ export default function CreateProduct() {
     [seriesData],
   );
 
-  const imagesUrl = async () => {
-    try {
-      if (!coverImages || coverImages.length === 0) {
-        return [];
+  // Clean up Object URL tránh tràn bộ nhớ (Memory Leak)
+  useEffect(() => {
+    return () => {
+      coverImages.forEach((img) => {
+        if (img.url?.startsWith("blob:")) URL.revokeObjectURL(img.url);
+      });
+    };
+  }, [coverImages]);
+
+  // Tách hàm gọi AI tạo mô tả bằng Groq ra ngoài độc lập
+  const handleAIGenerateDescription = useCallback(
+    async (name: string, originalDesc: string) => {
+      try {
+        showSuccessToast("Đang dùng AI tạo mô tả chi tiết...");
+        const metadata = await generateGroqDescription({
+          name,
+          description: originalDesc,
+        });
+
+        let newDesc = getValues("description") || "";
+
+        if (metadata.summary) {
+          newDesc = newDesc.replace(
+            /<p>\s*Mô tả ngắn gọn cốt truyện[\s\S]*?<\/p>/,
+            `<p>${metadata.summary}</p>`,
+          );
+        }
+        if (metadata.highlights?.length) {
+          newDesc = newDesc.replace(
+            /<ul>\s*<li>Nội dung hấp dẫn[\s\S]*?<\/ul>/,
+            `<p>\n${metadata.highlights.join(", <br/>\n")}\n</p>`,
+          );
+        }
+        if (metadata.targetAudience?.length) {
+          newDesc = newDesc.replace(
+            /<p>\s*Cuốn sách phù hợp với những người quan tâm[\s\S]*?<\/p>/,
+            `<p>${metadata.targetAudience.join(", <br/>\n")}</p>`,
+          );
+        }
+
+        setValue("description", newDesc, { shouldDirty: true });
+        showSuccessToast("Đã tự động tạo mô tả bằng AI thành công!");
+      } catch {
+        showErrorToast("Không thể tạo mô tả bằng AI. Đang dùng mô tả gốc.");
       }
+    },
+    [generateGroqDescription, getValues, setValue],
+  );
 
-      const cleanImageResponses = await imageService.uploadImage(coverImages);
-      return cleanImageResponses;
-    } catch (error) {
-      console.error("Lỗi trong quá trình xử lý đồng bộ ảnh:", error);
-      throw error;
+  // Đồng bộ thông tin Sách vào HTML Table (Đã bọc Debounce 800ms cực mượt)
+  useEffect(() => {
+    const [authorIds, genreIds, publisherId, publishYear, pages, seriesId] =
+      debouncedTaxonomy;
+    const currentDesc = getValues("description");
+    if (!currentDesc) return;
+
+    let newDesc = currentDesc;
+
+    // Tác giả
+    const authorNames = ((authorIds as number[]) || [])
+      .map((id) => authorOptions.find((a) => a.value === id)?.label)
+      .filter(Boolean)
+      .join(", ");
+    newDesc = updateTableHtml(
+      newDesc,
+      "Tác giả",
+      authorNames || "[Tên tác giả]",
+    );
+
+    // Thể loại
+    const genreNames = ((genreIds as number[]) || [])
+      .map((id) => genreOptions.find((g) => g.value === id)?.label)
+      .filter(Boolean)
+      .join(", ");
+    newDesc = updateTableHtml(
+      newDesc,
+      "Thể loại",
+      genreNames || "[Tên thể loại]",
+    );
+
+    // Nhà xuất bản
+    const publisherName = publisherOptions.find(
+      (p) => p.value === publisherId,
+    )?.label;
+    newDesc = updateTableHtml(
+      newDesc,
+      "Nhà xuất bản",
+      publisherName || "[Tên nhà xuất bản]",
+    );
+
+    // Ngày xuất bản & Số trang
+    newDesc = updateTableHtml(
+      newDesc,
+      "Ngày xuất bản",
+      (publishYear as string) || "[Ngày xuất bản]",
+    );
+    newDesc = updateTableHtml(
+      newDesc,
+      "Số trang",
+      pages ? String(pages) : "[Số trang]",
+    );
+
+    // Xử lý hàng Series
+    const seriesRowRegex =
+      /(<tr[^>]*>[\s\S]*?<td[^>]*>(?:<p[^>]*>)?\s*Series\s*(?:<\/p>)?<\/td>[\s\S]*?<\/tr>)/i;
+    const hasSeriesRow = seriesRowRegex.test(newDesc);
+
+    if (seriesId) {
+      const seriesName =
+        seriesOptions.find((s) => s.value === seriesId)?.label ||
+        "[Tên series]";
+      if (hasSeriesRow) {
+        newDesc = updateTableHtml(newDesc, "Series", seriesName);
+      } else {
+        const pagesRowRegex =
+          /(<tr[^>]*>[\s\S]*?<td[^>]*>(?:<p[^>]*>)?\s*Số trang\s*(?:<\/p>)?<\/td>[\s\S]*?<\/tr>)/i;
+        newDesc = newDesc.replace(
+          pagesRowRegex,
+          (match) =>
+            `${match}\n    <tr>\n      <td>Series</td>\n      <td>${seriesName}</td>\n    </tr>`,
+        );
+      }
+    } else if (hasSeriesRow) {
+      newDesc = newDesc.replace(seriesRowRegex, "");
     }
-  };
-  const navigate = useNavigate();
 
+    // Cập nhật mô tả chi tiết Tác giả ở phần 5
+    const selectedAuthors = ((authorIds as number[]) || [])
+      .map((id) => authorsData.find((a) => a.id === id))
+      .filter(Boolean);
+    if (selectedAuthors.length > 0) {
+      const authorDescriptions = selectedAuthors
+        .map(
+          (a) =>
+            `- ${a?.name || "Chưa rõ"}: ${a?.description || "Chưa có mô tả."}`,
+        )
+        .join("<br/>\n");
+      newDesc = newDesc.replace(
+        /(<h5><strong>5\. Về Tác Giả<\/strong><\/h5>\s*)<p>[\s\S]*?<\/p>/i,
+        `$1<p>\n${authorDescriptions}\n</p>`,
+      );
+    }
+
+    if (newDesc !== currentDesc) {
+      setValue("description", newDesc, { shouldDirty: true });
+    }
+  }, [
+    debouncedTaxonomy,
+    authorOptions,
+    genreOptions,
+    publisherOptions,
+    seriesOptions,
+    authorsData,
+    setValue,
+    getValues,
+  ]);
+
+  // Xử lý Submit Form chính
   const onSubmit = async (data: ProductRequest) => {
     try {
-      if (coverImages.length === 0) {
+      if (!coverImages.length) {
         showWarningToast("Vui lòng thêm ít nhất một ảnh sản phẩm!");
         return;
       }
 
-      // Upload ảnh trước
-      const uploadedImages = await imagesUrl();
+      const uploadedImages: ImageProductRequest[] =
+        coverImages.length > 0
+          ? await imageService.uploadImage(coverImages)
+          : [];
 
-      const payload: ProductRequest = {
+      await productService.add({
         ...data,
         coverImages: uploadedImages,
-      };
+      });
 
-      const resp = await productService.add(payload);
-
-      if (resp) {
-        showSuccessToast("Thêm sản phẩm thành công!");
-
-        reset(initialForm);
-
-        navigate("/admin/products");
-      }
+      showSuccessToast("Thêm sản phẩm thành công!");
+      handleReset();
+      navigate("/admin/products");
     } catch (error) {
-      console.error("Lỗi tạo sản phẩm:", error);
-
-      showErrorToast("Thêm sản phẩm thất bại!" + error);
+      showErrorToast(`Thêm sản phẩm thất bại! ${error}`);
     }
   };
 
-  const onError = (formErrors: unknown) => {
-    console.error("Form chứa các lỗi sau:", formErrors);
-    showWarningToast(
-      "Vui lòng kiểm tra lại các trường thông tin bị nhập sai hoặc thiếu!",
-    );
-  };
-
+  // Các hàm quản lý File Hình Ảnh
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files?.length) return;
@@ -377,7 +374,6 @@ export default function CreateProduct() {
       showWarningToast(
         `Bạn chỉ được phép tải lên tối đa ${MAX_IMAGES} hình ảnh.`,
       );
-      e.target.value = "";
       return;
     }
 
@@ -390,8 +386,7 @@ export default function CreateProduct() {
       isThumbnail: false,
     }));
 
-    const hasThumbnail = coverImages.some((img) => img.isThumbnail);
-    if (!hasThumbnail && newImages.length > 0) {
+    if (!coverImages.some((img) => img.isThumbnail) && newImages.length > 0) {
       newImages[0].isThumbnail = true;
     }
 
@@ -403,10 +398,11 @@ export default function CreateProduct() {
   };
 
   const handleAddImageUrl = () => {
-    if (!imageUrl.trim()) return;
+    const trimmedUrl = imageUrl.trim();
+    if (!trimmedUrl) return;
 
     try {
-      const url = new URL(imageUrl.trim());
+      const url = new URL(trimmedUrl);
       if (!["http:", "https:"].includes(url.protocol)) throw new Error();
     } catch {
       showWarningToast("URL ảnh không hợp lệ.");
@@ -419,7 +415,7 @@ export default function CreateProduct() {
     }
 
     const newImage: ImageProductRequest = {
-      url: imageUrl.trim(),
+      url: trimmedUrl,
       isThumbnail:
         coverImages.length === 0 || !coverImages.some((img) => img.isThumbnail),
     };
@@ -429,14 +425,6 @@ export default function CreateProduct() {
       shouldValidate: true,
     });
     setImageUrl("");
-  };
-
-  const handleSetThumbnail = (index: number) => {
-    setValue(
-      "coverImages",
-      coverImages.map((img, i) => ({ ...img, isThumbnail: i === index })),
-      { shouldDirty: true },
-    );
   };
 
   const handleRemoveImage = (index: number) => {
@@ -456,25 +444,20 @@ export default function CreateProduct() {
     });
   };
 
-  const handleEditClick = (index: number) => {
-    setReplaceIndex(index);
-    replaceFileInputRef.current?.click();
-  };
-
   const handleReplaceFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || replaceIndex === null) return;
-
-    const newImage: ImageProductRequest = {
-      file,
-      url: URL.createObjectURL(file),
-      isThumbnail: coverImages[replaceIndex].isThumbnail,
-    };
 
     const oldImage = coverImages[replaceIndex];
     if (oldImage.url?.startsWith("blob:")) {
       URL.revokeObjectURL(oldImage.url);
     }
+
+    const newImage: ImageProductRequest = {
+      file,
+      url: URL.createObjectURL(file),
+      isThumbnail: oldImage.isThumbnail,
+    };
 
     const updatedImages = [...coverImages];
     updatedImages[replaceIndex] = newImage;
@@ -483,163 +466,36 @@ export default function CreateProduct() {
       shouldDirty: true,
       shouldValidate: true,
     });
-
     setReplaceIndex(null);
     e.target.value = "";
   };
-  // Đồng bộ dữ liệu form vào bảng "Thông Tin Sách" trong mô tả
-  const [authorIds, genreIds, publisherId, publishYear, pages, seriesId] =
-    useWatch({
-      control,
-      name: [
-        "authorIds",
-        "genreIds",
-        "publisherId",
-        "publishYear",
-        "pages",
-        "seriesId",
-      ],
-    });
 
-  useEffect(() => {
-    const currentDesc = getValues("description");
-    if (!currentDesc) return;
-
-    let newDesc = currentDesc;
-
-    const updateTableData = (
-      html: string,
-      rowLabel: string,
-      newValue: string,
-    ) => {
-      const regex = new RegExp(
-        `(<td[^>]*>(?:<p[^>]*>)?\\s*${rowLabel}\\s*(?:<\\/p>)?<\\/td>\\s*<td[^>]*>(?:<p[^>]*>)?)([\\s\\S]*?)(<\\/p>)?(<\\/td>)`,
-        "i",
-      );
-      return html.replace(regex, (match, p1, p2, p3, p4) => {
-        return `${p1}${newValue}${p3 || ""}${p4}`;
-      });
-    };
-
-    // Tác giả
-    const authorNames = ((authorIds as number[]) || [])
-      .map((id) => authorOptions.find((a) => a.value === id)?.label)
-      .filter(Boolean)
-      .join(", ");
-    newDesc = updateTableData(
-      newDesc,
-      "Tác giả",
-      authorNames || "[Tên tác giả]",
-    );
-
-    // Thể loại
-    const genreNames = ((genreIds as number[]) || [])
-      .map((id) => genreOptions.find((g) => g.value === id)?.label)
-      .filter(Boolean)
-      .join(", ");
-    newDesc = updateTableData(
-      newDesc,
-      "Thể loại",
-      genreNames || "[Tên thể loại]",
-    );
-
-    // Nhà xuất bản
-    const publisherName = publisherOptions.find(
-      (p) => p.value === publisherId,
-    )?.label;
-    newDesc = updateTableData(
-      newDesc,
-      "Nhà xuất bản",
-      publisherName || "[Tên nhà xuất bản]",
-    );
-
-    // Ngày xuất bản
-    newDesc = updateTableData(
-      newDesc,
-      "Ngày xuất bản",
-      (publishYear as string) || "[Ngày xuất bản]",
-    );
-
-    // Số trang
-    newDesc = updateTableData(
-      newDesc,
-      "Số trang",
-      pages ? String(pages) : "[Số trang]",
-    );
-
-    // Series
-    const seriesRowRegex =
-      /(<tr[^>]*>[\s\S]*?<td[^>]*>(?:<p[^>]*>)?\s*Series\s*(?:<\/p>)?<\/td>[\s\S]*?<\/tr>)/i;
-    const hasSeriesRow = seriesRowRegex.test(newDesc);
-
-    if (seriesId) {
-      const seriesName =
-        seriesOptions.find((s) => s.value === seriesId)?.label ||
-        "[Tên series]";
-      if (hasSeriesRow) {
-        newDesc = updateTableData(newDesc, "Series", seriesName);
-      } else {
-        // Chèn vào ngay sau Số trang
-        const pagesRowRegex =
-          /(<tr[^>]*>[\s\S]*?<td[^>]*>(?:<p[^>]*>)?\s*Số trang\s*(?:<\/p>)?<\/td>[\s\S]*?<\/tr>)/i;
-        newDesc = newDesc.replace(pagesRowRegex, (match) => {
-          return `${match}\n    <tr>\n      <td>Series</td>\n      <td>${seriesName}</td>\n    </tr>`;
-        });
-      }
-    } else {
-      // Xoá row Series nếu có
-      if (hasSeriesRow) {
-        newDesc = newDesc.replace(seriesRowRegex, "");
-      }
-    }
-
-    // Cập nhật phần 5. Về Tác Giả
-    const selectedAuthors = ((authorIds as number[]) || [])
-      .map((id) => authorsData.find((a: AuthorResponse) => a.id === id))
-      .filter(Boolean);
-
-    if (selectedAuthors.length > 0) {
-      const authorDescriptions = selectedAuthors
-        .map(
-          (a) =>
-            `- ${a?.name || "Chưa rõ"}: ${a?.description || "Chưa có mô tả."}`,
-        )
-        .join("<br/>\n");
-      const authorSectionRegex =
-        /(<h5><strong>5\. Về Tác Giả<\/strong><\/h5>\s*)<p>[\s\S]*?<\/p>/i;
-      if (authorSectionRegex.test(newDesc)) {
-        newDesc = newDesc.replace(
-          authorSectionRegex,
-          `$1<p>\n${authorDescriptions}\n</p>`,
-        );
-      }
-    }
-
-    if (newDesc !== currentDesc) {
-      setValue("description", newDesc, { shouldDirty: true });
-    }
-  }, [
-    authorIds,
-    genreIds,
-    publisherId,
-    publishYear,
-    pages,
-    seriesId,
-    authorOptions,
-    genreOptions,
-    publisherOptions,
-    seriesOptions,
-    authorsData,
-    setValue,
-    getValues,
-  ]);
   const handleReset = () => {
     coverImages.forEach((img) => {
-      if (img.url?.startsWith("blob:")) {
-        URL.revokeObjectURL(img.url);
-      }
+      if (img.url?.startsWith("blob:")) URL.revokeObjectURL(img.url);
     });
-    reset(initialForm);
+    reset(INITIAL_FORM);
+  };
+
+  // Highlight văn bản tìm kiếm trùng khớp ngắn gọn
+  const renderHighlightedText = (text: string, highlight: string) => {
+    if (!highlight.trim()) return text;
+    const parts = text.split(
+      new RegExp(`(${highlight.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi"),
+    );
+    return (
+      <>
+        {parts.map((part, i) =>
+          part.toLowerCase() === highlight.toLowerCase() ? (
+            <mark key={i} className="bg-transparent font-bold text-indigo-700">
+              {part}
+            </mark>
+          ) : (
+            <span key={i}>{part}</span>
+          ),
+        )}
+      </>
+    );
   };
 
   if (isLoading)
@@ -657,7 +513,7 @@ export default function CreateProduct() {
       onSubmit={handleSubmit(onSubmit)}
       className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch"
     >
-      {/* HEADER ACTIONS */}
+      {/* 1. HEADER ACTIONS */}
       <div className="col-span-12 bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-2">
@@ -671,7 +527,6 @@ export default function CreateProduct() {
               Thêm sách mới
             </h1>
           </div>
-
           <div className="flex flex-wrap items-center gap-2">
             <Button
               type="button"
@@ -695,8 +550,7 @@ export default function CreateProduct() {
         </div>
       </div>
 
-      {/* LEFT COLUMN: BASIC INFO */}
-      {/* 🛠 SỬA ĐỔI: Sử dụng xl:h-full và xl:col-span-8 để chỉ kéo dãn trên desktop */}
+      {/* 2. LEFT COLUMN: BASIC INFO */}
       <div className="col-span-12 xl:col-span-7 space-y-6 xl:h-full">
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-5 xl:h-full flex flex-col justify-between">
           <div>
@@ -720,7 +574,7 @@ export default function CreateProduct() {
                 dataOptions={googleBooks ?? []}
                 displayKey="name"
                 valueKey="volumeId"
-                disableLocalFilter={true}
+                disableLocalFilter
                 isLoading={isLoadingGoogleBooks}
                 loadingMessage="Đang tìm kiếm trên Google Books..."
                 defaultMessage="Nhập tên sách để tìm trên Google Books..."
@@ -730,17 +584,14 @@ export default function CreateProduct() {
                     : `Không tìm thấy sách nào cho "${inputName}"`
                 }
                 renderItem={(item) => {
-                  // Kiểm tra xem item có đầy đủ dữ liệu không
                   const hasAllData =
                     !!item.name &&
                     item.authors?.length > 0 &&
                     !!item.thumbnail &&
                     !!item.description &&
                     item.pageCount !== null;
-
                   return (
                     <div className="flex items-center gap-3 w-full">
-                      {/* Thumbnail nhỏ nếu có */}
                       {item.thumbnail ? (
                         <img
                           src={item.thumbnail}
@@ -752,7 +603,6 @@ export default function CreateProduct() {
                           <BookOpen size={14} />
                         </div>
                       )}
-
                       <div className="flex min-w-0 flex-1 flex-col">
                         <span
                           className={
@@ -769,8 +619,6 @@ export default function CreateProduct() {
                             : "Không rõ tác giả"}
                         </span>
                       </div>
-
-                      {/* Badge đầy đủ dữ liệu */}
                       {hasAllData && (
                         <span className="shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
                           Đầy đủ
@@ -780,139 +628,64 @@ export default function CreateProduct() {
                   );
                 }}
                 onSelect={(selectedItem) => {
-                  console.log("Sách được chọn:", selectedItem);
-
-                  // Tên sách
                   setValue("name", selectedItem.name, { shouldDirty: true });
 
-                  // Số trang
-                  if (selectedItem.pageCount) {
+                  if (selectedItem.pageCount)
                     setValue("pages", selectedItem.pageCount, {
                       shouldDirty: true,
                     });
-                  }
 
-                  // Ngày xuất bản (chuyển đổi format nếu cần)
                   if (selectedItem.publishedDate) {
-                    // Google Books trả về dạng "2020-01-01" hoặc "2020"
                     let dateValue = selectedItem.publishedDate;
-                    if (/^\d{4}$/.test(dateValue)) {
+                    if (/^\d{4}$/.test(dateValue))
                       dateValue = `${dateValue}-01-01`;
-                    } else if (/^\d{4}-\d{2}$/.test(dateValue)) {
+                    else if (/^\d{4}-\d{2}$/.test(dateValue))
                       dateValue = `${dateValue}-01`;
-                    }
                     setValue("publishYear", dateValue, { shouldDirty: true });
                   }
 
-                  // Giá bán
-                  if (selectedItem.listPrice) {
+                  if (selectedItem.listPrice)
                     setValue("price", selectedItem.listPrice, {
                       shouldDirty: true,
                     });
-                  }
-
-                  // Giá nhập
-                  if (selectedItem.retailPrice) {
+                  if (selectedItem.retailPrice)
                     setValue("originalPrice", selectedItem.retailPrice, {
                       shouldDirty: true,
                     });
-                  }
 
-                  // Cập nhật ảnh đại diện ngay lập tức
+                  let updatedDesc = getValues("description") || "";
                   if (selectedItem.thumbnail) {
-                    let updatedDesc = getValues("description");
                     updatedDesc = updatedDesc.replace(
                       /src="https:\/\/images\.unsplash\.com\/photo-1544947950-fa07a98d237f\?q=80&w=600"/,
                       `src="${selectedItem.thumbnail}"`,
                     );
-                    setValue("description", updatedDesc, { shouldDirty: true });
                   }
-
-                  // Cập nhật Giới Thiệu Sách bằng mô tả từ Google Books
                   if (selectedItem.description) {
-                    let updatedDesc = getValues("description");
                     updatedDesc = updatedDesc.replace(
                       /<p>\s*Nhập phần giới thiệu ngắn gọn[\s\S]*?<\/p>/,
                       `<p>${selectedItem.description}</p>`,
                     );
-                    setValue("description", updatedDesc, { shouldDirty: true });
                   }
+                  setValue("description", updatedDesc, { shouldDirty: true });
 
-                  // Gọi AI để tạo mô tả chi tiết từ Groq
-                  const handleGroqBook = async () => {
-                    try {
-                      showSuccessToast("Đang dùng AI tạo mô tả chi tiết...");
-                      const metadata = await generateGroqDescription({
-                        name: selectedItem.name,
-                        description: selectedItem.description || "",
-                      });
+                  // Gọi hàm AI Groq riêng biệt gọn gàng
+                  handleAIGenerateDescription(
+                    selectedItem.name,
+                    selectedItem.description || "",
+                  );
 
-                      let newDesc = getValues("description");
-
-                      // 1. Thay thế Nội Dung Chính (summary)
-                      if (metadata.summary) {
-                        newDesc = newDesc.replace(
-                          /<p>\s*Mô tả ngắn gọn cốt truyện[\s\S]*?<\/p>/,
-                          `<p>${metadata.summary}</p>`,
-                        );
-                      }
-
-                      // 2. Thay thế Điểm nổi bật (highlights)
-                      if (
-                        metadata.highlights &&
-                        metadata.highlights.length > 0
-                      ) {
-                        const highlightsHtml = `<p>\n${metadata.highlights.join(", <br/>\n")}\n</p>`;
-                        newDesc = newDesc.replace(
-                          /<ul>\s*<li>Nội dung hấp dẫn[\s\S]*?<\/ul>/,
-                          highlightsHtml,
-                        );
-                      }
-
-                      // 3. Thay thế Đối tượng độc giả (targetAudience)
-                      if (
-                        metadata.targetAudience &&
-                        metadata.targetAudience.length > 0
-                      ) {
-                        const audienceText =
-                          metadata.targetAudience.join(", <br/>\n");
-                        newDesc = newDesc.replace(
-                          /<p>\s*Cuốn sách phù hợp với những người quan tâm[\s\S]*?<\/p>/,
-                          `<p>${audienceText}</p>`,
-                        );
-                      }
-
-                      setValue("description", newDesc, { shouldDirty: true });
-                      showSuccessToast(
-                        "Đã tự động tạo mô tả bằng AI thành công!",
-                      );
-                    } catch (error) {
-                      console.log(error);
-                      showErrorToast(
-                        "Không thể tạo mô tả bằng AI. Đang dùng mô tả gốc.",
-                      );
-                    }
-                  };
-
-                  handleGroqBook();
-
-                  // Ảnh bìa
                   if (selectedItem.thumbnail && coverImages.length === 0) {
-                    const newImage: ImageProductRequest = {
-                      url: selectedItem.thumbnail,
-                      isThumbnail: true,
-                    };
-                    setValue("coverImages", [newImage], {
-                      shouldDirty: true,
-                      shouldValidate: true,
-                    });
+                    setValue(
+                      "coverImages",
+                      [{ url: selectedItem.thumbnail, isThumbnail: true }],
+                      { shouldDirty: true, shouldValidate: true },
+                    );
                   }
                   trigger(["price", "originalPrice"]);
                 }}
               />
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {/* Giá nhập */}
                 <InputField
                   label="Giá nhập"
                   name="originalPrice"
@@ -926,20 +699,15 @@ export default function CreateProduct() {
                       value: 0,
                       message: "Giá nhập phải lớn hơn hoặc bằng 0",
                     },
-                    validate: (value) => {
-                      const price = getValues("price");
-                      if (!price || Number.isNaN(price)) return true;
-                      return (
-                        Number(value) <= Number(price) ||
-                        "Giá nhập không được lớn hơn giá bán"
-                      );
-                    },
+                    validate: (value) =>
+                      !getValues("price") ||
+                      Number(value) <= Number(getValues("price")) ||
+                      "Giá nhập không được lớn hơn giá bán",
                     onChange: () => trigger("price"),
                   }}
                   error={errors.originalPrice}
                 />
 
-                {/* Giá bán */}
                 <InputField
                   label="Giá bán"
                   name="price"
@@ -953,15 +721,10 @@ export default function CreateProduct() {
                       value: 0,
                       message: "Giá bán phải lớn hơn hoặc bằng 0",
                     },
-                    validate: (value) => {
-                      const originalPrice = getValues("originalPrice");
-                      if (!originalPrice || Number.isNaN(originalPrice))
-                        return true;
-                      return (
-                        Number(value) >= Number(originalPrice) ||
-                        "Giá bán không được nhỏ hơn giá nhập"
-                      );
-                    },
+                    validate: (value) =>
+                      !getValues("originalPrice") ||
+                      Number(value) >= Number(getValues("originalPrice")) ||
+                      "Giá bán không được nhỏ hơn giá nhập",
                     onChange: () => trigger("originalPrice"),
                   }}
                   error={errors.price}
@@ -1020,7 +783,7 @@ export default function CreateProduct() {
                         { label: "Không hoạt động", value: "INACTIVE" },
                       ]}
                       value={field.value}
-                      onChange={(val) => field.onChange(val)}
+                      onChange={field.onChange}
                     />
                   )}
                 />
@@ -1030,8 +793,7 @@ export default function CreateProduct() {
         </div>
       </div>
 
-      {/* RIGHT COLUMN: TAXONOMY */}
-      {/* 🛠 SỬA ĐỔI: Sử dụng xl:h-full và xl:col-span-4 */}
+      {/* 3. RIGHT COLUMN: TAXONOMY */}
       <div className="col-span-12 xl:col-span-5 space-y-6 xl:h-full">
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-4 xl:h-full">
           <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
@@ -1051,7 +813,7 @@ export default function CreateProduct() {
                     placeholder="Chọn thể loại..."
                     options={genreOptions}
                     value={field.value}
-                    onChange={(val) => field.onChange(val)}
+                    onChange={field.onChange}
                     required
                   />
                   {fieldState.error && (
@@ -1074,7 +836,7 @@ export default function CreateProduct() {
                     placeholder="Chọn tác giả..."
                     options={authorOptions}
                     value={field.value}
-                    onChange={(val) => field.onChange(val)}
+                    onChange={field.onChange}
                     required
                   />
                   {fieldState.error && (
@@ -1097,7 +859,7 @@ export default function CreateProduct() {
                     options={publisherOptions}
                     placeholder="Chọn nhà xuất bản..."
                     value={field.value}
-                    onChange={(val) => field.onChange(val)}
+                    onChange={field.onChange}
                     required
                   />
                   {fieldState.error && (
@@ -1119,7 +881,7 @@ export default function CreateProduct() {
                   options={seriesOptions}
                   value={field.value}
                   placeholder="Chọn series..."
-                  onChange={(val) => field.onChange(val)}
+                  onChange={field.onChange}
                 />
               )}
             />
@@ -1127,7 +889,7 @@ export default function CreateProduct() {
         </div>
       </div>
 
-      {/* IMAGE UPLOAD SECTION */}
+      {/* 4. IMAGE UPLOAD SECTION */}
       <div className="col-span-12 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
         <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
           <ImageIcon size={18} className="text-indigo-600" />
@@ -1151,7 +913,7 @@ export default function CreateProduct() {
           </button>
         </div>
 
-        {imageUploadMode === "file" && (
+        {imageUploadMode === "file" ? (
           <label className="flex flex-col items-center justify-center h-36 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:border-indigo-500 transition">
             <Upload size={28} className="text-slate-400 mb-2" />
             <span className="text-sm text-slate-600">Chọn ảnh từ máy tính</span>
@@ -1164,9 +926,7 @@ export default function CreateProduct() {
               onChange={handleFileChange}
             />
           </label>
-        )}
-
-        {imageUploadMode === "url" && (
+        ) : (
           <div className="flex gap-2">
             <input
               type="text"
@@ -1196,37 +956,38 @@ export default function CreateProduct() {
             {coverImages.map((image, index) => (
               <div
                 key={index}
-                className={`group relative aspect-square rounded-xl overflow-hidden border-2 bg-slate-50 ${
-                  image.isThumbnail
-                    ? "border-indigo-500 ring-2 ring-indigo-100"
-                    : "border-slate-200"
-                }`}
+                className={`group relative aspect-square rounded-xl overflow-hidden border-2 bg-slate-50 ${image.isThumbnail ? "border-indigo-500 ring-2 ring-indigo-100" : "border-slate-200"}`}
               >
                 <img
-                  src={image.url != null ? image.url : ""}
+                  src={image.url || ""}
                   alt={`Ảnh ${index + 1}`}
                   className="w-full h-full object-cover"
                 />
-
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
-
                 <button
                   type="button"
-                  onClick={() => handleSetThumbnail(index)}
-                  className={`absolute top-2 left-2 text-[10px] font-medium px-2 py-1 rounded-md shadow-sm transition ${
-                    image.isThumbnail
-                      ? "bg-indigo-600 text-white"
-                      : "bg-white text-slate-700 hover:bg-indigo-50"
-                  }`}
+                  onClick={() =>
+                    setValue(
+                      "coverImages",
+                      coverImages.map((img, i) => ({
+                        ...img,
+                        isThumbnail: i === index,
+                      })),
+                      { shouldDirty: true },
+                    )
+                  }
+                  className={`absolute top-2 left-2 text-[10px] font-medium px-2 py-1 rounded-md shadow-sm transition ${image.isThumbnail ? "bg-indigo-600 text-white" : "bg-white text-slate-700 hover:bg-indigo-50"}`}
                 >
                   {image.isThumbnail ? "Đại diện" : "Chọn"}
                 </button>
-
                 <div className="absolute top-2 right-2 flex gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition">
                   <button
                     type="button"
                     title="Thay thế ảnh"
-                    onClick={() => handleEditClick(index)}
+                    onClick={() => {
+                      setReplaceIndex(index);
+                      replaceFileInputRef.current?.click();
+                    }}
                     className="flex items-center justify-center w-7 h-7 rounded-full bg-blue-500 text-white hover:bg-blue-600 shadow-sm"
                   >
                     <Pencil size={12} />
@@ -1242,7 +1003,6 @@ export default function CreateProduct() {
                     </button>
                   )}
                 </div>
-
                 <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
                   {index + 1}/{MAX_IMAGES}
                 </div>
@@ -1269,12 +1029,13 @@ export default function CreateProduct() {
         )}
       </div>
 
-      {/* DESCRIPTION */}
+      {/* 5. DESCRIPTION */}
       <div className="col-span-12 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
         <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
           <FileText size={18} className="text-indigo-600" />
           <h2 className="text-base font-bold text-slate-900">Mô tả chi tiết</h2>
         </div>
+
         <Controller
           name="description"
           control={control}

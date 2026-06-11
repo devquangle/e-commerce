@@ -32,6 +32,7 @@ export interface ProductRequest {
   coverImages: ImageProductRequest[];
   description: string;
 }
+
 export interface ProductResponse {
   id: number;
   name: string;
@@ -42,3 +43,7 @@ export interface ProductResponse {
   publishYear: string;
   pages: number;
 }
+
+
+
+

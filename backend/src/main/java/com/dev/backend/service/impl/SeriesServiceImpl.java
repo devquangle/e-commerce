@@ -2,6 +2,7 @@ package com.dev.backend.service.impl;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.springframework.data.domain.Page;
@@ -81,42 +82,54 @@ public class SeriesServiceImpl implements SeriesService {
     @Transactional
     public void insertData() {
         log.info("Bắt đầu khởi tạo dữ liệu mẫu các Bộ Series sách nổi tiếng...");
-
-        // Khởi tạo danh sách các bộ series sách kinh điển (Việt Nam & Thế giới)
         List<Series> defaultSeries = Arrays.asList(
-            Series.builder()
-                .name("Harry Potter")
-                .slug(TextUtils.toSlug("Harry Potter"))
-                .description("Hành trình trưởng thành của cậu bé phù thủy mồ côi Harry Potter tại trường phép thuật Hogwarts và cuộc chiến chống lại Chúa tể Hắc ám Voldemort.")
-                .status(BaseStatus.ACTIVE)
-                .build(),
-            Series.builder()
-                .name("Kính Vạn Hoa")
-                .slug(TextUtils.toSlug("Kính Vạn Hoa"))
-                .description("Chuỗi truyện học đường kinh điển của nhà văn Nguyễn Nhật Ánh, khắc họa những trò nghịch ngợm và các chuyến thám hiểm của bộ ba Quý róm, Tiểu Long, Hạnh.")
-                .status(BaseStatus.ACTIVE)
-                .build(),
-            Series.builder()
-                .name("Chúa Tể Những Chiếc Nhẫn")
-                .slug(TextUtils.toSlug("Chúa Tể Những Chiếc Nhẫn"))
-                .description("Bộ sử thi kỳ ảo huyền thoại về chuyến đi tiêu hủy chiếc nhẫn quyền lực của tộc Hobbit nhằm cứu vớt vùng Trung Địa khỏi thế lực bóng tối Sauron.")
-                .status(BaseStatus.ACTIVE)
-                .build(),
-            Series.builder()
-                .name("Sherlock Holmes")
-                .slug(TextUtils.toSlug("Sherlock Holmes"))
-                .description("Tượng đài bất hủ của dòng sách trinh thám thế giới, khắc họa chuỗi vụ án ly kỳ được bóc tách dưới bộ óc thiên tài của vị thám tử lập dị Sherlock Holmes.")
-                .status(BaseStatus.ACTIVE)
-                .build(),
-            Series.builder()
-                .name("Bão Táp Triều Trần")
-                .slug(TextUtils.toSlug("Bão Táp Triều Trần"))
-                .description("Bộ tiểu thuyết lịch sử trường thiên đồ sộ của nhà văn Hoàng Quốc Hải, tái hiện sinh động sự hưng thịnh và cuộc chiến chống Nguyên Mông hào hùng của nhà Trần.")
-                .status(BaseStatus.ACTIVE)
-                .build()
-        );
+                new Series() {
+                    {
+                        setName("Harry Potter");
+                        setSlug(TextUtils.toSlug("Harry Potter"));
+                        setDescription(
+                                "Hành trình trưởng thành của cậu bé phù thủy mồ côi Harry Potter tại trường phép thuật Hogwarts và cuộc chiến chống lại Chúa tể Hắc ám Voldemort.");
+                        setStatus(BaseStatus.ACTIVE);
+                    }
+                },
+                new Series() {
+                    {
+                        setName("Kính Vạn Hoa");
+                        setSlug(TextUtils.toSlug("Kính Vạn Hoa"));
+                        setDescription(
+                                "Chuỗi truyện học đường kinh điển của nhà văn Nguyễn Nhật Ánh, khắc họa những trò nghịch ngợm và các chuyến thám hiểm của bộ ba Quý róm, Tiểu Long, Hạnh.");
+                        setStatus(BaseStatus.ACTIVE);
+                    }
+                },
+                new Series() {
+                    {
+                        setName("Chúa Tể Những Chiếc Nhẫn");
+                        setSlug(TextUtils.toSlug("Chúa Tể Những Chiếc Nhẫn"));
+                        setDescription(
+                                "Bộ sử thi kỳ ảo huyền thoại về chuyến đi tiêu hủy chiếc nhẫn quyền lực của tộc Hobbit nhằm cứu vớt vùng Trung Địa khỏi thế lực bóng tối Sauron.");
+                        setStatus(BaseStatus.ACTIVE);
+                    }
+                },
+                new Series() {
+                    {
+                        setName("Sherlock Holmes");
+                        setSlug(TextUtils.toSlug("Sherlock Holmes"));
+                        setDescription(
+                                "Tượng đài bất hủ của dòng sách trinh thám thế giới, khắc họa chuỗi vụ án ly kỳ được bóc tách dưới bộ óc thiên tài của vị thám tử lập dị Sherlock Holmes.");
+                        setStatus(BaseStatus.ACTIVE);
+                    }
+                },
+                new Series() {
+                    {
+                        setName("Bão Táp Triều Trần");
+                        setSlug(TextUtils.toSlug("Bão Táp Triều Trần"));
+                        setDescription(
+                                "Bộ tiểu thuyết lịch sử trường thiên đồ sộ của nhà văn Hoàng Quốc Hải, tái hiện sinh động sự hưng thịnh và cuộc chiến chống Nguyên Mông hào hùng của nhà Trần.");
+                        setStatus(BaseStatus.ACTIVE);
+                    }
+                });
 
-        if (seriesRepository.count() ==0) {
+        if (seriesRepository.count() == 0) {
             seriesRepository.saveAll(defaultSeries);
         }
         log.info("Hoàn thành khởi tạo dữ liệu cho Series sách!");
@@ -124,7 +137,7 @@ public class SeriesServiceImpl implements SeriesService {
 
     @Override
     public PageResponse<SeriesResponse> pages(int page, int size, String keyword, String status) {
-     Pageable pageable = PageRequest.of(
+        Pageable pageable = PageRequest.of(
                 page,
                 size,
                 Sort.by(Sort.Direction.DESC, "id"));

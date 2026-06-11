@@ -1,6 +1,6 @@
 import { getProductBadge } from "@/utils/getProductBadge";
 import { getDiscountPercent } from "@/utils/getDiscountPercent";
-import type { Product } from "@/types/product";
+import type { Product } from "@/types/product.type";
 
 interface Props {
   product: Product;

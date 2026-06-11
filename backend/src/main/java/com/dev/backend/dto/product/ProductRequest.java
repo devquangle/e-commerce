@@ -20,13 +20,14 @@ public class ProductRequest {
     private LocalDate publishYear;
     private Integer pages;
 
-    private List<String> authorIds;
+    private List<Integer> authorIds;
     private List<Integer> genreIds;
 
     private Integer publisherId;
     private Integer seriesId;
 
     private String status;
+    private String isbn;
 
     private List<ImageResponse> coverImages;
 

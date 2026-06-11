@@ -1,6 +1,6 @@
 import ProductCard from '@/components/user/ProductCard'
 import Container from '@/components/common/Container'
-import type { Product } from '@/types/product';
+import type { Product } from '@/types/product.type';
 
 
 
