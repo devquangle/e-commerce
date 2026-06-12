@@ -23,7 +23,7 @@ export default function AdminLayout() {
         onClose={() => setSidebarOpen(false)} />
 
       {/* MAIN CONTENT */}
-      <main className="h-[calc(100vh-60px)] w-full overflow-y-auto sm:pl-64">
+      <main className="h-[calc(100vh-60px)] w-full overflow-y-auto md:pl-64">
         <Container className="p-4">
           <Outlet />
         </Container>

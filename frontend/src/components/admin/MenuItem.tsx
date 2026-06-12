@@ -5,7 +5,7 @@ import { NavLink } from "react-router-dom"
 import { useState } from "react"
 import { ChevronDown } from "lucide-react"
 
-export default function MenuItem() {
+export default function MenuItem({ onClose }: { onClose?: () => void }) {
 
   const { userInfo } = useAuth()
   const roles = userInfo?.roles || []
@@ -57,6 +57,7 @@ export default function MenuItem() {
                     <li key={item.id}>
                       <NavLink
                         to={item.path!}
+                        onClick={() => onClose && onClose()}
                         className={({ isActive }) =>
                           [
                             "group flex items-center gap-3 px-3.5 py-2.5 text-xs font-medium rounded-xl transition-all duration-200 border-l-2",

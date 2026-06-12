@@ -16,13 +16,13 @@ function MobileDrawer({
         <>
             {isOpen && (
                 <div
-                    className="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 lg:hidden"
+                    className="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 md:hidden"
                     onClick={onClose}
                 />
             )}
 
             <div
-                className={`fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 z-50 transform transition-transform duration-300 lg:hidden
+                className={`fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 z-50 transform transition-transform duration-300 md:hidden
         ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
             >
                 <div className="flex h-16 items-center justify-between p-4 border-b border-slate-200">
@@ -44,7 +44,7 @@ function MobileDrawer({
 
                 {/* Content */}
                 <div className="p-4 space-y-2 overflow-y-auto h-[calc(100vh-64px)]">
-                    <MenuItem />
+                    <MenuItem onClose={onClose} />
                 </div>
             </div>
         </>

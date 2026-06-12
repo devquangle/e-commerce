@@ -3,11 +3,11 @@ package com.dev.backend.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
+
 
 import com.dev.backend.entity.ProductGenre;
 
-@Repository
+
 public interface ProductGenreRepository extends JpaRepository<ProductGenre, Integer> {
 
     @Query("SELECT COUNT(pg)>0 FROM ProductGenre pg WHERE pg.genre.id = :genreId")

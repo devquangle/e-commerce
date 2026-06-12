@@ -1,8 +1,7 @@
 package com.dev.backend.dto.product;
 
-import java.util.ArrayList;
-import java.util.List;
 
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

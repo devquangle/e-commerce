@@ -3,7 +3,6 @@ package com.dev.backend.security.jwt;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
-import java.util.Collection;
 
 import javax.crypto.SecretKey;
 

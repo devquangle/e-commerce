@@ -5,12 +5,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
+
 
 import com.dev.backend.constant.BaseStatus;
 import com.dev.backend.entity.Publisher;
 
-@Repository
+
 public interface PublisherRepository extends JpaRepository<Publisher, Integer> {
     @Query("""
             SELECT a

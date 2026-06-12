@@ -44,7 +44,7 @@ export default function Header() {
           <nav className="flex justify-between items-center h-15 gap-2">
             <Logo />
             <button
-              className="lg:hidden md:hidden cursor-pointer"
+              className="md:hidden cursor-pointer"
               onClick={() => setIsMobileNavOpen(true)}
             >
               <svg
