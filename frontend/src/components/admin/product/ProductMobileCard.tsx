@@ -115,46 +115,47 @@ const ProductMobileCard = ({ products, onDelete }: Props) => {
               )}
 
               {/* ===== GIÁ & TỒN KHO ===== */}
-              <div className="grid grid-cols-2 gap-2 border-y border-slate-100 py-2.5 text-xs">
+              <div className="grid grid-cols-3 gap-2 border-y border-slate-100 py-2.5 text-xs">
+                <div>
+                  <span className="text-slate-400 block mb-0.5">Giá nhập:</span>
+                  <span className="text-slate-700 font-medium text-sm">
+                    {formatPrice(product.originalPrice)}
+                  </span>
+                </div>
                 <div>
                   <span className="text-slate-400 block mb-0.5">Giá bán:</span>
                   <span className="text-indigo-600 font-bold text-sm">
                     {formatPrice(product.price)}
                   </span>
                   {product.originalPrice > product.price && (
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <span className="text-slate-400 line-through text-[11px]">
-                        {formatPrice(product.originalPrice)}
-                      </span>
-                      <span className="bg-rose-50 text-rose-600 border border-rose-100 text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                    <div className="mt-0.5">
+                      <span className="bg-rose-50 text-rose-600 border border-rose-100 text-[10px] font-bold px-1.5 py-0.5 rounded">
                         -{discount}%
                       </span>
                     </div>
                   )}
                 </div>
                 <div>
-                  <span className="text-slate-400 block mb-0.5">Tồn kho:</span>
-                  <span
-                    className={`font-bold text-sm ${
-                      product.quantity === 0
-                        ? "text-rose-600"
-                        : product.quantity <= 10
-                          ? "text-amber-600"
-                          : "text-slate-700"
-                    }`}
-                  >
-                    {product.quantity}
-                  </span>
-                  {product.quantity === 0 && (
-                    <span className="block text-[10px] text-rose-500 mt-0.5">
-                      Hết hàng
+                  <span className="text-slate-400 block mb-0.5 text-center">Tồn kho:</span>
+                  <div className="flex flex-col items-center gap-0.5">
+                    <span
+                      className={`font-bold text-sm ${
+                        product.quantity === 0
+                          ? "text-rose-600"
+                          : product.quantity <= 10
+                            ? "text-amber-600"
+                            : "text-slate-700"
+                      }`}
+                    >
+                      {product.quantity}
                     </span>
-                  )}
-                  {product.quantity > 0 && product.quantity <= 10 && (
-                    <span className="block text-[10px] text-amber-500 mt-0.5">
-                      Sắp hết
-                    </span>
-                  )}
+                    {product.quantity === 0 && (
+                      <span className="text-[10px] text-rose-500 font-medium">Hết hàng</span>
+                    )}
+                    {product.quantity > 0 && product.quantity <= 10 && (
+                      <span className="text-[10px] text-amber-500 font-medium">Sắp hết</span>
+                    )}
+                  </div>
                 </div>
               </div>
 

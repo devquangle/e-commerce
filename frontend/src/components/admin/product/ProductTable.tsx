@@ -34,7 +34,7 @@ export default function ProductTable({ products, onDelete }: Props) {
               STT
             </th>
             <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider min-w-[400px]">
-              Thông tin sản phẩm chung
+              Thông tin sản phẩm 
             </th>
             <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider w-36">
               Giá nhập
@@ -298,11 +298,7 @@ export const ExpandableAuthors = ({
       {hasMore && expanded && (
         <button
           type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setExpanded(false);
-          }}
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); setExpanded(false); }}
           className="inline-flex items-center text-indigo-600 hover:underline px-1 py-0.5 rounded text-[10px] cursor-pointer font-medium"
         >
           Thu gọn
@@ -356,11 +352,7 @@ export const ExpandableGenres = ({
       {hasMore && expanded && (
         <button
           type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setExpanded(false);
-          }}
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); setExpanded(false); }}
           className="inline-flex items-center text-slate-500 hover:underline px-1 py-0.5 rounded text-[10px] cursor-pointer font-medium"
         >
           Thu gọn
