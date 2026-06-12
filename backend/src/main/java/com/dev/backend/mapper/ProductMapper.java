@@ -133,8 +133,9 @@ public class ProductMapper {
                 .map(img -> {
                     ProductImageResponse productImageResponse = new ProductImageResponse();
                     if (productImageResponse != null) {
-                        productImageResponse.setThumbnail(img.isThumbnail());
+
                         productImageResponse.setUrl(img.getUrlImage());
+                        productImageResponse.setIsThumbnail(img.isThumbnail());
                     }
                     return productImageResponse;
                 }).collect(Collectors.toList());

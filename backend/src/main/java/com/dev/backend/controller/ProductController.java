@@ -4,6 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -35,7 +36,7 @@ public class ProductController {
     }
 
     @PostMapping("/products")
-    public ResponseEntity<ResponseData<ProductResponse>> post_product(@RequestBody ProductRequest request) {
+    public ResponseEntity<ResponseData<ProductResponse>> add(@RequestBody ProductRequest request) {
         ProductResponse response = productService.add(request);
         return ResponseUtil.success("Thêm sản phẩm thành công", response);
     }
@@ -44,5 +45,12 @@ public class ProductController {
     public ResponseEntity<ResponseData<ProductResponse>> edit(@PathVariable Integer id) {
         ProductResponse response = productService.edit(id);
         return ResponseUtil.success("lấy thông tin phẩm thành công", response);
+    }
+
+    @PutMapping("/products/{id}")
+    public ResponseEntity<ResponseData<ProductResponse>> update(@PathVariable Integer id,
+            @RequestBody ProductRequest request) {
+        ProductResponse response = productService.update(id, request);
+        return ResponseUtil.success("Cập nhật sản phẩm thành công", response);
     }
 }

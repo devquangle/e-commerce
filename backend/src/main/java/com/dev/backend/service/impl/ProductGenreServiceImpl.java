@@ -37,13 +37,14 @@ public class ProductGenreServiceImpl implements ProductGenreService {
     @Override
     @Transactional
     public void saveProductGenres(Product product, List<Integer> genreIds) {
+        productGenreRepository.deleteByProductId(product.getId());
         if (genreIds == null || genreIds.isEmpty()) {
             return;
         }
 
         List<ProductGenre> productGenresToSave = new ArrayList<>();
         List<Integer> uniqueGenreIds = genreIds.stream()
-                .distinct() 
+                .distinct()
                 .toList();
         for (Integer genreId : uniqueGenreIds) {
             ProductGenre productGenre = new ProductGenre();

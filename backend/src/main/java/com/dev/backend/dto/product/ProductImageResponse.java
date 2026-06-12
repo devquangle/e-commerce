@@ -7,5 +7,5 @@ import lombok.Setter;
 @Setter
 public class ProductImageResponse {
     private String url;
-    private boolean isThumbnail;
+    private Boolean isThumbnail;
 }

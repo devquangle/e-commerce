@@ -117,9 +117,32 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductResponse update(Integer id, ProductRequest productRequest) {
-        // TODO Auto-generated method stub
-        return null;
+    public ProductResponse update(Integer id, ProductRequest request) {
+        Product product= findById(id);
+        product.setName(TextUtils.capitalizeFully(request.getName().strip()));
+        product.setSlug(TextUtils.toSlug(request.getName().strip()));
+        product.setOriginalPrice(request.getOriginalPrice());
+        product.setPrice(request.getPrice());
+        product.setQuantity(request.getQuantity());
+        product.setWeight(request.getWeight());
+        product.setPublishYear(request.getPublishYear());
+        product.setPages(request.getPages());
+        product.setIsbn(request.getIsbn());
+        product.setStatus(ProductStatus.valueOf(request.getStatus()));
+        product.setDescription(request.getDescription());
+        if (request.getSeriesId() != null) {
+            product.setSeries(seriesService.findById(request.getSeriesId()));
+        }
+        product.setPublisher(publisherService.findById(request.getPublisherId()));
+
+        Product saved = save(product);
+        productGenreService.saveProductGenres(saved, request.getGenreIds());
+        productAuthorService.saveProductAuthors(saved, request.getAuthorIds());
+        imageService.saveProductImages(saved, request.getCoverImages());
+
+        log.debug("Saved product: {}", saved);
+
+        return productMapper.toDTO(saved);
     }
 
     @Override
