@@ -14,6 +14,7 @@ import com.dev.backend.exception.NotFoundException;
 import com.dev.backend.exception.UnauthorizedException;
 import com.dev.backend.repository.AuthRepository;
 import com.dev.backend.security.CustomUserDetails;
+import com.dev.backend.security.CustomUserDetailsService;
 import com.dev.backend.security.jwt.JwtUtil;
 import com.dev.backend.service.AuthService;
 import com.dev.backend.service.UserService;
@@ -33,6 +34,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
+    private final CustomUserDetailsService customUserDetailsService;
 
     @Override
     public User getUserById(Integer id) {
@@ -65,9 +67,7 @@ public class AuthServiceImpl implements AuthService {
                 throw new UnauthorizedException("Tài khoản đã bị khóa");
             }
 
-            String accessToken = jwtUtil.generateAccessToken(
-                    user.getId(),
-                    user.getTokenVersion());
+            String accessToken = jwtUtil.generateAccessToken(userDetails);
 
             String refreshToken = jwtUtil.generateRefreshToken(
                     user.getId(),
@@ -99,7 +99,11 @@ public class AuthServiceImpl implements AuthService {
             throw new UnauthorizedException("Token đã bị thu hồi");
         }
 
-        String accessToken = jwtUtil.generateAccessToken(user.getId(), user.getTokenVersion());
+        CustomUserDetails userDetails = customUserDetailsService.loadUserById(userId);
+        if (userDetails == null) {
+            throw new UnauthorizedException("User not found");
+        }
+        String accessToken = jwtUtil.generateAccessToken(userDetails);
         return RefreshResponse.builder()
                 .accessToken(accessToken)
                 .build();

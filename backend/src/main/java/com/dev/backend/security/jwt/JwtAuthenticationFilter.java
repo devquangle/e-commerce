@@ -11,6 +11,7 @@ import com.dev.backend.constant.JwtType;
 import com.dev.backend.entity.User;
 import com.dev.backend.repository.AuthRepository;
 import com.dev.backend.security.CustomUserDetails;
+import java.util.List;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -47,15 +48,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().getAuthentication() == null) {
 
                 int userId = jwtUtil.extractUserId(token);
+                
+                // Fetch basic user to check token version (1 simple query, no joins needed)
                 User user = authRepository.findById(userId).orElse(null);
-
                 
                 if (user == null || !jwtUtil.isTokenVersionValid(token, user.getTokenVersion())) {
                     chain.doFilter(request, response);
                     return;
                 }
 
-                CustomUserDetails userDetails = new CustomUserDetails(user);
+                // Extract stateless roles and permissions from JWT
+                List<String> roles = jwtUtil.extractRoles(token);
+                List<String> permissions = jwtUtil.extractPermissions(token);
+
+                // Build UserDetails without querying Role/Permission tables
+                CustomUserDetails userDetails = new CustomUserDetails(user, roles, permissions);
 
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails,

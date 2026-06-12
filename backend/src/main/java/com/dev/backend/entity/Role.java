@@ -1,5 +1,6 @@
 package com.dev.backend.entity;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -13,6 +14,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -21,12 +24,15 @@ import lombok.Setter;
 @Table(name = "roles")
 public class Role extends BaseEntity<Integer>{
 
-  
-
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 50)
     private String name;
 
+    @Column(length = 255)
     private String description;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "role", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<UserRole> userRoles = new HashSet<>();

@@ -2,6 +2,8 @@ package com.dev.backend.security.jwt;
 
 import java.util.Base64;
 import java.util.Date;
+import java.util.List;
+import java.util.Collection;
 
 import javax.crypto.SecretKey;
 
@@ -9,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.dev.backend.constant.JwtType;
+import com.dev.backend.security.CustomUserDetails;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -24,8 +27,17 @@ public class JwtUtil {
     }
 
     // ================= GENERATE =================
-    public String generateAccessToken(int userId, int tokenVersion) {
-        return buildToken(userId, tokenVersion, JwtType.ACCESS);
+    public String generateAccessToken(CustomUserDetails userDetails) {
+        return Jwts.builder()
+                .setSubject(String.valueOf(userDetails.getUser().getId()))
+                .claim("tokenVersion", userDetails.getUser().getTokenVersion())
+                .claim("roles", userDetails.getRoles())
+                .claim("permissions", userDetails.getPermissions())
+                .claim("type", JwtType.ACCESS.name())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + JwtType.ACCESS.getExpirationMillis()))
+                .signWith(signingKey(), SignatureAlgorithm.HS256)
+                .compact();
     }
 
     public String generateRefreshToken(int userId, int tokenVersion) {
@@ -72,6 +84,16 @@ public class JwtUtil {
     public int extractTokenVersion(String token) {
         Integer version = extractAllClaims(token).get("tokenVersion", Integer.class);
         return version == null ? 0 : version;
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<String> extractRoles(String token) {
+        return extractAllClaims(token).get("roles", List.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<String> extractPermissions(String token) {
+        return extractAllClaims(token).get("permissions", List.class);
     }
 
     // ================= VALIDATE =================

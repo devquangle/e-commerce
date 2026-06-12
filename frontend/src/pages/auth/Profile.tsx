@@ -8,9 +8,11 @@ import { showErrorToast, showSuccessToast } from "@/utils/toastUtil";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { apiAuth } from "@/configs/axios";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function Profile() {
   const { userInfo, setUserInfo } = useAuth();
+  const queryClient = useQueryClient();
 
   const {
     register,
@@ -64,6 +66,7 @@ export default function Profile() {
         showSuccessToast(res.data.message);
         console.log(res.data.data);
         setUserInfo(res.data.data);
+        queryClient.setQueryData(["auth", "me"], res.data.data);
       }
 
     } catch (error: unknown) {

@@ -9,12 +9,14 @@ import jakarta.persistence.ManyToOne;
 
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "review_images")
 public class ReviewImage {
@@ -24,7 +26,7 @@ public class ReviewImage {
     private Integer id;
     private String urlImage;
 
-    @ManyToOne
+    @ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
     @JoinColumn(name = "review_id")
     private Review review;
 }

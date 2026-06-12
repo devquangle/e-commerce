@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { ProductResponse } from "@/types/product.type";
 import {
   SearchX,
@@ -68,29 +69,23 @@ export default function ProductTable({ products, onDelete }: Props) {
                 {/* ── THÔNG TIN SẢN PHẨM CHUNG ── */}
                 <td className="py-3 px-4 align-middle">
                   <div className="flex gap-3 items-stretch">
-
-                    {/* Ảnh bìa — chiều cao bằng nội dung */}
-                    <div className="shrink-0 flex">
+                    {/* Ảnh bìa — kích thước cố định */}
+                    <div className="shrink-0 mt-0.5">
                       {product.urlImageDefault ? (
                         <img
                           src={product.urlImageDefault}
                           alt={product.name}
-                          className="w-20 rounded-lg object-cover border border-slate-200 shadow-sm group-hover:shadow-md transition-shadow self-stretch"
-                          style={{ minHeight: "88px" }}
+                          className="w-[72px] h-[104px] rounded object-cover border border-slate-200 shadow-sm group-hover:shadow-md transition-shadow"
                         />
                       ) : (
-                        <div
-                          className="w-20 rounded-lg border border-dashed border-slate-200 bg-slate-50 flex items-center justify-center self-stretch"
-                          style={{ minHeight: "88px" }}
-                        >
-                          <BookOpen size={18} className="text-slate-300" />
+                        <div className="w-[72px] h-[104px] rounded border border-dashed border-slate-200 bg-slate-50 flex items-center justify-center">
+                          <BookOpen size={20} className="text-slate-300" />
                         </div>
                       )}
                     </div>
 
                     {/* Nội dung 3 nhóm */}
-                    <div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5 py-0.5">
-
+                    <div className="flex-1 min-w-0 flex flex-col gap-1.5">
                       {/* ➊ Tên + ISBN */}
                       <div className="flex flex-col gap-0.5">
                         <p
@@ -106,53 +101,40 @@ export default function ProductTable({ products, onDelete }: Props) {
                         )}
                       </div>
 
-                      {/* NXB + Series — cùng 1 hàng, badge màu khác nhau */}
+                      {/* NXB + Series */}
                       {(product.publisherName || product.seriesName) && (
                         <div className="flex flex-wrap gap-1">
                           {product.publisherName && (
-                            <span className="inline-flex items-center gap-1 bg-teal-50 text-teal-700 border border-teal-200 px-2 py-0.5 rounded-full text-[11px] font-medium">
-                              <Building2 size={9} />
-                              {product.publisherName}
+                            <span className="inline-flex items-center gap-1 bg-teal-50 text-teal-700 border border-teal-100 px-1.5 py-0.5 rounded text-[10px] font-medium">
+                              <Building2 size={10} />
+                              <span>{product.publisherName}</span>
                             </span>
                           )}
                           {product.seriesName && (
-                            <span className="inline-flex items-center gap-1 bg-violet-50 text-violet-700 border border-violet-200 px-2 py-0.5 rounded-full text-[11px] font-medium">
-                              <Layers size={9} />
-                              {product.seriesName}
+                            <span className="inline-flex items-center gap-1 bg-violet-50 text-violet-700 border border-violet-100 px-1.5 py-0.5 rounded text-[10px] font-medium">
+                              <Layers size={10} />
+                              <span>{product.seriesName}</span>
                             </span>
                           )}
                         </div>
                       )}
 
-                      {/* ➋ Chip tác giả (indigo + BookOpen) + chip thể loại (slate + Tag) */}
+                      {/* Tác giả + Thể loại */}
                       <div className="flex flex-wrap gap-1">
-                        {product.productAuthors && product.productAuthors.length > 0
-                          ? product.productAuthors.map((a) => (
-                              <span
-                                key={a.id}
-                                className="inline-flex items-center gap-1 bg-indigo-50 text-indigo-700 border border-indigo-100 px-2 py-0.5 rounded-full text-[11px] font-medium"
-                              >
-                                <BookOpen size={9} />
-                                {a.name}
-                              </span>
-                            ))
-                          : (
-                            <span className="text-[11px] text-slate-300 italic">Chưa có tác giả</span>
-                          )}
-                        {product.productGenres &&
-                          product.productGenres.map((g) => (
-                            <span
-                              key={g.id}
-                              className="inline-flex items-center gap-1 bg-slate-100 text-slate-500 border border-slate-200 px-2 py-0.5 rounded-full text-[11px]"
-                            >
-                              <Tag size={9} />
-                              {g.name}
-                            </span>
-                          ))}
+                        <ExpandableAuthors
+                          authors={product.productAuthors}
+                          limit={3}
+                        />
+                        <ExpandableGenres
+                          genres={product.productGenres}
+                          limit={3}
+                        />
                       </div>
 
                       {/* ➌ Năm XB · Số trang · Trọng lượng */}
-                      {(product.publishYear || product.pages > 0 || product.weight > 0) && (
+                      {(product.publishYear ||
+                        product.pages > 0 ||
+                        product.weight > 0) && (
                         <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-slate-400">
                           {product.publishYear && (
                             <span className="flex items-center gap-1">
@@ -193,7 +175,13 @@ export default function ProductTable({ products, onDelete }: Props) {
                     </span>
                     {product.originalPrice > product.price && (
                       <span className="text-[11px] text-rose-500 font-semibold">
-                        -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
+                        -
+                        {Math.round(
+                          ((product.originalPrice - product.price) /
+                            product.originalPrice) *
+                            100,
+                        )}
+                        %
                       </span>
                     )}
                   </div>
@@ -214,10 +202,14 @@ export default function ProductTable({ products, onDelete }: Props) {
                       {product.quantity}
                     </span>
                     {product.quantity === 0 && (
-                      <span className="text-[10px] text-rose-500 font-medium">Hết hàng</span>
+                      <span className="text-[10px] text-rose-500 font-medium">
+                        Hết hàng
+                      </span>
                     )}
                     {product.quantity > 0 && product.quantity <= 10 && (
-                      <span className="text-[10px] text-amber-500 font-medium">Sắp hết</span>
+                      <span className="text-[10px] text-amber-500 font-medium">
+                        Sắp hết
+                      </span>
                     )}
                   </div>
                 </td>
@@ -257,3 +249,123 @@ export default function ProductTable({ products, onDelete }: Props) {
     </div>
   );
 }
+
+// ─── COMPONENT HIỂN THỊ CHIPS TÁC GIẢ ────────────────────────
+export const ExpandableAuthors = ({
+  authors,
+  limit,
+}: {
+  authors: ProductResponse["productAuthors"];
+  limit: number;
+}) => {
+  const [expanded, setExpanded] = useState(false);
+
+  if (!authors || authors.length === 0) {
+    return (
+      <span className="text-[10px] text-slate-400 italic">Chưa có tác giả</span>
+    );
+  }
+
+  const visible = expanded ? authors : authors.slice(0, limit);
+  const hasMore = authors.length > limit;
+
+  return (
+    <div className="flex flex-wrap gap-1 items-center">
+      {visible.map((a) => (
+        <span
+          key={`a-${a.id}`}
+          className="inline-flex items-center gap-1 bg-indigo-50 text-indigo-600 border border-indigo-100 px-1.5 py-0.5 rounded text-[10px]"
+        >
+          <BookOpen size={10} />
+          <span className="max-w-[100px] truncate" title={a.name}>
+            {a.name}
+          </span>
+        </span>
+      ))}
+      {hasMore && !expanded && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setExpanded(true);
+          }}
+          className="inline-flex items-center bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border border-indigo-100 px-1.5 py-0.5 rounded text-[10px] cursor-pointer transition-colors font-medium"
+        >
+          +{authors.length - limit} nữa
+        </button>
+      )}
+      {hasMore && expanded && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setExpanded(false);
+          }}
+          className="inline-flex items-center text-indigo-600 hover:underline px-1 py-0.5 rounded text-[10px] cursor-pointer font-medium"
+        >
+          Thu gọn
+        </button>
+      )}
+    </div>
+  );
+};
+
+// ─── COMPONENT HIỂN THỊ CHIPS THỂ LOẠI ───────────────────────
+export const ExpandableGenres = ({
+  genres,
+  limit,
+}: {
+  genres: ProductResponse["productGenres"];
+  limit: number;
+}) => {
+  const [expanded, setExpanded] = useState(false);
+
+  if (!genres || genres.length === 0) return null;
+
+  const visible = expanded ? genres : genres.slice(0, limit);
+  const hasMore = genres.length > limit;
+
+  return (
+    <div className="flex flex-wrap gap-1 items-center">
+      {visible.map((g) => (
+        <span
+          key={`g-${g.id}`}
+          className="inline-flex items-center gap-1 bg-slate-50 text-slate-500 border border-slate-200 px-1.5 py-0.5 rounded text-[10px]"
+        >
+          <Tag size={10} />
+          <span className="max-w-[100px] truncate" title={g.name}>
+            {g.name}
+          </span>
+        </span>
+      ))}
+      {hasMore && !expanded && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setExpanded(true);
+          }}
+          className="inline-flex items-center bg-slate-50 text-slate-500 hover:bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded text-[10px] cursor-pointer transition-colors font-medium"
+        >
+          +{genres.length - limit} nữa
+        </button>
+      )}
+      {hasMore && expanded && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setExpanded(false);
+          }}
+          className="inline-flex items-center text-slate-500 hover:underline px-1 py-0.5 rounded text-[10px] cursor-pointer font-medium"
+        >
+          Thu gọn
+        </button>
+      )}
+    </div>
+  );
+};

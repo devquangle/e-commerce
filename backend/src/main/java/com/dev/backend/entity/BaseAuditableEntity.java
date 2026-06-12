@@ -33,6 +33,6 @@ public abstract class BaseAuditableEntity<ID extends Serializable> extends BaseE
     @LastModifiedBy
     @Column(name = "updated_by")
     private Integer updatedBy;
-    @Column(name = "noted")
-    private String noted;
+    @Column(name = "note")
+    private String note;
 }

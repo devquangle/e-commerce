@@ -50,9 +50,7 @@ public class LoginServiceImpl implements LoginService {
                 throw new UnauthorizedException("Tài khoản đã bị khóa");
             }
 
-            String accessToken = jwtUtil.generateAccessToken(
-                    user.getId(),
-                    user.getTokenVersion());
+            String accessToken = jwtUtil.generateAccessToken(userDetails);
 
             String refreshToken = jwtUtil.generateRefreshToken(
                     user.getId(),

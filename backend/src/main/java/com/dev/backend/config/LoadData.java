@@ -54,7 +54,10 @@ public class LoadData implements ApplicationRunner {
                     case SUPPORT -> "Hỗ trợ khách hàng";
                     case CUSTOMER -> "Người dùng";
                 };
-                roleService.save(new Role(roleName.name(), description, null, null));
+                Role role = new Role();
+                role.setName(roleName.name());
+                role.setDescription(description);
+                roleService.save(role);
             });
         }
         if (permissionService.isEmpty()) {
@@ -64,8 +67,8 @@ public class LoadData implements ApplicationRunner {
                 Permission permission = new Permission();
                 permission.setCode(code);
                 permission.setDescription(description);
-                permission.setModule(p.getModule());
-                permission.setActionType(p.getAction());
+                permission.setName(code);
+                permission.setModule(p.getModule().name());
                 permissionService.save(permission);
             }
         }

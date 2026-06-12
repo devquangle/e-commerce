@@ -1,7 +1,8 @@
 import type { ProductResponse } from "@/types/product.type";
-import { SearchX, BookOpen, Tag, Calendar, FileText, Weight } from "lucide-react";
+import { SearchX, BookOpen, Calendar, FileText, Weight, Building2, Layers } from "lucide-react";
 import ProductStatusBadge from "./ProductStatusBadge";
 import ProductActionButtons from "./ProductActionButtons";
+import { ExpandableAuthors, ExpandableGenres } from "./ProductTable";
 
 type Props = {
   products: ProductResponse[];
@@ -57,50 +58,35 @@ const ProductMobileCard = ({ products, onDelete }: Props) => {
                     </div>
                   </div>
 
-                  {product.publisherName && (
-                    <span className="text-xs text-slate-500">
-                      {product.publisherName}
-                    </span>
-                  )}
                   {product.isbn && (
-                    <span className="text-[11px] text-slate-400 font-mono bg-slate-50 px-1.5 py-0.5 rounded w-fit">
+                    <span className="text-[11px] text-slate-400 font-mono">
                       {product.isbn}
                     </span>
                   )}
-                  {product.seriesName && (
-                    <span className="text-[11px] text-violet-600 bg-violet-50 px-1.5 py-0.5 rounded w-fit">
-                      Series: {product.seriesName}
-                    </span>
+                  {(product.publisherName || product.seriesName) && (
+                    <div className="flex flex-wrap gap-1 mt-0.5">
+                      {product.publisherName && (
+                        <span className="inline-flex items-center gap-1 bg-teal-50 text-teal-700 border border-teal-100 px-1.5 py-0.5 rounded text-[10px] font-medium">
+                          <Building2 size={10} />
+                          <span>{product.publisherName}</span>
+                        </span>
+                      )}
+                      {product.seriesName && (
+                        <span className="inline-flex items-center gap-1 bg-violet-50 text-violet-700 border border-violet-100 px-1.5 py-0.5 rounded text-[10px] font-medium">
+                          <Layers size={10} />
+                          <span>{product.seriesName}</span>
+                        </span>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
 
-              {/* ===== TÁC GIẢ ===== */}
-              {product.productAuthors && product.productAuthors.length > 0 && (
+              {/* ===== TÁC GIẢ + THỂ LOẠI ===== */}
+              {((product.productAuthors && product.productAuthors.length > 0) || (product.productGenres && product.productGenres.length > 0)) && (
                 <div className="flex flex-wrap gap-1">
-                  {product.productAuthors.map((a) => (
-                    <span
-                      key={a.id}
-                      className="inline-block bg-indigo-50 text-indigo-700 border border-indigo-100 px-2 py-0.5 rounded-full text-[11px] font-medium"
-                    >
-                      {a.name}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              {/* ===== THỂ LOẠI ===== */}
-              {product.productGenres && product.productGenres.length > 0 && (
-                <div className="flex flex-wrap gap-1">
-                  {product.productGenres.map((g) => (
-                    <span
-                      key={g.id}
-                      className="inline-flex items-center gap-0.5 bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded-full text-[11px]"
-                    >
-                      <Tag size={9} />
-                      {g.name}
-                    </span>
-                  ))}
+                  <ExpandableAuthors authors={product.productAuthors} limit={2} />
+                  <ExpandableGenres genres={product.productGenres} limit={2} />
                 </div>
               )}
 

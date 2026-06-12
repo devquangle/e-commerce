@@ -60,6 +60,20 @@ public class CustomUserDetails implements UserDetails {
         }
     }
 
+    public CustomUserDetails(User user, Collection<String> roles, Collection<String> permissions) {
+        this.user = user;
+        this.roles = new HashSet<>(roles);
+        this.permissions = new HashSet<>(permissions);
+        this.authorities = new HashSet<>();
+        
+        for (String role : roles) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + role));
+        }
+        for (String perm : permissions) {
+            authorities.add(new SimpleGrantedAuthority(perm));
+        }
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities;

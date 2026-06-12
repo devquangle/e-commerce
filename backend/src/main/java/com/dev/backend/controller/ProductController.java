@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.dev.backend.dto.author.AuthorResponse;
 import com.dev.backend.dto.product.ProductRequest;
 import com.dev.backend.dto.product.ProductResponse;
 import com.dev.backend.response.PageResponse;
@@ -35,13 +34,13 @@ public class ProductController {
         return ResponseUtil.success("Lấy danh sách sản phẩm thành công", response);
     }
 
-    @PostMapping("products")
+    @PostMapping("/products")
     public ResponseEntity<ResponseData<ProductResponse>> post_product(@RequestBody ProductRequest request) {
         ProductResponse response = productService.add(request);
         return ResponseUtil.success("Thêm sản phẩm thành công", response);
     }
 
-    @GetMapping("products/{id}")
+    @GetMapping("/products/{id}")
     public ResponseEntity<ResponseData<ProductResponse>> edit(@PathVariable Integer id) {
         ProductResponse response = productService.edit(id);
         return ResponseUtil.success("lấy thông tin phẩm thành công", response);

@@ -9,6 +9,7 @@ import authService from "@/services/authService";
 import { AUTH_STORAGE_KEY, TOKEN_KEY } from "@/constants/token";
 import { showSuccessToast } from "@/utils/toastUtil";
 import { useNavigate } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 type Props = {
   children: React.ReactNode;
@@ -20,40 +21,47 @@ export const AuthProvider = ({ children }: Props) => {
   const [isInitialized, setIsInitialized] = useState(false);
 
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const { data: user, isLoading, isError } = useQuery({
+    queryKey: ["auth", "me"],
+    queryFn: async () => {
+      if (sessionStorage.getItem(AUTH_STORAGE_KEY.MANUAL_LOGOUT) === "1") {
+        return null;
+      }
+      return await authService.getUser();
+    },
+    retry: false,
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000,
+  });
+
   useEffect(() => {
-    initAuth();
-  }, []);
-
-  const initAuth = async () => {
-    if (sessionStorage.getItem(AUTH_STORAGE_KEY.MANUAL_LOGOUT) === "1") {
-      setUserInfo(null);
-      setIsAuthenticated(false);
-      setIsInitialized(true);
-      return;
-    }
-
-    try {
-      const user = await authService.getUser();
-
-      setUserInfo(user);
-      setIsAuthenticated(true);
-    } catch {
-      removeToken(TOKEN_KEY.ACCESS_TOKEN);
-      setUserInfo(null);
-      setIsAuthenticated(false);
-    } finally {
+    if (!isLoading) {
+      if (user && !isError) {
+        setUserInfo(user);
+        setIsAuthenticated(true);
+      } else {
+        removeToken(TOKEN_KEY.ACCESS_TOKEN);
+        setUserInfo(null);
+        setIsAuthenticated(false);
+      }
       setIsInitialized(true);
     }
-  };
+  }, [user, isLoading, isError]);
 
   const login = async (request: LoginRequest) => {
     sessionStorage.removeItem(AUTH_STORAGE_KEY.MANUAL_LOGOUT);
     const res = await authService.login(request);
     setToken(TOKEN_KEY.ACCESS_TOKEN, res.accessToken);
-    const user = await authService.getUser();
-    setUserInfo(user);
+    // Force React Query to fetch and cache new user data
+    const fetchedUser = await queryClient.fetchQuery({
+      queryKey: ["auth", "me"],
+      queryFn: () => authService.getUser(),
+    });
+    setUserInfo(fetchedUser);
     setIsAuthenticated(true);
-    return user;
+    return fetchedUser;
   };
 
   const logout = async () => {
@@ -66,6 +74,7 @@ export const AuthProvider = ({ children }: Props) => {
     } catch {
       showSuccessToast("Đăng xuất thất bại");
     } finally {
+      queryClient.setQueryData(["auth", "me"], null);
       removeToken(TOKEN_KEY.ACCESS_TOKEN);
       setUserInfo(null);
       setIsAuthenticated(false);

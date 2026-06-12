@@ -2,6 +2,7 @@ package com.dev.backend.config;
 
 import com.dev.backend.constant.RoleName;
 import com.dev.backend.security.CustomAccessDeniedHandler;
+import com.dev.backend.security.CustomAuthenticationEntryPoint;
 import com.dev.backend.security.CustomUserDetailsService;
 import com.dev.backend.security.jwt.JwtAuthenticationFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,6 +35,7 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final CustomUserDetailsService customUserDetailsService;
 
     public static final String[] PUBLIC_URLS = {
@@ -90,7 +92,9 @@ public class SecurityConfig {
 
                         .anyRequest().authenticated())
 
-                .exceptionHandling(ex -> ex.accessDeniedHandler(customAccessDeniedHandler))
+                .exceptionHandling(ex -> ex
+                        .accessDeniedHandler(customAccessDeniedHandler)
+                        .authenticationEntryPoint(customAuthenticationEntryPoint))
 
                 .logout(logout -> logout.disable())
 
