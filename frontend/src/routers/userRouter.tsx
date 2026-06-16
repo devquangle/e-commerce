@@ -17,6 +17,7 @@ import { Role } from "@/types/role";
 import RegisterConfirm from "@/pages/user/RegisterConfirm";
 import CreateAddress from "@/pages/user/CreateAddress";
 import UpdateAddress from "@/pages/user/UpdateAddress";
+import ProductDetail from "@/pages/user/ProductDetail";
 
 
 const userRouter = [
@@ -43,6 +44,10 @@ const userRouter = [
     {
         path: "/products",
         element: <Products />,
+    },
+      {
+        path: "/product/:id",
+        element: <ProductDetail />,
     },
     {
         path: "/carts",

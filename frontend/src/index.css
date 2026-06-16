@@ -263,3 +263,34 @@ input::-ms-clear {
   margin-top: 0.25em;
   margin-bottom: 0.25em;
 }
+
+/* ==================== SWIPER: Product Detail ==================== */
+
+/* Thumbs gallery - active slide */
+.product-thumbs .swiper-slide-thumb-active > div {
+  border-color: #2563eb; /* blue-600 */
+  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+  transform: scale(1.03);
+}
+
+/* Thumbs gallery - slide cursor */
+.product-thumbs .swiper-slide {
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.3s;
+}
+
+.product-thumbs .swiper-slide-thumb-active {
+  opacity: 1;
+}
+
+/* Related products - contained within parent overflow-hidden */
+.related-products-swiper .swiper-slide {
+  height: auto;
+}
+
+/* Swiper navigation disabled state */
+.swiper-button-disabled {
+  opacity: 0.35 !important;
+  cursor: not-allowed !important;
+}
