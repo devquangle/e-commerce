@@ -32,7 +32,7 @@ export default function ProductCard({ product }: Props) {
       "
     >
       {/* IMAGE CONTAINER */}
-      <div className="relative aspect-[4/5] bg-slate-50 overflow-hidden">
+      <div className="relative aspect-4/5 bg-slate-50 overflow-hidden">
         {discount && (
           <span className="absolute left-3 top-3 z-10 rounded-full bg-red-500/90 backdrop-blur-sm px-2.5 py-1 text-[11px] font-bold tracking-wide text-white shadow-sm">
             -{discount}%

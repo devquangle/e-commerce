@@ -39,7 +39,7 @@ export default function Blogs() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {blogs.map((blog) => (
             <div key={blog.id} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-200/60 group cursor-pointer hover:shadow-md transition-shadow">
-              <div className="aspect-[3/2] overflow-hidden bg-slate-100">
+              <div className="aspect-3/2 overflow-hidden bg-slate-100">
                 <img src={blog.image} alt={blog.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
               </div>
               <div className="p-6">

@@ -1,150 +1,125 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Container from '@/components/common/Container'
 import FilterContent from "@/components/user/FilterContent";
 import ProductCard from '@/components/user/ProductCard'
 import type { Product } from '@/types/product.type';
-import { Filter, X, ChevronDown } from "lucide-react";
+import { Filter, X, ChevronDown, Search } from "lucide-react";
 
 const products: Product[] = [
-  {
-    id: 1,
-    title: 'Sách Marketing Căn Bản - Philip Kotler (Tái bản 2024)',
-    price: 185000,
-    originalPrice: 250000,
-    author: ['Philip Kotler'],
-    coverUrl: 'https://picsum.photos/400/500?random=1',
-    publishedAt: '2024-01-01',
-    soldCount: 1520,
-    rating: 4.8,
-    reviewCount: 320,
-    isFeatured: true
-  },
-  {
-    id: 2,
-    title: 'Đắc Nhân Tâm - Bí Quyết Thành Công Mọi Thời Đại (Bìa Cứng Cao Cấp)',
-    price: 95000,
-    originalPrice: 120000,
-    author: ['Dale Carnegie'],
-    coverUrl: 'https://picsum.photos/400/500?random=2',
-    publishedAt: '2023-05-15',
-    soldCount: 8400,
-    rating: 5.0,
-    reviewCount: 1250,
-    isFeatured: true
-  }, 
-  {
-    id: 3,
-    title: 'Sapiens - Lược Sử Loài Người',
-    price: 210000,
-    originalPrice: 265000,
-    author: ['Yuval Noah Harari'],
-    coverUrl: 'https://picsum.photos/400/500?random=3',
-    publishedAt: '2022-10-10',
-    soldCount: 3200,
-    rating: 4.9,
-    reviewCount: 890,
-    isFeatured: false
-  }, 
-  {
-    id: 4,
-    title: 'Atomic Habits - Thay Đổi Tí Hon Hiệu Quả Bất Ngờ',
-    price: 135000,
-    originalPrice: 160000,
-    author: ['James Clear'],
-    coverUrl: 'https://picsum.photos/400/500?random=4',
-    publishedAt: '2023-01-20',
-    soldCount: 5600,
-    rating: 4.8,
-    reviewCount: 1100,
-    isFeatured: true
-  },
-  {
-    id: 5,
-    title: 'Nhà Lãnh Đạo Không Chức Danh',
-    price: 85000,
-    originalPrice: 110000,
-    author: ['Robin Sharma'],
-    coverUrl: 'https://picsum.photos/400/500?random=5',
-    publishedAt: '2021-08-05',
-    soldCount: 2100,
-    rating: 4.7,
-    reviewCount: 450,
-    isFeatured: false
-  },
-  {
-    id: 6,
-    title: 'Tâm Lý Học Tội Phạm - Phát Hoạ Chân Dung Kẻ Phạm Tội',
-    price: 155000,
-    originalPrice: 195000,
-    author: ['Diệp Hồng Vĩ'],
-    coverUrl: 'https://picsum.photos/400/500?random=6',
-    publishedAt: '2022-11-11',
-    soldCount: 1250,
-    rating: 4.6,
-    reviewCount: 210,
-    isFeatured: true
-  }
+  { id: 1, title: 'Sách Marketing Căn Bản - Philip Kotler (Tái bản 2024)', price: 185000, originalPrice: 250000, author: ['Philip Kotler'], coverUrl: 'https://picsum.photos/400/500?random=1', publishedAt: '2024-01-01', soldCount: 1520, rating: 4.8, reviewCount: 320, isFeatured: true },
+  { id: 2, title: 'Đắc Nhân Tâm - Bí Quyết Thành Công Mọi Thời Đại (Bìa Cứng Cao Cấp)', price: 95000, originalPrice: 120000, author: ['Dale Carnegie'], coverUrl: 'https://picsum.photos/400/500?random=2', publishedAt: '2023-05-15', soldCount: 8400, rating: 5.0, reviewCount: 1250, isFeatured: true }, 
+  { id: 3, title: 'Sapiens - Lược Sử Loài Người', price: 210000, originalPrice: 265000, author: ['Yuval Noah Harari'], coverUrl: 'https://picsum.photos/400/500?random=3', publishedAt: '2022-10-10', soldCount: 3200, rating: 4.9, reviewCount: 890, isFeatured: false }, 
+  { id: 4, title: 'Atomic Habits - Thay Đổi Tí Hon Hiệu Quả Bất Ngờ', price: 135000, originalPrice: 160000, author: ['James Clear'], coverUrl: 'https://picsum.photos/400/500?random=4', publishedAt: '2023-01-20', soldCount: 5600, rating: 4.8, reviewCount: 1100, isFeatured: true },
+  { id: 5, title: 'Nhà Lãnh Đạo Không Chức Danh', price: 85000, originalPrice: 110000, author: ['Robin Sharma'], coverUrl: 'https://picsum.photos/400/500?random=5', publishedAt: '2021-08-05', soldCount: 2100, rating: 4.7, reviewCount: 450, isFeatured: false },
+  { id: 6, title: 'Tâm Lý Học Tội Phạm - Phát Hoạ Chân Dung Kẻ Phạm Tội', price: 155000, originalPrice: 195000, author: ['Diệp Hồng Vĩ'], coverUrl: 'https://picsum.photos/400/500?random=6', publishedAt: '2022-11-11', soldCount: 1250, rating: 4.6, reviewCount: 210, isFeatured: true }
 ];
 
 export default function Products() {
   const [openFilter, setOpenFilter] = useState(false);
+  const [sortBy, setSortBy] = useState("newest");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [priceRange, setPriceRange] = useState<number>(500000);
+
+  const sortOptions = [
+    { value: "newest", label: "Sách mới nhất" },
+    { value: "bestseller", label: "Bán chạy nhất" },
+    { value: "price-asc", label: "Giá: Thấp đến Cao" },
+    { value: "price-desc", label: "Giá: Cao đến Thấp" },
+  ];
+
+  useEffect(() => {
+    if (openFilter) {
+      document.body.classList.add("overflow-hidden");
+    } else {
+      document.body.classList.remove("overflow-hidden");
+    }
+    return () => {
+      document.body.classList.remove("overflow-hidden");
+    };
+  }, [openFilter]);
+
+  const handleResetFilter = () => {
+    setPriceRange(500000);
+    setSortBy("newest");
+    setSearchQuery("");
+  };
 
   return (
-    <div className="bg-slate-50/50 min-h-screen pb-12">
-      {/* HEADER SECTION WITH BREADCRUMBS/TITLE */}
-      <div className="bg-white border-b border-slate-200 py-6 mb-8">
-        <Container className="max-w-7xl px-4 md:px-8">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-            <div>
-              <div className="text-sm text-slate-500 mb-2 flex items-center gap-2">
-                <span className="hover:text-blue-600 cursor-pointer transition-colors">Trang chủ</span>
-                <span>/</span>
-                <span className="text-slate-800 font-medium">Sản phẩm</span>
-              </div>
-              <h1 className="text-2xl md:text-3xl font-bold text-slate-900">
-                Tất Cả Sản Phẩm
-              </h1>
-            </div>
-
-            {/* HEADER MOBILE & SORT DESKTOP */}
-            <div className="flex justify-between items-center gap-4">
-              <button
-                onClick={() => setOpenFilter(true)}
-                className="lg:hidden flex items-center gap-2 bg-white border border-slate-200 px-4 py-2.5 rounded-xl font-medium text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
-              >
-                <Filter size={18} />
-                <span>Bộ lọc</span>
-              </button>
-              
-              <div className="flex items-center gap-3">
-                <span className="text-sm text-slate-500 hidden md:block">Sắp xếp theo:</span>
-                <button className="flex items-center gap-2 bg-white border border-slate-200 px-4 py-2.5 rounded-xl font-medium text-slate-700 shadow-sm hover:bg-slate-50 transition-colors text-sm">
-                  <span>Mới nhất</span>
-                  <ChevronDown size={16} className="text-slate-400" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </Container>
-      </div>
-
+    <div className="bg-slate-50/50 min-h-screen pt-8 pb-16">
       <Container className="max-w-7xl px-4 md:px-8">
+        
         {/* MAIN LAYOUT */}
-        <div className="flex flex-col lg:flex-row gap-8">
+        <div className="flex flex-col lg:flex-row gap-8 items-start">
+          
           {/* ASIDE DESKTOP */}
           <aside className="hidden lg:block lg:w-[280px] flex-shrink-0">
-            <div className="sticky top-24 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-              <h2 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-                <Filter size={20} className="text-blue-600"/>
+            <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm">
+              <h2 className="text-base font-bold text-slate-900 mb-5 pb-4 border-b border-slate-100 flex items-center gap-2">
+                <Filter size={18} className="text-indigo-600"/>
                 Bộ Lọc Tìm Kiếm
               </h2>
-              <FilterContent />
+              <FilterContent priceRange={priceRange} setPriceRange={setPriceRange} />
             </div>
           </aside>
 
           {/* PRODUCTS LIST */}
-          <main className="flex-1">
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 items-stretch">
+          <main className="flex-1 w-full">
+            
+            {/* INPUT TEXT TÌM KIẾM - MOBILE */}
+            <div className="block lg:hidden mb-4">
+              <div className="relative w-full">
+                <input
+                  type="text"
+                  placeholder="Tìm kiếm sách bạn quan tâm..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-white border border-slate-200 text-sm font-medium px-4 py-3 pl-10 rounded-xl outline-none shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 text-slate-800 placeholder-slate-400"
+                />
+                <div className="absolute inset-y-0 left-3.5 flex items-center pointer-events-none text-slate-400">
+                  <Search size={16} />
+                </div>
+              </div>
+            </div>
+            
+            {/* UTILITY BAR */}
+            <div className="bg-white border border-slate-200/60 rounded-2xl p-4 mb-6 flex items-center justify-between gap-4 shadow-sm">
+              <div className="text-sm font-medium text-slate-500">
+                Tìm thấy <span className="font-bold text-slate-800">{products.length}</span> sản phẩm
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setOpenFilter(true)}
+                  className="lg:hidden flex items-center gap-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 px-4 py-2.5 rounded-xl font-bold text-xs text-slate-700 transition-all active:scale-95"
+                >
+                  <Filter size={14} className="text-indigo-600" />
+                  <span>Lọc & Sắp xếp</span>
+                </button>
+
+                <div className="hidden lg:flex items-center gap-2">
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Sắp xếp:</span>
+                  <div className="relative w-[180px]">
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value)}
+                      className="w-full bg-slate-50 hover:bg-slate-100/80 border border-slate-200 text-slate-700 text-xs font-bold px-3.5 py-2.5 rounded-xl outline-none appearance-none cursor-pointer transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10"
+                    >
+                      {sortOptions.map((option) => (
+                        <option key={option.value} value={option.value} className="font-medium text-slate-800 bg-white">
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-500">
+                      <ChevronDown size={14} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* PRODUCT GRID */}
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {products.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
@@ -152,7 +127,7 @@ export default function Products() {
 
             {/* LOAD MORE BUTTON */}
             <div className="mt-12 flex justify-center">
-              <button className="px-8 py-3 bg-white border border-slate-200 text-slate-700 font-semibold rounded-xl shadow-sm hover:bg-slate-50 hover:text-blue-600 transition-all active:scale-95">
+              <button className="px-8 py-3 bg-white border border-slate-200 text-sm font-bold text-slate-700 rounded-xl shadow-sm hover:border-indigo-600 hover:text-indigo-600 hover:shadow-md transition-all active:scale-95">
                 Xem Thêm Sản Phẩm
               </button>
             </div>
@@ -161,45 +136,76 @@ export default function Products() {
 
         {/* ================= MODAL FILTER MOBILE ================= */}
         {openFilter && (
-          <div
-            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/40 backdrop-blur-sm lg:hidden transition-opacity"
-            onClick={() => setOpenFilter(false)}
-          >
-            <div
-              className="bg-white w-full sm:w-[90%] sm:max-w-md rounded-t-3xl sm:rounded-2xl shadow-2xl max-h-[90vh] sm:max-h-[85vh] flex flex-col animate-in slide-in-from-bottom sm:zoom-in-95 duration-300"
-              onClick={(e) => e.stopPropagation()}
-            >
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center lg:hidden transition-all duration-300">
+            {/* ĐÃ TÁCH BIỆT BACKDROP: Click ra ngoài lớp nền này mới đóng modal, không ảnh hưởng đến vuốt kéo bên trong */}
+            <div 
+              className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
+              onClick={() => setOpenFilter(false)}
+            />
+            
+            {/* Thân Modal hoàn toàn độc lập */}
+            <div className="relative bg-white w-full sm:w-[90%] sm:max-w-md rounded-t-3xl sm:rounded-2xl shadow-2xl max-h-[85vh] flex flex-col animate-in slide-in-from-bottom duration-300 z-10">
               {/* Header */}
               <div className="flex justify-between items-center px-6 py-4 border-b border-slate-100">
-                <h3 className="font-bold text-lg text-slate-900 flex items-center gap-2">
-                  <Filter size={20} className="text-blue-600"/>
-                  Bộ lọc
+                <h3 className="font-bold text-base text-slate-900 flex items-center gap-2">
+                  <Filter size={18} className="text-indigo-600"/>
+                  Bộ lọc & Sắp xếp
                 </h3>
                 <button
                   onClick={() => setOpenFilter(false)}
                   className="p-2 -mr-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
                 >
-                  <X size={20} />
+                  <X size={18} />
                 </button>
               </div>
 
               {/* Content */}
-              <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
-                <FilterContent />
+              <div className="p-6 overflow-y-auto flex-1 custom-scrollbar space-y-6">
+                {/* Sắp xếp theo */}
+                <div className="space-y-2.5">
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Sắp xếp theo</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {sortOptions.map((option) => {
+                      const isSelected = sortBy === option.value;
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => setSortBy(option.value)}
+                          className={`text-left px-4 py-3 rounded-xl font-bold text-xs border transition-all ${
+                            isSelected
+                              ? "bg-indigo-50 border-indigo-500 text-indigo-600"
+                              : "bg-slate-50 border-slate-100 text-slate-700 hover:bg-slate-100"
+                          }`}
+                        >
+                          {option.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                
+                <hr className="border-slate-100" />
+
+                {/* Bộ lọc nâng cao */}
+                <div>
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-3">Bộ lọc nâng cao</label>
+                  <FilterContent priceRange={priceRange} setPriceRange={setPriceRange} />
+                </div>
               </div>
 
               {/* Footer */}
-              <div className="border-t border-slate-100 p-4 sm:p-6 bg-slate-50 rounded-b-2xl">
+              <div className="border-t border-slate-100 p-4 sm:p-6 bg-slate-50/80 rounded-b-2xl">
                 <div className="flex gap-3">
                   <button
-                    onClick={() => setOpenFilter(false)}
-                    className="flex-1 bg-white border border-slate-200 text-slate-700 font-semibold py-3 rounded-xl hover:bg-slate-50 transition-colors"
+                    onClick={handleResetFilter}
+                    className="flex-1 bg-white border border-slate-200 text-slate-700 font-bold text-sm py-3 rounded-xl hover:bg-slate-100 transition-all"
                   >
                     Thiết lập lại
                   </button>
                   <button
                     onClick={() => setOpenFilter(false)}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl shadow-md shadow-blue-600/20 transition-colors"
+                    className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm py-3 rounded-xl shadow-md transition-all"
                   >
                     Áp dụng
                   </button>

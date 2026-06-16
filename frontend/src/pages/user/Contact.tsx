@@ -16,7 +16,7 @@ export default function Contact() {
             <h2 className="text-2xl font-bold text-slate-900 mb-6">Thông tin liên hệ</h2>
             <div className="space-y-6">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 flex-shrink-0">
+                <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
                   <MapPin size={24} />
                 </div>
                 <div>
@@ -25,7 +25,7 @@ export default function Contact() {
                 </div>
               </div>
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center text-green-600 flex-shrink-0">
+                <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center text-green-600 shrink-0">
                   <Phone size={24} />
                 </div>
                 <div>
@@ -34,7 +34,7 @@ export default function Contact() {
                 </div>
               </div>
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center text-amber-600 flex-shrink-0">
+                <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center text-amber-600 shrink-0">
                   <Mail size={24} />
                 </div>
                 <div>
