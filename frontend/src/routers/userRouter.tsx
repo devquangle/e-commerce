@@ -3,6 +3,9 @@ import Home from "@/pages/user/Home";
 import { Navigate } from "react-router-dom";
 import Register from '../pages/auth/Register';
 import Products from "@/pages/user/Products";
+import About from "@/pages/user/About";
+import Contact from "@/pages/user/Contact";
+import Blogs from "@/pages/user/Blogs";
 import AccountLayout from "@/layouts/AccountLayout";
 
 import Orders from "@/pages/user/Orders";
@@ -45,7 +48,19 @@ const userRouter = [
         path: "/products",
         element: <Products />,
     },
-      {
+    {
+        path: "/about",
+        element: <About />,
+    },
+    {
+        path: "/contact",
+        element: <Contact />,
+    },
+    {
+        path: "/blogs",
+        element: <Blogs />,
+    },
+    {
         path: "/product/:id",
         element: <ProductDetail />,
     },

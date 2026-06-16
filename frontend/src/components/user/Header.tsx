@@ -41,7 +41,7 @@ export default function Header() {
     <>
       <header className="sticky  top-0 z-30 border-b bg-white/80 backdrop-blur ">
         <Container className="max-w-7xl px-4 md:px-8">
-          <nav className="flex justify-between items-center h-15 gap-2">
+          <nav className="flex justify-between items-center h-15 gap-2 relative">
             <Logo />
             <button className="lg:hidden cursor-pointer" onClick={() => setIsMobileNavOpen(true)}>
               <svg className="w-8 h-8 text-indigo-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 24 24">
@@ -51,9 +51,15 @@ export default function Header() {
             <MenuItem className="hidden lg:flex items-center gap-5 text-md" />
             <Search />
             <div className="flex items-center gap-4">
+              {/* icon favorite */}
+              <Link to={"/account/favorites"} className="hidden lg:flex justify-center items-center gap-2 text-indigo-500 hover:text-indigo-600 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7">
+                  <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+                </svg>
+              </Link>
               {/* icon cart */}
-              <Link to={"/carts"} className="hidden lg:flex justify-center items-center gap-2  ">
-                <svg className="w-8 h-8 text-indigo-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 24 24">
+              <Link to={"/carts"} className="hidden lg:flex justify-center items-center gap-2 text-indigo-500 hover:text-indigo-600 transition-colors">
+                <svg className="w-8 h-8" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 24 24">
                   <path fillRule="evenodd" d="M4 4a1 1 0 0 1 1-1h1.5a1 1 0 0 1 .979.796L7.939 6H19a1 1 0 0 1 .979 1.204l-1.25 6a1 1 0 0 1-.979.796H9.605l.208 1H17a3 3 0 1 1-2.83 2h-2.34a3 3 0 1 1-4.009-1.76L5.686 5H5a1 1 0 0 1-1-1Z" clipRule="evenodd" />
                 </svg>
               </Link>

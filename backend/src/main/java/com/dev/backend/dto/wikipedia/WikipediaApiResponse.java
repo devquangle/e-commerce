@@ -30,7 +30,6 @@ public class WikipediaApiResponse {
     @JsonProperty("titles")
     private Titles titles;
 
-
     @Data
     public static class Thumbnail {
         private String source;
@@ -41,15 +40,14 @@ public class WikipediaApiResponse {
         private Desktop desktop;
     }
 
-
     @Data
-   public static class Titles {
+    public static class Titles {
         private String canonical;
     }
+
     @Data
     public static class Desktop {
         private String page;
     }
-
 
 }
