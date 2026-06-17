@@ -1,155 +1,213 @@
-import Container from "@/components/common/Container"
-import { useState } from "react"
+import Container from "@/components/common/Container";
+import Modal from "@/components/common/Modal";
+import CartItemCard from "@/components/user/CartItemCard";
 
-interface Product {
-    id: number
-    title: string
-    image: string
-    price: number
-    quantity: number
-    checked: boolean
-}
+import {
+  CartItemsToolbar,
+  CheckoutEmptyState,
+  CheckoutMobileBar,
+  CheckoutPageHeader,
+} from "@/components/user/CheckoutUI";
+import { ShoppingCart } from "lucide-react";
+import {  useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import {
+  type CartItemUI,
+  type PaymentMethodType,
+  MOCK_CART_ITEMS,
+} from "@/types/cart.type";
+
+import {
+  showErrorToast,
+  showSuccessToast,
+} from "@/utils/toastUtil";
+import { PriceBreakdown } from "@/components/user/PriceBreakdown";
 
 export default function Carts() {
-    const [products] = useState<Product[]>([
-        {
-            id: 1,
-            title: "Đắc Nhân Tâm",
-            image: "https://via.placeholder.com/200x300",
-            price: 150000,
-            quantity: 1,
-            checked: true,
-        },
-        {
-            id: 2,
-            title: "Tư Duy Nhanh Và Chậm",
-            image: "https://via.placeholder.com/200x300",
-            price: 350000,
-            quantity: 2,
-            checked: false,
-        },
-    ])
+  const navigate = useNavigate();
 
-    return (
-        <Container className="px-3 md:px-8">
-            <div className="py-4">
-                {/* ================= TABLE ================= */}
-                <div className="overflow-x-auto rounded-lg border bg-white">
-                    <table className="w-full border-collapse text-sm">
-                        {/* ===== HEAD (DESKTOP) ===== */}
-                        <thead className="border-b hidden md:table-header-group">
-                            <tr className="text-gray-500 " >
-                                <th className="p-3 w-[10%]">
-                                    <div className="flex items-center gap-2">
-                                        <input type="checkbox" />
-                                        <span>Tất cả</span>
-                                    </div>
-                                </th>
-                                <th className="p-3">Sách</th>
-                                <th className="p-3 text-center">Số cuốn</th>
-                                <th className="p-3 text-right">Giá</th>
-                                <th className="p-3 text-right">Tạm tính</th>
-                                <th className="p-3 w-[10%]">  </th>                         
-                            </tr>
-                        </thead>
+  const [items, setItems] = useState<CartItemUI[]>(() =>
+    MOCK_CART_ITEMS.map((i) => ({ ...i })),
+  );
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-                        {/* ===== BODY ===== */}
-                        <tbody>
-                            {products.map(item => (
-                                <tr
-                                    key={item.id}
-                                    className="border"
-                                >
-                             
-                                   
-                                    <td className="p-3 w-[10%]" >
-                                        <input
-                                            type="checkbox"
-                                            checked={item.checked}
-                                            className="flex justify-start items-start "
-                                        />
-                                    </td>
-                                    <td className=" md:table-cell block">
-                                        <div className="flex flex-col gap-1">
-                                            <span className="font-medium line-clamp-2">
-                                                {item.title}
-                                            </span>
+  const allChecked = items.length > 0 && items.every((i) => i.checked);
+  const someChecked = items.some((i) => i.checked) && !allChecked;
+  const selectedItems = items.filter((i) => i.checked);
 
-                                            <span className="text-xs text-gray-500">
-                                                Sách giấy · Bìa mềm
-                                            </span>
+  const selectedCount = useMemo(
+    () => selectedItems.reduce((sum, i) => sum + i.quantity, 0),
+    [selectedItems],
+  );
 
-                                            <span className="text-gray-600 md:hidden">
-                                                Giá: {item.price.toLocaleString()}₫
-                                            </span>
-                                        </div>
-                                    </td>
-                                    {/* ===== QUANTITY ===== */}
-                                    <td className="p-3 md:table-cell block">
-                                        <span className="md:hidden text-xs text-gray-500 mb-1 block">
-                                            Số lượng
-                                        </span>
-                                        <div className="flex md:justify-center">
-                                            <div className="flex border rounded overflow-hidden">
-                                                <button className="px-3 bg-gray-100 active:scale-95">
-                                                    −
-                                                </button>
-                                                <input
-                                                    type="text"
-                                                    value={item.quantity}
-                                                    disabled
-                                                    className="w-12 text-center border-x"
-                                                />
-                                                <button className="px-3 bg-gray-100 active:scale-95">
-                                                    +
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </td>
+  // 1. ✨ TẠM TÍNH = Tính dựa trên giá gốc (originalPrice) chưa giảm của sản phẩm
+  const subtotal = useMemo(
+    () => selectedItems.reduce((sum, i) => sum + (i.product.originalPrice * i.quantity), 0),
+    [selectedItems],
+  );
 
-                                    {/* ===== PRICE (DESKTOP) ===== */}
-                                    <td className="p-3 text-right hidden md:table-cell">
-                                        {item.price.toLocaleString()}₫
-                                    </td>
+  // 2. ✨ GIẢM GIÁ SẢN PHẨM = Tổng chênh lệch giữa (Giá gốc - Giá bán hiện tại)
+  const productDiscount = useMemo(
+    () => selectedItems.reduce((sum, i) => sum + ((i.product.originalPrice - i.product.price) * i.quantity), 0),
+    [selectedItems],
+  );
 
-                                    {/* ===== TOTAL ===== */}
-                                    <td className="p-3 md:table-cell block text-right">
-                                        <span className="md:hidden text-xs text-gray-500">
-                                            Tạm tính:
-                                        </span>
-                                        <span className="font-semibold text-red-600 text-base">
-                                            {(item.price * item.quantity).toLocaleString()}₫
-                                        </span>
-                                    </td>
 
-                                    {/* ===== ACTION ===== */}
-                                    <td className="p-3 md:table-cell block text-right">
-                                        <button className="px-3 py-1 bg-red-500 text-white rounded active:scale-95">
-                                            Xoá
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
 
-                {/* ================= TOTAL BAR ================= */}
-                <div className="mt-6 flex flex-col md:flex-row gap-4 md:items-center md:justify-between border rounded p-4 bg-white">
-                    <div className="text-sm md:text-lg">
-                        <p>
-                            Sách đã chọn: <b>6 cuốn</b>
-                        </p>
-                        <p className="text-red-600 font-semibold text-lg">
-                            Tổng tiền: 2.000.000₫
-                        </p>
-                    </div>
+  // 4. ✨ TỔNG CỘNG CUỐI CÙNG = Tạm tính - Giảm giá sản phẩm - Giảm giá Voucher
+  const total = subtotal - productDiscount;
 
-                    <button className="w-full md:w-auto px-6 py-3 bg-red-600 text-white rounded text-center text-base font-medium active:scale-95">
-                        Đặt mua
-                    </button>
-                </div>
+  const toggleAll = () => {
+    setItems((prev) => prev.map((i) => ({ ...i, checked: !allChecked })));
+  };
+
+  const toggleItem = (cartItemId: number) => {
+    setItems((prev) =>
+      prev.map((i) =>
+        i.cartItemId === cartItemId ? { ...i, checked: !i.checked } : i,
+      ),
+    );
+  };
+
+  const updateQuantity = (cartItemId: number, delta: number) => {
+    setItems((prev) =>
+      prev.map((i) =>
+        i.cartItemId === cartItemId
+          ? { ...i, quantity: Math.max(1, i.quantity + delta) }
+          : i,
+      ),
+    );
+  };
+
+  const removeItem = (cartItemId: number) => {
+    setItems((prev) => prev.filter((i) => i.cartItemId !== cartItemId));
+    showSuccessToast("Đã xóa sản phẩm khỏi giỏ hàng");
+  };
+
+  const handleDeleteSelectedClick = () => {
+    if (selectedItems.length === 0) {
+      showErrorToast("Vui lòng chọn ít nhất một sản phẩm để xóa");
+      return;
+    }
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDeleteSelected = () => {
+    setItems((prev) => prev.filter((i) => !i.checked));
+    setIsDeleteModalOpen(false);
+    showSuccessToast("Đã xóa các sản phẩm đã chọn");
+  };
+
+  const checkoutState = {
+    checkedItems: selectedItems,
+    productDiscount,
+  };
+
+  const hasSelected = selectedCount > 0;
+
+  const handleProceedToCheckout = () => {
+    if (!hasSelected) return;
+    navigate("/payment", { state: checkoutState });
+  };
+
+  return (
+    <div className={`bg-slate-50/50 ${items.length > 0 ? "pb-24 lg:pb-0" : ""}`}>
+      <Container className="max-w-7xl px-4 md:px-8 my-4">
+        <div className="my-4">
+          <CheckoutPageHeader
+            icon={ShoppingCart}
+            title="Giỏ hàng của bạn"
+          />
+        </div>
+
+        {items.length === 0 ? (
+          <CheckoutEmptyState
+            icon={ShoppingCart}
+            title="Giỏ hàng trống"
+            description="Hãy khám phá và thêm sách yêu thích vào giỏ hàng"
+            action={{ to: "/products", label: "Mua sắm ngay" }}
+          />
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <div className="card-custom p-4 lg:col-span-8 space-y-4">
+              <CartItemsToolbar
+                allChecked={allChecked}
+                someChecked={someChecked}
+                itemCount={items.length}
+                onToggleAll={toggleAll}
+                onDeleteSelected={handleDeleteSelectedClick}
+              />
+
+              <div className="my-3 space-y-3">
+                {items.map((item) => (
+                  <CartItemCard
+                    key={item.cartItemId}
+                    item={item}
+                    onToggle={() => toggleItem(item.cartItemId)}
+                    onUpdateQuantity={(delta) => updateQuantity(item.cartItemId, delta)}
+                    onRemove={() => removeItem(item.cartItemId)}
+                  />
+                ))}
+              </div>
             </div>
-        </Container>
-    )
+
+            <div className="lg:col-span-4 lg:sticky lg:top-24">
+              {/* ✨ Cập nhật tham số truyền cho component PriceBreakdown */}
+              <PriceBreakdown
+                selectedCount={selectedCount}
+                subtotal={subtotal}
+                discount={productDiscount} // Đổi thành phần giảm giá của sản phẩm
+                total={total}
+                hasSelected={hasSelected}
+                isCheckout={false}
+                onClick={handleProceedToCheckout}
+                backLink={{ to: "/products", label: "Tiếp tục mua sắm" }}
+              />
+            </div>
+          </div>
+        )}
+      </Container>
+
+      {/* Mobile Bar */}
+      {items.length > 0 && (
+        <CheckoutMobileBar
+          subtitle={`${selectedCount} cuốn đã chọn`}
+          total={total}
+          discount={productDiscount}
+          action={
+            hasSelected ? (
+              <button
+                type="button"
+                onClick={handleProceedToCheckout}
+                className="rounded-xl bg-red-600 px-5 py-3 text-sm font-semibold text-white active:scale-95 transition"
+              >
+                Thanh toán
+              </button>
+            ) : (
+              <button
+                type="button"
+                disabled
+                className="rounded-xl bg-slate-200 px-5 py-3 text-sm font-semibold text-slate-400 cursor-not-allowed"
+              >
+                Thanh toán
+              </button>
+            )
+          }
+        />
+      )}
+
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={confirmDeleteSelected}
+        title="Xác nhận xóa sản phẩm"
+        cancelText="Hủy"
+        confirmText="Xóa"
+      >
+        <p className="text-sm text-slate-600">
+          Bạn có chắc muốn xóa <strong>{selectedItems.length} sản phẩm</strong> đã chọn khỏi giỏ hàng?
+        </p>
+      </Modal>
+    </div>
+  );
 }

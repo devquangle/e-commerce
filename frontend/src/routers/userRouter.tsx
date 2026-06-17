@@ -15,6 +15,8 @@ import Address from "@/pages/user/Address";
 import Favorites from "@/pages/user/Favorites";
 import OrderDetails from "@/pages/user/OrderDetails";
 import Carts from "@/pages/user/Carts";
+import PaymentPage from "@/pages/user/PaymentPage";
+import AddressPayment from "@/pages/user/AddressPayment";
 import ProtectedRoute from "@/components/common/ProtectedRoute";
 import { Role } from "@/types/role";
 import RegisterConfirm from "@/pages/user/RegisterConfirm";
@@ -67,6 +69,14 @@ const userRouter = [
     {
         path: "/carts",
         element: <Carts />
+    },
+    {
+        path: "/payment",
+        element: <PaymentPage />
+    },
+    {
+        path: "/address-payment",
+        element: <AddressPayment />
     },
     {
         path: "/account",
