@@ -1,13 +1,13 @@
 import AuthorStatusBadge from "./AuthorStatusBadge";
 import AuthorActionButtons from "./AuthorActionButtons";
-import type { AuthorRes } from "@/types/author";
+import type { AuthorResponse } from "@/types/author";
 import { ExternalLink, SearchX } from "lucide-react";
 import { useState } from "react";
 
 type Props = {
-  authors: AuthorRes[];
-  onEdit: (author: AuthorRes) => void;
-  onDelete: (author: AuthorRes) => void;
+  authors: AuthorResponse[];
+  onEdit: (author: AuthorResponse) => void;
+  onDelete: (author: AuthorResponse) => void;
 };
 
 export default function AuthorTable({ authors, onEdit, onDelete }: Props) {

@@ -1,11 +1,11 @@
-import AuthorService from "@/services/authorService";
+
 import type { AuthorRequest, AuthorResponse } from "@/types/author";
 import type { Pagination } from "@/types/pagination";
-;
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { showErrorToast, showSuccessToast } from "@/utils/toastUtil";
 import axios from "axios";
 import type { options } from "@/types/options.type";
+import AuthorService from "../services/author.service";
 
 export const useAuthor = () => {
   return useQuery<AuthorResponse[]>({
@@ -15,7 +15,7 @@ export const useAuthor = () => {
 };
 export const useFilterAuthor = (options?: options) => {
   return useQuery<Pagination<AuthorResponse>>({
-    queryKey: ["authors", options],
+    queryKey: ["authors-filter", options],
     queryFn: () => AuthorService.filterAuthor(options),
   });
 };
@@ -26,7 +26,7 @@ export const useCreateAuthor = () => {
   return useMutation({
     mutationFn: (req: AuthorRequest) => AuthorService.create(req),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["authors"] });
+      queryClient.invalidateQueries({ queryKey: ["authors-filter"] });
 
       showSuccessToast("Thêm mới tác giả thành công!");
     },
@@ -48,7 +48,7 @@ export const useUpdateAuthor = () => {
   return useMutation({
     mutationFn: ({id,req}:{id:number,req: AuthorRequest}) => AuthorService.update(id,req),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["authors"] });
+      queryClient.invalidateQueries({ queryKey: ["authors-filter"] });
 
       showSuccessToast("Cập nhật tác giả thành công!");
     },
@@ -70,7 +70,7 @@ export const useDeleteAuthor = () => {
   return useMutation({
     mutationFn: (id: number) => AuthorService.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["authors"] });
+      queryClient.invalidateQueries({ queryKey: ["authors-filter"] });
       showSuccessToast("Xóa tác giả thành công!");
     },
     onError: (error: unknown) => {
