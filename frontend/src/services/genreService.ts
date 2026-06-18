@@ -7,7 +7,7 @@ import type { Pagination } from "@/types/pagination";
 const genreService = {
   async fetchGenre() {
     const res =
-      await apiAuth.get<ApiResponse<GenreResponse[]>>("/api/v1/admin/genres");
+      await apiAuth.get<ApiResponse<GenreResponse[]>>("/api/v1/genres");
     if (!res.data.success || !res.data.data) {
       throw new Error(res.data.message || "Failed to fetch all genres");
     }

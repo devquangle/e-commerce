@@ -24,8 +24,6 @@ export function CheckoutPageHeader({
         <h1 className="text-2xl font-bold text-slate-900 leading-tight">
           {title}
         </h1>
-
-
       </div>
     </div>
   );
@@ -118,8 +116,7 @@ export function CartItemsToolbar({
         hidden lg:grid
         lg:grid-cols-[40px_1fr_120px_140px_120px_40px]
         items-center
-        gap-4
-p-4
+        px-4
         border-b
         border-slate-100
         bg-slate-50/50

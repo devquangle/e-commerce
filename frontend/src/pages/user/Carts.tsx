@@ -9,7 +9,7 @@ import {
   CheckoutPageHeader,
 } from "@/components/user/CheckoutUI";
 import { ShoppingCart } from "lucide-react";
-import {  useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   type CartItemUI,
@@ -17,10 +17,7 @@ import {
   MOCK_CART_ITEMS,
 } from "@/types/cart.type";
 
-import {
-  showErrorToast,
-  showSuccessToast,
-} from "@/utils/toastUtil";
+import { showErrorToast, showSuccessToast } from "@/utils/toastUtil";
 import { PriceBreakdown } from "@/components/user/PriceBreakdown";
 
 export default function Carts() {
@@ -42,17 +39,24 @@ export default function Carts() {
 
   // 1. ✨ TẠM TÍNH = Tính dựa trên giá gốc (originalPrice) chưa giảm của sản phẩm
   const subtotal = useMemo(
-    () => selectedItems.reduce((sum, i) => sum + (i.product.originalPrice * i.quantity), 0),
+    () =>
+      selectedItems.reduce(
+        (sum, i) => sum + i.product.originalPrice * i.quantity,
+        0,
+      ),
     [selectedItems],
   );
 
   // 2. ✨ GIẢM GIÁ SẢN PHẨM = Tổng chênh lệch giữa (Giá gốc - Giá bán hiện tại)
   const productDiscount = useMemo(
-    () => selectedItems.reduce((sum, i) => sum + ((i.product.originalPrice - i.product.price) * i.quantity), 0),
+    () =>
+      selectedItems.reduce(
+        (sum, i) =>
+          sum + (i.product.originalPrice - i.product.price) * i.quantity,
+        0,
+      ),
     [selectedItems],
   );
-
-
 
   // 4. ✨ TỔNG CỘNG CUỐI CÙNG = Tạm tính - Giảm giá sản phẩm - Giảm giá Voucher
   const total = subtotal - productDiscount;
@@ -111,13 +115,12 @@ export default function Carts() {
   };
 
   return (
-    <div className={`bg-slate-50/50 ${items.length > 0 ? "pb-24 lg:pb-0" : ""}`}>
+    <div
+      className={`bg-slate-50/50 ${items.length > 0 ? "pb-24 lg:pb-0" : ""}`}
+    >
       <Container className="max-w-7xl px-4 md:px-8 my-4">
         <div className="my-4">
-          <CheckoutPageHeader
-            icon={ShoppingCart}
-            title="Giỏ hàng của bạn"
-          />
+          <CheckoutPageHeader icon={ShoppingCart} title="Giỏ hàng của bạn" />
         </div>
 
         {items.length === 0 ? (
@@ -128,8 +131,8 @@ export default function Carts() {
             action={{ to: "/products", label: "Mua sắm ngay" }}
           />
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            <div className="card-custom p-4 lg:col-span-8 space-y-4">
+          <div className="flex flex-col lg:flex-row gap-4 items-start w-full">
+            <div className="card-custom flex-1 space-y-4 w-full">
               <CartItemsToolbar
                 allChecked={allChecked}
                 someChecked={someChecked}
@@ -144,19 +147,19 @@ export default function Carts() {
                     key={item.cartItemId}
                     item={item}
                     onToggle={() => toggleItem(item.cartItemId)}
-                    onUpdateQuantity={(delta) => updateQuantity(item.cartItemId, delta)}
+                    onUpdateQuantity={(delta) =>
+                      updateQuantity(item.cartItemId, delta)
+                    }
                     onRemove={() => removeItem(item.cartItemId)}
                   />
                 ))}
               </div>
             </div>
-
-            <div className="lg:col-span-4 lg:sticky lg:top-24">
-              {/* ✨ Cập nhật tham số truyền cho component PriceBreakdown */}
+            <div className="w-full lg:w-[350px] lg:shrink-0 lg:sticky lg:top-24">
               <PriceBreakdown
                 selectedCount={selectedCount}
                 subtotal={subtotal}
-                discount={productDiscount} // Đổi thành phần giảm giá của sản phẩm
+                discount={productDiscount}
                 total={total}
                 hasSelected={hasSelected}
                 isCheckout={false}
@@ -168,33 +171,7 @@ export default function Carts() {
         )}
       </Container>
 
-      {/* Mobile Bar */}
-      {items.length > 0 && (
-        <CheckoutMobileBar
-          subtitle={`${selectedCount} cuốn đã chọn`}
-          total={total}
-          discount={productDiscount}
-          action={
-            hasSelected ? (
-              <button
-                type="button"
-                onClick={handleProceedToCheckout}
-                className="rounded-xl bg-red-600 px-5 py-3 text-sm font-semibold text-white active:scale-95 transition"
-              >
-                Thanh toán
-              </button>
-            ) : (
-              <button
-                type="button"
-                disabled
-                className="rounded-xl bg-slate-200 px-5 py-3 text-sm font-semibold text-slate-400 cursor-not-allowed"
-              >
-                Thanh toán
-              </button>
-            )
-          }
-        />
-      )}
+
 
       <Modal
         isOpen={isDeleteModalOpen}
@@ -205,7 +182,8 @@ export default function Carts() {
         confirmText="Xóa"
       >
         <p className="text-sm text-slate-600">
-          Bạn có chắc muốn xóa <strong>{selectedItems.length} sản phẩm</strong> đã chọn khỏi giỏ hàng?
+          Bạn có chắc muốn xóa <strong>{selectedItems.length} sản phẩm</strong>{" "}
+          đã chọn khỏi giỏ hàng?
         </p>
       </Modal>
     </div>

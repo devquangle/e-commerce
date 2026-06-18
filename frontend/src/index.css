@@ -44,7 +44,7 @@
    
 }
 @utility card-custom {
-  @apply bg-white rounded-lg border border-slate-100 p-4 shadow-sm md:p-4;
+  @apply bg-white rounded-lg border border-slate-100 p-3 shadow-sm sm:p-4;
 }
 :root {
   --radius: 0.625rem;
@@ -311,4 +311,4 @@ input::-ms-clear {
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background-color: #94a3b8; /* slate-400 */
-}
+}

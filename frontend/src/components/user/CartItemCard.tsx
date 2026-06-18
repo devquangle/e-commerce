@@ -41,7 +41,7 @@ export default function CartItemCard({
         }`}
     >
       {/* 💻 1. Giao diện Desktop (lg trở lên) - KHỚP TĂM TẮP VỚI TOOLBAR */}
-      <div className="hidden lg:grid lg:grid-cols-[40px_1fr_120px_140px_120px_40px] lg:items-center gap-4">
+      <div className="hidden lg:grid lg:grid-cols-[40px_1fr_120px_140px_120px_40px] lg:items-center ">
         {/* Cột 1: Checkbox */}
         <div className="flex justify-center items-center h-full">
           {!readonly ? (
@@ -220,7 +220,7 @@ export default function CartItemCard({
       </div>
 
       {/* 📱 3. Giao diện Mobile */}
-      <div className="sm:hidden p-4 space-y-3">
+      <div className="sm:hidden p-2 space-y-3">
         <div className="flex gap-3">
           {!readonly && (
             <input
