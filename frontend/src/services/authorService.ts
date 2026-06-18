@@ -1,8 +1,8 @@
 import { apiAuth } from "@/configs/axios";
 import type { ApiResponse } from "@/types/api-response";
 import type { AuthorRequest, AuthorResponse  } from "@/types/author";
+import type { options } from "@/types/options.type";
 import type { Pagination } from "@/types/pagination";
-import type { options } from "@/types/genre";
 
 const AuthorService = {
   async fetchAuthor() {

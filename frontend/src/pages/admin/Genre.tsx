@@ -1,90 +1,85 @@
-﻿import Loading from "@/components/common/Loading";
+import Loading from "@/components/common/Loading";
 import {
   useCreateGenre,
   useDeleteGenre,
   useFilterGenre,
+  useImportGenre,
   useUpdateGenre,
 } from "@/hooks/useGenre";
 import {
   GenreStatus,
   GenreStatusLabel,
   type GenreRequest,
+  type GenreResponse,
 } from "@/types/genre";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Modal from "@/components/common/Modal";
-import { Controller, useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import InputField from "@/components/common/InputField";
 import { mapServerErrors } from "@/utils/mapServerErrors";
 import { showErrorToast, showSuccessToast } from "@/utils/toastUtil";
 import Pagination from "@/components/common/Pagination";
-import type { options as GenreOptions, GenreResponse } from "@/types/genre";
+
 import { useSearchParams } from "react-router-dom";
 import useDebounce from "@/hooks/useDebounce";
 import SelectBox from "@/components/common/SelectedBox";
 import {
-  Edit,
-  Eye,
-  Trash2,
   Sparkles,
   Plus,
   RotateCcw,
   Search,
   Layers,
+  FileUp,
 } from "lucide-react";
 import imageService from "@/services/imageService";
 import GenreTable from "@/components/admin/genre/GenreTable";
 import GenreMobileCard from "@/components/admin/genre/GenreMobileCard";
 import Button from "@/components/common/Button";
+import SingleImageUpload from "@/components/common/SingleImageUpload";
+import { BaseStatus, getBaseStatusLabel } from "@/types/status";
 
-const initialFilterOptions: GenreOptions = {
-  keyword: "",
-  page: 1,
-  size: 10,
-};
-
-function getPositiveNumberParam(
-  searchParams: URLSearchParams,
-  key: string,
-  fallback: number,
-) {
-  const value = Number(searchParams.get(key));
-  return Number.isInteger(value) && value > 0 ? value : fallback;
-}
+const initialFilterOptions = { keyword: "", status: "", page: 1, size: 10 };
 
 export default function Genre() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [keyword, setKeyword] = useState(
-    searchParams.get("keyword") ?? initialFilterOptions.keyword,
+    () => searchParams.get("keyword") ?? initialFilterOptions.keyword,
   );
-  const [status, setStatus] = useState<GenreStatus | null>(
-    (searchParams.get("status") as GenreStatus) ?? null,
+  const [status, setStatus] = useState<BaseStatus | null>(
+    () => (searchParams.get("status") as BaseStatus) ?? null,
   );
+  const [page, setPage] = useState<number>(
+    () => Number(searchParams.get("page")) || initialFilterOptions.page,
+  );
+  const [size, setSize] = useState<number>(
+    () => Number(searchParams.get("size")) || initialFilterOptions.size,
+  );
+
   const debouncedKeyword = useDebounce(keyword, 500);
-  const options = useMemo<GenreOptions>(
-    () => ({
-      keyword: searchParams.get("keyword") ?? initialFilterOptions.keyword,
-      status: (searchParams.get("status") as GenreStatus) || undefined,
-      page: getPositiveNumberParam(
-        searchParams,
-        "page",
-        initialFilterOptions.page ?? 1,
-      ),
-      size: getPositiveNumberParam(
-        searchParams,
-        "size",
-        initialFilterOptions.size ?? 10,
-      ),
-    }),
-    [searchParams],
-  );
-  const { data, isPending, isFetching } = useFilterGenre(options);
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (debouncedKeyword) params.set("keyword", debouncedKeyword);
+    if (status) params.set("status", status);
+    if (page !== initialFilterOptions.page) params.set("page", page.toString());
+    if (size !== initialFilterOptions.size) params.set("size", size.toString());
+    setSearchParams(params, { replace: true });
+  }, [debouncedKeyword, status, page, size, setSearchParams]);
+
+  const {
+    data: genres,
+    isPending,
+    isFetching,
+  } = useFilterGenre({
+    keyword: debouncedKeyword,
+    status: status || undefined,
+    page,
+    size,
+  });
+
+  const filterGenre = genres?.items || [];
+
   const [file, setFile] = useState<File | null>(null);
-  const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(
-    null,
-  );
-  const [generatedImageRetry, setGeneratedImageRetry] = useState(0);
-  const [generatedImageError, setGeneratedImageError] = useState(false);
-  const genres = data?.items ?? [];
+  const [avatarUrl, setAvatarUrl] = useState<string>("");
   const {
     register,
     handleSubmit,
@@ -97,60 +92,137 @@ export default function Genre() {
   } = useForm<GenreRequest>({
     defaultValues: {
       name: "",
-      status: GenreStatus.ACTIVE,
+      status: BaseStatus.ACTIVE,
       previewImageUrl: "",
     },
   });
-  const [openAddGenreModal, setOpenAddGenreModal] = useState(false);
+
+  // watch status field for SelectBox value (must be called unconditionally)
+  const watchedStatus = useWatch({ control, name: "status" });
+  const [openSaveModal, setOpenSaveModal] = useState(false);
   const [openDeleteGenreModal, setOpenDeleteGenreModal] = useState(false);
-  const [openUpdateGenreModal, setOpenUpdateGenreModal] = useState(false);
   const [selectGenre, setSelectGenre] = useState<GenreResponse | null>(null);
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+  // TỐI ƯU: Sử dụng useCallback cho các Filter Handlers để tránh re-render Table
+  const handleKeywordChange = useCallback((val: string) => {
+    setKeyword(val);
+    setPage(1);
+  }, []);
 
+  const handleStatusChange = useCallback((val: BaseStatus | null) => {
+    setStatus(val);
+    setPage(1);
+  }, []);
+
+  const handleResetFilter = useCallback(() => {
+    setKeyword("");
+    setStatus(null);
+    setPage(initialFilterOptions.page);
+    setSize(initialFilterOptions.size);
+  }, []);
   const createMutation = useCreateGenre();
   const deleteGenre = useDeleteGenre();
   const updateGenre = useUpdateGenre();
+  const importGenre = useImportGenre();
 
-  const onSubmitAddGenre = async (data: GenreRequest) => {
-    if (createMutation.isPending) return;
+  const processImageUpload = async (currentUrl: string = "") => {
+    if (file) {
+      const uploadRes = await imageService.uploadFile(file);
+      return uploadRes.urlImage;
+    }
+    if (avatarUrl && avatarUrl !== currentUrl) {
+      const uploadRes = await imageService.upload({ url: avatarUrl });
+      return uploadRes.urlImage;
+    }
+    if (!avatarUrl && currentUrl) {
+      return "";
+    }
+    return currentUrl;
+  };
+
+  const onSubmitSave = async (data: GenreRequest) => {
+    if (createMutation.isPending || updateGenre.isPending) return;
     try {
-      const formData = new FormData();
+      data.previewImageUrl = avatarUrl;
 
-      formData.append(
-        "data",
-        new Blob([JSON.stringify(data)], {
-          type: "application/json",
-        }),
-      );
-
-      if (file) {
-        formData.append("image", file);
+      if (selectGenre) {
+        const uploadedImageUrl = await processImageUpload(
+          selectGenre.urlImage || "",
+        );
+        await updateGenre.mutateAsync({
+          id: selectGenre.id,
+          data: { ...data, previewImageUrl: uploadedImageUrl },
+        });
+        showSuccessToast("Cập nhật thể loại thành công!");
+      } else {
+        const formData = new FormData();
+        formData.append(
+          "data",
+          new Blob([JSON.stringify(data)], { type: "application/json" }),
+        );
+        if (file) formData.append("image", file);
+        await createMutation.mutateAsync(formData);
+        showSuccessToast("Thêm thể loại thành công!");
       }
 
-      await createMutation.mutateAsync(formData);
-      showSuccessToast("Thêm thể loại thành công!");
-      reset();
-      setFile(null);
-      setValue("previewImageUrl", "");
-      setGeneratedImageUrl(null);
-      setGeneratedImageRetry(0);
-      setGeneratedImageError(false);
-      handleCloseAddGenreModal();
+      handleCloseSaveModal();
     } catch (error: unknown) {
       mapServerErrors(error, setError, showErrorToast);
     }
   };
-  const onSubmitUpdateGenre = async (data: GenreRequest) => {
-    if (updateGenre.isPending) return;
+
+  const handleImportGenre = async (uploadedFile: File | null | undefined) => {
+    if (!uploadedFile) return;
+    if (importGenre.isPending) return;
+
     try {
-      await updateGenre.mutateAsync({ id: selectGenre?.id ?? 0, data });
-      showSuccessToast("Cập nhật thể loại thành công!");
-      reset();
-      handleCloseUpdateGenreModal();
+      const formData = new FormData();
+      // Khớp đúng key "file" với cấu hình @RequestPart bên Backend Spring Boot
+      formData.append("file", uploadedFile);
+
+      // Gọi API import
+      await importGenre.mutateAsync(formData);
+
+      showSuccessToast(
+        `Import danh sách từ file "${uploadedFile.name}" thành công v!`,
+      );
     } catch (error: unknown) {
-      mapServerErrors(error, setError, showErrorToast);
+      showErrorToast(
+        "Lỗi khi import file Excel! Vui lòng kiểm tra lại cấu trúc file.",
+      );
+      console.error("Import Excel Error: ", error);
     }
   };
+
+  const handleGenerateImageWithAI = async () => {
+    const genreName = getValues("name")?.trim();
+
+    if (!genreName) {
+      setError("name", {
+        type: "manual",
+        message: "Vui lòng nhập tên thể loại trước khi tạo ảnh",
+      });
+      return;
+    }
+
+    setIsGeneratingAI(true);
+    try {
+      const resp = await imageService.createImage({
+        input: genreName,
+      });
+
+      setAvatarUrl(resp.imageUrl);
+      setFile(null);
+
+      showSuccessToast("Tạo ảnh bằng AI thành công!");
+    } catch (error) {
+      showErrorToast("Lỗi tạo ảnh bằng AI");
+      console.error(error);
+    } finally {
+      setIsGeneratingAI(false);
+    }
+  };
+
   const onSubmitDeleteGenre = async () => {
     deleteGenre.mutate(selectGenre?.id ?? 0, {
       onSuccess: () => {
@@ -173,139 +245,46 @@ export default function Genre() {
     setOpenDeleteGenreModal(true);
   };
 
-  const handleOpenUpdateGenreModal = (genre: GenreResponse) => {
-    setSelectGenre(genre);
-    setValue("name", genre.name);
-    setValue("status", genre.status);
-    setOpenUpdateGenreModal(true);
+  const handleOpenSaveModal = (genre: GenreResponse | null) => {
+    if (genre) {
+      setSelectGenre(genre);
+      reset({
+        name: genre.name,
+        status: genre.status,
+        previewImageUrl: genre.urlImage || "",
+      });
+      setAvatarUrl(genre.urlImage || "");
+      setFile(null);
+    } else {
+      setSelectGenre(null);
+      reset({
+        name: "",
+        status: GenreStatus.ACTIVE,
+        previewImageUrl: "",
+      });
+      setAvatarUrl("");
+      setFile(null);
+    }
+    setOpenSaveModal(true);
   };
 
-  const handleCloseAddGenreModal = () => {
+  const handleCloseSaveModal = () => {
     reset();
     setFile(null);
-    setGeneratedImageUrl(null);
-    setGeneratedImageRetry(0);
-    setGeneratedImageError(false);
-    setOpenAddGenreModal(false);
-  };
-  const handleCloseUpdateGenreModal = () => {
-    reset();
-    setOpenUpdateGenreModal(false);
-  };
-
-  const handleGenerateImageWithAI = async () => {
-    const genreName = getValues("name")?.trim();
-
-    if (!genreName) {
-      setError("name", {
-        type: "manual",
-        message: "Vui lòng nhập tên thể loại trước khi tạo ảnh",
-      });
-      return;
-    }
-
-    setIsGeneratingAI(true);
-    try {
-      const resp = await imageService.createImage({
-        input: genreName,
-      });
-      setValue("previewImageUrl", resp.imageUrl);
-
-      setGeneratedImageUrl(resp.imageUrl);
-      setGeneratedImageRetry(0);
-      setGeneratedImageError(false);
-      showSuccessToast("Tạo ảnh bằng AI thành công!");
-    } catch (error) {
-      showErrorToast("Lỗi tạo ảnh bằng AI");
-      console.error(error);
-    } finally {
-      setIsGeneratingAI(false);
-    }
-  };
-
-  const updateSearchParams = useCallback(
-    (nextOptions: GenreOptions, replace = true) => {
-      const nextSearchParams = new URLSearchParams(searchParams);
-      const nextKeyword = nextOptions.keyword?.trim();
-
-      if (nextKeyword) {
-        nextSearchParams.set("keyword", nextKeyword);
-      } else {
-        nextSearchParams.delete("keyword");
-      }
-
-      if (nextOptions.status) {
-        nextSearchParams.set("status", nextOptions.status);
-      } else {
-        nextSearchParams.delete("status");
-      }
-
-      nextSearchParams.set(
-        "page",
-        String(nextOptions.page ?? initialFilterOptions.page),
-      );
-      nextSearchParams.set(
-        "size",
-        String(nextOptions.size ?? initialFilterOptions.size),
-      );
-
-      setSearchParams(nextSearchParams, { replace });
-    },
-    [searchParams, setSearchParams],
-  );
-
-  useEffect(() => {
-    if (debouncedKeyword === options.keyword) return;
-
-    updateSearchParams({
-      ...options,
-      keyword: debouncedKeyword,
-      page: 1,
-    });
-  }, [debouncedKeyword, options, updateSearchParams]);
-
-  const handleKeywordChange = (keyword: string) => {
-    setKeyword(keyword);
-  };
-
-  const handleStatusChange = (value: GenreStatus | null) => {
-    setStatus(value);
-    updateSearchParams(
-      { ...options, status: value ?? undefined, page: 1 },
-      false,
-    );
-  };
-
-  const handlePageChange = (page: number) => {
-    updateSearchParams({ ...options, page }, false);
-  };
-
-  const handlePageSizeChange = (size: number) => {
-    updateSearchParams({ ...options, page: 1, size }, false);
-  };
-
-  const handleResetFilter = () => {
-    setKeyword(initialFilterOptions.keyword ?? "");
-    setStatus(null);
-    setSearchParams(new URLSearchParams(), { replace: true });
+    setAvatarUrl("");
+    setOpenSaveModal(false);
   };
 
   const statusOptions = useMemo(
     () => [
-      { label: "Tất cả trạng thái", value: null as GenreStatus | null },
-      ...Object.values(GenreStatus).map((value) => ({
+      { label: "Tất cả trạng thái", value: null as BaseStatus | null },
+      ...Object.values(BaseStatus).map((value) => ({
         label: GenreStatusLabel[value],
         value,
       })),
     ],
     [],
   );
-  const generatedPreviewUrl = useMemo(() => {
-    if (!generatedImageUrl) return "";
-
-    const separator = generatedImageUrl.includes("?") ? "&" : "?";
-    return `${generatedImageUrl}${separator}retry=${generatedImageRetry}`;
-  }, [generatedImageRetry, generatedImageUrl]);
 
   if (isPending) return <Loading />;
 
@@ -326,16 +305,33 @@ export default function Genre() {
               Phân loại sách và quản lý các danh mục sản phẩm của cửa hàng.
             </p>
           </div>
-          <Button
-            type="button"
-            color="primary"
-            className="w-full sm:w-auto cursor-pointer"
-            onClick={() => setOpenAddGenreModal(true)}
-          >
-            <Plus size={18} /> Thêm thể loại
-          </Button>
-
-        
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex gap-2 w-full sm:w-auto mt-4 sm:mt-0">
+              <label className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl text-sm font-semibold transition shadow flex-1 sm:flex-none flex justify-center items-center gap-2 cursor-pointer">
+                <FileUp size={16} />
+                Import Excel
+                <input
+                  type="file"
+                  accept=".xlsx, .xls"
+                  className="hidden"
+                  onChange={(e) => {
+                    const targetFile = e.target.files?.[0];
+                    if (targetFile) {
+                      handleImportGenre(targetFile);
+                    }
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+              <Button
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition shadow flex-1 sm:flex-none flex justify-center"
+                onClick={() => handleOpenSaveModal(null)}
+                icon={Plus}
+              >
+                Thêm mới
+              </Button>
+            </div>
+          </div>
         </div>
         <div className="card-custom">
           <div className="mb-5 grid grid-cols-1 gap-3 md:grid-cols-4 md:items-center">
@@ -345,13 +341,13 @@ export default function Genre() {
                 type="text"
                 placeholder="Tìm theo tên thể loại..."
                 value={keyword}
-                onChange={(event) => handleKeywordChange(event.target.value)}
+                onChange={(e) => handleKeywordChange(e.target.value)}
                 className="w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-10 pr-4 py-2.5 text-sm placeholder-slate-400 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100"
               />
             </div>
 
             <div className="w-full">
-              <SelectBox<GenreStatus | null>
+              <SelectBox<BaseStatus | null>
                 options={statusOptions}
                 value={status}
                 onChange={handleStatusChange}
@@ -368,53 +364,54 @@ export default function Genre() {
             </button>
           </div>
 
-          {/* TABLE (DESKTOP) */}
-          <div className="hidden md:block">
-            <GenreTable
-              genres={genres}
-              onEdit={handleOpenUpdateGenreModal}
-              onDelete={handleOpenDeleteGenreModal}
-            />
-          </div>
+          <GenreTable
+            genres={filterGenre}
+            onEdit={handleOpenSaveModal}
+            onDelete={handleOpenDeleteGenreModal}
+          />
 
           {/* MOBILE CARD */}
-          <div className="block md:hidden">
-            <GenreMobileCard
-              genres={genres}
-              onEdit={handleOpenUpdateGenreModal}
-              onDelete={handleOpenDeleteGenreModal}
-            />
-          </div>
+          <GenreMobileCard
+            genres={filterGenre}
+            onEdit={handleOpenSaveModal}
+            onDelete={handleOpenDeleteGenreModal}
+          />
         </div>
 
         {/* PAGINATION */}
         <div className="w-full">
           <Pagination
-            currentPage={(data?.page ?? 0) + 1}
-            totalPages={Math.max(data?.totalPages ?? 0, 1)}
-            onPageChange={handlePageChange}
-            totalItems={data?.totalItems || 0}
-            pageSize={data?.size || options.size || 10}
-            onPageSizeChange={handlePageSizeChange}
-            disabled={isFetching}
+            currentPage={page}
+            totalPages={genres?.totalPages || 1}
+            onPageChange={setPage}
+            totalItems={genres?.totalItems || 0}
+            pageSize={size}
+            onPageSizeChange={(s) => {
+              setSize(s);
+              setPage(1);
+            }}
           />
         </div>
       </div>
 
-      {/* CREATE MODAL */}
+      {/* SAVE MODAL (ADD & UPDATE) */}
       <Modal
-        isOpen={openAddGenreModal}
-        onClose={handleCloseAddGenreModal}
-        title="Thêm thể loại mới"
-        onConfirm={handleSubmit(onSubmitAddGenre)}
+        isOpen={openSaveModal}
+        onClose={handleCloseSaveModal}
+        title={selectGenre ? "Cập nhật thể loại" : "Thêm thể loại mới"}
+        onConfirm={handleSubmit(onSubmitSave)}
         confirmText={
-          createMutation.isPending ? "Đang thêm..." : "Thêm thể loại"
+          createMutation.isPending || updateGenre.isPending
+            ? "Đang lưu..."
+            : selectGenre
+              ? "Lưu thay đổi"
+              : "Thêm thể loại"
         }
         cancelText="Hủy"
         size="lg"
       >
         <div>
-          {createMutation.isPending && <Loading />}
+          {(createMutation.isPending || updateGenre.isPending) && <Loading />}
           <form className="space-y-4">
             <InputField
               label="Tên thể loại"
@@ -427,12 +424,27 @@ export default function Genre() {
               }}
               error={errors?.name}
             />
+            {selectGenre && (
+              <SelectBox<BaseStatus>
+                label="Trạng thái"
+                options={(Object.values(BaseStatus) as BaseStatus[])
+
+                  .filter((statusVal) => statusVal !== "DELETED")
+                  .map((value) => ({
+                    label: getBaseStatusLabel(value),
+                    value,
+                  }))}
+                value={watchedStatus}
+                onChange={(val) => setValue("status", val)}
+                searchable={false}
+              />
+            )}
             <div className="space-y-2">
               <label className="text-sm font-semibold text-slate-700">
-                Ảnh đại diện thể loại
+                Ảnh thể loại
               </label>
 
-              <div className="flex gap-2 mb-3">
+              <div className="flex gap-2 mb-1">
                 <button
                   type="button"
                   onClick={handleGenerateImageWithAI}
@@ -443,179 +455,17 @@ export default function Genre() {
                     size={16}
                     className="animate-pulse text-indigo-500"
                   />
-                  {isGeneratingAI
-                    ? "Đang tạo ảnh..."
-                    : "Tạo ảnh đại diện bằng AI"}
+                  {isGeneratingAI ? "Đang tạo ảnh..." : "Tạo ảnh bằng AI"}
                 </button>
               </div>
 
-              {!file && !generatedImageUrl ? (
-                <label
-                  className="
-                    flex cursor-pointer items-center justify-center
-                    rounded-2xl border-2 border-dashed
-                    border-slate-200 p-8 bg-slate-50/50
-                    transition hover:border-indigo-500
-                    hover:bg-indigo-50/10
-                  "
-                >
-                  <div className="flex flex-col items-center gap-2 text-sm text-slate-500">
-                    <span className="text-4xl filter drop-shadow">📁</span>
-                    <span className="font-semibold text-slate-700">
-                      Chọn ảnh hoặc kéo thả vào đây
-                    </span>
-                    <span className="text-xs text-slate-400">
-                      Chấp nhận PNG, JPG, WEBP
-                    </span>
-                  </div>
-
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-
-                      if (file) {
-                        setFile(file);
-                        setGeneratedImageUrl(null);
-                        setGeneratedImageRetry(0);
-                        setGeneratedImageError(false);
-                      }
-                    }}
-                  />
-                </label>
-              ) : (
-                <div className="relative group rounded-2xl border border-slate-200 p-2 overflow-hidden bg-slate-50/30">
-                  <img
-                    src={file ? URL.createObjectURL(file) : generatedPreviewUrl}
-                    alt="preview"
-                    referrerPolicy="no-referrer"
-                    className="h-44 w-full rounded-xl object-cover"
-                    onLoad={() => setGeneratedImageError(false)}
-                    onError={() => {
-                      if (
-                        !file &&
-                        generatedImageUrl &&
-                        generatedImageRetry < 6
-                      ) {
-                        window.setTimeout(() => {
-                          setGeneratedImageRetry((retry) => retry + 1);
-                        }, 1500);
-                        return;
-                      }
-
-                      setGeneratedImageError(true);
-                    }}
-                  />
-
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-slate-900/40 backdrop-blur-xs transition-all duration-200 rounded-xl flex items-center justify-center gap-3">
-                    {generatedImageUrl && !file && (
-                      <a
-                        href={generatedImageUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        title="Mở ảnh trong tab mới"
-                        className="bg-white p-2.5 rounded-xl cursor-pointer hover:bg-slate-100 transition shadow-lg flex items-center justify-center"
-                      >
-                        <Eye size={18} className="text-slate-700" />
-                      </a>
-                    )}
-                    <label className="bg-white p-2.5 rounded-xl cursor-pointer hover:bg-slate-100 transition shadow-lg flex items-center justify-center">
-                      <Edit size={18} className="text-slate-700" />
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            setFile(file);
-                            setGeneratedImageUrl(null);
-                            setGeneratedImageRetry(0);
-                            setGeneratedImageError(false);
-                          }
-                        }}
-                      />
-                    </label>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setFile(null);
-                        setGeneratedImageUrl(null);
-                        setGeneratedImageRetry(0);
-                        setGeneratedImageError(false);
-                      }}
-                      className="bg-rose-500 text-white p-2.5 rounded-xl hover:bg-rose-600 transition shadow-lg flex items-center justify-center cursor-pointer"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
-
-                  <div className="mt-2.5 px-1.5 flex justify-between items-center">
-                    <p className="text-xs font-semibold text-slate-500 truncate max-w-[80%]">
-                      {file?.name ?? "Ảnh được sinh bởi AI"}
-                    </p>
-                  </div>
-                  {generatedImageError && generatedImageUrl && !file && (
-                    <a
-                      href={generatedImageUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="mt-1 block text-xs text-rose-600 underline px-1.5"
-                    >
-                      Không tải được ảnh. Mở ảnh trong tab mới
-                    </a>
-                  )}
-                </div>
-              )}
+              <SingleImageUpload
+                file={file}
+                setFile={setFile}
+                avatarUrl={avatarUrl}
+                setAvatarUrl={setAvatarUrl}
+              />
             </div>
-          </form>
-        </div>
-      </Modal>
-
-      {/* UPDATE MODAL */}
-      <Modal
-        isOpen={openUpdateGenreModal}
-        onClose={handleCloseUpdateGenreModal}
-        title="Cập nhật thể loại"
-        onConfirm={handleSubmit(onSubmitUpdateGenre)}
-        confirmText="Lưu thay đổi"
-        cancelText="Hủy"
-        size="lg"
-      >
-        <div>
-          <form className="space-y-4">
-            <InputField
-              label="Tên thể loại"
-              name="name"
-              type="text"
-              placeholder="Nhập tên thể loại"
-              register={register}
-              rules={{
-                required: "Tên thể loại là bắt buộc",
-              }}
-              error={errors?.name}
-            />
-            <Controller
-              name="status"
-              control={control}
-              rules={{ required: "Vui lòng chọn trạng thái" }}
-              render={({ field, fieldState }) => (
-                <div>
-                  <SelectBox<GenreStatus | null>
-                    label="Trạng thái"
-                    options={statusOptions}
-                    value={field.value}
-                    onChange={field.onChange}
-                    searchable={false}
-                  />
-                  <p className="text-rose-500 text-xs mt-1">
-                    {fieldState.error?.message}
-                  </p>
-                </div>
-              )}
-            />
           </form>
         </div>
       </Modal>

@@ -14,7 +14,6 @@ import com.dev.backend.service.GenreService;
 import com.dev.backend.service.PermissionService;
 import com.dev.backend.service.PublisherService;
 import com.dev.backend.service.RegisterService;
-import com.dev.backend.service.RolePermissionService;
 import com.dev.backend.service.RoleService;
 import com.dev.backend.service.SeriesService;
 import com.dev.backend.service.UserService;
@@ -26,7 +25,6 @@ import lombok.RequiredArgsConstructor;
 public class LoadData implements ApplicationRunner {
     private final RoleService roleService;
     private final PermissionService permissionService;
-    private final RolePermissionService rolePermissionService;
 
     private final UserService userService;
     private final RegisterService registerService;
@@ -73,50 +71,51 @@ public class LoadData implements ApplicationRunner {
             }
         }
 
-        if (rolePermissionService.isEmpty()) {
+        long permissionsCount = roleService.findAll().stream().mapToLong(r -> r.getPermissions().size()).sum();
+        if (permissionsCount == 0) {
             roleService.findAll().forEach(role -> {
                 switch (RoleName.valueOf(role.getName())) {
                     case SUPER_ADMIN, ADMIN -> {
                         permissionService.findAll().forEach(permission -> {
-                            rolePermissionService.addPermission(role, permission);
+                            role.getPermissions().add(permission);
                         });
                     }
                     case MANAGER_PRODUCT -> {
-                        rolePermissionService.addPermission(role, permissionService.findByCode("PRODUCT_CREATE"));
-                        rolePermissionService.addPermission(role, permissionService.findByCode("PRODUCT_READ"));
-                        rolePermissionService.addPermission(role, permissionService.findByCode("PRODUCT_UPDATE"));
+                        role.getPermissions().add(permissionService.findByCode("PRODUCT_CREATE"));
+                        role.getPermissions().add(permissionService.findByCode("PRODUCT_READ"));
+                        role.getPermissions().add(permissionService.findByCode("PRODUCT_UPDATE"));
 
                     }
                     case MANAGER_ORDER -> {
-                        rolePermissionService.addPermission(role, permissionService.findByCode("ORDER_READ"));
-                        rolePermissionService.addPermission(role, permissionService.findByCode("ORDER_UPDATE"));
+                        role.getPermissions().add(permissionService.findByCode("ORDER_READ"));
+                        role.getPermissions().add(permissionService.findByCode("ORDER_UPDATE"));
                     }
                     case MANAGER_GENRE -> {
-                        rolePermissionService.addPermission(role, permissionService.findByCode("GENRE_CREATE"));
-                        rolePermissionService.addPermission(role, permissionService.findByCode("GENRE_READ"));
-                        rolePermissionService.addPermission(role, permissionService.findByCode("GENRE_UPDATE"));
+                        role.getPermissions().add(permissionService.findByCode("GENRE_CREATE"));
+                        role.getPermissions().add(permissionService.findByCode("GENRE_READ"));
+                        role.getPermissions().add(permissionService.findByCode("GENRE_UPDATE"));
 
                     }
                     case MANAGER_PROMOTION -> {
-                        rolePermissionService.addPermission(role, permissionService.findByCode("PROMOTION_CREATE"));
-                        rolePermissionService.addPermission(role, permissionService.findByCode("PROMOTION_READ"));
-                        rolePermissionService.addPermission(role, permissionService.findByCode("PROMOTION_UPDATE"));
-                        rolePermissionService.addPermission(role, permissionService.findByCode("PROMOTION_REPORT"));
+                        role.getPermissions().add(permissionService.findByCode("PROMOTION_CREATE"));
+                        role.getPermissions().add(permissionService.findByCode("PROMOTION_READ"));
+                        role.getPermissions().add(permissionService.findByCode("PROMOTION_UPDATE"));
+                        role.getPermissions().add(permissionService.findByCode("PROMOTION_REPORT"));
                     }
                     case CONTENT_EDITOR -> {
-                        rolePermissionService.addPermission(role, permissionService.findByCode("CONTENT_UPDATE"));
-                        rolePermissionService.addPermission(role, permissionService.findByCode("CONTENT_READ"));
+                        role.getPermissions().add(permissionService.findByCode("CONTENT_UPDATE"));
+                        role.getPermissions().add(permissionService.findByCode("CONTENT_READ"));
                     }
                     case SUPPORT -> {
-                        rolePermissionService.addPermission(role, permissionService.findByCode("ORDER_READ"));
-                        rolePermissionService.addPermission(role, permissionService.findByCode("SUPPORT_TASK"));
-                        rolePermissionService.addPermission(role,
-                                permissionService.findByCode("CUSTOMER_RESET_PASSWORD"));
+                        role.getPermissions().add(permissionService.findByCode("ORDER_READ"));
+                        role.getPermissions().add(permissionService.findByCode("SUPPORT_TASK"));
+                        role.getPermissions().add(permissionService.findByCode("CUSTOMER_RESET_PASSWORD"));
                     }
                     case CUSTOMER -> {
 
                     }
                 }
+                roleService.save(role);
             });
         }
 
@@ -124,7 +123,7 @@ public class LoadData implements ApplicationRunner {
             registerService.setUp();
         }
 
-        genreService.demoData();
+        genreService.insertData();
         authorService.insertData();
         publisherService.insertData();
 

@@ -17,26 +17,29 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.dev.backend.dto.genre.GenreRequest;
 import com.dev.backend.dto.genre.GenreResponse;
+import com.dev.backend.dto.genre.UserGenreResponse;
 import com.dev.backend.response.PageResponse;
 import com.dev.backend.response.ResponseData;
 import com.dev.backend.response.ResponseUtil;
+import com.dev.backend.service.ExcelService;
 import com.dev.backend.service.GenreService;
 
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/admin")
+@RequestMapping("/api/v1")
 public class GenreController {
     private final GenreService genreService;
+    private final ExcelService excelService;
 
     @GetMapping("/genres")
-    public ResponseEntity<ResponseData<List<GenreResponse>>> list() {
-        List<GenreResponse> listGenre = genreService.findAll();
-        return ResponseUtil.success("Lấy danh sách thể loại thành công", listGenre);
+    public ResponseEntity<ResponseData<List<UserGenreResponse>>> list() {
+        List<UserGenreResponse> userGenreResponses = genreService.findActiveGenresWithProductCount();
+        return ResponseUtil.success("Lấy danh sách thể loại thành công", userGenreResponses);
     }
 
-    @PostMapping("/genres")
+    @PostMapping("/admin/genres")
     public ResponseEntity<ResponseData<GenreResponse>> post_genre(
             @RequestPart("data") GenreRequest genreRequest,
             @RequestPart(value = "image", required = false) MultipartFile image) {
@@ -44,7 +47,7 @@ public class GenreController {
         return ResponseUtil.success("Thêm thể loại thành công", addGenre);
     }
 
-    @PutMapping("/genres/{id}")
+    @PutMapping("/admin/genres/{id}")
     public ResponseEntity<ResponseData<GenreResponse>> put_genre(
             @PathVariable Integer id,
             @RequestBody GenreRequest genreRequest,
@@ -53,13 +56,13 @@ public class GenreController {
         return ResponseUtil.success("Cập nhật thể loại thành công", updateGenre);
     }
 
-    @DeleteMapping("/genres/{id}")
+    @DeleteMapping("/admin/genres/{id}")
     public ResponseEntity<ResponseData<Void>> delete_genre(@PathVariable Integer id) {
         genreService.delete(id);
         return ResponseUtil.success("Xóa thể loại thành công", null);
     }
 
-    @GetMapping("/genres/filter")
+    @GetMapping("/admin/genres/filter")
     public ResponseEntity<ResponseData<PageResponse<GenreResponse>>> pageGenre(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -67,6 +70,18 @@ public class GenreController {
         PageResponse<GenreResponse> pageGenre = genreService.pageGenre(page - 1, size, keyword);
         return ResponseUtil.success("Load thể loại thành công", pageGenre);
 
+    }
+
+    @PostMapping("/admin/genres/import")
+    public ResponseEntity<ResponseData<Integer>> post_genre_import(
+            @RequestPart(value = "file") MultipartFile file) {
+        int importedCount = excelService.importGenresFromExcel(file);
+
+        if (importedCount > 0) {
+            return ResponseUtil.success("Đã thêm thành công " + importedCount + " thể loại mới", importedCount);
+        } else {
+            return ResponseUtil.success("Không có thể loại mới nào được thêm (Tất cả đều đã tồn tại)", 0);
+        }
     }
 
 }

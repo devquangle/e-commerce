@@ -14,6 +14,7 @@ import lombok.Setter;
 public class GenreResponse {
     private Integer id;
     private String name;
+    private String slug;
     private int totalProduct;
     private BaseStatus status;
 }

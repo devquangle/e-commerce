@@ -23,12 +23,12 @@ import lombok.Setter;
 @Entity
 @Builder
 @Table(name = "genres")
-public class Genre extends BaseEntity<Integer>  {
-
+public class Genre extends BaseEntity<Integer> {
 
     @Column(nullable = false)
     private String name;
-
+    @Column(unique = true, nullable = false)
+    private String slug;
     private String urlImage;
 
     @Enumerated(EnumType.STRING)

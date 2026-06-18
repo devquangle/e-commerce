@@ -1,6 +1,6 @@
 
 import Logo from './Logo'
-import MenuItem from './MenuItem'
+import MenuItemMobile from './MenuItemMobile'
 interface MobileDrawerProps {
     isOpen: boolean,
     onClose: () => void
@@ -42,7 +42,7 @@ function MobileDrawer({
 
                 {/* Content */}
                 <div className="p-4 space-y-2 overflow-y-auto h-[calc(100vh-64px)]">
-                    <MenuItem className='space-y-2' />
+                    <MenuItemMobile />
                    
                 </div>
             </div>

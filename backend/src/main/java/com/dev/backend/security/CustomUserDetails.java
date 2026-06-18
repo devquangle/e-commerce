@@ -6,9 +6,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import com.dev.backend.entity.Permission;
 import com.dev.backend.entity.Role;
-import com.dev.backend.entity.RolePermission;
 import com.dev.backend.entity.User;
-import com.dev.backend.entity.UserRole;
 
 import java.util.*;
 
@@ -29,11 +27,10 @@ public class CustomUserDetails implements UserDetails {
         this.permissions = new HashSet<>();
         this.authorities = new HashSet<>();
 
-        if (user.getUserRoles() == null)
+        if (user.getRoles() == null)
             return;
 
-        for (UserRole ur : user.getUserRoles()) {
-            Role role = ur.getRole();
+        for (Role role : user.getRoles()) {
             if (role == null)
                 continue;
 
@@ -43,11 +40,10 @@ public class CustomUserDetails implements UserDetails {
                 authorities.add(new SimpleGrantedAuthority("ROLE_" + roleName));
             }
 
-            if (role.getRolePermissions() == null)
+            if (role.getPermissions() == null)
                 continue;
 
-            for (RolePermission rp : role.getRolePermissions()) {
-                Permission p = rp.getPermission();
+            for (Permission p : role.getPermissions()) {
                 if (p == null)
                     continue;
 

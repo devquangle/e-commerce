@@ -17,15 +17,33 @@ const GenreMobileCard = ({
 }: Props) => {
   return (
     <div className="space-y-4 md:hidden">
-      {genres.map((genre) => (
+      {genres.map((genre, index) => (
         <div
           key={genre.id}
           className="space-y-3 card-custom"
         >
-          {/* TITLE */}
+          {/* TITLE & IMAGE */}
           <div className="flex items-start justify-between">
-            <div className="text-base font-bold text-slate-800">
-              {genre.name}
+            <div className="flex items-center gap-3">
+              <span className="text-slate-500 font-bold bg-slate-100 px-2 py-1 rounded-md text-xs">
+                #{index + 1}
+              </span>
+              <div className="w-10 h-10 rounded-xl bg-slate-50 overflow-hidden flex-shrink-0 border border-slate-200 shadow-sm flex items-center justify-center">
+                {genre.urlImage ? (
+                  <img
+                    src={genre.urlImage}
+                    alt={genre.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="text-slate-400 font-bold text-lg bg-slate-100 w-full h-full flex items-center justify-center">
+                    {genre.name.charAt(0)}
+                  </div>
+                )}
+              </div>
+              <div className="text-base font-bold text-slate-800">
+                {genre.name}
+              </div>
             </div>
 
             <GenreStatusBadge status={genre.status} />

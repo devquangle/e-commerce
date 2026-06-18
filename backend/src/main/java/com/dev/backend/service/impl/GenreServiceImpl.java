@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.dev.backend.constant.BaseStatus;
 import com.dev.backend.dto.genre.GenreRequest;
 import com.dev.backend.dto.genre.GenreResponse;
+import com.dev.backend.dto.genre.UserGenreResponse;
 import com.dev.backend.entity.Genre;
 import com.dev.backend.exception.DuplicateFieldException;
 import com.dev.backend.exception.NotFoundException;
@@ -53,7 +54,7 @@ public class GenreServiceImpl implements GenreService {
         }
 
         @Override
-        public void demoData() {
+        public void insertData() {
 
                 if (genreRepository.count() > 0) {
                         return;
@@ -213,5 +214,14 @@ public class GenreServiceImpl implements GenreService {
                                 genrePage.getSize(),
                                 genrePage.getTotalElements(),
                                 genrePage.getTotalPages());
+        }
+
+        @Override
+        public List<UserGenreResponse> findActiveGenresWithProductCount() {
+                return genreRepository.findActiveGenresWithProductCount();
+        }
+        @Override
+        public List<Genre> saveAll(List<Genre> list) {
+        return genreRepository.saveAll(list);
         }
 }

@@ -42,4 +42,13 @@ public class TextUtils {
 
         return slug;
     }
+
+    public static String urlImage(String name) {
+        if (name == null || name.isBlank()) {
+            return "";
+        }
+        String encodedName = name.replace(" ", "+");
+        String autoAvatarUrl = "https://ui-avatars.com/api/?name=" + encodedName + "&background=random&size=128";
+        return autoAvatarUrl;
+    }
 }

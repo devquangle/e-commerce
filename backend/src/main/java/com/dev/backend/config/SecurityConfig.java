@@ -1,6 +1,5 @@
 package com.dev.backend.config;
 
-import com.dev.backend.constant.RoleName;
 import com.dev.backend.security.CustomAccessDeniedHandler;
 import com.dev.backend.security.CustomAuthenticationEntryPoint;
 import com.dev.backend.security.CustomUserDetailsService;
@@ -10,9 +9,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -30,129 +31,128 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final CustomAccessDeniedHandler customAccessDeniedHandler;
-    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
-    private final CustomUserDetailsService customUserDetailsService;
+        private final JwtAuthenticationFilter jwtAuthenticationFilter;
+        private final CustomAccessDeniedHandler customAccessDeniedHandler;
+        private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+        private final CustomUserDetailsService customUserDetailsService;
 
-    public static final String[] PUBLIC_URLS = {
-            "/login",
-            "/logout",
-            "/register",
-            "/refresh-token",
-            "/resend-verify-register",
-            "/verify-register",
-            "/home/**",
-            "/products",
-            "/genre/list",
-            "/productdetail/**",
-            "/images/**",
-            "/reviews/**",
-            "/public/**"
-    };
+        public static final String[] PUBLIC_URLS = {
+                        "/login",
+                        "/logout",
+                        "/register",
+                        "/refresh-token",
+                        "/resend-verify-register",
+                        "/verify-register",
+                        "/api/v1/auth/**",
+                        "/home/**",
+                        "/images/**",
+                        "/public/**"
+        };
 
-    // ================= AUTH MANAGER =================
-    @Bean
-    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-        AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
+        public static final String[] PUBLIC_GET_URLS = {
+                        "/products",
+                        "/genre/list",
+                        "/productdetail/**",
+                        "/reviews/**",
+                        "/api/v1/products/**",
+                        "/api/v1/genres/**",
+                        "/api/v1/authors/**",
+                        "/api/v1/publishers/**",
+                        "/api/v1/reviews/**"
+        };
 
-        builder
-                .userDetailsService(customUserDetailsService)
-                .passwordEncoder(passwordEncoder());
+        // ================= AUTH MANAGER =================
+        @Bean
+        public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+                AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
 
-        return builder.build();
-    }
+                builder
+                                .userDetailsService(customUserDetailsService)
+                                .passwordEncoder(passwordEncoder());
 
-    // ================= SECURITY FILTER CHAIN =================
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+                return builder.build();
+        }
 
-        http
-                .csrf(csrf -> csrf.disable())
+        // ================= SECURITY FILTER CHAIN =================
+        @Bean
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-                // CORS chuẩn
-                .cors(Customizer.withDefaults())
+                http
+                                .csrf(csrf -> csrf.disable())
+                                .cors(Customizer.withDefaults())
 
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .sessionManagement(session -> session
+                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                .authorizeHttpRequests(req -> req
-                        .requestMatchers(PUBLIC_URLS).permitAll()
+                                .authorizeHttpRequests(req -> req
+                                                .requestMatchers(PUBLIC_URLS).permitAll()
+                                                .requestMatchers(HttpMethod.GET, PUBLIC_GET_URLS).permitAll()
+                                                .anyRequest().authenticated())
 
-                        .requestMatchers("/admin/**")
-                        .hasAnyRole(
-                                RoleName.SUPER_ADMIN.name(),
-                                RoleName.ADMIN.name())
+                                .exceptionHandling(ex -> ex
+                                                .accessDeniedHandler(customAccessDeniedHandler)
+                                                .authenticationEntryPoint(customAuthenticationEntryPoint))
 
-                        .requestMatchers("/staff/**").hasRole("STAFF")
-                        .requestMatchers("/accounting/**").hasRole("ACCOUNTANT")
-                        .requestMatchers("/customer/**").hasRole("CUSTOMER")
+                                .logout(logout -> logout.disable())
 
-                        .anyRequest().authenticated())
+                                .addFilterBefore(jwtAuthenticationFilter,
+                                                UsernamePasswordAuthenticationFilter.class);
 
-                .exceptionHandling(ex -> ex
-                        .accessDeniedHandler(customAccessDeniedHandler)
-                        .authenticationEntryPoint(customAuthenticationEntryPoint))
+                return http.build();
+        }
 
-                .logout(logout -> logout.disable())
+        // ================= CORS CONFIG =================
+        @Bean
+        public CorsConfigurationSource corsConfigurationSource() {
 
-                .addFilterBefore(jwtAuthenticationFilter,
-                        UsernamePasswordAuthenticationFilter.class);
+                CorsConfiguration config = new CorsConfiguration();
 
-        return http.build();
-    }
+                config.setAllowedOrigins(List.of(
+                                "http://localhost:5173"));
 
-    // ================= CORS CONFIG =================
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+                config.setAllowedMethods(List.of(
+                                "GET", "POST", "PUT", "DELETE", "OPTIONS"));
 
-        CorsConfiguration config = new CorsConfiguration();
+                config.setAllowedHeaders(List.of(
+                                "Authorization",
+                                "Content-Type",
+                                "Accept"));
 
-        config.setAllowedOrigins(List.of(
-                "http://localhost:5173"));
+                config.setExposedHeaders(List.of(
+                                "Authorization"));
 
-        config.setAllowedMethods(List.of(
-                "GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                config.setAllowCredentials(true);
+                config.setMaxAge(3600L);
 
-        config.setAllowedHeaders(List.of(
-                "Authorization",
-                "Content-Type",
-                "Accept"));
+                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
-        config.setExposedHeaders(List.of(
-                "Authorization"));
+                source.registerCorsConfiguration("/**", config);
 
-        config.setAllowCredentials(true);
-        config.setMaxAge(3600L);
+                return source;
+        }
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        // ================= PASSWORD =================
+        @Bean
+        public BCryptPasswordEncoder passwordEncoder() {
+                return new BCryptPasswordEncoder();
+        }
 
-        source.registerCorsConfiguration("/**", config);
+        @Bean
+        public RestTemplate restTemplate() {
+                return new RestTemplate();
+        }
 
-        return source;
-    }
+        @Bean
+        public MultipartResolver multipartResolver() {
+                return new StandardServletMultipartResolver();
+        }
 
-    // ================= PASSWORD =================
-    @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public RestTemplate restTemplate() {
-        return new RestTemplate();
-    }
-
-    @Bean
-    public MultipartResolver multipartResolver() {
-        return new StandardServletMultipartResolver();
-    }
-
-
-    @Bean
-    public ObjectMapper objectMapper() {
-        return new ObjectMapper();
-    }
+        @Bean
+        public ObjectMapper objectMapper() {
+                return new ObjectMapper();
+        }
 }

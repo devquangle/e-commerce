@@ -13,8 +13,11 @@ export default function GenreTable({ genres, onEdit, onDelete }: Props) {
     <div className="hidden md:block overflow-x-auto">
       <table className="w-full text-left text-sm border-collapse">
         <thead>
-          <tr className="border-b border-slate-100 text-slate-500">
-            <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50 first:rounded-l-lg last:rounded-r-lg">
+          <tr className="border-b border-slate-100 text-slate-500 bg-slate-50">
+            <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 first:rounded-l-lg">
+              STT
+            </th>
+            <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400">
               Tên thể loại
             </th>
             <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50">
@@ -30,13 +33,31 @@ export default function GenreTable({ genres, onEdit, onDelete }: Props) {
         </thead>
 
         <tbody className="divide-y divide-slate-100">
-          {genres.map((genre) => (
+          {genres.map((genre, index) => (
             <tr
               key={genre.id}
               className="hover:bg-slate-50/50 transition-colors"
             >
+              <td className="py-4 px-4 font-medium text-slate-500">
+                {index + 1}
+              </td>
               <td className="py-4 px-4 text-slate-900 font-semibold">
-                {genre?.name}
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-slate-50 overflow-hidden flex-shrink-0 border border-slate-200 shadow-sm flex items-center justify-center">
+                    {genre.urlImage ? (
+                      <img
+                        src={genre.urlImage}
+                        alt={genre.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="text-slate-400 font-bold text-lg bg-slate-100 w-full h-full flex items-center justify-center">
+                        {genre.name.charAt(0)}
+                      </div>
+                    )}
+                  </div>
+                  <span>{genre?.name}</span>
+                </div>
               </td>
 
               <td className="py-4 px-4 text-slate-600">

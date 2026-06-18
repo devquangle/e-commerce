@@ -20,10 +20,6 @@ const menuItems = [
 ];
 
 export default function MenuItem({ className = "" }) {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  // Thêm state để kiểm soát trạng thái hover trên Desktop
-  const [isDesktopMenuOpen, setIsDesktopMenuOpen] = useState(false);
-
   const { data: genres = [], isLoading: loadingGenres } = useQuery({
     queryKey: ["public-genres"],
     queryFn: () => genreService.fetchGenre(),
@@ -41,44 +37,15 @@ export default function MenuItem({ className = "" }) {
     (a) => a.status === "ACTIVE" || !a.status,
   );
 
-
-
   return (
     <ul className={className}>
-      <li
-        className="group cursor-pointer"
-        onMouseEnter={() => setIsDesktopMenuOpen(true)}
-        onMouseLeave={() => setIsDesktopMenuOpen(false)}
-      >
-        <div className="flex items-center justify-between py-4">
-          <div
-            className="flex items-center gap-1 hover:text-indigo-600 font-medium"
-          >
-            Danh mục
-            <ChevronDown
-              size={16}
-              className="hidden lg:block group-hover:rotate-180 transition-transform duration-300 ml-0.5"
-            />
-          </div>
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              setIsMobileMenuOpen(!isMobileMenuOpen);
-            }}
-            className="lg:hidden p-2 -mr-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors"
-          >
-            <ChevronDown
-              size={18}
-              className={`transition-transform duration-300 ${isMobileMenuOpen ? "rotate-180" : ""}`}
-            />
-          </button>
-        </div>
+      <li className="group">
+        <Link to="/products" className="flex items-center gap-1 hover:text-indigo-600 font-medium py-4">
+            Danh mục <ChevronDown size={16} className="group-hover:rotate-180 transition-transform duration-300" />
+        </Link>
 
         {/* Dropdown Container */}
-        {/* Thay đổi: Sử dụng cả class `group-hover:block` kết hợp trạng thái `isMobileMenuOpen` */}
-        <div
-          className={`lg:absolute lg:top-full lg:left-0 lg:w-full bg-white lg:rounded-3xl lg:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] lg:border border-slate-100/50 ${isMobileMenuOpen ? "block" : "hidden"} lg:hidden lg:group-hover:block transition-all duration-300 z-50`}
-        >
+        <div className="hidden lg:block absolute top-full left-0 w-full bg-white rounded-3xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] border border-slate-100/50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform origin-top translate-y-3 group-hover:translate-y-0 z-50">
           <div className="flex flex-col lg:grid lg:grid-cols-12 p-4 lg:p-8 gap-6 lg:gap-8">
             {/* === CỘT 1: THỂ LOẠI === */}
             <div className="lg:col-span-4 flex flex-col">

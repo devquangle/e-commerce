@@ -1,10 +1,11 @@
 import AuthorService from "@/services/authorService";
 import type { AuthorRequest, AuthorResponse } from "@/types/author";
 import type { Pagination } from "@/types/pagination";
-import type { options } from "@/types/genre";
+;
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { showErrorToast, showSuccessToast } from "@/utils/toastUtil";
 import axios from "axios";
+import type { options } from "@/types/options.type";
 
 export const useAuthor = () => {
   return useQuery<AuthorResponse[]>({
