@@ -1,6 +1,6 @@
 const Loading = () => {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
+    <div className="fixed inset-0 z-60 flex items-center justify-center pointer-events-none">
       {/* Nền mờ + blur + fade in */}
       <div className="absolute inset-0 bg-white/30 backdrop-blur-sm transition-opacity duration-500 opacity-100"></div>
 

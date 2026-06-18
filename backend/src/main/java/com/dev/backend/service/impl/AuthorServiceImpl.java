@@ -127,10 +127,12 @@ public class AuthorServiceImpl implements AuthorService {
         DuplicateFieldException errors = new DuplicateFieldException(new HashMap<>());
         if (existsByName(authorRequest.getName())) {
             errors.addError("name", "Tên tác giả đã tồn tại.");
+            log.warn("Kiểm tra trùng lặp: Tên tác giả [{}] đã tồn tại trong hệ thống.", authorRequest.getName());
         }
         if (!errors.getErrors().isEmpty()) {
             throw errors;
         }
+        log.info("Kiểm tra trùng lặp hợp lệ: Tên tác giả [{}] sạch, có thể tạo mới.", authorRequest.getName());
 
     }
 

@@ -8,9 +8,17 @@ type Props = {
   authors: AuthorResponse[];
   onEdit: (author: AuthorResponse) => void;
   onDelete: (author: AuthorResponse) => void;
+  page: number;
+  pageSize: number;
 };
 
-export default function AuthorTable({ authors, onEdit, onDelete }: Props) {
+export default function AuthorTable({
+  authors,
+  onEdit,
+  onDelete,
+  page,
+  pageSize,
+}: Props) {
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
   const toggle = (id: number) => {
@@ -44,13 +52,15 @@ export default function AuthorTable({ authors, onEdit, onDelete }: Props) {
 
         <tbody className="divide-y divide-slate-100">
           {authors && authors.length > 0 ? (
+            
             authors.map((author, index) => (
+
               <tr
                 key={author?.id}
                 className="hover:bg-slate-50/60 transition-colors"
               >
                 {/* AUTHOR */}
-                <td className="py-4 px-4">{index + 1}</td>
+                <td className="py-4 px-4">{(page - 1) * pageSize + index + 1}</td>
                 <td className="py-4 px-4">
                   <div className="flex items-center gap-3">
                     <img
@@ -111,7 +121,7 @@ export default function AuthorTable({ authors, onEdit, onDelete }: Props) {
 
                 {/* ACTION */}
                 <td className="py-4 px-4 text-right">
-                  {!(author.name == "Khác" )&& (
+                  {!(author.name == "Khác") && (
                     <AuthorActionButtons
                       item={author}
                       onEdit={onEdit}
