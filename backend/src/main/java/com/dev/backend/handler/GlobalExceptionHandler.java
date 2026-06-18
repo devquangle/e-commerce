@@ -15,6 +15,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import com.dev.backend.exception.AppException;
 import com.dev.backend.response.ApiErrorCode;
 import com.dev.backend.response.ResponseData;
+import com.dev.backend.response.ResponseUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
@@ -32,13 +33,7 @@ public class GlobalExceptionHandler {
                 }
                 String error = ex.getError() == null || ex.getError().isBlank() ? status.name() : ex.getError();
 
-                return buildErrorResponse(
-                                status,
-                                ex.getCode(),
-                                ex.getMessage(),
-                                error,
-                                request.getRequestURI(),
-                                ex.getData());
+                return ResponseUtil.error(status, ex.getMessage(), error, request.getRequestURI(), ex.getData());
         }
 
         @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -50,26 +45,14 @@ public class GlobalExceptionHandler {
                         errors.put(fieldError.getField(), fieldError.getDefaultMessage());
                 }
 
-                return buildErrorResponse(
-                                HttpStatus.BAD_REQUEST,
-                                HttpStatus.BAD_REQUEST.value(),
-                                "Dữ liệu không hợp lệ!",
-                                ApiErrorCode.VALIDATION_ERROR,
-                                request.getRequestURI(),
-                                errors);
+                return ResponseUtil.error(HttpStatus.BAD_REQUEST, "Dữ liệu không hợp lệ!", ApiErrorCode.VALIDATION_ERROR, request.getRequestURI(), errors);
         }
 
         @ExceptionHandler(ConstraintViolationException.class)
         public ResponseEntity<ResponseData<Object>> handleConstraintViolation(
                         ConstraintViolationException ex,
                         HttpServletRequest request) {
-                return buildErrorResponse(
-                                HttpStatus.BAD_REQUEST,
-                                HttpStatus.BAD_REQUEST.value(),
-                                ex.getMessage(),
-                                ApiErrorCode.VALIDATION_ERROR,
-                                request.getRequestURI(),
-                                null);
+                return ResponseUtil.error(HttpStatus.BAD_REQUEST, ex.getMessage(), ApiErrorCode.VALIDATION_ERROR, request.getRequestURI(), null);
         }
 
         @ExceptionHandler(MethodArgumentTypeMismatchException.class)
@@ -77,56 +60,20 @@ public class GlobalExceptionHandler {
                         MethodArgumentTypeMismatchException ex,
                         HttpServletRequest request) {
                 String message = "Invalid value for parameter: " + ex.getName();
-                return buildErrorResponse(
-                                HttpStatus.BAD_REQUEST,
-                                HttpStatus.BAD_REQUEST.value(),
-                                message,
-                                ApiErrorCode.TYPE_MISMATCH,
-                                request.getRequestURI(),
-                                null);
+                return ResponseUtil.error(HttpStatus.BAD_REQUEST, message, ApiErrorCode.TYPE_MISMATCH, request.getRequestURI(), null);
         }
 
         @ExceptionHandler(AccessDeniedException.class)
         public ResponseEntity<ResponseData<Object>> handleAccessDenied(
                         AccessDeniedException ex,
                         HttpServletRequest request) {
-                return buildErrorResponse(
-                                HttpStatus.FORBIDDEN,
-                                HttpStatus.FORBIDDEN.value(),
-                                "You do not have permission to access this resource",
-                                ApiErrorCode.ACCESS_DENIED,
-                                request.getRequestURI(),
-                                null);
+                return ResponseUtil.error(HttpStatus.FORBIDDEN, "You do not have permission to access this resource", ApiErrorCode.ACCESS_DENIED, request.getRequestURI(), null);
         }
 
         @ExceptionHandler(Exception.class)
         public ResponseEntity<ResponseData<Object>> handleException(Exception ex, HttpServletRequest request) {
                 log.error("Unhandled exception at {}", request.getRequestURI(), ex);
-                return buildErrorResponse(
-                                HttpStatus.INTERNAL_SERVER_ERROR,
-                                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                                "Internal server error",
-                                ApiErrorCode.INTERNAL_SERVER_ERROR,
-                                request.getRequestURI(),
-                                null);
-        }
-
-        private ResponseEntity<ResponseData<Object>> buildErrorResponse(
-                        HttpStatus status,
-                        int code,
-                        String message,
-                        String error,
-                        String path,
-                        Object data) {
-                ResponseData<Object> response = ResponseData.<Object>builder()
-                                .success(false)
-                                .message(message)
-                                .data(data)
-                                .code(code)
-                                .error(error)
-                                .path(path)
-                                .build();
-                return ResponseEntity.status(status).body(response);
+                return ResponseUtil.error(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error", ApiErrorCode.INTERNAL_SERVER_ERROR, request.getRequestURI(), null);
         }
 
         @ExceptionHandler({
@@ -137,13 +84,7 @@ public class GlobalExceptionHandler {
                         Exception ex,
                         HttpServletRequest request) {
 
-                return buildErrorResponse(
-                                HttpStatus.UNAUTHORIZED,
-                                HttpStatus.UNAUTHORIZED.value(),
-                                "Tài khoản hoặc mật khẩu không đúng",
-                                ApiErrorCode.UNAUTHORIZED,
-                                request.getRequestURI(),
-                                null);
+                return ResponseUtil.error(HttpStatus.UNAUTHORIZED, "Tài khoản hoặc mật khẩu không đúng", ApiErrorCode.UNAUTHORIZED, request.getRequestURI(), null);
         }
 
         @ExceptionHandler(org.springframework.security.authentication.LockedException.class)
@@ -151,13 +92,7 @@ public class GlobalExceptionHandler {
                         Exception ex,
                         HttpServletRequest request) {
 
-                return buildErrorResponse(
-                                HttpStatus.UNAUTHORIZED,
-                                HttpStatus.UNAUTHORIZED.value(),
-                                "Tài khoản đã bị khóa",
-                                ApiErrorCode.UNAUTHORIZED,
-                                request.getRequestURI(),
-                                null);
+                return ResponseUtil.error(HttpStatus.UNAUTHORIZED, "Tài khoản đã bị khóa", ApiErrorCode.UNAUTHORIZED, request.getRequestURI(), null);
         }
 
         @ExceptionHandler(org.springframework.security.authentication.DisabledException.class)
@@ -165,12 +100,6 @@ public class GlobalExceptionHandler {
                         Exception ex,
                         HttpServletRequest request) {
 
-                return buildErrorResponse(
-                                HttpStatus.UNAUTHORIZED,
-                                HttpStatus.UNAUTHORIZED.value(),
-                                "Tài khoản chưa được kích hoạt",
-                                ApiErrorCode.UNAUTHORIZED,
-                                request.getRequestURI(),
-                                null);
+                return ResponseUtil.error(HttpStatus.UNAUTHORIZED, "Tài khoản chưa được kích hoạt", ApiErrorCode.UNAUTHORIZED, request.getRequestURI(), null);
         }
 }
