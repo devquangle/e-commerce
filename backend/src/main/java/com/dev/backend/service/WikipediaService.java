@@ -39,6 +39,7 @@ public class WikipediaService {
     private static final String URL_SUMMARY = "https://%s.wikipedia.org/api/rest_v1/page/summary/";
     private static final String USER_AGENT = "MyWikiApp/1.0 (email@gmail.com)";
 
+    // 🌟 TỐI ƯU CACHE: Đặt Cache ở đầu luồng hàm chính để ăn cache toàn bộ kết quả tìm kiếm, tăng tốc độ tối đa
     @Cacheable(value = "wikipediaAuthors", key = "#name", unless = "#result == null")
     public WikipediaResponse fetchApiInforAuthor(String name) {
         if (name == null || name.trim().isEmpty()) {
