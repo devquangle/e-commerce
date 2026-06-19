@@ -4,7 +4,7 @@ import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import com.dev.backend.entity.Permission;
+import com.dev.backend.constant.Permission;
 import com.dev.backend.entity.Role;
 import com.dev.backend.entity.User;
 
@@ -30,28 +30,23 @@ public class CustomUserDetails implements UserDetails {
         if (user.getRoles() == null)
             return;
 
-        for (Role role : user.getRoles()) {
-            if (role == null)
-                continue;
 
-            String roleName = role.getName();
-            if (roleName != null) {
-                roles.add(roleName);
-                authorities.add(new SimpleGrantedAuthority("ROLE_" + roleName));
+        for (Role role : user.getRoles()) {
+            if (role == null) continue;
+
+            String code = role.getCode();
+            // Fallback for old database records that haven't been wiped
+            if (code == null || code.trim().isEmpty()) {
+                code = role.getName();
             }
 
-            if (role.getPermissions() == null)
-                continue;
-
-            for (Permission p : role.getPermissions()) {
-                if (p == null)
-                    continue;
-
-                String code = p.getCode();
-                if (code != null) {
-                    permissions.add(code);
-                    authorities.add(new SimpleGrantedAuthority(code));
+            if (code != null && !code.trim().isEmpty()) {
+                if (role.getName() != null) {
+                    roles.add(role.getName());
                 }
+                
+                permissions.add(code);
+                authorities.add(new SimpleGrantedAuthority(code));
             }
         }
     }
@@ -66,7 +61,9 @@ public class CustomUserDetails implements UserDetails {
             authorities.add(new SimpleGrantedAuthority("ROLE_" + role));
         }
         for (String perm : permissions) {
-            authorities.add(new SimpleGrantedAuthority(perm));
+            if (perm != null && !perm.trim().isEmpty()) {
+                authorities.add(new SimpleGrantedAuthority(perm));
+            }
         }
     }
 

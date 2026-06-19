@@ -10,6 +10,6 @@ import com.dev.backend.entity.Role;
 
 
 public interface RoleRepository extends JpaRepository<Role, Integer> {
-       @Query("SELECT r FROM Role r WHERE r.name = :name")
-       Optional<Role> findByName(String name);
+       @Query("SELECT r FROM Role r WHERE r.code = :code")
+       Optional<Role> findByCode(String code);
 }

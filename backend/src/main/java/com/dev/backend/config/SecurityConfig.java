@@ -11,6 +11,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
+import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
+import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
+import com.dev.backend.constant.Permission;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -154,5 +159,24 @@ public class SecurityConfig {
         @Bean
         public ObjectMapper objectMapper() {
                 return new ObjectMapper();
+        }
+
+        @Bean
+        public RoleHierarchy roleHierarchy() {
+                StringBuilder hierarchy = new StringBuilder();
+                for (Permission p : Permission.values()) {
+                        if (p != Permission.SUPER_ADMIN && p != Permission.ADMIN && p != Permission.CUSTOMER) {
+                                hierarchy.append("SUPER_ADMIN > ").append(p.name()).append("\n");
+                                hierarchy.append("ADMIN > ").append(p.name()).append("\n");
+                        }
+                }
+                return RoleHierarchyImpl.fromHierarchy(hierarchy.toString());
+        }
+
+        @Bean
+        public MethodSecurityExpressionHandler methodSecurityExpressionHandler(RoleHierarchy roleHierarchy) {
+                DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
+                expressionHandler.setRoleHierarchy(roleHierarchy);
+                return expressionHandler;
         }
 }

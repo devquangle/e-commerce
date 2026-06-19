@@ -12,7 +12,7 @@ import com.dev.backend.exception.DuplicateFieldException;
 import com.dev.backend.exception.UnauthorizedException;
 import com.dev.backend.security.jwt.JwtUtil;
 import com.dev.backend.constant.JwtType;
-import com.dev.backend.constant.RoleName;
+import com.dev.backend.constant.Permission;
 import com.dev.backend.service.RegisterService;
 import com.dev.backend.service.RoleService;
 import com.dev.backend.service.SendEmailService;
@@ -60,7 +60,7 @@ public class RegisterServiceImpl implements RegisterService {
         re.setPassword(passwordEncoder.encode(registerBean.getPassword()));
         re.setCode(generatedCode);
 
-        re.getRoles().add(roleService.findByName(role));
+        re.getRoles().add(roleService.findByCode(role));
         User saved = userService.saveUser(re);
         return saved;
     }
@@ -111,8 +111,8 @@ public class RegisterServiceImpl implements RegisterService {
     public void setUp() {
         RegisterBean customer = new RegisterBean("customer", "customer@gmail.com", "123456", "123456");
         RegisterBean super_admin = new RegisterBean("super_admin", "superadmin@gmail.com", "123456", "123456");
-        register(customer, RoleName.CUSTOMER.name());
-        register(super_admin, RoleName.SUPER_ADMIN.name());
+        register(customer, Permission.CUSTOMER.name());
+        register(super_admin, Permission.SUPER_ADMIN.name());
 
     }
 }

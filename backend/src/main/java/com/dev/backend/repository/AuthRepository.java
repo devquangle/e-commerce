@@ -12,15 +12,13 @@ public interface AuthRepository extends JpaRepository<User, Integer> {
 
     @Query("SELECT DISTINCT u FROM User u WHERE u.email = :email")
     @EntityGraph(attributePaths = {
-            "roles",
-            "roles.permissions"
+            "roles"
     })
     Optional<User> findByEmail(String email);
 
     @Query("SELECT DISTINCT u FROM User u WHERE u.id = :id")
     @EntityGraph(attributePaths = {
-            "roles",
-            "roles.permissions"
+            "roles"
     })
     Optional<User> findById(Integer id);
 

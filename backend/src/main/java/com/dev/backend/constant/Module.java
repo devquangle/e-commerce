@@ -3,9 +3,10 @@ package com.dev.backend.constant;
 public enum Module {
     PRODUCT,
     ORDER,
-    GENRE,
+    AUTHOR,
+    PUBLISHER,
     PROMOTION,
-    CUSTOMER,
-    CONTENT,
-    SUPPORT
+    GENRE,
+    SYSTEM,
+    USER
 }

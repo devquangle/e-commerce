@@ -1,10 +1,11 @@
-import type { AuthorRes } from "@/types/author";
+
 import { Edit, Trash2 } from "lucide-react";
+import type { AuthorResponse } from "../types/author";
 
 type Props = {
-  onEdit: (item: AuthorRes) => void;
-  onDelete: (item: AuthorRes) => void;
-  item: AuthorRes;
+  onEdit: (item: AuthorResponse) => void;
+  onDelete: (item: AuthorResponse) => void;
+  item: AuthorResponse;
   mobile?: boolean;
 };
 

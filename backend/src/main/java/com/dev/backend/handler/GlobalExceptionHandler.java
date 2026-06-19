@@ -1,6 +1,5 @@
 package com.dev.backend.handler;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -65,7 +64,7 @@ public class GlobalExceptionHandler {
                 // Gom lỗi bằng Stream API ngắn gọn
                 Map<String, String> errors = ex.getBindingResult().getFieldErrors().stream()
                                 .collect(Collectors.toMap(
-                                                FieldError::getField,
+                                                fieldError -> fieldError.getField(),
                                                 fieldError -> fieldError.getDefaultMessage() != null
                                                                 ? fieldError.getDefaultMessage()
                                                                 : "Lỗi không xác định",

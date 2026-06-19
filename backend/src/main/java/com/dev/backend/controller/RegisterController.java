@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.dev.backend.bean.JwtBean;
 import com.dev.backend.bean.RegisterBean;
 import com.dev.backend.entity.User;
-import com.dev.backend.constant.RoleName;
+import com.dev.backend.constant.Permission;
 import com.dev.backend.response.ResponseData;
 import com.dev.backend.response.ResponseUtil;
 import com.dev.backend.security.jwt.JwtUtil;
@@ -40,7 +40,7 @@ public class RegisterController {
 
     @PostMapping("/register")
     public ResponseEntity<ResponseData<Object>> post_register(@RequestBody @Valid RegisterBean registerBean) {
-        User user = registerService.register(registerBean, RoleName.CUSTOMER.name());
+        User user = registerService.register(registerBean, Permission.CUSTOMER.name());
         if (user != null) {
             String verifyToken = jwtUtil.generateVerifyToken(user.getId(),user.getTokenVersion());
             sendEmailService.sendEmailRegister(user.getEmail(),

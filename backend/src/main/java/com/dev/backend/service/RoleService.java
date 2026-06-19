@@ -12,5 +12,5 @@ public interface RoleService {
    List<Role> findAll();
    Role save(Role role);
    Role findById(Integer id);
-   Role findByName(String name);
+   Role findByCode(String code);
 }
