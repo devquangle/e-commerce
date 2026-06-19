@@ -63,18 +63,13 @@ export default function AuthorFormModal({
 
   useEffect(() => {
     if (!isOpen) {
-      // 2. Khi đóng modal, hủy ngay lập tức các request wikipedia đang chạy ngầm
       queryClient.cancelQueries({ queryKey: ["wikipedia-author"] });
-      // (Lưu ý: Thay ["wikipedia-author"] bằng đúng queryKey bạn đặt trong hook useWikipediaAuthor)
     }
   }, [isOpen, queryClient]);
 
-  // Reset form khi đóng/mở hoặc đổi item chọn
-// Reset form khi đóng/mở hoặc đổi item chọn
 useEffect(() => {
   if (isOpen) {
     if (selectItem) {
-      // 1. Khi MỞ chế độ Update -> Đổ dữ liệu cũ vào form
       reset({
         name: selectItem.name,
         extract: selectItem.description || "",
@@ -84,7 +79,6 @@ useEffect(() => {
         urlImage: selectItem.urlImage || "",
       });
     } else {
-      // 2. Khi MỞ chế độ Add mới -> Xóa sạch form về mặc định
       reset(initAuthor);
     }
   } else {

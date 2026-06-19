@@ -1,8 +1,9 @@
 import { apiAuth } from "@/configs/axios";
 import type { ApiResponse } from "@/types/api-response";
-import type { GenreRequest, GenreResponse } from "@/types/genre";
+
 import type { options } from "@/types/options.type";
 import type { Pagination } from "@/types/pagination";
+import type { GenreRequest, GenreResponse } from "../types/genre";
 
 const genreService = {
   async fetchGenre() {

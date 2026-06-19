@@ -1,7 +1,8 @@
-import type { GenreResponse } from "@/types/genre";
+
 import { BookOpen } from "lucide-react";
 import GenreStatusBadge from "./GenreStatusBadge";
 import GenreActionButtons from "./GenreActionButtons";
+import type { GenreResponse } from "../types/genre";
 type Props = {
   genres: GenreResponse[];
   onEdit: (genre: GenreResponse) => void;
@@ -43,7 +44,7 @@ export default function GenreTable({ genres, onEdit, onDelete }: Props) {
               </td>
               <td className="py-4 px-4 text-slate-900 font-semibold">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-slate-50 overflow-hidden flex-shrink-0 border border-slate-200 shadow-sm flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-slate-50 overflow-hidden shrink-0 border border-slate-200 shadow-sm flex items-center justify-center">
                     {genre.urlImage ? (
                       <img
                         src={genre.urlImage}

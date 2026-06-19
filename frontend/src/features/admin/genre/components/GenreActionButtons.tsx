@@ -1,5 +1,6 @@
-import type { GenreResponse } from "@/types/genre";
+
 import { Edit, Trash2 } from "lucide-react";
+import type { GenreResponse } from "../types/genre";
 
 type Props = {
   genre: GenreResponse;

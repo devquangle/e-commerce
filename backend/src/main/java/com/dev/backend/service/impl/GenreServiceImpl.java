@@ -23,6 +23,7 @@ import com.dev.backend.service.CloudinaryService;
 import com.dev.backend.service.GeminiService;
 import com.dev.backend.service.GenreService;
 import com.dev.backend.service.ProductGenreService;
+import com.dev.backend.util.TextUtils;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -106,6 +107,7 @@ public class GenreServiceImpl implements GenreService {
                 validate(genreRequest.getName());
                 genre.setName(genreRequest.getName());
                 genre.setStatus(genreRequest.getStatus());
+                genre.setSlug(TextUtils.toSlug(genreRequest.getName()));
 
                 // Trường hợp 1: Người dùng tự upload file ảnh từ máy tính lên
                 if (image != null && !image.isEmpty()) {
@@ -130,6 +132,7 @@ public class GenreServiceImpl implements GenreService {
                 }
                 genre.setName(genreRequest.getName());
                 genre.setStatus(genreRequest.getStatus());
+                
                 if (image != null && !image.isEmpty()) {
                         setImageCloudinary(genre, image);
                 } else {

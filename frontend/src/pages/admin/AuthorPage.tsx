@@ -1,5 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useState, useMemo, useCallback } from "react";
 import { Plus, RotateCcw, Search, Users } from "lucide-react";
 import Modal from "@/components/common/Modal";
 import Pagination from "@/components/common/Pagination";
@@ -9,7 +8,6 @@ import Loading from "@/components/common/Loading";
 import AuthorTable from "@/features/admin/author/components/AuthorTable";
 import AuthorMobileCard from "@/features/admin/author/components/AuthorMobileCard";
 
-import useDebounce from "@/hooks/useDebounce";
 import {
   useCreateAuthor,
   useFilterAuthor,
@@ -23,40 +21,27 @@ import imageService from "@/services/imageService";
 import AuthorFormModal from "@/features/admin/author/components/AuthorFormModal";
 import { mapServerErrors } from "@/utils/mapServerErrors";
 import type { UseFormSetError } from "react-hook-form"; // Import thêm cái này
-const initialFilterOptions = { keyword: "", status: "", page: 1, size: 10 };
+import useAuthorFilter from "@/features/admin/author/hooks/useAuthorFilter";
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export default function AuthorPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [keyword, setKeyword] = useState(
-    () => searchParams.get("keyword") ?? initialFilterOptions.keyword,
-  );
-  const [status, setStatus] = useState<BaseStatus | null>(
-    () => (searchParams.get("status") as BaseStatus) ?? null,
-  );
-  const [page, setPage] = useState<number>(
-    () => Number(searchParams.get("page")) || initialFilterOptions.page,
-  );
-  const [size, setSize] = useState<number>(
-    () => Number(searchParams.get("size")) || initialFilterOptions.size,
-  );
-
-  const debouncedKeyword = useDebounce(keyword, 500);
-
-  useEffect(() => {
-    const params = new URLSearchParams();
-    if (debouncedKeyword) params.set("keyword", debouncedKeyword);
-    if (status) params.set("status", status);
-    if (page !== initialFilterOptions.page) params.set("page", page.toString());
-    if (size !== initialFilterOptions.size) params.set("size", size.toString());
-    setSearchParams(params, { replace: true });
-  }, [debouncedKeyword, status, page, size, setSearchParams]);
-
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [openSaveModal, setOpenSaveModal] = useState(false);
   const [selectItem, setSelectItem] = useState<AuthorResponse | null>(null);
 
   const [file, setFile] = useState<File | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string>("");
+  const {
+    keyword,
+    status,
+    page,
+    size,
+    debouncedKeyword,
+    setPage,
+    setSize,
+    handleKeywordChange,
+    handleStatusChange,
+    handleResetFilter,
+  } = useAuthorFilter();
 
   const { data: authors } = useFilterAuthor({
     keyword: debouncedKeyword,
@@ -65,7 +50,7 @@ export default function AuthorPage() {
     size,
   });
 
-  const filterAuthor = useMemo(() => authors?.items || [], [authors]);
+  const filterAuthor = authors?.items ?? [];
 
   const statusOptions = useMemo(
     () => [
@@ -77,23 +62,6 @@ export default function AuthorPage() {
     ],
     [],
   );
-
-  const handleKeywordChange = useCallback((val: string) => {
-    setKeyword(val);
-    setPage(1);
-  }, []);
-
-  const handleStatusChange = useCallback((val: BaseStatus | null) => {
-    setStatus(val);
-    setPage(1);
-  }, []);
-
-  const handleResetFilter = useCallback(() => {
-    setKeyword("");
-    setStatus(null);
-    setPage(initialFilterOptions.page);
-    setSize(initialFilterOptions.size);
-  }, []);
 
   const createMutation = useCreateAuthor();
   const updateMutation = useUpdateAuthor();
@@ -137,9 +105,10 @@ export default function AuthorPage() {
       );
       const finalData = { ...req, urlImage: uploadedImageUrl };
 
-      const apiPromise = isUpdate && selectItem?.id
-      ? updateMutation.mutateAsync({ id: selectItem.id, req: finalData })
-      : createMutation.mutateAsync(finalData);
+      const apiPromise =
+        isUpdate && selectItem?.id
+          ? updateMutation.mutateAsync({ id: selectItem.id, req: finalData })
+          : createMutation.mutateAsync(finalData);
       await Promise.all([apiPromise, delay(2000)]);
       handleCloseSaveModal();
     } catch (error: unknown) {

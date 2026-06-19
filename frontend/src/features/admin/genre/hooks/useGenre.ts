@@ -1,10 +1,11 @@
-import genreService from "@/services/genreService";
-import type { GenreRequest, GenreResponse } from "@/types/genre";
+
 import type { options } from "@/types/options.type";
 import type { Pagination } from "@/types/pagination";
 import { showErrorToast, showSuccessToast } from "@/utils/toastUtil";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
+import genreService from "../services/genre.service";
+import type { GenreRequest, GenreResponse } from "../types/genre";
 
 export const useGenre = () => {
   return useQuery<GenreResponse[]>({

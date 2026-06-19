@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import genreService from "@/services/genreService";
+
 import AuthorService from "@/services/authorService";
 import { ChevronDown, BookOpen, Users, Star, Zap, Tag } from "lucide-react";
 import { useState } from "react";
+import genreService from "@/features/admin/genre/services/genre.service";
 
 const menuItems = [
     { id: 3, label: "Giới thiệu", path: "/about" },

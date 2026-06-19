@@ -1,17 +1,5 @@
 import Loading from "@/components/common/Loading";
-import {
-  useCreateGenre,
-  useDeleteGenre,
-  useFilterGenre,
-  useImportGenre,
-  useUpdateGenre,
-} from "@/hooks/useGenre";
-import {
-  GenreStatus,
-  GenreStatusLabel,
-  type GenreRequest,
-  type GenreResponse,
-} from "@/types/genre";
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Modal from "@/components/common/Modal";
 import { useForm, useWatch } from "react-hook-form";
@@ -32,11 +20,14 @@ import {
   FileUp,
 } from "lucide-react";
 import imageService from "@/services/imageService";
-import GenreTable from "@/components/admin/genre/GenreTable";
-import GenreMobileCard from "@/components/admin/genre/GenreMobileCard";
+
 import Button from "@/components/common/Button";
 import SingleImageUpload from "@/components/common/SingleImageUpload";
 import { BaseStatus, getBaseStatusLabel } from "@/types/status";
+import { useCreateGenre, useDeleteGenre, useFilterGenre, useImportGenre, useUpdateGenre } from "@/features/admin/genre/hooks/useGenre";
+import type { GenreRequest, GenreResponse } from "@/features/admin/genre/types/genre";
+import GenreTable from "@/features/admin/genre/components/GenreTable";
+import GenreMobileCard from "@/features/admin/genre/components/GenreMobileCard";
 
 const initialFilterOptions = { keyword: "", status: "", page: 1, size: 10 };
 
@@ -259,7 +250,7 @@ export default function Genre() {
       setSelectGenre(null);
       reset({
         name: "",
-        status: GenreStatus.ACTIVE,
+        status: BaseStatus.ACTIVE,
         previewImageUrl: "",
       });
       setAvatarUrl("");
@@ -277,9 +268,9 @@ export default function Genre() {
 
   const statusOptions = useMemo(
     () => [
-      { label: "Tất cả trạng thái", value: null as BaseStatus | null },
-      ...Object.values(BaseStatus).map((value) => ({
-        label: GenreStatusLabel[value],
+      { label: "Tất cả trạng thái", value: null },
+      ...(Object.values(BaseStatus) as BaseStatus[]).map((value) => ({
+        label: getBaseStatusLabel(value),
         value,
       })),
     ],
@@ -379,8 +370,7 @@ export default function Genre() {
         </div>
 
         {/* PAGINATION */}
-        <div className="w-full">
-          <Pagination
+        <Pagination
             currentPage={page}
             totalPages={genres?.totalPages || 1}
             onPageChange={setPage}
@@ -391,7 +381,6 @@ export default function Genre() {
               setPage(1);
             }}
           />
-        </div>
       </div>
 
       {/* SAVE MODAL (ADD & UPDATE) */}
