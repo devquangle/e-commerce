@@ -1,105 +1,102 @@
-import { ExternalLink } from "lucide-react";
+import { useState } from "react";
+import { SearchX, Package } from "lucide-react";
+
 import GenreStatusBadge from "./GenreStatusBadge";
 import GenreActionButtons from "./GenreActionButtons";
-import { useState } from "react";
-import type { GenreRes } from "../../types/genre.type";
-import { SearchX } from "lucide-react";
+import type { GenreResponse } from "../types/genre.type";
+
 type Props = {
-  genres: GenreRes[];
-  onEdit: (genre: GenreRes) => void;
-  onDelete: (genre: GenreRes) => void;
+  genres: GenreResponse[];
+  onEdit: (genre: GenreResponse) => void;
+  onDelete: (genre: GenreResponse) => void;
 };
 
-const GenreMobileCard = ({ genres, onEdit, onDelete }: Props) => {
+export default function GenreMobileCard({
+  genres,
+  onEdit,
+  onDelete,
+}: Props) {
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
   const toggle = (id: number) => {
     setExpandedId((prev) => (prev === id ? null : id));
   };
+
+  if (!genres.length) {
+    return (
+      <div className="md:hidden flex flex-col items-center justify-center py-12 px-4 text-center">
+        <div className="p-3 bg-slate-50 rounded-full text-slate-400 mb-2">
+          <SearchX size={32} strokeWidth={1.5} />
+        </div>
+
+        <span className="text-sm font-medium text-slate-600">
+          Không tìm thấy thể loại nào
+        </span>
+
+        <p className="text-xs text-slate-400 mt-1">
+          Hãy thử thay đổi từ khóa tìm kiếm.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4 md:hidden">
-      {genres && genres.length > 0 ? (
-        genres.map((genre) => (
-          <div key={genre.id} className="space-y-3 card-custom">
-            {/* TITLE */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <img
-                  src={genre.urlImage || "/default-avatar.png"}
-                  alt={genre.name}
-                  className="w-10 h-10 rounded-full object-cover border border-slate-200 shadow-sm"
-                />
+      {genres.map((genre) => (
+        <div
+          key={genre.id}
+          className="card-custom space-y-4"
+        >
+          {/* HEADER */}
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <img
+                src={genre.urlImage || "/default-avatar.png"}
+                alt={genre.name}
+                className="w-12 h-12 rounded-xl object-cover border border-slate-200 shrink-0"
+              />
 
-                <div className="flex flex-col">
-                  {genre.urlBio ? (
-                    <a
-                      href={genre.urlBio}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group flex items-center gap-1 font-semibold text-slate-900 hover:text-indigo-600 transition-colors"
-                    >
-                      <span>{genre.name}</span>
-                      <ExternalLink
-                        size={14}
-                        className="text-slate-400 group-hover:text-indigo-500 transition-colors"
-                      />
-                    </a>
-                  ) : (
-                    <span className="font-semibold text-slate-900">
-                      {genre.name}
-                    </span>
-                  )}
+              <div className="min-w-0">
+                <h3 className="font-semibold text-slate-900 truncate">
+                  {genre.name}
+                </h3>
+
+                <div className="flex items-center gap-1 text-xs text-slate-500 mt-1">
+                  <Package size={13} />
+                  <span>
+                    {genre.totalProduct} sản phẩm
+                  </span>
                 </div>
               </div>
-              <GenreStatusBadge status={genre.status} />
             </div>
 
-            {/* DESCRIPTION */}
-            <div className="py-4 px-4 text-slate-500 text-xs max-w-[260px]">
-              <div className="space-y-1">
-                <p
-                  className={`text-xs text-slate-500 leading-relaxed wrap-break-word ${
-                    expandedId === genre.id ? "" : "line-clamp-2"
-                  }`}
-                >
-                  {genre.description}
-                </p>
+            <GenreStatusBadge status={genre.status} />
+          </div>
 
-                {genre.description && genre.description.length > 120 && (
-                  <button
-                    onClick={() => toggle(genre.id)}
-                    className="text-xs font-medium text-indigo-500 hover:text-indigo-600 hover:underline transition-colors mt-1 focus:outline-none"
-                  >
-                    {expandedId === genre.id ? "Thu gọn" : "Xem thêm"}
-                  </button>
-                )}
-              </div>
+          {/* INFO */}
+          <div className="rounded-xl bg-slate-50 p-3">
+           
+
+            <div className="flex justify-between text-sm mt-2">
+              <span className="text-slate-500">
+                Tổng sản phẩm
+              </span>
+
+              <span className="font-medium text-slate-900">
+                {genre.totalProduct}
+              </span>
             </div>
+          </div>
 
-            {/* ACTION */}
-            <GenreActionButtons
-              item={genre}
-              onEdit={onEdit}
-              onDelete={onDelete}
-              mobile
-            />
-          </div>
-        ))
-      ) : (
-        <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-          <div className="p-3 bg-slate-50 rounded-full text-slate-400 mb-2">
-            <SearchX size={32} strokeWidth={1.5} />
-          </div>
-          <span className="text-sm font-medium text-slate-600">
-            Không tìm thấy tác giả nào
-          </span>
-          <p className="text-xs text-slate-400 max-w-60 mt-1 leading-relaxed">
-            Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc xem sao nhé.
-          </p>
+          {/* ACTION */}
+          <GenreActionButtons
+            item={genre}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            mobile
+          />
         </div>
-      )}
+      ))}
     </div>
   );
-};
-
-export default GenreMobileCard;
+}

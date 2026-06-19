@@ -1,5 +1,5 @@
 import Modal from "@/components/common/Modal";
-import type { GenreResponse } from "@/types/genre";
+import type { GenreResponse } from "../types/genre.type";
 
 interface GenreDeleteModalProps {
   isOpen: boolean;
@@ -18,15 +18,15 @@ export default function GenreDeleteModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Xóa tác giả"
+      title="Xóa thể loại"
       onConfirm={onConfirm}
-      confirmText="Xóa tác giả"
+      confirmText="Xóa thể loại"
       cancelText="Hủy"
     >
       <div className="py-2">
         {genre && (
           <p className="text-base text-slate-700">
-            Bạn có chắc chắn muốn xóa tác giả{" "}
+            Bạn có chắc chắn muốn xóa thể loại{" "}
             <span className="font-bold text-slate-900">
               "{genre.name}"
             </span>

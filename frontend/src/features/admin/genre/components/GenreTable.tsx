@@ -2,7 +2,6 @@ import GenreStatusBadge from "./GenreStatusBadge";
 import GenreActionButtons from "./GenreActionButtons";
 
 import { SearchX } from "lucide-react";
-import { useState } from "react";
 import type { GenreResponse } from "../types/genre.type";
 
 type Props = {
@@ -103,7 +102,7 @@ export default function GenreTable({
                   </div>
 
                   <span className="text-sm font-medium text-slate-600">
-                    Không tìm thấy tác giả nào
+                    Không tìm thấy thể loại nào
                   </span>
                   <p className="text-xs text-slate-400 max-w-[200px] leading-relaxed">
                     Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc xem sao nhé.
