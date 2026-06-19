@@ -41,18 +41,16 @@ public class GenreController {
 
     @PostMapping("/admin/genres")
     public ResponseEntity<ResponseData<GenreResponse>> post_genre(
-            @RequestPart("data") GenreRequest genreRequest,
-            @RequestPart(value = "image", required = false) MultipartFile image) {
-        GenreResponse addGenre = genreService.addGenre(genreRequest, image);
+            @RequestBody GenreRequest genreRequest) {
+        GenreResponse addGenre = genreService.addGenre(genreRequest);
         return ResponseUtil.success("Thêm thể loại thành công", addGenre);
     }
 
     @PutMapping("/admin/genres/{id}")
     public ResponseEntity<ResponseData<GenreResponse>> put_genre(
             @PathVariable Integer id,
-            @RequestBody GenreRequest genreRequest,
-            @RequestPart(value = "image", required = false) MultipartFile image) {
-        GenreResponse updateGenre = genreService.updateGenre(id, genreRequest, image);
+            @RequestBody GenreRequest genreRequest) {
+        GenreResponse updateGenre = genreService.updateGenre(id, genreRequest);
         return ResponseUtil.success("Cập nhật thể loại thành công", updateGenre);
     }
 

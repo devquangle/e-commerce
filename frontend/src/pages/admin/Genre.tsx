@@ -1,6 +1,6 @@
 import Loading from "@/components/common/Loading";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Modal from "@/components/common/Modal";
 import { useForm, useWatch } from "react-hook-form";
 import InputField from "@/components/common/InputField";
@@ -8,8 +8,7 @@ import { mapServerErrors } from "@/utils/mapServerErrors";
 import { showErrorToast, showSuccessToast } from "@/utils/toastUtil";
 import Pagination from "@/components/common/Pagination";
 
-import { useSearchParams } from "react-router-dom";
-import useDebounce from "@/hooks/useDebounce";
+
 import SelectBox from "@/components/common/SelectedBox";
 import {
   Sparkles,
@@ -25,37 +24,25 @@ import Button from "@/components/common/Button";
 import SingleImageUpload from "@/components/common/SingleImageUpload";
 import { BaseStatus, getBaseStatusLabel } from "@/types/status";
 import { useCreateGenre, useDeleteGenre, useFilterGenre, useImportGenre, useUpdateGenre } from "@/features/admin/genre/hooks/useGenre";
-import type { GenreRequest, GenreResponse } from "@/features/admin/genre/types/genre";
+import type { GenreRequest, GenreResponse } from "@/features/admin/genre/types/genre.type";
 import GenreTable from "@/features/admin/genre/components/GenreTable";
 import GenreMobileCard from "@/features/admin/genre/components/GenreMobileCard";
+import useGenreFilter from "@/features/admin/genre/hooks/useGenreFilter";
 
-const initialFilterOptions = { keyword: "", status: "", page: 1, size: 10 };
 
 export default function Genre() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [keyword, setKeyword] = useState(
-    () => searchParams.get("keyword") ?? initialFilterOptions.keyword,
-  );
-  const [status, setStatus] = useState<BaseStatus | null>(
-    () => (searchParams.get("status") as BaseStatus) ?? null,
-  );
-  const [page, setPage] = useState<number>(
-    () => Number(searchParams.get("page")) || initialFilterOptions.page,
-  );
-  const [size, setSize] = useState<number>(
-    () => Number(searchParams.get("size")) || initialFilterOptions.size,
-  );
-
-  const debouncedKeyword = useDebounce(keyword, 500);
-  useEffect(() => {
-    const params = new URLSearchParams();
-    if (debouncedKeyword) params.set("keyword", debouncedKeyword);
-    if (status) params.set("status", status);
-    if (page !== initialFilterOptions.page) params.set("page", page.toString());
-    if (size !== initialFilterOptions.size) params.set("size", size.toString());
-    setSearchParams(params, { replace: true });
-  }, [debouncedKeyword, status, page, size, setSearchParams]);
-
+ const {
+    keyword,
+    status,
+    page,
+    size,
+    debouncedKeyword,
+    setPage,
+    setSize,
+    handleKeywordChange,
+    handleStatusChange,
+    handleResetFilter,
+  } = useGenreFilter();
   const {
     data: genres,
     isPending,
@@ -95,22 +82,7 @@ export default function Genre() {
   const [selectGenre, setSelectGenre] = useState<GenreResponse | null>(null);
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   // TỐI ƯU: Sử dụng useCallback cho các Filter Handlers để tránh re-render Table
-  const handleKeywordChange = useCallback((val: string) => {
-    setKeyword(val);
-    setPage(1);
-  }, []);
-
-  const handleStatusChange = useCallback((val: BaseStatus | null) => {
-    setStatus(val);
-    setPage(1);
-  }, []);
-
-  const handleResetFilter = useCallback(() => {
-    setKeyword("");
-    setStatus(null);
-    setPage(initialFilterOptions.page);
-    setSize(initialFilterOptions.size);
-  }, []);
+ 
   const createMutation = useCreateGenre();
   const deleteGenre = useDeleteGenre();
   const updateGenre = useUpdateGenre();
@@ -134,25 +106,21 @@ export default function Genre() {
   const onSubmitSave = async (data: GenreRequest) => {
     if (createMutation.isPending || updateGenre.isPending) return;
     try {
-      data.previewImageUrl = avatarUrl;
-
       if (selectGenre) {
         const uploadedImageUrl = await processImageUpload(
           selectGenre.urlImage || "",
         );
         await updateGenre.mutateAsync({
           id: selectGenre.id,
-          data: { ...data, previewImageUrl: uploadedImageUrl },
+          req: { ...data, previewImageUrl: uploadedImageUrl },
         });
         showSuccessToast("Cập nhật thể loại thành công!");
       } else {
-        const formData = new FormData();
-        formData.append(
-          "data",
-          new Blob([JSON.stringify(data)], { type: "application/json" }),
-        );
-        if (file) formData.append("image", file);
-        await createMutation.mutateAsync(formData);
+        const uploadedImageUrl = await processImageUpload();
+        await createMutation.mutateAsync({
+          ...data,
+          previewImageUrl: uploadedImageUrl,
+        });
         showSuccessToast("Thêm thể loại thành công!");
       }
 
@@ -168,10 +136,8 @@ export default function Genre() {
 
     try {
       const formData = new FormData();
-      // Khớp đúng key "file" với cấu hình @RequestPart bên Backend Spring Boot
       formData.append("file", uploadedFile);
 
-      // Gọi API import
       await importGenre.mutateAsync(formData);
 
       showSuccessToast(
@@ -359,6 +325,8 @@ export default function Genre() {
             genres={filterGenre}
             onEdit={handleOpenSaveModal}
             onDelete={handleOpenDeleteGenreModal}
+               pageSize={size}
+            page={page}
           />
 
           {/* MOBILE CARD */}

@@ -15,7 +15,7 @@ import {
   Pencil,
 } from "lucide-react";
 
-import ProductDescriptionEditor from "../../components/admin/product/ProductDescriptionEditor";
+import ProductDescriptionEditor from "@/features/admin/product/components/ProductDescriptionEditor";
 import SelectedMutil from "@/components/common/SelectedMutil";
 import SelectBox from "@/components/common/SelectedBox";
 import InputField from "@/components/common/InputField";
@@ -26,7 +26,6 @@ import { useBookFormData } from "@/hooks/useBookFormData";
 import { useFilterGoogleBook } from "@/hooks/useGoogleBook";
 import { useGroqBook } from "@/hooks/useGroq";
 import useDebounce from "@/hooks/useDebounce";
-import { useProductById, useUpdateProduct } from "@/hooks/useProduct";
 
 import imageService from "@/services/imageService";
 import {
@@ -36,10 +35,12 @@ import {
 } from "@/utils/toastUtil";
 
 import type { AuthorResponse } from "@/types/author";
-import type { GenreResponse } from "@/types/genre";
+
 import type { ImageProductRequest } from "@/types/image";
 import type { ProductRequest } from "@/types/product.type";
 import type { GoogleBookResponse } from "@/types/googlebook";
+import { useProductById, useUpdateProduct } from "@/features/admin/product/hooks/useProduct";
+import type { GenreResponse } from "@/features/admin/genre/types/genre.type";
 
 const MAX_IMAGES = 6;
 

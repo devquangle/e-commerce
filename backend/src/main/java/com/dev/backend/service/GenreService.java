@@ -26,9 +26,9 @@ public interface GenreService {
 
     void insertData();
 
-    GenreResponse addGenre(GenreRequest genreRequest, MultipartFile image);
+    GenreResponse addGenre(GenreRequest genreRequest);
 
-    GenreResponse updateGenre(Integer id, GenreRequest genreRequest, MultipartFile image);
+    GenreResponse updateGenre(Integer id, GenreRequest genreRequest);
 
     PageResponse<GenreResponse> pageGenre(int page, int size, String keyword);
 

@@ -7,19 +7,16 @@ import { useSearchParams } from "react-router-dom";
 import useDebounce from "@/hooks/useDebounce";
 import SelectBox from "@/components/common/SelectedBox";
 import { Building2, Plus, RotateCcw, Search } from "lucide-react";
-import PublisherTable from "@/components/admin/publisher/PublisherTable";
-import PublisherMobileCard from "@/components/admin/publisher/PublisherMobileCard";
+
 import Button from "@/components/common/Button";
 import { showErrorToast } from "@/utils/toastUtil";
 import type { PublisherRequest, PublisherResponse } from "@/types/publisher";
 import { BaseStatus, getBaseStatusLabel } from "@/types/status";
-import {
-  useCreatePublisher,
-  useFilterPublisher,
-  useUpdatePublisher,
-  useDeletePublisher,
-} from "@/hooks/usePublisher";
+
 import { mapServerErrors } from "@/utils/mapServerErrors";
+import PublisherTable from "@/features/admin/publisher/components/PublisherTable";
+import PublisherMobileCard from "@/features/admin/publisher/components/PublisherMobileCard";
+import { useCreatePublisher, useDeletePublisher, useFilterPublisher, useUpdatePublisher } from "@/features/admin/publisher/hooks/usePublisher";
 
 const initialFilterOptions = { keyword: "", status: "", page: 1, size: 10 };
 const initPublisher: PublisherRequest = {

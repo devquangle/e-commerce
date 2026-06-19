@@ -4,7 +4,6 @@ import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import com.dev.backend.constant.Permission;
 import com.dev.backend.entity.Role;
 import com.dev.backend.entity.User;
 

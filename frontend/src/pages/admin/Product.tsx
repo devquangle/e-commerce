@@ -5,15 +5,18 @@ import { useSearchParams, Link } from "react-router-dom";
 import useDebounce from "@/hooks/useDebounce";
 import SelectBox from "@/components/common/SelectedBox";
 import { BookOpen, Plus, RotateCcw, Search } from "lucide-react";
-import ProductTable from "@/components/admin/product/ProductTable";
-import ProductMobileCard from "@/components/admin/product/ProductMobileCard";
-import { useFilterProduct, useDeleteProduct } from "@/hooks/useProduct";
+
+
 import type { ProductResponse } from "@/types/product.type";
+import ProductTable from "@/features/admin/product/components/ProductTable";
+import ProductMobileCard from "@/features/admin/product/components/ProductMobileCard";
+import { useDeleteProduct, useFilterProduct } from "@/features/admin/product/hooks/useProduct";
+import type { BaseStatus } from "@/types/status";
 
 const initialFilterOptions = { keyword: "", status: "", page: 1, size: 10 };
 
-const statusOptions = [
-  { label: "Tất cả trạng thái", value: null as string | null },
+const statusOptions: { label: string; value: BaseStatus | null }[] = [
+  { label: "Tất cả trạng thái", value: null },
   { label: "Đang bán", value: "ACTIVE" },
   { label: "Ngừng bán", value: "INACTIVE" },
 ];
@@ -24,8 +27,8 @@ export default function Product() {
   const [keyword, setKeyword] = useState(
     () => searchParams.get("keyword") ?? initialFilterOptions.keyword,
   );
-  const [status, setStatus] = useState<string | null>(
-    () => searchParams.get("status") ?? null,
+  const [status, setStatus] = useState<BaseStatus | null>(
+    () => searchParams.get("status") as BaseStatus | null,
   );
   const [page, setPage] = useState<number>(
     () => Number(searchParams.get("page")) || initialFilterOptions.page,

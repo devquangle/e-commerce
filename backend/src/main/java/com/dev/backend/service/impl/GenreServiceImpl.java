@@ -20,7 +20,7 @@ import com.dev.backend.mapper.GenreMapper;
 import com.dev.backend.repository.GenreRepository;
 import com.dev.backend.response.PageResponse;
 import com.dev.backend.service.CloudinaryService;
-import com.dev.backend.service.GeminiService;
+
 import com.dev.backend.service.GenreService;
 import com.dev.backend.service.ProductGenreService;
 import com.dev.backend.util.TextUtils;
@@ -36,8 +36,6 @@ public class GenreServiceImpl implements GenreService {
         private final GenreMapper genreMapper;
         private final ProductGenreService productGenreService;
         private final CloudinaryService cloudinaryService;
-        private final GeminiService geminiService;
-
         @Override
         public boolean isEmpty() {
                 return genreRepository.count() == 0;
@@ -102,45 +100,27 @@ public class GenreServiceImpl implements GenreService {
         }
 
         @Override
-        public GenreResponse addGenre(GenreRequest genreRequest, MultipartFile image) {
+        public GenreResponse addGenre(GenreRequest genreRequest) {
                 Genre genre = new Genre();
                 validate(genreRequest.getName());
                 genre.setName(genreRequest.getName());
                 genre.setStatus(genreRequest.getStatus());
                 genre.setSlug(TextUtils.toSlug(genreRequest.getName()));
-
-                // Trường hợp 1: Người dùng tự upload file ảnh từ máy tính lên
-                if (image != null && !image.isEmpty()) {
-                        setImageCloudinary(genre, image);
-                } else if (genreRequest.getPreviewImageUrl() != null && !genreRequest.getPreviewImageUrl().isEmpty()) {
-
-                        String finalCloudinaryUrl = geminiService.generateImage(genreRequest.getPreviewImageUrl());
-                        genre.setUrlImage(finalCloudinaryUrl);
-                        log.info("Saved AI Image to Cloudinary: " + finalCloudinaryUrl);
-                } else {
-                        genre.setUrlImage("https://via.placeholder.com/1024x1024.png?text=No+Image");
-                }
+                genre.setUrlImage(genreRequest.getPreviewImageUrl());
 
                 return genreMapper.toDTO(save(genre));
         }
 
         @Override
-        public GenreResponse updateGenre(Integer id, GenreRequest genreRequest, MultipartFile image) {
+        public GenreResponse updateGenre(Integer id, GenreRequest genreRequest) {
                 Genre genre = findById(id);
                 if (!genre.getName().equals(genreRequest.getName())) {
                         validate(genreRequest.getName());
                 }
                 genre.setName(genreRequest.getName());
                 genre.setStatus(genreRequest.getStatus());
-                
-                if (image != null && !image.isEmpty()) {
-                        setImageCloudinary(genre, image);
-                } else {
-                        String imageUrl = geminiService.generateImage(
-                                        genreRequest.getName());
+                genre.setUrlImage(genreRequest.getPreviewImageUrl());
 
-                        genre.setUrlImage(imageUrl);
-                }
                 return genreMapper.toDTO(save(genre));
         }
 
@@ -223,8 +203,9 @@ public class GenreServiceImpl implements GenreService {
         public List<UserGenreResponse> findActiveGenresWithProductCount() {
                 return genreRepository.findActiveGenresWithProductCount();
         }
+
         @Override
         public List<Genre> saveAll(List<Genre> list) {
-        return genreRepository.saveAll(list);
+                return genreRepository.saveAll(list);
         }
 }

@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 
-import AuthorService from "@/services/authorService";
+import AuthorService from "@/features/admin/author/services/author.service";
 import {
   ChevronDown,
   Star,

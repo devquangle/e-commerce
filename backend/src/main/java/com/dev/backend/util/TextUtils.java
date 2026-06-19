@@ -1,5 +1,7 @@
 package com.dev.backend.util;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 
 public class TextUtils {
@@ -47,8 +49,11 @@ public class TextUtils {
         if (name == null || name.isBlank()) {
             return "";
         }
-        String encodedName = name.replace(" ", "+");
-        String autoAvatarUrl = "https://ui-avatars.com/api/?name=" + encodedName + "&background=random&size=128";
-        return autoAvatarUrl;
+
+        String encodedName = URLEncoder.encode(name, StandardCharsets.UTF_8);
+
+        return "https://ui-avatars.com/api/?name="
+                + encodedName
+                + "&background=random&size=128";
     }
 }

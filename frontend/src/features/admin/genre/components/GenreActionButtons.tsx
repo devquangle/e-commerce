@@ -1,24 +1,19 @@
 
 import { Edit, Trash2 } from "lucide-react";
-import type { GenreResponse } from "../types/genre";
+import type { GenreResponse } from "../types/genre.type";
 
 type Props = {
-  genre: GenreResponse;
-  onEdit: (genre: GenreResponse) => void;
-  onDelete: (genre: GenreResponse) => void;
+  onEdit: (item: GenreResponse) => void;
+  onDelete: (item: GenreResponse) => void;
+  item: GenreResponse;
   mobile?: boolean;
 };
 
-const GenreActionButtons = ({
-  genre,
-  onEdit,
-  onDelete,
-  mobile = false,
-}: Props) => {
+const GenreActionButtons = ({ item, onEdit, onDelete, mobile = false }: Props) => {
   return (
     <div className={mobile ? "flex gap-2" : "inline-flex gap-2"}>
       <button
-        onClick={() => onEdit(genre)}
+        onClick={() => onEdit(item)}
         className={
           mobile
             ? "inline-flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white py-2 text-xs font-semibold text-slate-700 transition-all hover:bg-slate-50"
@@ -30,7 +25,7 @@ const GenreActionButtons = ({
       </button>
 
       <button
-        onClick={() => onDelete(genre)}
+        onClick={() => onDelete(item)}
         className={
           mobile
             ? "inline-flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-rose-100 bg-rose-50/50 py-2 text-xs font-semibold text-rose-600 transition-all hover:border-rose-200 hover:bg-rose-50"

@@ -1,10 +1,12 @@
 import { useQueries } from "@tanstack/react-query";
 // 👇 Import các Service chứa hàm API thuần, không import Hook
-import AuthorService from "@/services/authorService";
+import AuthorService from "@/features/admin/author/services/author.service";
 
-import PublisherService from "@/services/publisherService"; // Thay đổi theo đường dẫn thực tế của bạn
-import SeriesService from "@/services/seriesService";
+
 import genreService from "@/features/admin/genre/services/genre.service";
+
+import SeriesService from "@/features/admin/series/services/series.service";
+import PublisherService from "@/features/admin/publisher/services/publisher.service";
 
 export const useBookFormData = () => {
   const results = useQueries({

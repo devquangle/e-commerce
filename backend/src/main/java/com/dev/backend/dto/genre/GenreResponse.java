@@ -17,4 +17,5 @@ public class GenreResponse {
     private String slug;
     private int totalProduct;
     private BaseStatus status;
+    private String urlImage;
 }

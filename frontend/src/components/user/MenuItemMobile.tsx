@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 
-import AuthorService from "@/services/authorService";
+import AuthorService from "@/features/admin/author/services/author.service";
 import { ChevronDown, BookOpen, Users, Star, Zap, Tag } from "lucide-react";
 import { useState } from "react";
 import genreService from "@/features/admin/genre/services/genre.service";

@@ -3,60 +3,60 @@ import type { ApiResponse } from "@/types/api-response";
 
 import type { options } from "@/types/options.type";
 import type { Pagination } from "@/types/pagination";
-import type { GenreRequest, GenreResponse } from "../types/genre";
+import type { GenreRequest, GenreResponse } from "../types/genre.type";
 
-const genreService = {
+const GenreService = {
   async fetchGenre() {
-    const res =
-      await apiAuth.get<ApiResponse<GenreResponse[]>>("/api/v1/genres");
+    const res = await apiAuth.get<ApiResponse<GenreResponse[]>>("/admin/genres");
     if (!res.data.success || !res.data.data) {
-      throw new Error(res.data.message || "Failed to fetch all genres");
+      throw new Error(res.data.message || "Fetch genres failed");
     }
     return res.data.data;
   },
-  async createGenre(formData: FormData) {
+  async create(data: GenreRequest) {
     const res = await apiAuth.post<ApiResponse<GenreResponse>>(
       "/api/v1/admin/genres",
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      },
+      data,
     );
-    if (!res.data.success) {
-      throw new Error(res.data.message || "Failed to create genre");
+    if (!res.data.success || !res.data.data) {
+      throw new Error(res.data.message || "Add genre failed");
     }
     return res.data.data;
   },
-  async updateGenre(id: number, data: GenreRequest) {
+
+   async update(id:number,data: GenreRequest) {
     const res = await apiAuth.put<ApiResponse<GenreResponse>>(
       `/api/v1/admin/genres/${id}`,
       data,
     );
     if (!res.data.success || !res.data.data) {
-      throw new Error(res.data.message || "Failed to update genre");
+      throw new Error(res.data.message || "Update genre failed");
     }
     return res.data.data;
   },
-  async deleteGenre(id: number) {
-    const res = await apiAuth.delete<ApiResponse<void>>(`/api/v1/admin/genres/${id}`);
-    if (!res.data.success) {
-      throw new Error(res.data.message || "Delete genre failed");
-    }
-    return;
-  },
+
   async filterGenre(options?: options) {
     const res = await apiAuth.get<ApiResponse<Pagination<GenreResponse>>>(
       "/api/v1/admin/genres/filter",
       { params: options },
     );
     if (!res.data.success || !res.data.data) {
-      throw new Error(res.data.message || "Fetch addresses failed");
+      throw new Error(res.data.message || "Fetch genres failed");
     }
+    console.log(res);
     return res.data.data;
   },
-  async importGenre(formData: FormData) {
+
+  async delete(id: number) {
+    const res = await apiAuth.delete<ApiResponse<null>>(
+      `/api/v1/admin/genres/${id}`
+    );
+    if (!res.data.success) {
+      throw new Error(res.data.message || "Delete genre failed");
+    }
+    return res.data;
+  },
+   async importGenre(formData: FormData) {
     const res = await apiAuth.post<ApiResponse<number>>(
       "/api/v1/admin/genres/import",
       formData,
@@ -71,6 +71,7 @@ const genreService = {
     }
     return res.data;
   },
+
 };
 
-export default genreService;
+export default GenreService;

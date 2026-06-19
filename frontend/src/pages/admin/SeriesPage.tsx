@@ -8,19 +8,16 @@ import { useSearchParams } from "react-router-dom";
 import useDebounce from "@/hooks/useDebounce";
 import SelectBox from "@/components/common/SelectedBox";
 import { Library, Plus, RotateCcw, Search } from "lucide-react";
-import SeriesTable from "@/components/admin/series/SeriesTable";
-import SeriesMobileCard from "@/components/admin/series/SeriesMobileCard";
+
 import Button from "@/components/common/Button";
 import { showErrorToast } from "@/utils/toastUtil";
 import type { SeriesRequest, SeriesResponse } from "@/types/series";
 import { BaseStatus, getBaseStatusLabel } from "@/types/status";
-import {
-  useCreateSeries,
-  useFilterSeries,
-  useUpdateSeries,
-  useDeleteSeries,
-} from "@/hooks/useSeries";
+
 import { mapServerErrors } from "@/utils/mapServerErrors";
+import SeriesTable from "@/features/admin/series/components/SeriesTable";
+import SeriesMobileCard from "@/features/admin/series/components/SeriesMobileCard";
+import { useCreateSeries, useDeleteSeries, useFilterSeries, useUpdateSeries } from "@/features/admin/series/hooks/useSeries";
 
 const initialFilterOptions = { keyword: "", status: "", page: 1, size: 10 };
 const initSeries: SeriesRequest = {
@@ -233,12 +230,12 @@ export default function SeriesPage() {
           </div>
 
           <SeriesTable
-            seriesList={filterSeries}
+            series={filterSeries}
             onEdit={handleOpenSaveModal}
             onDelete={handleOpenDelete}
           />
           <SeriesMobileCard
-            seriesList={filterSeries}
+            series={filterSeries}
             onEdit={handleOpenSaveModal}
             onDelete={handleOpenDelete}
           />

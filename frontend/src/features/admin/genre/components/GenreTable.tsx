@@ -1,88 +1,117 @@
-
-import { BookOpen } from "lucide-react";
 import GenreStatusBadge from "./GenreStatusBadge";
 import GenreActionButtons from "./GenreActionButtons";
-import type { GenreResponse } from "../types/genre";
+
+import { SearchX } from "lucide-react";
+import { useState } from "react";
+import type { GenreResponse } from "../types/genre.type";
+
 type Props = {
   genres: GenreResponse[];
   onEdit: (genre: GenreResponse) => void;
   onDelete: (genre: GenreResponse) => void;
+  page: number;
+  pageSize: number;
 };
 
-export default function GenreTable({ genres, onEdit, onDelete }: Props) {
+export default function GenreTable({
+  genres,
+  onEdit,
+  onDelete,
+  page,
+  pageSize,
+}: Props) {
+
   return (
     <div className="hidden md:block overflow-x-auto">
-      <table className="w-full text-left text-sm border-collapse">
-        <thead>
-          <tr className="border-b border-slate-100 text-slate-500 bg-slate-50">
-            <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 first:rounded-l-lg">
+      <table className="w-full text-left text-sm">
+        <thead className="bg-slate-50">
+          <tr className="text-slate-500">
+            <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider">
               STT
             </th>
-            <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400">
-              Tên thể loại
+            <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider">
+              Thể loại
             </th>
-            <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50">
-              Số sách liên quan
+
+            <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider">
+              Số sản phẩm
             </th>
-            <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50">
+
+            <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider">
               Trạng thái
             </th>
-            <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50 text-right">
+
+            <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider text-right">
               Thao tác
             </th>
           </tr>
         </thead>
 
         <tbody className="divide-y divide-slate-100">
-          {genres.map((genre, index) => (
-            <tr
-              key={genre.id}
-              className="hover:bg-slate-50/50 transition-colors"
-            >
-              <td className="py-4 px-4 font-medium text-slate-500">
-                {index + 1}
-              </td>
-              <td className="py-4 px-4 text-slate-900 font-semibold">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-slate-50 overflow-hidden shrink-0 border border-slate-200 shadow-sm flex items-center justify-center">
-                    {genre.urlImage ? (
-                      <img
-                        src={genre.urlImage}
-                        alt={genre.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="text-slate-400 font-bold text-lg bg-slate-100 w-full h-full flex items-center justify-center">
-                        {genre.name.charAt(0)}
-                      </div>
-                    )}
+          {genres && genres.length > 0 ? (
+            genres.map((genre, index) => (
+              <tr
+                key={genre?.id}
+                className="hover:bg-slate-50/60 transition-colors"
+              >
+                {/* AUTHOR */}
+                <td className="py-4 px-4">
+                  {(page - 1) * pageSize + index + 1}
+                </td>
+                <td className="py-4 px-4">
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={genre.urlImage || "/default-avatar.png"}
+                      alt={genre.name}
+                      className="w-10 h-10 rounded-full object-cover border border-slate-200 shadow-sm"
+                    />
+                    <span className="font-semibold text-slate-900">
+                      {genre.name}
+                    </span>
                   </div>
-                  <span>{genre?.name}</span>
-                </div>
-              </td>
+                </td>
 
-              <td className="py-4 px-4 text-slate-600">
-                <span className="inline-flex items-center gap-1 bg-slate-100 text-slate-800 text-xs px-2.5 py-1 rounded-md font-semibold">
-                  <BookOpen size={13} className="text-slate-500" />
-                  {genre.totalProduct || 0} cuốn
-                </span>
-              </td>
+                {/* DESCRIPTION */}
+                <td className="py-4 px-4 text-slate-500 font-medium">
+                  {genre.totalProduct || 0}
+                </td>
 
-              <td className="py-4 px-4">
-                <GenreStatusBadge status={genre.status} />
-              </td>
+                {/* STATUS */}
+                <td className="py-4 px-4">
+                  <GenreStatusBadge status={genre?.status} />
+                </td>
 
-              <td className="py-4 px-4 text-right">
-                <div className="inline-flex gap-2">
-                  <GenreActionButtons
-                    genre={genre}
-                    onEdit={onEdit}
-                    onDelete={onDelete}
-                  />
+                {/* ACTION */}
+                <td className="py-4 px-4 text-right">
+                  {!(genre.name == "Khác") && (
+                    <GenreActionButtons
+                      item={genre}
+                      onEdit={onEdit}
+                      onDelete={onDelete}
+                    />
+                  )}
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan={4} className="py-12 text-center text-slate-400">
+                <div className="flex flex-col items-center justify-center gap-2">
+                  {/* Thêm ICON ở đây */}
+                  <div className="p-3 bg-slate-50 rounded-full text-slate-400 mb-1 animate-pulse">
+                    <SearchX size={32} strokeWidth={1.5} />
+                  </div>
+
+                  <span className="text-sm font-medium text-slate-600">
+                    Không tìm thấy tác giả nào
+                  </span>
+                  <p className="text-xs text-slate-400 max-w-[200px] leading-relaxed">
+                    Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc xem sao nhé.
+                  </p>
                 </div>
               </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
     </div>

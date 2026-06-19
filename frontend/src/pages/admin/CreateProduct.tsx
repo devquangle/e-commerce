@@ -15,7 +15,7 @@ import {
   Pencil,
 } from "lucide-react";
 
-import ProductDescriptionEditor from "../../components/admin/product/ProductDescriptionEditor";
+import ProductDescriptionEditor from "@/features/admin/product/components/ProductDescriptionEditor";
 import SelectedMutil from "@/components/common/SelectedMutil";
 import SelectBox from "@/components/common/SelectedBox";
 import InputField from "@/components/common/InputField";
@@ -28,7 +28,7 @@ import { useGroqBook } from "@/hooks/useGroq";
 import useDebounce from "@/hooks/useDebounce";
 
 import imageService from "@/services/imageService";
-import productService from "@/services/productService";
+
 import {
   showErrorToast,
   showSuccessToast,
@@ -36,10 +36,12 @@ import {
 } from "@/utils/toastUtil";
 
 import type { AuthorResponse } from "@/types/author";
-import type { GenreResponse } from "@/types/genre";
+
 import type { ImageProductRequest } from "@/types/image";
 import type { ProductRequest } from "@/types/product.type";
 import type { GoogleBookResponse } from "@/types/googlebook";
+import type { GenreResponse } from "@/features/admin/genre/types/genre.type";
+import ProductService from "@/features/admin/product/services/product.service";
 
 const MAX_IMAGES = 6;
 
@@ -353,7 +355,7 @@ export default function CreateProduct() {
           ? await imageService.uploadImage(coverImages)
           : [];
 
-      await productService.add({
+      await ProductService.create({
         ...data,
         coverImages: uploadedImages,
       });

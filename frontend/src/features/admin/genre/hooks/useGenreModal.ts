@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { GenreResponse } from "../types/genre";
+import type { GenreResponse } from "../types/genre.type";
 
 export const useGenreModal = () => {
   const [selectedGenre, setSelectedGenre] = useState<GenreResponse | null>(

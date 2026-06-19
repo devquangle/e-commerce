@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.dev.backend.dto.genre.GenreResponse;
 import com.dev.backend.entity.Genre;
+import com.dev.backend.util.TextUtils;
 
 @Component
 public class GenreMapper {
@@ -21,6 +22,7 @@ public class GenreMapper {
     }else{
         dto.setTotalProduct(genre.getProductGenres().size());
     }
+    dto.setUrlImage(genre.getUrlImage() !=null ?genre.getUrlImage() : TextUtils.urlImage(genre.getName()));
     return dto;
   }
 }
