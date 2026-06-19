@@ -36,6 +36,7 @@ public class GenreServiceImpl implements GenreService {
         private final GenreMapper genreMapper;
         private final ProductGenreService productGenreService;
         private final CloudinaryService cloudinaryService;
+
         @Override
         public boolean isEmpty() {
                 return genreRepository.count() == 0;
@@ -173,20 +174,28 @@ public class GenreServiceImpl implements GenreService {
         }
 
         @Override
-        public PageResponse<GenreResponse> pageGenre(int page, int size, String keyword) {
+        public PageResponse<GenreResponse> pageGenre(
+                        int page,
+                        int size,
+                        String keyword,
+                        String status) {
                 Pageable pageable = PageRequest.of(
                                 page,
                                 size,
                                 Sort.by(Sort.Direction.DESC, "id"));
 
-                Page<Genre> genrePage = (keyword == null || keyword.isEmpty())
-                                ? genreRepository.findAll(pageable)
-                                : genreRepository.findByNameContainingIgnoreCase(
-                                                keyword,
-                                                pageable);
+                BaseStatus baseStatus = null;
 
-                List<GenreResponse> items = genrePage
-                                .getContent()
+                if (status != null && !status.isBlank()) {
+                        baseStatus = BaseStatus.valueOf(status);
+                }
+
+                Page<Genre> genrePage = genreRepository.filterGenres(
+                                keyword,
+                                baseStatus,
+                                pageable);
+
+                List<GenreResponse> items = genrePage.getContent()
                                 .stream()
                                 .map(genreMapper::toDTO)
                                 .toList();

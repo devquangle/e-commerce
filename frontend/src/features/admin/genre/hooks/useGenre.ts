@@ -4,9 +4,10 @@ import type { Pagination } from "@/types/pagination";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { showErrorToast, showSuccessToast } from "@/utils/toastUtil";
 import axios from "axios";
-import type { options } from "@/types/options.type";
+
 import GenreService from "../services/genre.service";
 import type { GenreRequest, GenreResponse } from "../types/genre.type";
+import type { options } from "@/types/options.type";
 
 export const useGenre = () => {
   return useQuery<GenreResponse[]>({

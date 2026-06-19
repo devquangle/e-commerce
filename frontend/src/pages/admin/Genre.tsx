@@ -44,6 +44,7 @@ export default function Genre() {
     handleStatusChange,
     handleResetFilter,
   } = useGenreFilter();
+  
   const {
     data: genres,
     isPending,

@@ -64,8 +64,9 @@ public class GenreController {
     public ResponseEntity<ResponseData<PageResponse<GenreResponse>>> pageGenre(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String keyword) {
-        PageResponse<GenreResponse> pageGenre = genreService.pageGenre(page - 1, size, keyword);
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String status) {
+        PageResponse<GenreResponse> pageGenre = genreService.pageGenre(page - 1, size, keyword, status);
         return ResponseUtil.success("Load thể loại thành công", pageGenre);
 
     }

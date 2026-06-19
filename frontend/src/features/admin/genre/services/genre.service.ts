@@ -40,6 +40,8 @@ const GenreService = {
       "/api/v1/admin/genres/filter",
       { params: options },
     );
+    console.log(options);
+    
     if (!res.data.success || !res.data.data) {
       throw new Error(res.data.message || "Fetch genres failed");
     }

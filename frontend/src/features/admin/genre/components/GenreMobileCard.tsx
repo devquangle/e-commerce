@@ -16,11 +16,7 @@ export default function GenreMobileCard({
   onEdit,
   onDelete,
 }: Props) {
-  const [expandedId, setExpandedId] = useState<number | null>(null);
 
-  const toggle = (id: number) => {
-    setExpandedId((prev) => (prev === id ? null : id));
-  };
 
   if (!genres.length) {
     return (
