@@ -34,10 +34,9 @@ import {
   showWarningToast,
 } from "@/utils/toastUtil";
 
-import type { AuthorResponse } from "@/types/author";
 
 import type { ImageProductRequest } from "@/types/image";
-import type { ProductRequest } from "@/types/product.type";
+import type { ProductAuthorResponse, ProductRequest } from "@/types/product.type";
 import type { GoogleBookResponse } from "@/types/googlebook";
 import { useProductById, useUpdateProduct } from "@/features/admin/product/hooks/useProduct";
 import type { GenreResponse } from "@/features/admin/genre/types/genre.type";
@@ -178,7 +177,7 @@ export default function UpdateProduct() {
   );
   const authorOptions = useMemo(
     () =>
-      authorsData.map((a: AuthorResponse) => ({ label: a.name, value: a.id })),
+      authorsData.map((a: ProductAuthorResponse) => ({ label: a.name, value: a.id })),
     [authorsData],
   );
   const publisherOptions = useMemo(

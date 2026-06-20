@@ -62,7 +62,10 @@ public class Product extends BaseAuditableEntity<Integer> {
     private List<ProductGenre> productGenres = new ArrayList<>();
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductAuthor> productAuthors = new ArrayList<>();
-
+    @OneToMany(mappedBy = "product")
+    private List<Review> reviews = new ArrayList<>();
+    @OneToMany(mappedBy = "product")
+    private List<OrderItem> orderItems = new ArrayList<>();
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "series_id")
     private Series series;

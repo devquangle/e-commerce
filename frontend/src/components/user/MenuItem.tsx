@@ -11,7 +11,7 @@ import {
   Users,
   Sparkles,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import genreService from "@/features/admin/genre/services/genre.service";
 
 const menuItems = [

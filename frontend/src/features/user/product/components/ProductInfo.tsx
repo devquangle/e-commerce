@@ -19,31 +19,31 @@ export default function ProductInfo({ product, rating = 0, reviewCount = 0, sold
   const originalPrice = product.originalPrice || price;
   const discountPercent = originalPrice > price ? Math.round((1 - price / originalPrice) * 100) : 0;
   
-
   return (
     <div className="lg:col-span-6 xl:col-span-8 flex flex-col">
       <div className="flex flex-wrap gap-2 mb-3">
-        <span className="px-3 py-1 bg-amber-50 text-amber-600 text-xs font-bold uppercase tracking-wider rounded-full">
-          Sách bán chạy
+        <span className="px-2.5 py-1 bg-orange-50 text-orange-500 text-[11px] font-bold uppercase tracking-wider rounded-md">
+          SÁCH BÁN CHẠY
         </span>
       </div>
 
-      <h1 className="text-2xl md:text-3xl xl:text-4xl font-bold text-slate-900 leading-tight mb-4">
+      <h1 className="text-2xl md:text-3xl font-bold text-slate-900 leading-tight mb-4">
         {product.name}
       </h1>
 
       <div className="flex flex-col gap-3 text-sm text-slate-600 mb-6">
-        <div className="flex items-center flex-wrap gap-4">
-          <div className="flex items-center gap-1">
-            <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
-            <span className="font-bold text-slate-900 text-base ml-1">
-              {rating}
+        {/* Rating & Sold */}
+        <div className="flex items-center flex-wrap gap-3">
+          <div className="flex items-center gap-1 text-amber-400">
+            <Star className="w-4 h-4 fill-current" />
+            <span className="font-bold text-slate-900 ml-1">
+              {rating.toFixed(1)}
             </span>
             <span className="text-slate-500">
               ({reviewCount} đánh giá)
             </span>
           </div>
-          <div className="w-1 h-1 rounded-full bg-slate-300"></div>
+          <span className="text-slate-300">•</span>
           <div>
             Đã bán{" "}
             <span className="font-semibold text-slate-900">
@@ -52,58 +52,70 @@ export default function ProductInfo({ product, rating = 0, reviewCount = 0, sold
           </div>
         </div>
 
+        {/* Tác giả */}
         {product.productAuthors && product.productAuthors.length > 0 && (
-          <div className="flex items-start gap-2">
-            <span className="whitespace-nowrap mt-0.5">Tác giả:</span>
+          <div className="flex items-center gap-2">
+            <span className="whitespace-nowrap text-slate-500">Tác giả:</span>
             <div className="flex flex-wrap gap-1.5">
-              {product.productAuthors.map(author => (
-                <span key={author.id} className="px-2.5 py-0.5 bg-blue-50 text-blue-700 text-xs rounded-md font-medium cursor-pointer hover:bg-blue-100 transition-colors">
-                  {author.name}
+              {product.productAuthors.map((author, idx) => (
+                <span key={author.id}>
+                  <a href="#" className="text-blue-600 hover:underline hover:text-blue-700 transition-colors">
+                    {author.name}
+                  </a>
+                  {idx < product.productAuthors!.length - 1 && <span className="text-slate-400">,</span>}
                 </span>
               ))}
             </div>
           </div>
         )}
 
+        {/* Thể loại */}
         {product.productGenres && product.productGenres.length > 0 && (
-          <div className="flex items-start gap-2">
-            <span className="whitespace-nowrap mt-0.5">Thể loại:</span>
+          <div className="flex items-center gap-2">
+            <span className="whitespace-nowrap text-slate-500">Thể loại:</span>
             <div className="flex flex-wrap gap-1.5">
-              {product.productGenres.map(genre => (
-                <span key={genre.id} className="px-2.5 py-0.5 bg-slate-100 text-slate-700 text-xs rounded-md font-medium cursor-pointer hover:bg-slate-200 transition-colors">
-                  {genre.name}
+              {product.productGenres.map((genre, idx) => (
+                <span key={genre.id}>
+                  <a href="#" className="text-blue-600 hover:underline hover:text-blue-700 transition-colors">
+                    {genre.name}
+                  </a>
+                  {idx < product.productGenres!.length - 1 && <span className="text-slate-400">,</span>}
                 </span>
               ))}
             </div>
           </div>
         )}
 
-        {product.publisherName && (
-          <div className="flex items-center gap-2">
-            <span>Nhà xuất bản:</span>
-            <span className="font-semibold text-slate-900">{product.publisherName}</span>
-          </div>
-        )}
-
-        {product.seriesName && (
-          <div className="flex items-center gap-2">
-            <span>Series:</span>
-            <span className="font-semibold text-slate-900">{product.seriesName}</span>
-          </div>
-        )}
+        {/* NXB & Series */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
+          {product.publisherName && (
+            <div className="flex items-center gap-2">
+              <span className="text-slate-500">Nhà xuất bản:</span>
+              <span className="font-bold text-slate-800">{product.publisherName}</span>
+            </div>
+          )}
+          
+          {product.seriesName && (
+            <div className="flex items-center gap-2">
+              <span className="text-slate-500">Series:</span>
+              <span className="font-bold text-slate-800">{product.seriesName}</span>
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="bg-slate-50/80 rounded-2xl p-6 mb-8 border border-slate-100">
-        <div className="flex items-end gap-4">
-          <span className="text-3xl md:text-4xl font-extrabold text-blue-600">
+      {/* Giá */}
+      <div className="bg-slate-50 rounded-2xl p-5 mb-8">
+        <div className="flex items-end gap-3 flex-wrap">
+          <span className="text-3xl font-extrabold text-blue-600">
             {price.toLocaleString()} ₫
           </span>
           {originalPrice > price && (
             <>
-              <span className="text-lg text-slate-400 line-through mb-1 font-medium">
+              <span className="text-base text-slate-400 line-through mb-1 font-medium">
                 {originalPrice.toLocaleString()} ₫
               </span>
-              <span className="mb-2 px-2 py-0.5 bg-red-100 text-red-600 text-xs font-bold rounded">
+              <span className="mb-1.5 px-2 py-0.5 bg-rose-50 text-rose-600 text-[11px] font-bold rounded">
                 -{discountPercent}%
               </span>
             </>
@@ -111,67 +123,67 @@ export default function ProductInfo({ product, rating = 0, reviewCount = 0, sold
         </div>
       </div>
 
-      {/* ACTION AREA */}
-      <div className="flex flex-col sm:flex-row gap-6 mb-8 border-b border-slate-200 pb-8">
-        {/* Quantity */}
+      {/* Hành động (Mua, Giỏ, Yêu thích) */}
+      <div className="flex flex-col sm:flex-row gap-6 mb-8 border-b border-slate-100 pb-8">
+        {/* Số lượng */}
         <div className="flex flex-col gap-2">
           <span className="text-sm font-semibold text-slate-700">
             Số lượng
           </span>
-          <div className="flex items-center border border-slate-200 rounded-xl h-12 w-36 bg-white overflow-hidden shadow-sm">
+          <div className="flex items-center border border-slate-200 rounded-xl h-11 w-32 bg-white overflow-hidden shadow-sm">
             <button
               onClick={handleDecrease}
-              className="w-12 h-full flex items-center justify-center text-slate-500 hover:bg-slate-50 hover:text-blue-600 transition-colors"
+              className="w-10 h-full flex items-center justify-center text-slate-500 hover:bg-slate-50 hover:text-blue-600 transition-colors"
             >
-              <Minus size={18} />
+              <Minus size={16} />
             </button>
             <input
               type="number"
               value={quantity}
               readOnly
-              className="w-full h-full text-center font-semibold text-slate-900 border-x border-slate-200 focus:outline-none"
+              className="w-full h-full text-center text-sm font-semibold text-slate-900 border-x border-slate-200 focus:outline-none"
             />
             <button
               onClick={handleIncrease}
-              className="w-12 h-full flex items-center justify-center text-slate-500 hover:bg-slate-50 hover:text-blue-600 transition-colors"
+              className="w-10 h-full flex items-center justify-center text-slate-500 hover:bg-slate-50 hover:text-blue-600 transition-colors"
             >
-              <Plus size={18} />
+              <Plus size={16} />
             </button>
           </div>
         </div>
 
         {/* Buttons */}
         <div className="flex-1 flex gap-3 items-end">
-          <button className="h-12 px-6 bg-blue-50 text-blue-600 font-semibold rounded-xl border border-blue-200 hover:bg-blue-100 transition-colors flex items-center justify-center gap-2 flex-1 sm:flex-none">
-            <ShoppingCart size={20} />
+          <button className="h-11 px-5 bg-blue-50 text-blue-600 text-sm font-bold rounded-xl border border-blue-200 hover:bg-blue-100 transition-colors flex items-center justify-center gap-2 flex-1 sm:flex-none">
+            <ShoppingCart size={18} />
             <span>Thêm vào giỏ</span>
           </button>
-          <button className="h-12 px-8 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-600/30 hover:bg-blue-700 hover:shadow-blue-600/50 hover:-translate-y-0.5 transition-all flex-1">
+          <button className="h-11 px-8 bg-blue-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-blue-600/20 hover:bg-blue-700 hover:shadow-blue-600/40 transition-all flex-1">
             Mua ngay
           </button>
-          <button className="h-12 w-12 flex items-center justify-center border border-slate-200 rounded-xl text-slate-500 hover:text-red-500 hover:border-red-200 hover:bg-red-50 transition-all">
-            <Heart size={22} />
+          <button className="h-11 w-11 flex items-center justify-center border border-slate-200 rounded-xl text-slate-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 transition-all shrink-0">
+            <Heart size={20} />
           </button>
         </div>
       </div>
 
-      {/* PERKS */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="flex items-center gap-3 p-3 rounded-xl bg-green-50/50 text-green-700">
-          <ShieldCheck size={24} className="opacity-80" />
-          <span className="text-sm font-medium">
+      {/* Ưu đãi / Cam kết */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="flex items-center gap-2.5 p-3 rounded-lg border border-green-100 bg-green-50/30 text-green-700">
+          <ShieldCheck size={20} className="shrink-0" />
+          <span className="text-xs font-medium">
             100% Sách gốc, chất lượng cao
           </span>
         </div>
-        <div className="flex items-center gap-3 p-3 rounded-xl bg-blue-50/50 text-blue-700">
-          <Truck size={24} className="opacity-80" />
-          <span className="text-sm font-medium">
+        <div className="flex items-center gap-2.5 p-3 rounded-lg border border-blue-100 bg-blue-50/30 text-blue-700">
+          <Truck size={20} className="shrink-0" />
+          <span className="text-xs font-medium">
             Giao hàng siêu tốc trong 2h
           </span>
         </div>
-        <div className="flex items-center gap-3 p-3 rounded-xl bg-amber-50/50 text-amber-700">
-          <RotateCcw size={24} className="opacity-80" />
-          <span className="text-sm font-medium">
+        <div className="flex items-center gap-2.5 p-3 rounded-lg border border-orange-100 bg-orange-50/30 text-orange-700">
+          <RotateCcw size={20} className="shrink-0" />
+          <span className="text-xs font-medium">
             Đổi trả miễn phí trong 30 ngày
           </span>
         </div>

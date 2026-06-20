@@ -14,66 +14,75 @@ export default function ProductDescription({ product }: ProductDescriptionProps)
     const node = contentRef.current;
     if (!node) return;
 
-    const shouldShow = node.scrollHeight > 250;
-    if (shouldShow === showButton) return;
+    // Cho phép thời gian DOM render HTML xong
+    const checkHeight = () => {
+      const shouldShow = node.scrollHeight > 300;
+      if (shouldShow !== showButton) {
+        setShowButton(shouldShow);
+      }
+    };
 
-    const rafId = window.requestAnimationFrame(() => {
-      setShowButton(shouldShow);
-    });
+    const rafId = window.requestAnimationFrame(checkHeight);
+    
+    // Fallback timer just in case images in HTML load later
+    const timeoutId = setTimeout(checkHeight, 500);
 
-    return () => window.cancelAnimationFrame(rafId);
+    return () => {
+      window.cancelAnimationFrame(rafId);
+      clearTimeout(timeoutId);
+    };
   }, [product.description, showButton]);
 
   return (
-    <div className= "bg-white rounded-3xl shadow-sm border border-slate-200/60 p-6 md:p-10 mb-8">
-      <h2 className="text-2xl font-bold text-slate-900 mb-6">Mô tả sản phẩm</h2>
+    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 mb-8">
+      <h2 className="text-xl md:text-2xl font-bold text-slate-900 mb-6">Mô tả sản phẩm</h2>
+      
       <div className="relative">
         <div 
           ref={contentRef}
-          className={`prose max-w-none text-slate-600 leading-relaxed text-base overflow-hidden transition-all duration-300 ${!isExpanded ? 'max-h-[250px]' : ''}`}
+          className={`
+            prose prose-sm md:prose-base max-w-none text-slate-600 leading-relaxed
+            prose-p:mb-4 prose-a:text-blue-600 prose-img:rounded-xl prose-img:max-w-full
+            overflow-hidden transition-all duration-300
+            ${!isExpanded ? 'max-h-[300px]' : ''}
+          `}
         >
-          <p>{product.description}</p>
-          
-          <ul className="list-disc pl-5 mt-4 space-y-2 font-medium text-slate-700">
-            {product.isbn && <li>ISBN: {product.isbn}</li>}
-            {product.pages && <li>Số trang: {product.pages}</li>}
-            {product.publisherName && <li>Nhà xuất bản: {product.publisherName}</li>}
-            {product.publishYear && <li>Năm xuất bản: {product.publishYear}</li>}
-            {!product.isbn && <li>Khổ sách: 14x20.5 cm</li>}
-            {!product.pages && <li>Số trang: 350 trang</li>}
-            {!product.publisherName && <li>Nhà xuất bản: NXB Trẻ</li>}
-          </ul>
-
-          {!product.description && (
+          {/* MÔ TẢ HTML TỪ TIPTAP */}
+          {product.description ? (
+            <div dangerouslySetInnerHTML={{ __html: product.description }} />
+          ) : (
              <>
                <p>
-                 Nội dung chi tiết sẽ được trình bày ở đây. Bạn có thể sử dụng HTML content tĩnh hoặc động từ API.
+                 Marketing căn bản là cuốn sách gối đầu giường của mọi marketer. 
+                 Trong phiên bản tái bản mới nhất, tác giả đã cập nhật thêm những xu hướng 
+                 digital marketing hiện đại, giúp người đọc nắm bắt được sự chuyển dịch của thị trường.
                </p>
-               <br />
-               <p>
-                 Cuốn sách này cung cấp một cái nhìn sâu sắc và toàn diện về lĩnh vực, 
-                 với những phân tích chuyên sâu và ví dụ thực tế. Nó được thiết kế để 
-                 giúp độc giả nắm bắt kiến thức một cách nhanh chóng và hiệu quả.
-               </p>
-               <br />
-               <p>
-                 Bên cạnh đó, các tác giả cũng chia sẻ những kinh nghiệm quý báu 
-                 được đúc kết từ nhiều năm nghiên cứu và làm việc thực tế.
-               </p>
+               <ul>
+                 {product.isbn && <li>ISBN: {product.isbn}</li>}
+                 {product.pages && <li>Số trang: {product.pages}</li>}
+                 {product.publisherName && <li>Nhà xuất bản: {product.publisherName}</li>}
+                 {product.publishYear && <li>Năm xuất bản: {product.publishYear}</li>}
+                 {!product.isbn && <li>ISBN: 978-604-1-12345-6</li>}
+                 {!product.pages && <li>Số trang: 720</li>}
+                 {!product.publisherName && <li>Nhà xuất bản: Nhà Xuất Bản Trẻ</li>}
+                 {!product.publishYear && <li>Năm xuất bản: 2024</li>}
+               </ul>
              </>
           )}
         </div>
         
+        {/* Lớp phủ mờ (Fade out gradient) khi chưa mở rộng */}
         {!isExpanded && showButton && (
-          <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent pointer-events-none" />
+          <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none" />
         )}
       </div>
 
+      {/* Nút Xem thêm / Thu gọn */}
       {showButton && (
-        <div className="mt-6 flex justify-center">
+        <div className="mt-8 flex justify-center">
           <button 
             onClick={() => setIsExpanded(!isExpanded)}
-            className="px-8 py-2.5 text-blue-600 border border-blue-200 rounded-full font-semibold hover:bg-blue-50 transition-colors shadow-sm"
+            className="px-8 py-2 text-sm font-semibold text-blue-600 border border-blue-200 rounded-full hover:bg-blue-50 hover:border-blue-300 transition-colors shadow-sm"
           >
             {isExpanded ? 'Thu gọn' : 'Xem thêm'}
           </button>

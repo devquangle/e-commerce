@@ -7,5 +7,20 @@ export function formatMoney(value: number | undefined | null): string {
   if (value === undefined || value === null || isNaN(value)) {
     return "0 VND";
   }
-  return `${value.toLocaleString("vi-VN")} VND`;
+  return `${value.toLocaleString("vi-VN")} đ`;
+}
+
+/**
+ * Định dạng số lượng dạng rút gọn (ví dụ: 1520 -> 1.5k)
+ * @param value Số cần định dạng
+ * @returns Chuỗi đã rút gọn
+ */
+export function formatCompactNumber(value: number | undefined | null): string {
+  if (value === undefined || value === null || isNaN(value)) {
+    return "0";
+  }
+  return Intl.NumberFormat("en-US", {
+    notation: "compact",
+    maximumFractionDigits: 1,
+  }).format(value).toLowerCase();
 }

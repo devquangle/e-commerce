@@ -2,16 +2,16 @@ import { useState, useEffect } from "react";
 import Container from '@/components/common/Container'
 import FilterContent from "@/components/user/FilterContent";
 import ProductCard from '@/components/user/ProductCard'
-import type { Product } from '@/types/product.type';
+import type { ProductCard as ProductCardType } from '@/types/product.card.type';
 import { Filter, X, ChevronDown, Search } from "lucide-react";
 
-const products: Product[] = [
-  { id: 1, title: 'Sách Marketing Căn Bản - Philip Kotler (Tái bản 2024)', price: 185000, originalPrice: 250000, author: ['Philip Kotler'], coverUrl: 'https://picsum.photos/400/500?random=1', publishedAt: '2024-01-01', soldCount: 1520, rating: 4.8, reviewCount: 320, isFeatured: true },
-  { id: 2, title: 'Đắc Nhân Tâm - Bí Quyết Thành Công Mọi Thời Đại (Bìa Cứng Cao Cấp)', price: 95000, originalPrice: 120000, author: ['Dale Carnegie'], coverUrl: 'https://picsum.photos/400/500?random=2', publishedAt: '2023-05-15', soldCount: 8400, rating: 5.0, reviewCount: 1250, isFeatured: true }, 
-  { id: 3, title: 'Sapiens - Lược Sử Loài Người', price: 210000, originalPrice: 265000, author: ['Yuval Noah Harari'], coverUrl: 'https://picsum.photos/400/500?random=3', publishedAt: '2022-10-10', soldCount: 3200, rating: 4.9, reviewCount: 890, isFeatured: false }, 
-  { id: 4, title: 'Atomic Habits - Thay Đổi Tí Hon Hiệu Quả Bất Ngờ', price: 135000, originalPrice: 160000, author: ['James Clear'], coverUrl: 'https://picsum.photos/400/500?random=4', publishedAt: '2023-01-20', soldCount: 5600, rating: 4.8, reviewCount: 1100, isFeatured: true },
-  { id: 5, title: 'Nhà Lãnh Đạo Không Chức Danh', price: 85000, originalPrice: 110000, author: ['Robin Sharma'], coverUrl: 'https://picsum.photos/400/500?random=5', publishedAt: '2021-08-05', soldCount: 2100, rating: 4.7, reviewCount: 450, isFeatured: false },
-  { id: 6, title: 'Tâm Lý Học Tội Phạm - Phát Hoạ Chân Dung Kẻ Phạm Tội', price: 155000, originalPrice: 195000, author: ['Diệp Hồng Vĩ'], coverUrl: 'https://picsum.photos/400/500?random=6', publishedAt: '2022-11-11', soldCount: 1250, rating: 4.6, reviewCount: 210, isFeatured: true }
+const products: ProductCardType[] = [
+  { id: 1, slug: 'sach-marketing-can-ban', name: 'Sách Marketing Căn Bản - Philip Kotler (Tái bản 2024)', price: 185000, promosionValue: 26, urlImage: 'https://picsum.photos/400/500?random=1', soldCount: 1520, rating: 4.8, reviewCount: 320, bage: 'Bán chạy' },
+  { id: 2, slug: 'dac-nhan-tam', name: 'Đắc Nhân Tâm - Bí Quyết Thành Công Mọi Thời Đại (Bìa Cứng Cao Cấp)', price: 95000, promosionValue: 21, urlImage: 'https://picsum.photos/400/500?random=2', soldCount: 8400, rating: 5.0, reviewCount: 1250, bage: 'Mới' }, 
+  { id: 3, slug: 'sapiens', name: 'Sapiens - Lược Sử Loài Người', price: 210000, promosionValue: 21, urlImage: 'https://picsum.photos/400/500?random=3', soldCount: 3200, rating: 4.9, reviewCount: 890, bage: '' }, 
+  { id: 4, slug: 'atomic-habits', name: 'Atomic Habits - Thay Đổi Tí Hon Hiệu Quả Bất Ngờ', price: 135000, promosionValue: 16, urlImage: 'https://picsum.photos/400/500?random=4', soldCount: 5600, rating: 4.8, reviewCount: 1100, bage: 'Hot' },
+  { id: 5, slug: 'nha-lanh-dao-khong-chuc-danh', name: 'Nhà Lãnh Đạo Không Chức Danh', price: 85000, promosionValue: 23, urlImage: 'https://picsum.photos/400/500?random=5', soldCount: 2100, rating: 4.7, reviewCount: 450, bage: '' },
+  { id: 6, slug: 'tam-ly-hoc-toi-pham', name: 'Tâm Lý Học Tội Phạm - Phát Hoạ Chân Dung Kẻ Phạm Tội', price: 155000, promosionValue: 21, urlImage: 'https://picsum.photos/400/500?random=6', soldCount: 1250, rating: 4.6, reviewCount: 210, bage: 'Nổi bật' }
 ];
 
 export default function Products() {

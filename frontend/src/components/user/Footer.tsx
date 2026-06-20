@@ -152,10 +152,38 @@ export default function Footer() {
               <p>Email: support@bookstore.vn</p>
               <p>Địa chỉ: 123 Đường Sách, Quận 1, TP.HCM</p>
             </div>
+
+            {/* Phương thức thanh toán */}
+            <div className="mt-6">
+              <div className="mb-3 text-xs font-bold uppercase tracking-widest text-gray-800">Thanh toán</div>
+              <div className="flex items-center gap-3">
+                {/* COD */}
+                <div className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm">
+                  <svg className="h-5 w-5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+                    <line x1="1" y1="10" x2="23" y2="10" />
+                  </svg>
+                  <span className="text-xs font-bold text-slate-700">COD</span>
+                </div>
+                {/* VNPAY */}
+                <div className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm">
+                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none">
+                    <rect width="24" height="24" rx="4" fill="#005BAA" />
+                    <path d="M4 8L8 16L12 8" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M14 8V16M14 8H18C19.1 8 20 8.9 20 10V10C20 11.1 19.1 12 18 12H14" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  <span className="text-xs font-bold text-slate-700">VNPAY</span>
+                </div>
+              </div>
+            </div>
           </div>
+        </div>
+
+        {/* Copyright */}
+        <div className="border-t border-slate-100 pt-6 text-center text-xs text-slate-400">
+          © {new Date().getFullYear()} BookStore. All rights reserved.
         </div>
       </Container>
     </footer>
   )
 }
-
