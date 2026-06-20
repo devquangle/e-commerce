@@ -2,7 +2,8 @@ package com.dev.backend.service;
 
 import java.util.List;
 
-
+import com.dev.backend.dto.product.ProductCardResponse;
+import com.dev.backend.dto.product.ProductFilterRequest;
 import com.dev.backend.dto.product.ProductRequest;
 import com.dev.backend.dto.product.ProductResponse;
 import com.dev.backend.entity.Product;
@@ -19,6 +20,8 @@ public interface ProductService {
     Product findBySlug(String slug);
 
     PageResponse<ProductResponse> pages(int page, int size, String keyword, String status);
+
+    PageResponse<ProductCardResponse> filterProducts(ProductFilterRequest request);
 
     Product save(Product product);
 

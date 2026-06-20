@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.dev.backend.dto.product.ProductCardResponse;
+import com.dev.backend.dto.product.ProductFilterRequest;
 import com.dev.backend.dto.product.ProductRequest;
 import com.dev.backend.dto.product.ProductResponse;
 import com.dev.backend.response.PageResponse;
@@ -33,6 +35,13 @@ public class ProductController {
             @RequestParam(required = false) String status) {
         PageResponse<ProductResponse> response = productService.pages(page - 1, size, keyword, status);
         return ResponseUtil.success("Lấy danh sách sản phẩm thành công", response);
+    }
+
+    @PostMapping("/products/search")
+    public ResponseEntity<ResponseData<PageResponse<ProductCardResponse>>> searchProducts(
+            @RequestBody ProductFilterRequest request) {
+        PageResponse<ProductCardResponse> response = productService.filterProducts(request);
+        return ResponseUtil.success("Lọc sản phẩm thành công", response);
     }
 
     @PostMapping("/products")

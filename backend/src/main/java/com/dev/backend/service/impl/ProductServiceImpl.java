@@ -173,4 +173,26 @@ public class ProductServiceImpl implements ProductService {
                 productPage.getTotalPages());
     }
 
+    @Override
+    public PageResponse<com.dev.backend.dto.product.ProductCardResponse> filterProducts(com.dev.backend.dto.product.ProductFilterRequest request) {
+        int page = request.getPage() != null ? request.getPage() : 0;
+        int size = request.getSize() != null ? request.getSize() : 10;
+        
+        String sortBy = request.getSort() != null && !request.getSort().isEmpty() ? request.getSort() : "id";
+        Sort sort = Sort.by(Sort.Direction.DESC, sortBy);
+        if ("priceAsc".equals(request.getSort())) sort = Sort.by(Sort.Direction.ASC, "price");
+        if ("priceDesc".equals(request.getSort())) sort = Sort.by(Sort.Direction.DESC, "price");
+        
+        Pageable pageable = PageRequest.of(page, size, sort);
+        
+        Page<com.dev.backend.dto.product.ProductCardResponse> productPage = productRepository.filterProducts(request, pageable);
+        
+        return new PageResponse<>(
+                productPage.getContent(),
+                productPage.getNumber(),
+                productPage.getSize(),
+                productPage.getTotalElements(),
+                productPage.getTotalPages());
+    }
+
 }

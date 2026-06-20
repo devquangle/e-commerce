@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import com.dev.backend.constant.BaseStatus;
 import com.dev.backend.entity.Product;
 
-public interface ProductRepository extends JpaRepository<Product, Integer> {
+public interface ProductRepository extends JpaRepository<Product, Integer>, ProductRepositoryCustom {
 
     @Query("""
             SELECT DISTINCT p
