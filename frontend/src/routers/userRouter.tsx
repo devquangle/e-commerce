@@ -22,7 +22,7 @@ import { Role } from "@/types/role";
 import RegisterConfirm from "@/pages/user/RegisterConfirm";
 import CreateAddress from "@/pages/user/CreateAddress";
 import UpdateAddress from "@/pages/user/UpdateAddress";
-import ProductDetail from "@/pages/user/ProductDetail";
+import ProductDetail from "@/pages/user/ProductDetailPage";
 
 
 const userRouter = [

@@ -7,7 +7,7 @@ import type { GenreRequest, GenreResponse } from "../types/genre.type";
 
 const GenreService = {
   async fetchGenre() {
-    const res = await apiAuth.get<ApiResponse<GenreResponse[]>>("/admin/genres");
+    const res = await apiAuth.get<ApiResponse<GenreResponse[]>>("/api/v1/genres");
     if (!res.data.success || !res.data.data) {
       throw new Error(res.data.message || "Fetch genres failed");
     }
