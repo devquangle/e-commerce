@@ -28,9 +28,11 @@ export default function MenuItem({ className = "" }) {
   const loadingGenres = isLoading;
   const loadingAuthors = isLoading;
 
-  const activeGenres = genres.filter((g) => g.status === "ACTIVE" || !g.status);
+  const activeGenres = genres.filter(
+    (g) => (g.status === "ACTIVE" || !g.status) && (g.bookCount || 0) > 0
+  );
   const activeAuthors = authors.filter(
-    (a) => a.status === "ACTIVE" || !a.status,
+    (a) => (a.status === "ACTIVE" || !a.status) && (a.bookCount || 0) > 0
   );
 
 
