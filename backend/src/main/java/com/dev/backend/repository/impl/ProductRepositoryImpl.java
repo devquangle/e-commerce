@@ -126,7 +126,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
         // =========================
         // SORT (SAFE)
         // =========================
-        List<Order> orders = new ArrayList<>();
+        List<jakarta.persistence.criteria.Order> orders = new ArrayList<>();
 
         if (pageable.getSort().isSorted()) {
             for (Sort.Order sortOrder : pageable.getSort()) {
