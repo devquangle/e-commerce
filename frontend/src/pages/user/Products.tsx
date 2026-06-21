@@ -37,7 +37,7 @@ export default function Products() {
 
   return (
     <div className="bg-slate-50/50 min-h-screen pt-8 pb-16">
-      <Container className="max-w-7xl ">
+      <Container className="max-w-7xl p-2 ">
         {/* MAIN LAYOUT */}
         <div className="flex flex-col lg:flex-row gap-4 items-start">
           <FilterSidebar

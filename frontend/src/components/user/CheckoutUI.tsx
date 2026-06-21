@@ -74,7 +74,7 @@ export function CheckoutMobileBar({
 }) {
   return (
     <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white p-3 lg:hidden">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3">
+      <div className="mx-auto flex max-w-7xl p-2 items-center justify-between gap-3">
         <div className="min-w-0">
           <p className="truncate text-xs font-medium text-slate-600">
             {subtitle}

@@ -164,7 +164,7 @@ export default function ProductDetailPage() {
   ];
 
   return (
-    <Container className="max-w-7xl ">
+    <Container className="max-w-7xl p-2 ">
       {/* ==================== MAIN PRODUCT SECTION ==================== */}
       <div className="bg-white rounded-3xl shadow-sm border border-slate-200/60 p-4 md:p-8 my-4">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">

@@ -113,7 +113,7 @@ export default function PaymentPage() {
   if (items.length === 0) {
     return (
       <div className="min-h-screen bg-white">
-        <Container className="max-w-7xl px-4 md:px-6 lg:px-8 py-8 md:py-10 lg:py-12">
+        <Container className="max-w-7xl p-2 px-4 md:px-6 lg:px-8 py-8 md:py-10 lg:py-12">
           <CheckoutEmptyState
             icon={Package}
             title="Không có sản phẩm để thanh toán"
@@ -127,7 +127,7 @@ export default function PaymentPage() {
 
   return (
     <div className="min-h-screen bg-white pb-32 lg:pb-10">
-      <Container className="max-w-7xl px-4 md:px-6 lg:px-8 py-8 md:py-10 lg:py-12">
+      <Container className="max-w-7xl p-2 px-4 md:px-6 lg:px-8 py-8 md:py-10 lg:py-12">
         <div className="mb-10 lg:mb-12">
           <CheckoutPageHeader
             icon={CreditCard}

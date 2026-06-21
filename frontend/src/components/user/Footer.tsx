@@ -2,21 +2,21 @@ import Container from '../common/Container'
 
 export default function Footer() {
   return (
-    <footer className="bg-white py-6 sm:py-4 lg:py-8 border-t">
-      <Container className="max-w-7xl ">
-        <div className="mb-12 grid grid-cols-2 gap-8 md:grid-cols-4 lg:grid-cols-6 lg:gap-10">
+    <footer className="bg-white py-6 border-t">
+      <Container className="max-w-7xl px-4 md:px-8">
+        <div className="mb-8 grid grid-cols-2 gap-6 md:grid-cols-4 lg:grid-cols-6 lg:gap-8">
           <div className="col-span-full lg:col-span-2">
-            <div className="mb-4 lg:-mt-2">
+            <div className="mb-3">
               <a
                 href="/"
-                className="inline-flex items-center gap-2 text-xl font-bold text-indigo-700 md:text-2xl"
+                className="inline-flex items-center gap-2 text-lg font-bold text-indigo-700 md:text-xl"
                 aria-label="logo"
               >
                 <svg
-                  width="32"
-                  height="32"
+                  width="24"
+                  height="24"
                   viewBox="0 0 24 24"
-                  className="h-8 w-8 text-indigo-500"
+                  className="text-indigo-500"
                   fill="currentColor"
                   xmlns="http://www.w3.org/2000/svg"
                 >
@@ -28,21 +28,19 @@ export default function Footer() {
               </a>
             </div>
 
-            <p className="mb-6 text-gray-500 sm:pr-8">
+            <p className="mb-4 text-[13px] text-gray-500 sm:pr-8 leading-relaxed">
               Nơi bạn có thể tìm thấy từ những cuốn sách kinh điển đến các ấn phẩm mới nhất, giao hàng nhanh chóng
               và nhiều ưu đãi hấp dẫn.
             </p>
 
-            <div className="flex gap-4">
+            <div className="flex gap-3">
               <a
                 href="#"
                 target="_blank"
                 className="text-gray-400 transition duration-100 hover:text-indigo-500 active:text-indigo-600"
               >
                 <svg
-                  className="h-5 w-5"
-                  width="24"
-                  height="24"
+                  className="h-4 w-4"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                   xmlns="http://www.w3.org/2000/svg"
@@ -57,9 +55,7 @@ export default function Footer() {
                 className="text-gray-400 transition duration-100 hover:text-indigo-500 active:text-indigo-600"
               >
                 <svg
-                  className="h-5 w-5"
-                  width="24"
-                  height="24"
+                  className="h-4 w-4"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                   xmlns="http://www.w3.org/2000/svg"
@@ -74,9 +70,7 @@ export default function Footer() {
                 className="text-gray-400 transition duration-100 hover:text-indigo-500 active:text-indigo-600"
               >
                 <svg
-                  className="h-5 w-5"
-                  width="24"
-                  height="24"
+                  className="h-4 w-4"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                   xmlns="http://www.w3.org/2000/svg"
@@ -88,9 +82,9 @@ export default function Footer() {
           </div>
 
           <div>
-            <div className="mb-4 font-bold uppercase tracking-widest text-gray-800">Danh mục</div>
+            <div className="mb-3 text-[11px] font-bold uppercase tracking-widest text-gray-800">Danh mục</div>
 
-            <nav className="flex flex-col gap-3 text-sm">
+            <nav className="flex flex-col gap-2.5 text-[13px]">
               <a href="#" className="text-gray-500 transition hover:text-indigo-500">
                 Sách văn học
               </a>
@@ -107,9 +101,9 @@ export default function Footer() {
           </div>
 
           <div>
-            <div className="mb-4 font-bold uppercase tracking-widest text-gray-800">Về BookStore</div>
+            <div className="mb-3 text-[11px] font-bold uppercase tracking-widest text-gray-800">Về BookStore</div>
 
-            <nav className="flex flex-col gap-3 text-sm">
+            <nav className="flex flex-col gap-2.5 text-[13px]">
               <a href="#" className="text-gray-500 transition hover:text-indigo-500">
                 Giới thiệu
               </a>
@@ -126,9 +120,9 @@ export default function Footer() {
           </div>
 
           <div>
-            <div className="mb-4 font-bold uppercase tracking-widest text-gray-800">Hỗ trợ</div>
+            <div className="mb-3 text-[11px] font-bold uppercase tracking-widest text-gray-800">Hỗ trợ</div>
 
-            <nav className="flex flex-col gap-3 text-sm">
+            <nav className="flex flex-col gap-2.5 text-[13px]">
               <a href="#" className="text-gray-500 transition hover:text-indigo-500">
                 Liên hệ
               </a>
@@ -145,42 +139,38 @@ export default function Footer() {
           </div>
 
           <div>
-            <div className="mb-4 font-bold uppercase tracking-widest text-gray-800">Liên hệ</div>
+            <div className="mb-3 text-[11px] font-bold uppercase tracking-widest text-gray-800">Liên hệ</div>
 
-            <div className="flex flex-col gap-2 text-sm text-gray-500">
+            <div className="flex flex-col gap-2 text-[13px] text-gray-500">
               <p>Hotline: 1900 9999</p>
               <p>Email: support@bookstore.vn</p>
-              <p>Địa chỉ: 123 Đường Sách, Quận 1, TP.HCM</p>
+              <p>Địa chỉ: 123 Đường Sách, Q.1, TP.HCM</p>
             </div>
 
-            {/* Phương thức thanh toán */}
-            <div className="mt-6">
-              <div className="mb-3 text-xs font-bold uppercase tracking-widest text-gray-800">Thanh toán</div>
-              <div className="flex items-center gap-3">
-                {/* COD */}
-                <div className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm">
-                  <svg className="h-5 w-5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <div className="mt-5">
+              <div className="mb-2.5 text-[11px] font-bold uppercase tracking-widest text-gray-800">Thanh toán</div>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 rounded border border-slate-200 bg-white px-2 py-1 shadow-sm">
+                  <svg className="h-4 w-4 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
                     <line x1="1" y1="10" x2="23" y2="10" />
                   </svg>
-                  <span className="text-xs font-bold text-slate-700">COD</span>
+                  <span className="text-[10px] font-bold text-slate-700">COD</span>
                 </div>
-                {/* VNPAY */}
-                <div className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm">
-                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none">
+                <div className="flex items-center gap-1 rounded border border-slate-200 bg-white px-2 py-1 shadow-sm">
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none">
                     <rect width="24" height="24" rx="4" fill="#005BAA" />
                     <path d="M4 8L8 16L12 8" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     <path d="M14 8V16M14 8H18C19.1 8 20 8.9 20 10V10C20 11.1 19.1 12 18 12H14" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
-                  <span className="text-xs font-bold text-slate-700">VNPAY</span>
+                  <span className="text-[10px] font-bold text-slate-700">VNPAY</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Copyright */}
-        <div className="border-t border-slate-100 pt-6 text-center text-xs text-slate-400">
+        <div className="border-t border-slate-100 pt-4 pb-2 text-center text-[12px] text-slate-400">
           © {new Date().getFullYear()} BookStore. All rights reserved.
         </div>
       </Container>
