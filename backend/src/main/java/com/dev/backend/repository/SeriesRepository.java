@@ -42,7 +42,9 @@ public interface SeriesRepository extends JpaRepository<Series, Integer> {
                                 ON p.status = com.dev.backend.constant.ProductStatus.ACTIVE
                             WHERE s.status = com.dev.backend.constant.BaseStatus.ACTIVE
                             GROUP BY s.id, s.name, s.slug
+                      
                             ORDER BY s.name
+                         
                         """)
         List<SeriesWithProductCountResponse> findActiveSeriesWithProductCount();
 }

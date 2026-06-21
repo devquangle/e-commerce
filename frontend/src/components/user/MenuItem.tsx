@@ -99,7 +99,7 @@ export default function MenuItem({ className = "" }) {
                   {activeGenres.map((genre) => (
                     <Link
                       key={genre.id}
-                      to={`/products?genre=${genre.id}`}
+                      to={`/products?genres=${genre.slug || genre.id}`}
                       // Khi click vào item thì đóng cả menu để khôi phục scroll body
                       onClick={() => {
                         setIsMobileMenuOpen(false);
@@ -162,7 +162,7 @@ export default function MenuItem({ className = "" }) {
                   {activeAuthors.map((author) => (
                     <Link
                       key={author.id}
-                      to={`/products?author=${author.id}`}
+                      to={`/products?authors=${author.slug || author.id}`}
                       onClick={() => {
                         setIsMobileMenuOpen(false);
                         setIsDesktopMenuOpen(false);

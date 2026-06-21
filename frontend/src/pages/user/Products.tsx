@@ -39,7 +39,7 @@ export default function Products() {
     <div className="bg-slate-50/50 min-h-screen pt-8 pb-16">
       <Container className="max-w-7xl px-4 md:px-8">
         {/* MAIN LAYOUT */}
-        <div className="flex flex-col lg:flex-row gap-8 items-start">
+        <div className="flex flex-col lg:flex-row gap-4 items-start">
           <FilterSidebar
             openFilter={openFilter}
             setOpenFilter={setOpenFilter}
@@ -85,7 +85,7 @@ export default function Products() {
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
                 {products.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}

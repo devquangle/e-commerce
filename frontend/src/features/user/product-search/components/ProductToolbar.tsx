@@ -36,7 +36,7 @@ export default function ProductToolbar({
       </div>
 
       {/* UTILITY BAR */}
-      <div className="bg-white border border-slate-200/60 rounded-2xl p-4 mb-6 flex items-center justify-between gap-4 shadow-sm">
+      <div className="bg-white border border-slate-200/60 rounded-2xl p-4 mb-4 flex items-center justify-between gap-4 shadow-sm">
         <div className="text-sm font-medium text-slate-500">
           Tìm thấy <span className="font-bold text-slate-800">{totalItems}</span> sản phẩm
         </div>

@@ -46,7 +46,7 @@ public interface GenreRepository extends JpaRepository<Genre, Integer> {
                       g.name,
                       g.slug,
                       g.urlImage,
-                      COUNT(p.id)
+                    COUNT(DISTINCT p.id)
                   )
                 FROM Genre g
                 LEFT JOIN g.productGenres pg
@@ -54,6 +54,7 @@ public interface GenreRepository extends JpaRepository<Genre, Integer> {
                 WHERE g.status = BaseStatus.ACTIVE
                   AND (p IS NULL OR p.status = ProductStatus.ACTIVE)
                 GROUP BY g.id, g.name,g.slug, g.urlImage
+              
                 ORDER BY g.name
             """)
     List<GenreWithProductCountResponse> findActiveGenresWithProductCount();

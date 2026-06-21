@@ -25,12 +25,24 @@ export default function FilterSidebar({
     <>
       {/* ASIDE DESKTOP */}
       <aside className="hidden lg:block lg:w-[280px] shrink-0">
-        <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm">
+        <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm flex flex-col h-full">
           <h2 className="text-base font-bold text-slate-900 mb-5 pb-4 border-b border-slate-100 flex items-center gap-2">
             <Filter size={18} className="text-indigo-600" />
             Bộ Lọc Tìm Kiếm
           </h2>
-          <FilterContent priceRange={priceRange} setPriceRange={setPriceRange} filters={filters} updateFilter={updateFilter} />
+          
+          <div className="flex-1">
+            <FilterContent priceRange={priceRange} setPriceRange={setPriceRange} filters={filters} updateFilter={updateFilter} />
+          </div>
+
+          <div className="mt-6 pt-5 border-t border-slate-100">
+            <button
+              onClick={resetFilters}
+              className="w-full bg-slate-50 border border-slate-200 text-slate-700 font-bold text-[13px] py-2.5 rounded-xl hover:bg-slate-100 transition-all flex items-center justify-center"
+            >
+              Thiết lập lại
+            </button>
+          </div>
         </div>
       </aside>
 

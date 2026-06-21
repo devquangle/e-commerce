@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useBookFormData } from "@/hooks/useBookFormData";
 import type { ProductFilterOptions } from "../types/product.filter.options";
-import { Building2, Layers, ChevronDown } from "lucide-react";
+import { Building2, Layers, ChevronDown, Star } from "lucide-react";
 
 /* ================= TYPES ================= */
 
@@ -324,7 +324,17 @@ export default function FilterContent({
 
       <FilterSection title="Đánh giá" defaultOpen={true}>
         <div className="space-y-2">
-          {[5, 4, 3].map((r) => (
+          <label className="flex items-center gap-2.5 text-sm font-medium text-slate-600 cursor-pointer select-none hover:text-indigo-600 transition-colors">
+            <input
+              type="radio"
+              name="rating"
+              checked={!filters?.rating}
+              onChange={() => updateFilter?.({ rating: undefined })}
+              className="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500/20 cursor-pointer flex-shrink-0"
+            />
+            <span className="flex-1">Tất cả</span>
+          </label>
+          {[5, 4, 3, 2, 1].map((r) => (
             <label
               key={r}
               className="flex items-center gap-2.5 text-sm font-medium text-slate-600 cursor-pointer select-none hover:text-indigo-600 transition-colors"
@@ -334,9 +344,20 @@ export default function FilterContent({
                 name="rating"
                 checked={filters?.rating === r}
                 onChange={() => updateFilter?.({ rating: r })}
-                className="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500/20 cursor-pointer"
+                className="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500/20 cursor-pointer flex-shrink-0"
               />
-              <span>{r} sao trở lên</span>
+              <div className="flex items-center gap-1 flex-1">
+                <div className="flex items-center text-amber-400">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star
+                      key={i}
+                      size={14}
+                      className={i < r ? "fill-amber-400 text-amber-400" : "fill-slate-200 text-slate-200"}
+                    />
+                  ))}
+                </div>
+                {r < 5 && <span className="ml-1 text-[13px] text-slate-500">trở lên</span>}
+              </div>
             </label>
           ))}
         </div>
