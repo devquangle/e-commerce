@@ -8,6 +8,11 @@ const ProductSearchService = {
   async search(options?: ProductFilterOptions) {
     const params: any = { ...options };
 
+    // Backend expects 0-indexed page, frontend uses 1-indexed
+    if (params.page) {
+      params.page = Math.max(0, params.page - 1);
+    }
+
     if (options?.genres && Array.isArray(options.genres)) {
       params.genres = options.genres.join(',');
     }
@@ -24,6 +29,8 @@ const ProductSearchService = {
     if (!res.data.success || !res.data.data) {
       throw new Error(res.data.message || "Fetch products failed");
     }
+    console.log(res.data.data.items);
+    
 
     return res.data.data;
   },

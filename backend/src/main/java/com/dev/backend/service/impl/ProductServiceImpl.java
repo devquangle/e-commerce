@@ -181,10 +181,9 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public PageResponse<ProductCardResponse> filterProducts(
             ProductFilterRequest request) {
-
-        int page = request.getPage() != null
-                ? request.getPage()
-                : 0;
+        int page = (request.getPage() == null || request.getPage() < 1)
+                ? 0
+                : request.getPage() - 1;
 
         int size = request.getSize() != null
                 ? request.getSize()

@@ -18,7 +18,7 @@ export type SortType =
   | "PRICE_DESC"
   | "SOLD_COUNT"
   | "RATING"
-  | "NEWEST";
+  | "NEWEST"| "";
 
 export const SORT_OPTIONS: {
   value: SortType;
@@ -43,5 +43,9 @@ export const SORT_OPTIONS: {
   {
     value: "NEWEST",
     label: "Mới Nhất",
+  },
+    {
+    value: "",
+    label: "Tất cả",
   },
 ];

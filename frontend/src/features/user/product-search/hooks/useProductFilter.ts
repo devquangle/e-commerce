@@ -13,9 +13,7 @@ export function useProductFilter(initialOptions: ProductFilterOptions = {}) {
     const parsedInitialOptions = JSON.parse(initialOptionsStr);
     const params: ProductFilterOptions = {
       page: 1,
-      size: 12,
-      sort: '',
-      maxPrice: 5000,
+      size: 10,
       ...parsedInitialOptions,
     };
 
