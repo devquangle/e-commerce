@@ -83,10 +83,12 @@ export interface ProductCard {
   rating: number; // 0 → 5
   reviewCount: number; // số lượt đánh giá
   price: number;
-  createdAt: string;
-  badge: ProductBadge;
+  createdAt?: string;
+  badge?: ProductBadge;
   urlImage: string;
-  promotion: PromotionResponse;
+  promotion?: PromotionResponse;
+  bage?: string;
+  promosionValue?: number;
 }
 
 export interface PromotionResponse {

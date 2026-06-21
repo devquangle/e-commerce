@@ -10,6 +10,7 @@ interface CheckboxListItem {
   name: string;
   urlImage?: string;
   bookCount?: number;
+  slug?: string;
 }
 
 interface CheckboxListProps {
@@ -230,6 +231,19 @@ export default function FilterContent({
   const { genresData, authorsData, publishersData, seriesData, isLoading } =
     useBookFormData();
 
+  const activeGenres = (genresData || []).filter(
+    (g: any) => (g.status === "ACTIVE" || !g.status) && (g.bookCount || 0) > 0
+  );
+  const activeAuthors = (authorsData || []).filter(
+    (a: any) => (a.status === "ACTIVE" || !a.status) && (a.bookCount || 0) > 0
+  );
+  const activePublishers = (publishersData || []).filter(
+    (p: any) => (p.status === "ACTIVE" || !p.status) && (p.bookCount || 0) > 0
+  );
+  const activeSeries = (seriesData || []).filter(
+    (s: any) => (s.status === "ACTIVE" || !s.status) && (s.bookCount || 0) > 0
+  );
+
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -269,7 +283,7 @@ export default function FilterContent({
           <SkeletonLoading />
         ) : (
           <CheckboxList
-            items={genresData as any}
+            items={activeGenres as any}
             limit={5}
             selectedValues={filters?.genres}
             onChange={(val, checked) =>
@@ -284,7 +298,7 @@ export default function FilterContent({
           <SkeletonLoading />
         ) : (
           <CheckboxList
-            items={authorsData as any}
+            items={activeAuthors as any}
             limit={5}
             selectedValues={filters?.authors}
             onChange={(val, checked) =>
@@ -299,7 +313,7 @@ export default function FilterContent({
           <SkeletonLoading />
         ) : (
           <RadioList
-            items={publishersData as any}
+            items={activePublishers as any}
             limit={5}
             selectedValue={filters?.publisher}
             onChange={(slug) => updateFilter?.({ publisher: slug })}
@@ -313,7 +327,7 @@ export default function FilterContent({
           <SkeletonLoading />
         ) : (
           <RadioList
-            items={seriesData as any}
+            items={activeSeries as any}
             limit={5}
             selectedValue={filters?.series}
             onChange={(slug) => updateFilter?.({ series: slug })}

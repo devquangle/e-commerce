@@ -279,7 +279,7 @@ export const baseProducts: ProductCardType[] = [
   }
 ];
 
-export const flashSaleProducts = baseProducts.filter(p => p.promosionValue >= 40 || p.bage === 'Flash Sale');
+export const flashSaleProducts = baseProducts.filter(p => (p.promosionValue ?? 0) >= 40 || p.bage === 'Flash Sale');
 export const bestSellerProducts = [...baseProducts].sort((a, b) => b.soldCount - a.soldCount);
 export const newProducts = baseProducts.filter(p => p.bage === 'Mới' || p.id > 15);
 export const highlyRatedProducts = baseProducts.filter(p => p.rating >= 4.8);

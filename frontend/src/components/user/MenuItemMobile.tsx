@@ -12,9 +12,16 @@ const menuItems = [
 export default function MenuItemMobile() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-    const { genresData: genres = [], authorsData: authors = [], isLoading } = useBookFormData();
+    const { genresData = [], authorsData = [], isLoading } = useBookFormData();
     const loadingGenres = isLoading;
     const loadingAuthors = isLoading;
+
+    const genres = genresData.filter(
+        (g) => (g.status === "ACTIVE" || !g.status) && (g.bookCount || 0) > 0
+    );
+    const authors = authorsData.filter(
+        (a) => (a.status === "ACTIVE" || !a.status) && (a.bookCount || 0) > 0
+    );
 
 
     return (

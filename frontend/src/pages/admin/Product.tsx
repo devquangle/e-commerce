@@ -65,7 +65,7 @@ export default function Product() {
     setPage(1);
   }, []);
 
-  const handleStatusChange = useCallback((val: string | null) => {
+  const handleStatusChange = useCallback((val: BaseStatus | null) => {
     setStatus(val);
     setPage(1);
   }, []);
@@ -143,7 +143,7 @@ export default function Product() {
 
             {/* Status filter */}
             <div className="w-full md:w-52">
-              <SelectBox<string | null>
+              <SelectBox<BaseStatus | null>
                 options={memoStatusOptions}
                 value={status}
                 onChange={handleStatusChange}
