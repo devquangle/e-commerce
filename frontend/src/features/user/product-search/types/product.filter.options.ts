@@ -14,34 +14,34 @@ export type ProductFilterOptions = {
 };
 
 export type SortType =
-  | "PRICE_ASC"
-  | "PRICE_DESC"
-  | "SOLD_COUNT"
-  | "RATING"
-  | "NEWEST"| "";
+  | "priceAsc"
+  | "priceDesc"
+  | "soldCount"
+  | "rating"
+  | "newest"| "";
 
 export const SORT_OPTIONS: {
   value: SortType;
   label: string;
 }[] = [
   {
-    value: "PRICE_ASC",
+    value: "priceAsc",
     label: "Giá: Thấp đến Cao",
   },
   {
-    value: "PRICE_DESC",
+    value: "priceDesc",
     label: "Giá: Cao đến Thấp",
   },
   {
-    value: "SOLD_COUNT",
+    value: "soldCount",
     label: "Bán Chạy",
   },
   {
-    value: "RATING",
+    value: "rating",
     label: "Đánh Giá Cao",
   },
   {
-    value: "NEWEST",
+    value: "newest",
     label: "Mới Nhất",
   },
     {

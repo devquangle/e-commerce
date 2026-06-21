@@ -5,21 +5,17 @@ import com.dev.backend.dto.product.ProductCardResponse;
 import com.dev.backend.dto.product.ProductFilterRequest;
 import com.dev.backend.dto.product.PromotionResponse;
 import com.dev.backend.entity.*;
+import com.dev.backend.entity.Order;
 import com.dev.backend.repository.ProductRepositoryCustom;
 import com.dev.backend.repository.specification.ProductSpecification;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Tuple;
-import jakarta.persistence.TypedQuery;
+import jakarta.persistence.*;
 import jakarta.persistence.criteria.*;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Repository
 public class ProductRepositoryImpl implements ProductRepositoryCustom {
@@ -27,190 +23,197 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
     @PersistenceContext
     private EntityManager entityManager;
 
-   @Override
-public Page<ProductCardResponse> filterProducts(
-        ProductFilterRequest request,
-        Pageable pageable) {
+    @Override
+    public Page<ProductCardResponse> filterProducts(
+            ProductFilterRequest request,
+            Pageable pageable) {
 
-    CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 
-    // =========================
-    // DATA QUERY
-    // =========================
-    CriteriaQuery<Tuple> query = cb.createTupleQuery();
-    Root<Product> root = query.from(Product.class);
-    query.distinct(true);
+        // =========================
+        // MAIN QUERY
+        // =========================
+        CriteriaQuery<Tuple> query = cb.createTupleQuery();
+        Root<Product> root = query.from(Product.class);
+        query.distinct(true);
 
-    // JOINS
-    Join<Product, OrderItem> oiJoin =
-            root.join("orderItems", JoinType.LEFT);
+        // JOIN (NO IMAGE JOIN -> AVOID DUPLICATE ROWS)
+        Join<Product, OrderItem> oiJoin = root.join("orderItems", JoinType.LEFT);
+        Join<Product, Review> rJoin = root.join("reviews", JoinType.LEFT);
 
-    Join<Product, Review> rJoin =
-            root.join("reviews", JoinType.LEFT);
+        Join<Product, PromotionProduct> ppJoin = root.join("promotionProducts", JoinType.LEFT);
+        Join<PromotionProduct, Promotion> promoJoin = ppJoin.join("promotion", JoinType.LEFT);
 
-    Join<Product, Image> imgJoin =
-            root.join("images", JoinType.LEFT);
+        LocalDateTime now = LocalDateTime.now();
 
-    Join<Product, PromotionProduct> ppJoin =
-            root.join("promotionProducts", JoinType.LEFT);
-
-    Join<PromotionProduct, Promotion> promoJoin =
-            ppJoin.join("promotion", JoinType.LEFT);
-
-    LocalDateTime now = LocalDateTime.now();
-
-    promoJoin.on(
-            cb.and(
-                    cb.lessThanOrEqualTo(promoJoin.get("startDate"), now),
-                    cb.greaterThanOrEqualTo(promoJoin.get("expireDate"), now)
-            )
-    );
-
-    // FILTER
-    Predicate filterPredicate =
-            ProductSpecification.buildPredicate(root, cb, request);
-
-    query.where(filterPredicate);
-
-    // =========================
-    // EXPRESSIONS
-    // =========================
-    Expression<Double> ratingExpr = cb.avg(rJoin.get("rate"));
-
-    Expression<Long> soldCountExpr =
-            cb.sumAsLong(oiJoin.get("quantity"));
-
-    Expression<Long> reviewCountExpr =
-            cb.countDistinct(rJoin.get("id"));
-
-    Expression<Integer> promotionValueExpr =
-            cb.max(promoJoin.get("value"));
-
-    // ⭐ FIX IMAGE ONLY (KHÔNG ĐỘNG ORDER)
-    Expression<String> thumbnailImage =
-            cb.greatest(
-                    cb.<String>selectCase()
-                            .when(
-                                    cb.equal(imgJoin.get("isThumbnail"), true),
-                                    imgJoin.get("urlImage")
-                            )
-                            .otherwise((String) null)
-            );
-
-    // =========================
-    // GROUP BY (FIX ONLY)
-    // =========================
-    query.groupBy(
-            root.get("id"),
-            root.get("slug"),
-            root.get("name"),
-            root.get("price"),
-            root.get("createdAt"),
-            promoJoin.get("promotionType")
-    );
-
-    // HAVING
-    if (request.getRating() != null) {
-        query.having(
-                cb.greaterThanOrEqualTo(
-                        cb.coalesce(ratingExpr, 0.0),
-                        request.getRating()
+        promoJoin.on(
+                cb.and(
+                        cb.lessThanOrEqualTo(promoJoin.get("startDate"), now),
+                        cb.greaterThanOrEqualTo(promoJoin.get("expireDate"), now)
                 )
         );
-    }
 
-    // =========================
-    // SELECT
-    // =========================
-    query.select(cb.tuple(
-            root.get("id").alias("id"),
-            root.get("slug").alias("slug"),
-            root.get("name").alias("name"),
-            root.get("createdAt").alias("createdAt"),
+        // =========================
+        // FILTER
+        // =========================
+        Predicate predicate = ProductSpecification.buildPredicate(root, cb, request);
+        query.where(predicate);
 
-            soldCountExpr.alias("soldCount"),
-            ratingExpr.alias("rating"),
-            reviewCountExpr.alias("reviewCount"),
+        // =========================
+        // EXPRESSIONS
+        // =========================
+        Expression<Double> ratingExpr = cb.avg(rJoin.get("rate"));
+        Expression<Long> soldExpr = cb.sumAsLong(oiJoin.get("quantity"));
+        Expression<Long> reviewExpr = cb.countDistinct(rJoin.get("id"));
+        Expression<Integer> promoValueExpr = cb.max(promoJoin.get("value"));
 
-            root.get("price").alias("price"),
+        // =========================
+        // SUBQUERY FOR IMAGE (FIX NULL + NO DUPLICATE)
+        // =========================
+        Subquery<String> imgSub = query.subquery(String.class);
+        Root<Image> imgRoot = imgSub.from(Image.class);
 
-            thumbnailImage.alias("urlImage"),
+        imgSub.select(imgRoot.get("urlImage"));
+        imgSub.where(
+                cb.equal(imgRoot.get("product"), root),
+                cb.isTrue(imgRoot.get("isThumbnail"))
+        );
 
-            promotionValueExpr.alias("promotionValue"),
-            promoJoin.get("promotionType").alias("promotionType")
-    ));
+        // =========================
+        // GROUP BY
+        // =========================
+        query.groupBy(
+                root.get("id"),
+                root.get("slug"),
+                root.get("name"),
+                root.get("price"),
+                root.get("createdAt"),
+                promoJoin.get("promotionType")
+        );
 
-    // =========================
-    // EXECUTE
-    // =========================
-    TypedQuery<Tuple> typedQuery =
-            entityManager.createQuery(query);
+        // =========================
+        // HAVING (rating filter)
+        // =========================
+        if (request.getRating() != null) {
+            query.having(
+                    cb.greaterThanOrEqualTo(
+                            cb.coalesce(ratingExpr, 0.0),
+                            request.getRating()
+                    )
+            );
+        }
 
-    typedQuery.setFirstResult((int) pageable.getOffset());
-    typedQuery.setMaxResults(pageable.getPageSize());
+        // =========================
+        // SELECT
+        // =========================
+        query.select(cb.tuple(
+                root.get("id").alias("id"),
+                root.get("slug").alias("slug"),
+                root.get("name").alias("name"),
+                root.get("createdAt").alias("createdAt"),
 
-    List<Tuple> tuples = typedQuery.getResultList();
+                soldExpr.alias("soldCount"),
+                ratingExpr.alias("rating"),
+                reviewExpr.alias("reviewCount"),
 
-    List<ProductCardResponse> content =
-            tuples.stream().map(tuple -> {
+                root.get("price").alias("price"),
+                imgSub.alias("urlImage"),
 
-                ProductCardResponse res =
-                        new ProductCardResponse();
+                promoValueExpr.alias("promotionValue"),
+                promoJoin.get("promotionType").alias("promotionType")
+        ));
 
-                res.setId(tuple.get("id", Integer.class));
-                res.setSlug(tuple.get("slug", String.class));
-                res.setName(tuple.get("name", String.class));
+        // =========================
+        // SORT (SAFE)
+        // =========================
+        List<Order> orders = new ArrayList<>();
 
-                Number sold = tuple.get("soldCount", Number.class);
-                res.setSoldCount(sold != null ? sold.intValue() : 0);
+        if (pageable.getSort().isSorted()) {
+            for (Sort.Order sortOrder : pageable.getSort()) {
 
-                Number rating = tuple.get("rating", Number.class);
-                res.setRating(rating != null ? rating.doubleValue() : 0.0);
+                Expression<?> expression;
 
-                Number review = tuple.get("reviewCount", Number.class);
-                res.setReviewCount(review != null ? review.intValue() : 0);
+                switch (sortOrder.getProperty()) {
 
-                res.setPrice(tuple.get("price", Integer.class));
+                    case "soldCount" -> expression = soldExpr;
+                    case "rating" -> expression = ratingExpr;
+                    case "reviewCount" -> expression = reviewExpr;
+                    case "promotionValue" -> expression = promoValueExpr;
 
-                res.setCreatedAt(tuple.get("createdAt", LocalDateTime.class));
+                    case "price" -> expression = root.get("price");
+                    case "createdAt" -> expression = root.get("createdAt");
+                    case "name" -> expression = root.get("name");
 
-                Number promoValue = tuple.get("promotionValue", Number.class);
-                PromotionCampaignType promoType =
-                        tuple.get("promotionType", PromotionCampaignType.class);
-
-                if (promoValue != null || promoType != null) {
-                    PromotionResponse promotion = new PromotionResponse();
-                    promotion.setValue(promoValue != null ? promoValue.intValue() : null);
-                    promotion.setType(promoType);
-                    res.setPromotion(promotion);
+                    default -> expression = root.get("id");
                 }
 
-                // IMAGE FIX
-                res.setUrlImage(tuple.get("urlImage", String.class));
+                orders.add(sortOrder.isAscending()
+                        ? cb.asc(expression)
+                        : cb.desc(expression));
+            }
+        }
 
-                return res;
-            }).toList();
+        query.orderBy(orders);
 
-    // =========================
-    // COUNT QUERY (KHÔNG ĐỘNG)
-    // =========================
-    CriteriaQuery<Long> countQuery =
-            cb.createQuery(Long.class);
+        // =========================
+        // EXECUTE
+        // =========================
+        TypedQuery<Tuple> typedQuery = entityManager.createQuery(query);
+        typedQuery.setFirstResult((int) pageable.getOffset());
+        typedQuery.setMaxResults(pageable.getPageSize());
 
-    Root<Product> countRoot =
-            countQuery.from(Product.class);
+        List<ProductCardResponse> content = typedQuery.getResultList()
+                .stream()
+                .map(tuple -> {
 
-    Predicate countPredicate =
-            ProductSpecification.buildPredicate(countRoot, cb, request);
+                    ProductCardResponse res = new ProductCardResponse();
 
-    countQuery.where(countPredicate);
+                    res.setId(tuple.get("id", Integer.class));
+                    res.setSlug(tuple.get("slug", String.class));
+                    res.setName(tuple.get("name", String.class));
+                    res.setCreatedAt(tuple.get("createdAt", LocalDateTime.class));
 
-    Long total =
-            entityManager.createQuery(
-                    countQuery.select(cb.countDistinct(countRoot.get("id")))
-            ).getSingleResult();
+                    Number sold = tuple.get("soldCount", Number.class);
+                    res.setSoldCount(sold != null ? sold.intValue() : 0);
 
-    return new PageImpl<>(content, pageable, total);
-}
+                    Number rating = tuple.get("rating", Number.class);
+                    res.setRating(rating != null ? rating.doubleValue() : 0.0);
 
+                    Number review = tuple.get("reviewCount", Number.class);
+                    res.setReviewCount(review != null ? review.intValue() : 0);
+
+                    res.setPrice(tuple.get("price", Integer.class));
+                    res.setUrlImage(tuple.get("urlImage", String.class));
+
+                    Number promoValue = tuple.get("promotionValue", Number.class);
+                    PromotionCampaignType promoType =
+                            tuple.get("promotionType", PromotionCampaignType.class);
+
+                    if (promoValue != null || promoType != null) {
+                        PromotionResponse promo = new PromotionResponse();
+                        promo.setValue(promoValue != null ? promoValue.intValue() : null);
+                        promo.setType(promoType);
+                        res.setPromotion(promo);
+                    }
+
+                    return res;
+                })
+                .toList();
+
+        // =========================
+        // COUNT QUERY (SAFE)
+        // =========================
+        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+        Root<Product> countRoot = countQuery.from(Product.class);
+
+        Predicate countPredicate =
+                ProductSpecification.buildPredicate(countRoot, cb, request);
+
+        countQuery.select(cb.countDistinct(countRoot.get("id")));
+        countQuery.where(countPredicate);
+
+        Long total = entityManager.createQuery(countQuery).getSingleResult();
+
+        return new PageImpl<>(content, pageable, total);
+    }
 }
