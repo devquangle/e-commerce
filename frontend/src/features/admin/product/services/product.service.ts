@@ -6,7 +6,7 @@ import type { Pagination } from "@/types/pagination";
 
 const ProductService = {
   async fetchProduct() {
-    const res = await apiAuth.get<ApiResponse<ProductResponse[]>>("/admin/products");
+    const res = await apiAuth.get<ApiResponse<ProductResponse[]>>("/api/v1/admin/products");
     if (!res.data.success || !res.data.data) {
       throw new Error(res.data.message || "Fetch products failed");
     }
@@ -14,7 +14,7 @@ const ProductService = {
   },
     async getById(id: number) {
     const res = await apiAuth.get<ApiResponse<ProductResponse>>(
-      `/admin/products/${id}`,
+      `/api/v1/admin/products/${id}`,
     );
     if (!res.data.success || !res.data.data) {
       throw new Error(res.data.message || "Failed to fetch product");
@@ -23,7 +23,7 @@ const ProductService = {
   },
   async create(data: ProductRequest) {
     const res = await apiAuth.post<ApiResponse<ProductResponse>>(
-      "/admin/products",
+      "/api/v1/admin/products",
       data,
     );
     if (!res.data.success || !res.data.data) {
@@ -34,7 +34,7 @@ const ProductService = {
 
    async update(id:number,data: ProductRequest) {
     const res = await apiAuth.put<ApiResponse<ProductResponse>>(
-      `/admin/products/${id}`,
+      `/api/v1/admin/products/${id}`,
       data,
     );
     if (!res.data.success || !res.data.data) {
@@ -45,7 +45,7 @@ const ProductService = {
 
   async filterProduct(options?: options) {
     const res = await apiAuth.get<ApiResponse<Pagination<ProductResponse>>>(
-      "/admin/products/filter",
+      "/api/v1/admin/products/filter",
       { params: options },
     );
     if (!res.data.success || !res.data.data) {
@@ -57,7 +57,7 @@ const ProductService = {
 
   async delete(id: number) {
     const res = await apiAuth.delete<ApiResponse<null>>(
-      `/admin/products/${id}`
+      `/api/v1/admin/products/${id}`
     );
     if (!res.data.success) {
       throw new Error(res.data.message || "Delete product failed");

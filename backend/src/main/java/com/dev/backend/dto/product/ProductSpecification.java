@@ -41,7 +41,7 @@ public class ProductSpecification {
             }
 
             // genre
-            if (req.getSlugGenres() != null && !req.getSlugGenres().isEmpty()) {
+            if (req.getGenres() != null && !req.getGenres().isEmpty()) {
 
                 Join<Product, ProductGenre> productGenreJoin =
                         root.join("productGenres", JoinType.LEFT);
@@ -50,12 +50,12 @@ public class ProductSpecification {
                         productGenreJoin.join("genre", JoinType.LEFT);
 
                 predicates.add(
-                        genreJoin.get("slug").in(req.getSlugGenres())
+                        genreJoin.get("slug").in(req.getGenres())
                 );
             }
 
             // author
-            if (req.getSlugAuthors() != null && !req.getSlugAuthors().isEmpty()) {
+            if (req.getAuthors() != null && !req.getAuthors().isEmpty()) {
 
                 Join<Product, ProductAuthor> productAuthorJoin =
                         root.join("productAuthors", JoinType.LEFT);
@@ -64,12 +64,12 @@ public class ProductSpecification {
                         productAuthorJoin.join("author", JoinType.LEFT);
 
                 predicates.add(
-                        authorJoin.get("slug").in(req.getSlugAuthors())
+                        authorJoin.get("slug").in(req.getAuthors())
                 );
             }
 
             // publisher
-            if (StringUtils.hasText(req.getSlugPublisher())) {
+            if (StringUtils.hasText(req.getPublisher())) {
 
                 Join<Product, Publisher> publisherJoin =
                         root.join("publisher", JoinType.LEFT);
@@ -77,13 +77,13 @@ public class ProductSpecification {
                 predicates.add(
                         cb.equal(
                                 publisherJoin.get("slug"),
-                                req.getSlugPublisher()
+                                req.getPublisher()
                         )
                 );
             }
 
             // series
-            if (StringUtils.hasText(req.getSlugSeries())) {
+            if (StringUtils.hasText(req.getSeries())) {
 
                 Join<Product, Series> seriesJoin =
                         root.join("series", JoinType.LEFT);
@@ -91,7 +91,7 @@ public class ProductSpecification {
                 predicates.add(
                         cb.equal(
                                 seriesJoin.get("slug"),
-                                req.getSlugSeries()
+                                req.getSeries()
                         )
                 );
             }

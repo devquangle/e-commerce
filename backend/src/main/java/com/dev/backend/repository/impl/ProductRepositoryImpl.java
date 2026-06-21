@@ -61,7 +61,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
                 root.get("price"),
                 root.get("createdAt"),
                 imgJoin.get("urlImage"),
-                promoJoin.get("type"));
+                promoJoin.get("promotionType"));
 
         // Having (Rating Filter)
         Expression<Double> ratingExpr = cb.avg(rJoin.get("rate"));
@@ -84,7 +84,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
                 imgJoin.get("urlImage").alias("urlImage"),
 
                 cb.max(promoJoin.get("value")).alias("promotionValue"),
-                promoJoin.get("type").alias("promotionType")));
+                promoJoin.get("promotionType").alias("promotionType")));
 
         // Sorting
         if (pageable.getSort().isSorted()) {

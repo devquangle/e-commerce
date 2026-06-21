@@ -1,6 +1,6 @@
 
 import { Edit, Trash2 } from "lucide-react";
-import type { AuthorResponse } from "../types/author";
+import type { AuthorResponse } from "../types/author.type";
 
 type Props = {
   onEdit: (item: AuthorResponse) => void;

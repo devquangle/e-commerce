@@ -10,13 +10,13 @@ import lombok.Setter;
 public class ProductFilterRequest {
     private String keyword;
 
-    private List<String> slugGenres;
+    private List<String> genres;
 
-    private List<String> slugAuthors;
+    private List<String> authors;
 
-    private String slugPublisher;
+    private String publisher;
 
-    private String slugSeries;
+    private String series;
 
     private Integer minPrice;
 

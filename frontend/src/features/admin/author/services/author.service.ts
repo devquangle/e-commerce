@@ -3,11 +3,11 @@ import type { ApiResponse } from "@/types/api-response";
 
 import type { options } from "@/types/options.type";
 import type { Pagination } from "@/types/pagination";
-import type { AuthorRequest, AuthorResponse } from "../types/author";
+import type { AuthorRequest, AuthorResponse, AuthorWithProductCountResponse } from "../types/author.type";
 
 const AuthorService = {
   async fetchAuthor() {
-    const res = await apiAuth.get<ApiResponse<AuthorResponse[]>>("/api/v1/authors");
+    const res = await apiAuth.get<ApiResponse<AuthorWithProductCountResponse[]>>("/api/v1/authors");
     if (!res.data.success || !res.data.data) {
       throw new Error(res.data.message || "Fetch authors failed");
     }

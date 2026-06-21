@@ -2,6 +2,7 @@ package com.dev.backend.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -22,12 +23,12 @@ import com.dev.backend.service.ProductService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class ProductController {
     private final ProductService productService;
 
-    @GetMapping("/products/filter")
+    @GetMapping("/admin/products/filter")
     public ResponseEntity<ResponseData<PageResponse<ProductResponse>>> filter(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -37,26 +38,26 @@ public class ProductController {
         return ResponseUtil.success("Lấy danh sách sản phẩm thành công", response);
     }
 
-    @PostMapping("/products/search")
+    @GetMapping("/products/search")
     public ResponseEntity<ResponseData<PageResponse<ProductCardResponse>>> searchProducts(
-            @RequestBody ProductFilterRequest request) {
+            @ModelAttribute ProductFilterRequest request) {
         PageResponse<ProductCardResponse> response = productService.filterProducts(request);
         return ResponseUtil.success("Lọc sản phẩm thành công", response);
     }
 
-    @PostMapping("/products")
+    @PostMapping("/admin/products")
     public ResponseEntity<ResponseData<ProductResponse>> add(@RequestBody ProductRequest request) {
         ProductResponse response = productService.add(request);
         return ResponseUtil.success("Thêm sản phẩm thành công", response);
     }
 
-    @GetMapping("/products/{id}")
+    @GetMapping("/admin/products/{id}")
     public ResponseEntity<ResponseData<ProductResponse>> edit(@PathVariable Integer id) {
         ProductResponse response = productService.edit(id);
         return ResponseUtil.success("lấy thông tin phẩm thành công", response);
     }
 
-    @PutMapping("/products/{id}")
+    @PutMapping("/admin/products/{id}")
     public ResponseEntity<ResponseData<ProductResponse>> update(@PathVariable Integer id,
             @RequestBody ProductRequest request) {
         ProductResponse response = productService.update(id, request);

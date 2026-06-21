@@ -30,7 +30,7 @@ export default function FilterSidebar({
             <Filter size={18} className="text-indigo-600" />
             Bộ Lọc Tìm Kiếm
           </h2>
-          <FilterContent priceRange={priceRange} setPriceRange={setPriceRange} />
+          <FilterContent priceRange={priceRange} setPriceRange={setPriceRange} filters={filters} updateFilter={updateFilter} />
         </div>
       </aside>
 
@@ -92,7 +92,7 @@ export default function FilterSidebar({
                 <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-3">
                   Bộ lọc nâng cao
                 </label>
-                <FilterContent priceRange={priceRange} setPriceRange={setPriceRange} />
+                <FilterContent priceRange={priceRange} setPriceRange={setPriceRange} filters={filters} updateFilter={updateFilter} />
               </div>
             </div>
 

@@ -17,26 +17,26 @@ public class ProductSpecification {
             predicates.add(cb.like(cb.lower(root.get("name")), "%" + request.getKeyword().toLowerCase() + "%"));
         }
         
-        if (request.getSlugGenres() != null && !request.getSlugGenres().isEmpty()) {
+        if (request.getGenres() != null && !request.getGenres().isEmpty()) {
             Join<Product, ProductGenre> pgJoin = root.join("productGenres", JoinType.INNER);
             Join<ProductGenre, Genre> genreJoin = pgJoin.join("genre", JoinType.INNER);
-            predicates.add(genreJoin.get("slug").in(request.getSlugGenres()));
+            predicates.add(genreJoin.get("slug").in(request.getGenres()));
         }
 
-        if (request.getSlugAuthors() != null && !request.getSlugAuthors().isEmpty()) {
+        if (request.getAuthors() != null && !request.getAuthors().isEmpty()) {
             Join<Product, ProductAuthor> paJoin = root.join("productAuthors", JoinType.INNER);
             Join<ProductAuthor, Author> authorJoin = paJoin.join("author", JoinType.INNER);
-            predicates.add(authorJoin.get("slug").in(request.getSlugAuthors()));
+            predicates.add(authorJoin.get("slug").in(request.getAuthors()));
         }
 
-        if (StringUtils.hasText(request.getSlugPublisher())) {
+        if (StringUtils.hasText(request.getPublisher())) {
             Join<Product, Publisher> pubJoin = root.join("publisher", JoinType.INNER);
-            predicates.add(cb.equal(pubJoin.get("slug"), request.getSlugPublisher()));
+            predicates.add(cb.equal(pubJoin.get("slug"), request.getPublisher()));
         }
 
-        if (StringUtils.hasText(request.getSlugSeries())) {
+        if (StringUtils.hasText(request.getSeries())) {
             Join<Product, Series> seriesJoin = root.join("series", JoinType.INNER);
-            predicates.add(cb.equal(seriesJoin.get("slug"), request.getSlugSeries()));
+            predicates.add(cb.equal(seriesJoin.get("slug"), request.getSeries()));
         }
 
         if (request.getMinPrice() != null) {
