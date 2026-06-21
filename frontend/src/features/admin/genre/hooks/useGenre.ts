@@ -6,11 +6,11 @@ import { showErrorToast, showSuccessToast } from "@/utils/toastUtil";
 import axios from "axios";
 
 import GenreService from "../services/genre.service";
-import type { GenreRequest, GenreResponse } from "../types/genre.type";
+import type { GenreRequest, GenreResponse, GenreWithProductCountResponse } from "../types/genre.type";
 import type { options } from "@/types/options.type";
 
 export const useGenre = () => {
-  return useQuery<GenreResponse[]>({
+  return useQuery<GenreWithProductCountResponse[]>({
     queryKey: ["genres"],
     queryFn: GenreService.fetchGenre,
   });

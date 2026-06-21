@@ -7,6 +7,7 @@ export interface AuthorResponse {
   urlImage: string;
   description: string;
   urlBio: string;
+  slug: string;
   status: BaseStatus;
 }
 export interface AuthorRequest {

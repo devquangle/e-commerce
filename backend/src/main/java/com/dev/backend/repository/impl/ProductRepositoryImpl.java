@@ -95,8 +95,6 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
                     case "rating":
                     case "reviewCount":
                     case "promotionValue":
-                        // Sorting by alias or expression can be tricky in some JPA providers.
-                        // Ideally, we rebuild the expression for sorting.
                         if ("soldCount".equals(order.getProperty()))
                             path = (Path<?>) (Expression<?>) cb.sumAsLong(oiJoin.get("quantity"));
                         else if ("rating".equals(order.getProperty()))

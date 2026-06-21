@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.dev.backend.constant.BaseStatus;
 import com.dev.backend.dto.genre.GenreRequest;
 import com.dev.backend.dto.genre.GenreResponse;
+import com.dev.backend.dto.genre.GenreWithProductCountResponse;
 import com.dev.backend.dto.genre.UserGenreResponse;
 import com.dev.backend.entity.Genre;
 import com.dev.backend.exception.DuplicateFieldException;
@@ -209,7 +210,7 @@ public class GenreServiceImpl implements GenreService {
         }
 
         @Override
-        public List<UserGenreResponse> findActiveGenresWithProductCount() {
+        public List<GenreWithProductCountResponse> findActiveGenresWithProductCount() {
                 return genreRepository.findActiveGenresWithProductCount();
         }
 

@@ -32,9 +32,6 @@ export default function GenreTable({
               Thể loại
             </th>
 
-            <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider">
-              Số sản phẩm
-            </th>
 
             <th className="py-3 px-4 font-semibold text-xs uppercase tracking-wider">
               Trạng thái
@@ -70,10 +67,7 @@ export default function GenreTable({
                   </div>
                 </td>
 
-                {/* DESCRIPTION */}
-                <td className="py-4 px-4 text-slate-500 font-medium">
-                  {genre.totalProduct || 0}
-                </td>
+               
 
                 {/* STATUS */}
                 <td className="py-4 px-4">

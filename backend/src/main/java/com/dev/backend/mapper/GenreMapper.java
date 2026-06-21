@@ -17,11 +17,6 @@ public class GenreMapper {
     dto.setId(genre.getId());
     dto.setName(genre.getName());
     dto.setStatus(genre.getStatus());
-    if (genre.getProductGenres()==null) {
-          dto.setTotalProduct(0);
-    }else{
-        dto.setTotalProduct(genre.getProductGenres().size());
-    }
     dto.setUrlImage(genre.getUrlImage() !=null ?genre.getUrlImage() : TextUtils.urlImage(genre.getName()));
     return dto;
   }

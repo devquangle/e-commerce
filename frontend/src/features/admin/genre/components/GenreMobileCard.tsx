@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { SearchX, Package } from "lucide-react";
+import { SearchX } from "lucide-react";
 
 import GenreStatusBadge from "./GenreStatusBadge";
 import GenreActionButtons from "./GenreActionButtons";
@@ -57,32 +56,14 @@ export default function GenreMobileCard({
                   {genre.name}
                 </h3>
 
-                <div className="flex items-center gap-1 text-xs text-slate-500 mt-1">
-                  <Package size={13} />
-                  <span>
-                    {genre.totalProduct} sản phẩm
-                  </span>
-                </div>
+               
               </div>
             </div>
 
             <GenreStatusBadge status={genre.status} />
           </div>
 
-          {/* INFO */}
-          <div className="rounded-xl bg-slate-50 p-3">
-           
-
-            <div className="flex justify-between text-sm mt-2">
-              <span className="text-slate-500">
-                Tổng sản phẩm
-              </span>
-
-              <span className="font-medium text-slate-900">
-                {genre.totalProduct}
-              </span>
-            </div>
-          </div>
+          
 
           {/* ACTION */}
           <GenreActionButtons

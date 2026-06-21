@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.dev.backend.constant.BaseStatus;
+import com.dev.backend.dto.genre.GenreWithProductCountResponse;
 import com.dev.backend.dto.genre.UserGenreResponse;
 import com.dev.backend.entity.Genre;
 
@@ -41,7 +42,7 @@ public interface GenreRepository extends JpaRepository<Genre, Integer> {
     boolean existsByName(@Param("name") String name);
 
     @Query("""
-                 SELECT new com.dev.backend.dto.genre.UserGenreResponse(
+                 SELECT new com.dev.backend.dto.genre.GenreWithProductCountResponse(
                       g.id,
                       g.name,
                       g.slug,
@@ -51,11 +52,11 @@ public interface GenreRepository extends JpaRepository<Genre, Integer> {
                 FROM Genre g
                 LEFT JOIN g.productGenres pg
                 LEFT JOIN pg.product p
-                WHERE g.status = com.dev.backend.constant.BaseStatus.ACTIVE
-                  AND (p IS NULL OR p.status = com.dev.backend.constant.ProductStatus.ACTIVE)
+                WHERE g.status = BaseStatus.ACTIVE
+                  AND (p IS NULL OR p.status = ProductStatus.ACTIVE)
                 GROUP BY g.id, g.name,g.slug, g.urlImage
                 ORDER BY g.name
             """)
-    List<UserGenreResponse> findActiveGenresWithProductCount();
+    List<GenreWithProductCountResponse> findActiveGenresWithProductCount();
 
 }

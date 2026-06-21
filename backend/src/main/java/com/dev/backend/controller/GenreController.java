@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.dev.backend.dto.genre.GenreRequest;
 import com.dev.backend.dto.genre.GenreResponse;
+import com.dev.backend.dto.genre.GenreWithProductCountResponse;
 import com.dev.backend.dto.genre.UserGenreResponse;
 import com.dev.backend.response.PageResponse;
 import com.dev.backend.response.ResponseData;
@@ -34,9 +35,9 @@ public class GenreController {
     private final ExcelService excelService;
 
     @GetMapping("/genres")
-    public ResponseEntity<ResponseData<List<UserGenreResponse>>> list() {
-        List<UserGenreResponse> userGenreResponses = genreService.findActiveGenresWithProductCount();
-        return ResponseUtil.success("Lấy danh sách thể loại thành công", userGenreResponses);
+    public ResponseEntity<ResponseData<List<GenreWithProductCountResponse>>> list() {
+        List<GenreWithProductCountResponse> items = genreService.findActiveGenresWithProductCount();
+        return ResponseUtil.success("Lấy danh sách thể loại thành công", items);
     }
 
     @PostMapping("/admin/genres")

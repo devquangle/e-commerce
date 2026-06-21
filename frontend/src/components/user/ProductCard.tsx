@@ -1,4 +1,5 @@
-import type { ProductCard as ProductCardType } from "@/types/product.card.type";
+import type { ProductCard as ProductCardType, ProductBadge, PromotionCampaignType } from "@/types/product.card.type";
+import { getProductBadgeLabel, getPromotionCampaignLabel } from "@/types/product.card.type";
 import { Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { formatMoney, formatCompactNumber } from "@/utils/number.utils";
@@ -13,18 +14,29 @@ const getDiscountColor = (value: number) => {
   return "bg-amber-500";
 };
 
-const getBadgeColor = (badgeName: string) => {
-  const lowerName = badgeName.toLowerCase();
-  if (lowerName.includes("bán chạy")) return "bg-orange-500";
-  if (lowerName.includes("mới") || lowerName.includes("new")) return "bg-emerald-500";
+const getBadgeColor = (badge: ProductBadge | undefined | null) => {
+  if (badge === "BEST_SELLER") return "bg-orange-500";
+  if (badge === "NEW") return "bg-emerald-500";
+  if (badge === "FLASH_SALE") return "bg-rose-500";
   return "bg-indigo-500";
 };
 
+const getCampaignColor = (type: PromotionCampaignType | undefined | null) => {
+  if (type === "FLASH_SALE") return "bg-rose-500";
+  if (type === "SEASONAL") return "bg-blue-500";
+  return "bg-amber-500";
+};
+
 export default function ProductCard({ product }: Props) {
-  const hasDiscount = product.promosionValue > 0;
+  const discountValue = product.promotion?.value || 0;
+  const hasDiscount = discountValue > 0;
+  
   const originalPrice = hasDiscount
-    ? Math.round(product.price / (1 - product.promosionValue / 100))
+    ? Math.round(product.price / (1 - discountValue / 100))
     : product.price;
+
+  const badgeLabel = product.badge ? getProductBadgeLabel(product.badge) : null;
+  const campaignLabel = product.promotion?.type ? getPromotionCampaignLabel(product.promotion.type) : null;
 
   return (
     <Link
@@ -65,16 +77,16 @@ export default function ProductCard({ product }: Props) {
         </h3>
 
         {/* Badges dưới title */}
-        {(hasDiscount || product.bage) && (
+        {(hasDiscount || badgeLabel) && (
           <div className="flex items-center gap-1.5 mb-2 flex-wrap">
-            {product.bage && (
-              <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold text-white uppercase tracking-wide ${getBadgeColor(product.bage)}`}>
-                {product.bage}
+            {badgeLabel && (
+              <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold text-white uppercase tracking-wide ${getBadgeColor(product.badge)}`}>
+                {badgeLabel}
               </span>
             )}
             {hasDiscount && (
-              <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold text-white ${getDiscountColor(product.promosionValue)}`}>
-                -{product.promosionValue}%
+              <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold text-white ${getDiscountColor(discountValue)}`}>
+                -{discountValue}%
               </span>
             )}
           </div>
