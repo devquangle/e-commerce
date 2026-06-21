@@ -1,6 +1,7 @@
 import { Filter, X } from "lucide-react";
-import FilterContent from "./FilterContent";
+
 import { SORT_OPTIONS, type ProductFilterOptions } from "../types/product.filter.options";
+import FilterContent from "./FilterContent";
 
 interface FilterSidebarProps {
   openFilter: boolean;
