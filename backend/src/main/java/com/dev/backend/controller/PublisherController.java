@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dev.backend.dto.publisher.PublisherRequest;
 import com.dev.backend.dto.publisher.PublisherResponse;
+import com.dev.backend.dto.publisher.PublisherWithProductCountResponse;
 import com.dev.backend.response.PageResponse;
 import com.dev.backend.response.ResponseData;
 import com.dev.backend.response.ResponseUtil;
@@ -29,9 +30,9 @@ public class PublisherController {
     private final PublisherService publisherService;
 
     @GetMapping("/publishers")
-    public ResponseEntity<ResponseData<List<PublisherResponse>>> list() {
-        List<PublisherResponse> list = publisherService.findAll();
-        return ResponseUtil.success("Lấy danh nhà xuất bản thành công", list);
+    public ResponseEntity<ResponseData<List<PublisherWithProductCountResponse>>> list() {
+        List<PublisherWithProductCountResponse> items = publisherService.findActivePublishersWithProductCount();
+        return ResponseUtil.success("Lấy danh nhà xuất bản thành công", items);
     }
 
     @GetMapping("/publishers/filter")

@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.dev.backend.constant.BaseStatus;
 import com.dev.backend.dto.publisher.PublisherRequest;
 import com.dev.backend.dto.publisher.PublisherResponse;
+import com.dev.backend.dto.publisher.PublisherWithProductCountResponse;
 import com.dev.backend.entity.Publisher;
 import com.dev.backend.exception.DuplicateFieldException;
 import com.dev.backend.exception.NotFoundException;
@@ -186,5 +187,10 @@ public class PublisherServiceImpl implements PublisherService {
         if (!errors.getErrors().isEmpty()) {
             throw errors;
         }
+    }
+
+    @Override
+    public List<PublisherWithProductCountResponse> findActivePublishersWithProductCount() {
+        return publisherRepository.findActivePublishersWithProductCount();
     }
 }
