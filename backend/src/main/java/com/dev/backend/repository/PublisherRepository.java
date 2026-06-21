@@ -43,7 +43,7 @@ public interface PublisherRepository extends JpaRepository<Publisher, Integer> {
                 WHERE pu.status = com.dev.backend.constant.BaseStatus.ACTIVE
                 GROUP BY pu.id, pu.name, pu.slug
     
-                     ORDER BY pu.name
+                    ORDER BY COUNT(DISTINCT p.id) DESC
             """)
     List<PublisherWithProductCountResponse> findActivePublishersWithProductCount();
 

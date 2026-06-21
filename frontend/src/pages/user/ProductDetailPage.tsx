@@ -8,7 +8,6 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import type { Product } from "@/types/product.type";
 
 // Swiper
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -165,7 +164,7 @@ export default function ProductDetailPage() {
   ];
 
   return (
-    <Container className="max-w-7xl px-4 md:px-8">
+    <Container className="max-w-7xl ">
       {/* ==================== MAIN PRODUCT SECTION ==================== */}
       <div className="bg-white rounded-3xl shadow-sm border border-slate-200/60 p-4 md:p-8 my-4">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
@@ -217,7 +216,7 @@ export default function ProductDetailPage() {
             className="related-products-swiper"
           >
             {relatedProducts.map((product) => (
-              <SwiperSlide key={product.id} className="!h-auto">
+              <SwiperSlide key={product.id} className="h-auto!">
                 <ProductCard product={product} />
               </SwiperSlide>
             ))}

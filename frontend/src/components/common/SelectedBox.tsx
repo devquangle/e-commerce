@@ -9,12 +9,13 @@ interface Option<T> {
 interface Props<T> {
   label?: string;
   options: Option<T>[];
-  value?: T;
-  onChange: (value: T) => void;
+  value?: T | null;
+  onChange: (value: any) => void;
   placeholder?: string;
   disabled?: boolean;
   searchable?: boolean;
   required?: boolean;
+  isClearable?: boolean;
 }
 
 const isEqual = <T,>(a: T, b: T) => a === b;
@@ -28,6 +29,7 @@ export default function SelectBox<T>({
   disabled = false,
   searchable = true,
   required = false,
+  isClearable = false,
 }: Props<T>) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -112,10 +114,25 @@ export default function SelectBox<T>({
           {selected ? selected.label : placeholder}
         </span>
 
-        <ChevronDown
-          size={16}
-          className={`transition-transform ${open ? "rotate-180" : ""}`}
-        />
+        <div className="flex items-center gap-1.5 text-slate-400">
+          {isClearable && selected && !disabled && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onChange(undefined as any);
+                setSearch("");
+              }}
+              className="hover:text-red-500 transition-colors p-0.5 rounded-md hover:bg-slate-100"
+            >
+              <X size={15} />
+            </button>
+          )}
+          <ChevronDown
+            size={16}
+            className={`transition-transform ${open ? "rotate-180" : ""}`}
+          />
+        </div>
       </div>
 
       {/* Dropdown Menu */}

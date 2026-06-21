@@ -24,5 +24,6 @@ export interface AuthorWithProductCountResponse {
   name: string;
   slug: string;
   urlImage: string;
+   description: string;
   bookCount: number | 0;
 }

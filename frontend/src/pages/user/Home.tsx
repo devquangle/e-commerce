@@ -17,7 +17,7 @@ import {
 export default function Home() {
   return (
     <div className="py-6 sm:py-8 bg-slate-50 min-h-screen">
-      <Container className="max-w-7xl px-4 md:px-8">
+      <Container className="max-w-7xl ">
         {/* 1. Hero Banner Carousel */}
         <HeroBanner banners={banners} />
         

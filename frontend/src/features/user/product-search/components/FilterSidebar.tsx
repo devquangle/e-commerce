@@ -1,4 +1,4 @@
-import { Filter, X } from "lucide-react";
+import { Filter, X, RotateCcw } from "lucide-react";
 
 import { SORT_OPTIONS, type ProductFilterOptions } from "../types/product.filter.options";
 import FilterContent from "./FilterContent";
@@ -24,12 +24,21 @@ export default function FilterSidebar({
   return (
     <>
       {/* ASIDE DESKTOP */}
-      <aside className="hidden lg:block lg:w-[280px] shrink-0">
-        <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm flex flex-col h-full">
-          <h2 className="text-base font-bold text-slate-900 mb-5 pb-4 border-b border-slate-100 flex items-center gap-2">
-            <Filter size={18} className="text-indigo-600" />
-            Bộ Lọc Tìm Kiếm
-          </h2>
+      <aside className="hidden lg:block lg:w-[280px] shrink-0 sticky top-[72px] self-start h-[calc(100vh-80px)] overflow-y-auto custom-scrollbar rounded-2xl">
+        <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm flex flex-col min-h-full">
+          <div className="flex items-center justify-between mb-5 pb-4 border-b border-slate-100">
+            <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+              <Filter size={18} className="text-indigo-600" />
+              Bộ Lọc Tìm Kiếm
+            </h2>
+            <button
+              onClick={resetFilters}
+              className="p-1.5 text-slate-400 hover:text-indigo-600 bg-slate-50 hover:bg-indigo-50 rounded-lg transition-all"
+              title="Thiết lập lại"
+            >
+              <RotateCcw size={16} />
+            </button>
+          </div>
           
           <div className="flex-1">
             <FilterContent priceRange={priceRange} setPriceRange={setPriceRange} filters={filters} updateFilter={updateFilter} />

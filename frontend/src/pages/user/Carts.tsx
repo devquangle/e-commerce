@@ -118,7 +118,7 @@ export default function Carts() {
     <div
       className={`bg-slate-50/50 ${items.length > 0 ? "pb-24 lg:pb-0" : ""}`}
     >
-      <Container className="max-w-7xl px-4 md:px-8 my-4">
+      <Container className="max-w-7xl  my-4">
         <div className="my-4">
           <CheckoutPageHeader icon={ShoppingCart} title="Giỏ hàng của bạn" />
         </div>

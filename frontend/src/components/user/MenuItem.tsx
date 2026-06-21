@@ -29,10 +29,10 @@ export default function MenuItem({ className = "" }) {
   const loadingAuthors = isLoading;
 
   const activeGenres = genres.filter(
-    (g) => (g.status === "ACTIVE" || !g.status) && (g.bookCount || 0) > 0
+    (g) => (g.bookCount || 0) > 0
   );
   const activeAuthors = authors.filter(
-    (a) => (a.status === "ACTIVE" || !a.status) && (a.bookCount || 0) > 0
+    (a) => (a.bookCount || 0) > 0
   );
 
 
@@ -70,9 +70,8 @@ export default function MenuItem({ className = "" }) {
         </div>
 
         {/* Dropdown Container */}
-        {/* Thay đổi: Sử dụng cả class `group-hover:block` kết hợp trạng thái `isMobileMenuOpen` */}
         <div
-          className={`lg:absolute lg:top-full lg:left-0 lg:w-full bg-white lg:rounded-3xl lg:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] lg:border border-slate-100/50 ${isMobileMenuOpen ? "block" : "hidden"} lg:hidden lg:group-hover:block transition-all duration-300 z-50`}
+          className={`lg:absolute lg:top-full lg:left-0 lg:w-full bg-white lg:rounded-3xl lg:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] lg:border border-slate-100/50 ${isMobileMenuOpen ? "block" : "hidden"} ${isDesktopMenuOpen ? "lg:block" : "lg:hidden"} transition-all duration-300 z-50`}
         >
           <div className="flex flex-col lg:grid lg:grid-cols-12 p-4 lg:p-8 gap-6 lg:gap-8">
             {/* === CỘT 1: THỂ LOẠI === */}
@@ -107,9 +106,9 @@ export default function MenuItem({ className = "" }) {
                         setIsMobileMenuOpen(false);
                         setIsDesktopMenuOpen(false);
                       }}
-                      className="group/item flex items-center gap-3 p-2.5 rounded-xl hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 transition-all duration-200 border border-transparent hover:border-indigo-200 shadow-sm hover:shadow-md"
+                      className="group/item flex items-center gap-3 p-2.5 rounded-xl hover:bg-linear-to-r hover:from-indigo-50 hover:to-purple-50 transition-all duration-200 border border-transparent hover:border-indigo-200 shadow-sm hover:shadow-md"
                     >
-                      <div className="hidden lg:flex w-10 h-10 rounded-lg bg-gradient-to-br from-slate-50 to-slate-100 overflow-hidden flex-shrink-0 border border-slate-200/70 shadow-sm items-center justify-center group-hover/item:shadow-md transition-all">
+                      <div className="hidden lg:flex w-10 h-10 rounded-lg bg-linear-to-br from-slate-50 to-slate-100 overflow-hidden shrink-0 border border-slate-200/70 shadow-sm items-center justify-center group-hover/item:shadow-md transition-all">
                         {genre.urlImage ? (
                           <img
                             src={genre.urlImage}
@@ -128,7 +127,7 @@ export default function MenuItem({ className = "" }) {
                         </div>
                       </div>
                       {genre.bookCount !== undefined && (
-                        <div className="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-100/50 whitespace-nowrap flex-shrink-0">
+                        <div className="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-100/50 whitespace-nowrap shrink-0">
                           {genre.bookCount} sách
                         </div>
                       )}
@@ -169,9 +168,9 @@ export default function MenuItem({ className = "" }) {
                         setIsMobileMenuOpen(false);
                         setIsDesktopMenuOpen(false);
                       }}
-                      className="group/item flex items-center gap-3 p-2.5 rounded-xl hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 transition-all duration-200 border border-transparent hover:border-indigo-200 shadow-sm hover:shadow-md"
+                      className="group/item flex items-center gap-3 p-2.5 rounded-xl hover:bg-linear-to-r hover:from-indigo-50 hover:to-purple-50 transition-all duration-200 border border-transparent hover:border-indigo-200 shadow-sm hover:shadow-md"
                     >
-                      <div className="hidden lg:flex w-10 h-10 rounded-full bg-gradient-to-br from-slate-50 to-slate-100 overflow-hidden flex-shrink-0 border border-slate-200/70 shadow-sm items-center justify-center group-hover/item:shadow-md transition-all">
+                      <div className="hidden lg:flex w-10 h-10 rounded-full bg-linear-to-br from-slate-50 to-slate-100 overflow-hidden shrink-0 border border-slate-200/70 shadow-sm items-center justify-center group-hover/item:shadow-md transition-all">
                         {author.urlImage ? (
                           <img
                             src={author.urlImage}
@@ -190,7 +189,7 @@ export default function MenuItem({ className = "" }) {
                         </div>
                       </div>
                       {author.bookCount !== undefined && (
-                        <div className="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-100/50 whitespace-nowrap flex-shrink-0">
+                        <div className="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-100/50 whitespace-nowrap shrink-0">
                           {author.bookCount} sách
                         </div>
                       )}
@@ -217,7 +216,7 @@ export default function MenuItem({ className = "" }) {
                     }}
                     className="flex items-start gap-3 group/col p-2.5 rounded-xl hover:bg-amber-50/60 transition-all duration-200"
                   >
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-100 to-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0 shadow-sm group-hover/col:shadow-md transition-all">
+                    <div className="w-9 h-9 rounded-full bg-linear-to-br from-amber-100 to-amber-50 text-amber-600 flex items-center justify-center shrink-0 shadow-sm group-hover/col:shadow-md transition-all">
                       <Star size={18} className="fill-current" />
                     </div>
                     <div className="mt-0.5 flex-1">
@@ -238,7 +237,7 @@ export default function MenuItem({ className = "" }) {
                     }}
                     className="flex items-start gap-3 group/col p-2.5 rounded-xl hover:bg-blue-50/60 transition-all duration-200"
                   >
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-100 to-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 shadow-sm group-hover/col:shadow-md transition-all">
+                    <div className="w-9 h-9 rounded-full bg-linear-to-br from-blue-100 to-blue-50 text-blue-600 flex items-center justify-center shrink-0 shadow-sm group-hover/col:shadow-md transition-all">
                       <Zap size={18} className="fill-current" />
                     </div>
                     <div className="mt-0.5 flex-1">
@@ -259,7 +258,7 @@ export default function MenuItem({ className = "" }) {
                     }}
                     className="flex items-start gap-3 group/col p-2.5 rounded-xl hover:bg-red-50/60 transition-all duration-200"
                   >
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-red-100 to-red-50 text-red-600 flex items-center justify-center flex-shrink-0 shadow-sm group-hover/col:shadow-md transition-all">
+                    <div className="w-9 h-9 rounded-full bg-linear-to-br from-red-100 to-red-50 text-red-600 flex items-center justify-center shrink-0 shadow-sm group-hover/col:shadow-md transition-all">
                       <Tag size={18} className="fill-current" />
                     </div>
                     <div className="mt-0.5 flex-1">
@@ -288,9 +287,9 @@ export default function MenuItem({ className = "" }) {
                     alt="Promo"
                     className="w-full h-full object-cover transition-transform duration-500 group-hover/banner:scale-105"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-900/30 to-transparent"></div>
+                  <div className="absolute inset-0 bg-linear-to-t from-slate-950/80 via-slate-900/30 to-transparent"></div>
                   <div className="absolute bottom-0 left-0 right-0 p-4">
-                    <span className="inline-block px-2.5 py-1 bg-gradient-to-r from-red-600 to-rose-600 text-white text-[10px] font-black uppercase rounded-md mb-2 tracking-widest shadow-lg">
+                    <span className="inline-block px-2.5 py-1 bg-linear-to-r from-red-600 to-rose-600 text-white text-[10px] font-black uppercase rounded-md mb-2 tracking-widest shadow-lg">
                       🔥 Hot Deal
                     </span>
                     <h4 className="text-white font-bold text-base mb-1 leading-snug">

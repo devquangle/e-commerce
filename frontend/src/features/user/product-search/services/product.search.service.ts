@@ -8,10 +8,7 @@ const ProductSearchService = {
   async search(options?: ProductFilterOptions) {
     const params: any = { ...options };
 
-    // Backend expects 0-indexed page, frontend uses 1-indexed
-    if (params.page) {
-      params.page = Math.max(0, params.page - 1);
-    }
+    // Backend expects 1-indexed page, same as frontend
 
     if (options?.genres && Array.isArray(options.genres)) {
       params.genres = options.genres.join(',');

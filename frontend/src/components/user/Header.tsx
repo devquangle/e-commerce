@@ -40,7 +40,7 @@ export default function Header() {
   return (
     <>
       <header className="sticky  top-0 z-30 border-b bg-white/80 backdrop-blur ">
-        <Container className="max-w-7xl px-4 md:px-8">
+        <Container className="max-w-7xl ">
           <nav className="flex justify-between items-center h-15 gap-2 relative">
             <Logo />
             <button className="lg:hidden cursor-pointer" onClick={() => setIsMobileNavOpen(true)}>

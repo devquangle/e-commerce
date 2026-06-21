@@ -35,12 +35,11 @@ import {
   showWarningToast,
 } from "@/utils/toastUtil";
 
-import type { AuthorResponse } from "@/types/author";
+import type { AuthorWithProductCountResponse } from "@/types/author";
 
 import type { ImageProductRequest } from "@/types/image";
 import type { ProductRequest } from "@/types/product.type";
 import type { GoogleBookResponse } from "@/types/googlebook";
-import type { GenreResponse } from "@/features/admin/genre/types/genre.type";
 import { useCreateProduct } from "@/features/admin/product/hooks/useProduct";
 
 const MAX_IMAGES = 6;
@@ -57,7 +56,7 @@ const INITIAL_FORM: ProductRequest = {
   genreIds: [],
   publisherId: undefined,
   seriesId: undefined,
-  isbn:"0000000000000",
+  isbn: "0000000000000",
   status: "ACTIVE",
   coverImages: [],
   description: `
@@ -112,13 +111,15 @@ export default function CreateProduct() {
   const navigate = useNavigate();
   const replaceFileInputRef = useRef<HTMLInputElement>(null);
 
-  const { mutateAsync: createProduct, isPending: isCreating } = useCreateProduct();
+  const { mutateAsync: createProduct, isPending: isCreating } =
+    useCreateProduct();
 
   const [imageUploadMode, setImageUploadMode] = useState<"file" | "url">(
     "file",
   );
   const [imageUrl, setImageUrl] = useState("");
   const [replaceIndex, setReplaceIndex] = useState<number | null>(null);
+  const [taxonomySyncTrigger, setTaxonomySyncTrigger] = useState(0);
 
   const {
     register,
@@ -169,13 +170,11 @@ export default function CreateProduct() {
 
   // Khởi tạo Options sử dụng useMemo ổn định
   const genreOptions = useMemo(
-    () =>
-      genresData.map((g) => ({ label: g.name, value: g.id })),
+    () => genresData.map((g) => ({ label: g.name, value: g.id })),
     [genresData],
   );
   const authorOptions = useMemo(
-    () =>
-      authorsData.map((a) => ({ label: a.name, value: a.id })),
+    () => authorsData.map((a) => ({ label: a.name, value: a.id })),
     [authorsData],
   );
   const publisherOptions = useMemo(
@@ -316,12 +315,12 @@ export default function CreateProduct() {
     // Cập nhật mô tả chi tiết Tác giả ở phần 5
     const selectedAuthors = ((authorIds as number[]) || [])
       .map((id) => authorsData.find((a) => a.id === id))
-      .filter(Boolean);
+      .filter((author): author is AuthorWithProductCountResponse => !!author);
     if (selectedAuthors.length > 0) {
       const authorDescriptions = selectedAuthors
         .map(
           (a) =>
-            `- ${a?.name || "Chưa rõ"}: ${(a as any)?.description || "Chưa có mô tả."}`,
+            `- ${a.name || "Chưa rõ"}: ${a.description || "Chưa có mô tả."}`,
         )
         .join("<br/>\n");
       newDesc = newDesc.replace(
@@ -342,6 +341,7 @@ export default function CreateProduct() {
     authorsData,
     setValue,
     getValues,
+    taxonomySyncTrigger,
   ]);
 
   // Xử lý Submit Form chính
@@ -547,7 +547,12 @@ export default function CreateProduct() {
             >
               <RotateCcw size={15} /> Đặt lại
             </Button>
-            <Button type="submit" color="primary" className="w-full sm:w-auto" disabled={isCreating}>
+            <Button
+              type="submit"
+              color="primary"
+              className="w-full sm:w-auto"
+              disabled={isCreating}
+            >
               <Save size={15} /> {isCreating ? "Đang lưu..." : "Lưu"}
             </Button>
           </div>
@@ -593,9 +598,9 @@ export default function CreateProduct() {
                     item.authors?.length > 0 &&
                     !!item.thumbnail &&
                     !!item.description &&
-                    !!item.isbn && 
+                    !!item.isbn &&
                     !!item.description &&
-                    !!item.isbn&&
+                    !!item.isbn &&
                     item.pageCount !== null;
                   return (
                     <div className="flex items-center gap-3 w-full">
@@ -637,36 +642,44 @@ export default function CreateProduct() {
                 onSelect={(selectedItem) => {
                   setValue("name", selectedItem.name, { shouldDirty: true });
 
-                  if (selectedItem.pageCount)
-                    setValue("pages", selectedItem.pageCount, {
+                  setValue(
+                    "pages",
+                    selectedItem.pageCount || INITIAL_FORM.pages,
+                    {
                       shouldDirty: true,
-                    });
+                    },
+                  );
 
+                  let dateValue = INITIAL_FORM.publishYear;
                   if (selectedItem.publishedDate) {
-                    let dateValue = selectedItem.publishedDate;
+                    dateValue = selectedItem.publishedDate;
                     if (/^\d{4}$/.test(dateValue))
                       dateValue = `${dateValue}-01-01`;
                     else if (/^\d{4}-\d{2}$/.test(dateValue))
                       dateValue = `${dateValue}-01`;
-                    setValue("publishYear", dateValue, { shouldDirty: true });
                   }
+                  setValue("publishYear", dateValue, { shouldDirty: true });
 
-                  if (selectedItem.isbn) {
-                      setValue("isbn", selectedItem.isbn, {
-                      shouldDirty: true,
-                    });
-                  }
+                  setValue("isbn", selectedItem.isbn || INITIAL_FORM.isbn, {
+                    shouldDirty: true,
+                  });
 
-                  if (selectedItem.listPrice)
-                    setValue("price", selectedItem.listPrice, {
+                  setValue(
+                    "price",
+                    selectedItem.listPrice || INITIAL_FORM.price,
+                    {
                       shouldDirty: true,
-                    });
-                  if (selectedItem.retailPrice)
-                    setValue("originalPrice", selectedItem.retailPrice, {
+                    },
+                  );
+                  setValue(
+                    "originalPrice",
+                    selectedItem.retailPrice || INITIAL_FORM.originalPrice,
+                    {
                       shouldDirty: true,
-                    });
+                    },
+                  );
 
-                  let updatedDesc = getValues("description") || "";
+                  let updatedDesc = INITIAL_FORM.description;
                   if (selectedItem.thumbnail) {
                     updatedDesc = updatedDesc.replace(
                       /src="https:\/\/images\.unsplash\.com\/photo-1544947950-fa07a98d237f\?q=80&w=600"/,
@@ -681,18 +694,45 @@ export default function CreateProduct() {
                   }
                   setValue("description", updatedDesc, { shouldDirty: true });
 
+                  setTaxonomySyncTrigger((prev) => prev + 1);
+
                   // Gọi hàm AI Groq riêng biệt gọn gàng
                   handleAIGenerateDescription(
                     selectedItem.name,
                     selectedItem.description || "",
                   );
 
-                  if (selectedItem.thumbnail && coverImages.length === 0) {
-                    setValue(
-                      "coverImages",
-                      [{ url: selectedItem.thumbnail, isThumbnail: true }],
-                      { shouldDirty: true, shouldValidate: true },
-                    );
+                  if (selectedItem.thumbnail) {
+                    const currentImages = getValues("coverImages") || [];
+                    if (currentImages.length === 0) {
+                      setValue(
+                        "coverImages",
+                        [{ url: selectedItem.thumbnail, isThumbnail: true }],
+                        { shouldDirty: true, shouldValidate: true },
+                      );
+                    } else {
+                      const newImages = [...currentImages];
+                      const thumbIndex = newImages.findIndex(
+                        (img) => img.isThumbnail,
+                      );
+                      if (thumbIndex >= 0) {
+                        newImages[thumbIndex] = {
+                          ...newImages[thumbIndex],
+                          url: selectedItem.thumbnail,
+                          file: undefined,
+                        };
+                      } else {
+                        newImages[0] = {
+                          ...newImages[0],
+                          url: selectedItem.thumbnail,
+                          file: undefined,
+                        };
+                      }
+                      setValue("coverImages", newImages, {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      });
+                    }
                   }
                   trigger(["price", "originalPrice"]);
                 }}
@@ -884,6 +924,7 @@ export default function CreateProduct() {
                     value={field.value}
                     onChange={field.onChange}
                     required
+                    isClearable
                   />
                   {fieldState.error && (
                     <p className="text-red-600 text-xs mt-1">
@@ -905,6 +946,7 @@ export default function CreateProduct() {
                   value={field.value}
                   placeholder="Chọn series..."
                   onChange={field.onChange}
+                  isClearable
                 />
               )}
             />

@@ -11,6 +11,7 @@ export type ProductFilterOptions = {
   page?: number;
   size?: number;
   sort?: SortType;
+  hasPromotion?: string;
 };
 
 export type SortType =

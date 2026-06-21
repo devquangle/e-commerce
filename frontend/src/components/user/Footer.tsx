@@ -3,7 +3,7 @@ import Container from '../common/Container'
 export default function Footer() {
   return (
     <footer className="bg-white py-6 sm:py-4 lg:py-8 border-t">
-      <Container className="max-w-7xl px-4 md:px-8">
+      <Container className="max-w-7xl ">
         <div className="mb-12 grid grid-cols-2 gap-8 md:grid-cols-4 lg:grid-cols-6 lg:gap-10">
           <div className="col-span-full lg:col-span-2">
             <div className="mb-4 lg:-mt-2">

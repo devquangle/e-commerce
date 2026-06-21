@@ -37,6 +37,7 @@ public interface AuthorRepository extends JpaRepository<Author, Integer> {
                     a.name,
                     a.slug,
                     a.urlImage,
+                    a.description,
                     COUNT(DISTINCT p.id)
                 )
                 FROM Author a
@@ -45,8 +46,7 @@ public interface AuthorRepository extends JpaRepository<Author, Integer> {
                     ON p.status = com.dev.backend.constant.ProductStatus.ACTIVE
                 WHERE a.status = com.dev.backend.constant.BaseStatus.ACTIVE
                 GROUP BY a.id, a.name, a.slug, a.urlImage
-
-                ORDER BY a.name
+                ORDER BY COUNT(DISTINCT p.id) DESC
             """)
     List<AuthorWithProductCountResponse> findActiveAuthorsWithProductCount();
 

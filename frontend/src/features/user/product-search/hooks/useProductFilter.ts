@@ -26,6 +26,7 @@ export function useProductFilter(initialOptions: ProductFilterOptions = {}) {
     if (searchParams.has('keyword')) params.keyword = searchParams.get('keyword') || undefined;
     if (searchParams.has('publisher')) params.publisher = searchParams.get('publisher') || undefined;
     if (searchParams.has('series')) params.series = searchParams.get('series') || undefined;
+    if (searchParams.has('hasPromotion')) params.hasPromotion = searchParams.get('hasPromotion') || undefined;
     
     // Arrays
     const genresStr = searchParams.get('genres');

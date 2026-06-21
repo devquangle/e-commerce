@@ -1,5 +1,5 @@
-import { Filter, ChevronDown, Search } from "lucide-react";
-import { SORT_OPTIONS, type ProductFilterOptions, type SortType } from "../types/product.filter.options";
+import { Filter, Search } from "lucide-react";
+import { type ProductFilterOptions } from "../types/product.filter.options";
 
 interface ProductToolbarProps {
   totalItems: number;
@@ -18,7 +18,61 @@ export default function ProductToolbar({
   const sortBy = filters.sort || "NEWEST";
 
   return (
-    <>
+    <div className="flex flex-col gap-3 mb-4">
+      {/* QUICK FILTERS */}
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-sm font-bold text-slate-700 mr-2">Bộ lọc nhanh:</span>
+        <button
+          onClick={() => updateFilter({ sort: "soldCount" })}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
+            sortBy === "soldCount"
+              ? "bg-orange-50 border-orange-200 text-orange-600"
+              : "bg-white border-slate-200 text-slate-600 hover:border-orange-200 hover:text-orange-600"
+          }`}
+        >
+          🔥 Bán chạy
+        </button>
+        <button
+          onClick={() => updateFilter({ rating: filters.rating === 4 ? undefined : 4 })}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
+            filters.rating === 4
+              ? "bg-amber-50 border-amber-200 text-amber-600"
+              : "bg-white border-slate-200 text-slate-600 hover:border-amber-200 hover:text-amber-600"
+          }`}
+        >
+          ⭐ 4 sao+
+        </button>
+        <button
+          onClick={() => updateFilter({ sort: "newest" })}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
+            sortBy === "newest"
+              ? "bg-emerald-50 border-emerald-200 text-emerald-600"
+              : "bg-white border-slate-200 text-slate-600 hover:border-emerald-200 hover:text-emerald-600"
+          }`}
+        >
+          📚 Sách mới
+        </button>
+        <button
+          onClick={() => updateFilter({ maxPrice: filters.maxPrice === 100000 ? undefined : 100000 })}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
+            filters.maxPrice === 100000
+              ? "bg-blue-50 border-blue-200 text-blue-600"
+              : "bg-white border-slate-200 text-slate-600 hover:border-blue-200 hover:text-blue-600"
+          }`}
+        >
+          💰 Dưới 100k
+        </button>
+        <button
+          onClick={() => updateFilter({ hasPromotion: filters.hasPromotion === "true" ? undefined : "true" })}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
+            filters.hasPromotion === "true"
+              ? "bg-rose-50 border-rose-200 text-rose-600"
+              : "bg-white border-slate-200 text-slate-600 hover:border-rose-200 hover:text-rose-600"
+          }`}
+        >
+          🎁 Khuyến mãi
+        </button>
+      </div>
       {/* INPUT TEXT TÌM KIẾM - MOBILE */}
       <div className="block lg:hidden mb-4">
         <div className="relative w-full">
@@ -54,29 +108,51 @@ export default function ProductToolbar({
             <span className="text-xs font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">
               Sắp xếp:
             </span>
-            <div className="relative w-[180px]">
-              <select
-                value={sortBy}
-                onChange={(e) => updateFilter({ sort: e.target.value as SortType })}
-                className="w-full bg-slate-50 hover:bg-slate-100/80 border border-slate-200 text-slate-700 text-xs font-bold px-3.5 py-2.5 rounded-xl outline-none appearance-none cursor-pointer transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10"
+            <div className="flex bg-slate-100 p-1 rounded-xl">
+              <button
+                onClick={() => updateFilter({ sort: "newest" })}
+                className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                  sortBy === "newest"
+                    ? "bg-white shadow text-indigo-600"
+                    : "text-slate-600 hover:text-slate-800"
+                }`}
               >
-                {SORT_OPTIONS.map((option) => (
-                  <option
-                    key={option.value}
-                    value={option.value}
-                    className="font-medium text-slate-800 bg-white"
-                  >
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-500">
-                <ChevronDown size={14} />
-              </div>
+                Mới nhất
+              </button>
+              <button
+                onClick={() => updateFilter({ sort: "soldCount" })}
+                className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                  sortBy === "soldCount"
+                    ? "bg-white shadow text-indigo-600"
+                    : "text-slate-600 hover:text-slate-800"
+                }`}
+              >
+                Bán chạy
+              </button>
+              <button
+                onClick={() => updateFilter({ sort: "priceAsc" })}
+                className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                  sortBy === "priceAsc"
+                    ? "bg-white shadow text-indigo-600"
+                    : "text-slate-600 hover:text-slate-800"
+                }`}
+              >
+                Giá ↑
+              </button>
+              <button
+                onClick={() => updateFilter({ sort: "priceDesc" })}
+                className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                  sortBy === "priceDesc"
+                    ? "bg-white shadow text-indigo-600"
+                    : "text-slate-600 hover:text-slate-800"
+                }`}
+              >
+                Giá ↓
+              </button>
             </div>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

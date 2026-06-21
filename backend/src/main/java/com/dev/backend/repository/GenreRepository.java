@@ -55,7 +55,7 @@ public interface GenreRepository extends JpaRepository<Genre, Integer> {
                   AND (p IS NULL OR p.status = ProductStatus.ACTIVE)
                 GROUP BY g.id, g.name,g.slug, g.urlImage
               
-                ORDER BY g.name
+              ORDER BY COUNT(DISTINCT p.id) DESC
             """)
     List<GenreWithProductCountResponse> findActiveGenresWithProductCount();
 

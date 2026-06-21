@@ -74,7 +74,7 @@ export default function MenuItemMobile() {
                       className="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-white hover:shadow-sm transition-all duration-200 group"
                     >
                       <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center flex-shrink-0 shadow-inner">
+                        <div className="w-8 h-8 rounded-lg bg-linear-to-br from-slate-100 to-slate-200 flex items-center justify-center shrink-0 shadow-inner">
                           {genre.urlImage ? (
                             <img
                               src={genre.urlImage}
@@ -92,7 +92,7 @@ export default function MenuItemMobile() {
                         </span>
                       </div>
                       {genre.bookCount !== undefined && (
-                        <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100/50 flex-shrink-0 ml-2">
+                        <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100/50 shrink-0 ml-2">
                           {genre.bookCount} sách
                         </span>
                       )}
@@ -126,7 +126,7 @@ export default function MenuItemMobile() {
                       className="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-white hover:shadow-sm transition-all duration-200 group"
                     >
                       <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center flex-shrink-0 shadow-inner overflow-hidden">
+                        <div className="w-8 h-8 rounded-full bg-linear-to-br from-slate-100 to-slate-200 flex items-center justify-center shrink-0 shadow-inner overflow-hidden">
                           {author.urlImage ? (
                             <img
                               src={author.urlImage}
@@ -144,7 +144,7 @@ export default function MenuItemMobile() {
                         </span>
                       </div>
                       {author.bookCount !== undefined && (
-                        <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100/50 flex-shrink-0 ml-2">
+                        <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100/50 shrink-0 ml-2">
                           {author.bookCount} sách
                         </span>
                       )}

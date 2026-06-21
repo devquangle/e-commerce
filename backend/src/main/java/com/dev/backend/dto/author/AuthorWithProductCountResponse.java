@@ -5,4 +5,5 @@ public record AuthorWithProductCountResponse(
         String name,
         String slug,
         String urlImage,
+        String description,
         Long bookCount) {}

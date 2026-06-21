@@ -1,12 +1,12 @@
 import { apiAuth } from "@/configs/axios";
 import type { ApiResponse } from "@/types/api-response";
-import type { PublisherRequest, PublisherResponse  } from "../types/publisher.type";
+import type { PublisherRequest, PublisherResponse, PublisherWithProductCountResponse  } from "../types/publisher.type";
 import type { options } from "@/types/options.type";
 import type { Pagination } from "@/types/pagination";
 
 const PublisherService = {
   async fetchPublisher() {
-    const res = await apiAuth.get<ApiResponse<PublisherResponse[]>>("/api/v1/publishers");
+    const res = await apiAuth.get<ApiResponse<PublisherWithProductCountResponse[]>>("/api/v1/publishers");
     if (!res.data.success || !res.data.data) {
       throw new Error(res.data.message || "Fetch publishers failed");
     }

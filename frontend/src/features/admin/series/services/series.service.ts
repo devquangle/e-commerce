@@ -1,12 +1,12 @@
 import { apiAuth } from "@/configs/axios";
 import type { ApiResponse } from "@/types/api-response";
-import type { SeriesRequest, SeriesResponse  } from "../types/series.type";
+import type { SeriesRequest, SeriesResponse, SeriesWithProductCountResponse  } from "../types/series.type";
 import type { options } from "@/types/options.type";
 import type { Pagination } from "@/types/pagination";
 
 const SeriesService = {
   async fetchSeries() {
-    const res = await apiAuth.get<ApiResponse<SeriesResponse[]>>("/api/v1/series");
+    const res = await apiAuth.get<ApiResponse<SeriesWithProductCountResponse[]>>("/api/v1/series");
     if (!res.data.success || !res.data.data) {
       throw new Error(res.data.message || "Fetch series failed");
     }

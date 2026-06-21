@@ -1,5 +1,5 @@
 import type { ProductCard as ProductCardType, ProductBadge,  } from "@/types/product.card.type";
-import { getProductBadgeLabel, getPromotionCampaignLabel } from "@/types/product.card.type";
+import { getProductBadgeLabel } from "@/types/product.card.type";
 import { Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { formatMoney, formatCompactNumber } from "@/utils/number.utils";
@@ -45,7 +45,7 @@ export default function ProductCard({ product }: Props) {
       "
     >
       {/* IMAGE SECTION */}
-      <div className="relative aspect-[3/4] w-full bg-slate-50/80 overflow-hidden shrink-0 flex items-center justify-center p-4">
+      <div className="relative aspect-3/4 w-full bg-slate-50/80 overflow-hidden shrink-0 flex items-center justify-center p-4">
         <img
           src={product.urlImage}
           alt={product.name}
@@ -55,7 +55,7 @@ export default function ProductCard({ product }: Props) {
             (e.target as HTMLImageElement).src = 'https://via.placeholder.com/300x400?text=No+Image';
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/5 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        <div className="absolute inset-0 bg-linear-to-t from-slate-900/5 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       </div>
 
       {/* CONTENT SECTION */}
@@ -93,13 +93,21 @@ export default function ProductCard({ product }: Props) {
           <div className="flex items-center justify-between w-full">
             {/* Left: Rating */}
             <div className="flex items-center gap-1">
-              <Star size={14} className="fill-amber-400 text-amber-400" />
-              <span className="text-[13px] font-semibold text-slate-700">
-                {product.rating ? product.rating.toFixed(1) : "0.0"}
-              </span>
-              <span className="text-[12px] text-slate-400 ml-0.5">
-                ({product.reviewCount || 0})
-              </span>
+              {product.rating && product.rating > 0 ? (
+                <>
+                  <Star size={14} className="fill-amber-400 text-amber-400" />
+                  <span className="text-[13px] font-semibold text-slate-700">
+                    {product.rating.toFixed(1)}
+                  </span>
+                  <span className="text-[12px] text-slate-400 ml-0.5">
+                    ({product.reviewCount || 0})
+                  </span>
+                </>
+              ) : (
+                <span className="text-[12px] text-slate-500 italic">
+                  Chưa có đánh giá
+                </span>
+              )}
             </div>
 
             {/* Right: Sold Count */}

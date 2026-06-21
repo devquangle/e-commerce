@@ -2,6 +2,11 @@ import { useState } from "react";
 import { useBookFormData } from "@/hooks/useBookFormData";
 import type { ProductFilterOptions } from "../types/product.filter.options";
 import { Building2, Layers, ChevronDown, Star } from "lucide-react";
+import Loading from "@/components/common/Loading";
+import type { GenreWithProductCountResponse } from "@/types/genre";
+import type { AuthorWithProductCountResponse } from "@/types/author";
+import type { PublisherWithProductCountResponse } from "@/features/admin/publisher/types/publisher.type";
+import type { SeriesWithProductCountResponse } from "@/features/admin/series/types/series.type";
 
 /* ================= TYPES ================= */
 
@@ -107,9 +112,9 @@ function CheckboxList({
                   value={itemValue}
                   checked={isChecked}
                   onChange={(e) => onChange?.(itemValue, e.target.checked)}
-                  className="w-4 h-4 rounded text-indigo-600 border-slate-300 focus:ring-indigo-500/20 cursor-pointer flex-shrink-0"
+                  className="w-4 h-4 rounded text-indigo-600 border-slate-300 focus:ring-indigo-500/20 cursor-pointer shrink-0"
                 />
-                <div className="w-6 h-6 rounded bg-slate-100 flex-shrink-0 flex items-center justify-center overflow-hidden">
+                <div className="w-6 h-6 rounded bg-slate-100 shrink-0 flex items-center justify-center overflow-hidden">
                   {item.urlImage ? (
                     <img
                       src={item.urlImage}
@@ -122,10 +127,12 @@ function CheckboxList({
                     </span>
                   )}
                 </div>
-                <span className="truncate">{item.name}</span>
+                <span className="whitespace-normal wrap-break-word leading-tight">
+                  {item.name}
+                </span>
               </div>
               {item.bookCount !== undefined && (
-                <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-md group-hover:text-indigo-600 group-hover:bg-indigo-50 transition-colors flex-shrink-0">
+                <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-md group-hover:text-indigo-600 group-hover:bg-indigo-50 transition-colors shrink-0">
                   {item.bookCount}
                 </span>
               )}
@@ -143,7 +150,7 @@ function CheckboxList({
           onClick={() => setExpanded(!expanded)}
           className="mt-3 text-xs font-bold text-indigo-600 hover:text-indigo-700 hover:underline transition-colors block"
         >
-          {expanded ? "Thu gọn" : `Xem thêm (${items.length - limit})`}
+          {expanded ? "Thu gọn" : `Xem tất cả (${items.length - limit})`}
         </button>
       )}
     </div>
@@ -169,9 +176,9 @@ function RadioList({
             type="radio"
             checked={!selectedValue}
             onChange={() => onChange(undefined)}
-            className="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500/20 cursor-pointer flex-shrink-0"
+            className="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500/20 cursor-pointer shrink-0"
           />
-          <div className="w-6 h-6 rounded bg-slate-100 flex-shrink-0 flex items-center justify-center text-slate-400">
+          <div className="w-6 h-6 rounded bg-slate-100 shrink-0 flex items-center justify-center text-slate-400">
             {icon}
           </div>
           <span className="truncate flex-1">Tất cả</span>
@@ -188,15 +195,17 @@ function RadioList({
                 value={item.slug}
                 checked={selectedValue === item.slug}
                 onChange={() => onChange(item.slug)}
-                className="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500/20 cursor-pointer flex-shrink-0"
+                className="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500/20 cursor-pointer shrink-0"
               />
-              <div className="w-6 h-6 rounded bg-slate-100 flex-shrink-0 flex items-center justify-center text-slate-400 group-hover:text-indigo-500 transition-colors">
+              <div className="w-6 h-6 rounded bg-slate-100 shrink-0 flex items-center justify-center text-slate-400 group-hover:text-indigo-500 transition-colors">
                 {icon}
               </div>
-              <span className="truncate">{item.name}</span>
+              <span className="whitespace-normal wrap-break-word leading-tight">
+                {item.name}
+              </span>
             </div>
             {item.bookCount !== undefined && (
-              <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-md group-hover:text-indigo-600 group-hover:bg-indigo-50 transition-colors flex-shrink-0">
+              <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-md group-hover:text-indigo-600 group-hover:bg-indigo-50 transition-colors shrink-0">
                 {item.bookCount}
               </span>
             )}
@@ -213,7 +222,7 @@ function RadioList({
           onClick={() => setExpanded(!expanded)}
           className="mt-3 text-xs font-bold text-indigo-600 hover:text-indigo-700 hover:underline transition-colors block"
         >
-          {expanded ? "Thu gọn" : `Xem thêm (${items.length - limit})`}
+          {expanded ? "Thu gọn" : `Xem tất cả (${items.length - limit})`}
         </button>
       )}
     </div>
@@ -232,16 +241,19 @@ export default function FilterContent({
     useBookFormData();
 
   const activeGenres = (genresData || []).filter(
-    (g: any) => (g.status === "ACTIVE" || !g.status) && (g.bookCount || 0) > 0
+    (g: GenreWithProductCountResponse) => (g.bookCount || 0) > 0,
   );
+
   const activeAuthors = (authorsData || []).filter(
-    (a: any) => (a.status === "ACTIVE" || !a.status) && (a.bookCount || 0) > 0
+    (a: AuthorWithProductCountResponse) => (a.bookCount || 0) > 0,
   );
+
   const activePublishers = (publishersData || []).filter(
-    (p: any) => (p.status === "ACTIVE" || !p.status) && (p.bookCount || 0) > 0
+    (p: PublisherWithProductCountResponse) => (p.bookCount || 0) > 0,
   );
+
   const activeSeries = (seriesData || []).filter(
-    (s: any) => (s.status === "ACTIVE" || !s.status) && (s.bookCount || 0) > 0
+    (s: SeriesWithProductCountResponse) => (s.bookCount || 0) > 0,
   );
 
   const formatCurrency = (value: number) => {
@@ -267,24 +279,15 @@ export default function FilterContent({
     updateFilter({ [filterKey]: newValues });
   };
 
-  const SkeletonLoading = () => (
-    <div className="animate-pulse space-y-2">
-      <div className="h-4 bg-slate-100 rounded w-1/3 mb-4"></div>
-      <div className="h-4 bg-slate-100 rounded w-full"></div>
-      <div className="h-4 bg-slate-100 rounded w-full"></div>
-      <div className="h-4 bg-slate-100 rounded w-3/4"></div>
-    </div>
-  );
-
   return (
     <div className="space-y-5">
-      <FilterSection title="Thể loại" defaultOpen={true}>
+      <FilterSection title="Thể loại" defaultOpen={!!filters?.genres?.length}>
         {isLoading ? (
-          <SkeletonLoading />
+          <Loading />
         ) : (
           <CheckboxList
-            items={activeGenres as any}
-            limit={5}
+            items={activeGenres}
+            limit={6}
             selectedValues={filters?.genres}
             onChange={(val, checked) =>
               handleCheckboxChange("genres", val, checked)
@@ -293,13 +296,13 @@ export default function FilterContent({
         )}
       </FilterSection>
 
-      <FilterSection title="Tác giả" defaultOpen={true}>
+      <FilterSection title="Tác giả" defaultOpen={!!filters?.authors?.length}>
         {isLoading ? (
-          <SkeletonLoading />
+          <Loading />
         ) : (
           <CheckboxList
-            items={activeAuthors as any}
-            limit={5}
+            items={activeAuthors}
+            limit={6}
             selectedValues={filters?.authors}
             onChange={(val, checked) =>
               handleCheckboxChange("authors", val, checked)
@@ -308,13 +311,13 @@ export default function FilterContent({
         )}
       </FilterSection>
 
-      <FilterSection title="Nhà xuất bản" defaultOpen={true}>
+      <FilterSection title="Nhà xuất bản" defaultOpen={!!filters?.publisher}>
         {isLoading ? (
-          <SkeletonLoading />
+          <Loading />
         ) : (
           <RadioList
-            items={activePublishers as any}
-            limit={5}
+            items={activePublishers}
+            limit={6}
             selectedValue={filters?.publisher}
             onChange={(slug) => updateFilter?.({ publisher: slug })}
             icon={<Building2 size={14} />}
@@ -322,13 +325,13 @@ export default function FilterContent({
         )}
       </FilterSection>
 
-      <FilterSection title="Series" defaultOpen={true}>
+      <FilterSection title="Series" defaultOpen={!!filters?.series}>
         {isLoading ? (
-          <SkeletonLoading />
+          <Loading />
         ) : (
           <RadioList
-            items={activeSeries as any}
-            limit={5}
+            items={activeSeries}
+            limit={6}
             selectedValue={filters?.series}
             onChange={(slug) => updateFilter?.({ series: slug })}
             icon={<Layers size={14} />}
@@ -344,7 +347,7 @@ export default function FilterContent({
               name="rating"
               checked={!filters?.rating}
               onChange={() => updateFilter?.({ rating: undefined })}
-              className="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500/20 cursor-pointer flex-shrink-0"
+              className="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500/20 cursor-pointer shrink-0"
             />
             <span className="flex-1">Tất cả</span>
           </label>
@@ -358,7 +361,7 @@ export default function FilterContent({
                 name="rating"
                 checked={filters?.rating === r}
                 onChange={() => updateFilter?.({ rating: r })}
-                className="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500/20 cursor-pointer flex-shrink-0"
+                className="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500/20 cursor-pointer shrink-0"
               />
               <div className="flex items-center gap-1 flex-1">
                 <div className="flex items-center text-amber-400">
@@ -366,11 +369,19 @@ export default function FilterContent({
                     <Star
                       key={i}
                       size={14}
-                      className={i < r ? "fill-amber-400 text-amber-400" : "fill-slate-200 text-slate-200"}
+                      className={
+                        i < r
+                          ? "fill-amber-400 text-amber-400"
+                          : "fill-slate-200 text-slate-200"
+                      }
                     />
                   ))}
                 </div>
-                {r < 5 && <span className="ml-1 text-[13px] text-slate-500">trở lên</span>}
+                {r < 5 && (
+                  <span className="ml-1 text-[13px] text-slate-500">
+                    trở lên
+                  </span>
+                )}
               </div>
             </label>
           ))}
