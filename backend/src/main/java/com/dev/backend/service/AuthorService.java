@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.dev.backend.dto.author.AuthorRequest;
 import com.dev.backend.dto.author.AuthorResponse;
+import com.dev.backend.dto.author.AuthorWithProductCountResponse;
 import com.dev.backend.entity.Author;
 import com.dev.backend.response.PageResponse;
 
@@ -32,4 +33,5 @@ public interface AuthorService {
 
     PageResponse<AuthorResponse> pages(int page, int size, String keyword, String status);
 
+    List<AuthorWithProductCountResponse> findActiveAuthorsWithProductCount();
 }

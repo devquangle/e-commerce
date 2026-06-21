@@ -7,7 +7,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.dev.backend.dto.genre.GenreRequest;
 import com.dev.backend.dto.genre.GenreResponse;
 import com.dev.backend.dto.genre.GenreWithProductCountResponse;
-import com.dev.backend.dto.genre.UserGenreResponse;
 import com.dev.backend.entity.Genre;
 import com.dev.backend.response.PageResponse;
 

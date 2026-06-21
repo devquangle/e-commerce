@@ -11,7 +11,6 @@ import org.springframework.data.repository.query.Param;
 
 import com.dev.backend.constant.BaseStatus;
 import com.dev.backend.dto.genre.GenreWithProductCountResponse;
-import com.dev.backend.dto.genre.UserGenreResponse;
 import com.dev.backend.entity.Genre;
 
 public interface GenreRepository extends JpaRepository<Genre, Integer> {

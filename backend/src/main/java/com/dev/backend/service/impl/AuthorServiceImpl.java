@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.dev.backend.constant.BaseStatus;
 import com.dev.backend.dto.author.AuthorRequest;
 import com.dev.backend.dto.author.AuthorResponse;
+import com.dev.backend.dto.author.AuthorWithProductCountResponse;
 import com.dev.backend.entity.Author;
 import com.dev.backend.exception.DuplicateFieldException;
 import com.dev.backend.exception.NotFoundException;
@@ -140,51 +141,59 @@ public class AuthorServiceImpl implements AuthorService {
     public void insertData() {
 
         List<Author> authors = List.of(
-
-                new Author(
-                        null,
+                createAuthor(
                         "Khác",
-                        TextUtils.toSlug("Khác"),
                         null,
                         null,
                         null,
-                        "Tác giả không xác định hoặc nhóm khác",
-                        BaseStatus.ACTIVE),
+                        "Tác giả không xác định hoặc nhóm khác"),
 
-                new Author(
-                        null,
+                createAuthor(
                         "Nguyễn Nhật Ánh",
-                        TextUtils.toSlug("Nguyễn Nhật Ánh"),
                         "Q7022893",
                         "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Nguyen_Nhat_Anh_in_January_2019.png/330px-Nguyen_Nhat_Anh_in_January_2019.png",
                         "https://vi.wikipedia.org/wiki/Nguy%E1%BB%85n_Nh%E1%BA%ADt_%C3%81nh",
-                        "Nguyễn Nhật Ánh là nhà văn Việt Nam nổi tiếng với các tác phẩm về tuổi thơ và thanh thiếu niên.",
-                        BaseStatus.ACTIVE),
+                        "Nguyễn Nhật Ánh là nhà văn Việt Nam nổi tiếng..."),
 
-                new Author(
-                        null,
+                createAuthor(
                         "Nam Cao",
-                        TextUtils.toSlug("Nam Cao"),
                         "Q11760",
                         "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Portrait_of_Nam_Cao.jpg/330px-Portrait_of_Nam_Cao.jpg",
                         "https://vi.wikipedia.org/wiki/Nam_Cao",
-                        "Nam Cao là một nhà văn, nhà báo và cũng là một chiến sĩ, liệt sĩ, Anh hùng Lực lượng vũ trang nhân dân Việt Nam. Ông là nhà văn hiện thực lớn trước Cách mạng Tháng Tám, một nhà báo kháng chiến sau khi Cách mạng thành công và là một trong những nhà văn người Việt Nam tiêu biểu nhất thế kỷ 20. Nam Cao có nhiều đóng góp quan trọng đối với việc hoàn thiện phong cách truyện ngắn và tiểu thuyết Việt Nam ở nửa đầu thế kỷ 20.",
-                        BaseStatus.ACTIVE),
+                        "Nam Cao là một nhà văn..."),
 
-                new Author(
-                        null,
+                createAuthor(
                         "Tô Hoài",
-                        TextUtils.toSlug("Tô Hoài"),
                         "Q13127",
                         "https://upload.wikimedia.org/wikipedia/vi/thumb/7/73/Nhavan_t%C3%B4_ho%C3%A0i.jpg/330px-Nhavan_t%C3%B4_ho%C3%A0i.jpg",
                         "https://vi.wikipedia.org/wiki/T%C3%B4_Ho%C3%A0i",
-                        "Tô Hoài là một nhà văn Việt Nam được tặng Giải thưởng Hồ Chí Minh về Văn học Nghệ thuật năm 1996. Ông là Tổng Thư ký đầu tiên của Hội Nhà văn Việt Nam (1957-1963). Dế Mèn phiêu lưu ký là tác phẩm được nhiều người biết đến nhất của ông dành cho thiếu nhi.",
-                        BaseStatus.ACTIVE)
-
-        );
+                        "Tô Hoài là một nhà văn..."));
         if (authorRepository.count() == 0) {
             authorRepository.saveAll(authors);
         }
 
+    }
+
+    public Author createAuthor(
+            String name,
+            String wikibaseItem,
+            String image,
+            String urlBio,
+            String description) {
+        Author a = new Author();
+        a.setName(name);
+        a.setSlug(TextUtils.toSlug(name));
+        a.setWikibaseItem(wikibaseItem);
+        a.setUrlImage(image);
+        a.setUrlBio(urlBio);
+        a.setDescription(description);
+        a.setStatus(BaseStatus.ACTIVE);
+        return a;
+    }
+
+
+    @Override
+    public List<AuthorWithProductCountResponse> findActiveAuthorsWithProductCount() {
+        return authorRepository.findActiveAuthorsWithProductCount();
     }
 }

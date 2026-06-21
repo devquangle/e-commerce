@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dev.backend.dto.author.AuthorRequest;
 import com.dev.backend.dto.author.AuthorResponse;
+import com.dev.backend.dto.author.AuthorWithProductCountResponse;
 import com.dev.backend.response.PageResponse;
 import com.dev.backend.response.ResponseData;
 import com.dev.backend.response.ResponseUtil;
@@ -31,9 +32,9 @@ public class AuthorController {
 
 
      @GetMapping("/authors")
-    public ResponseEntity<ResponseData<List<AuthorResponse>>> list() {
-        List<AuthorResponse> list = authorService.findAll();
-        return ResponseUtil.success("Lấy danh sách tác giả thành công", list);
+    public ResponseEntity<ResponseData<List<AuthorWithProductCountResponse>>> list() {
+        List<AuthorWithProductCountResponse> items = authorService.findActiveAuthorsWithProductCount();
+        return ResponseUtil.success("Lấy danh sách tác giả thành công", items);
     }
 
 
