@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import type { ProductFilterOptions, SortType } from '../types/product.filter.options';
 
 export function useProductFilter(initialOptions: ProductFilterOptions = {}) {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   const initialOptionsStr = JSON.stringify(initialOptions);
