@@ -32,4 +32,6 @@ public interface PublisherService {
     PageResponse<PublisherResponse> pages(int page, int size, String keyword, String status);
 
     List<PublisherWithProductCountResponse> findActivePublishersWithProductCount();
+
+    
 }

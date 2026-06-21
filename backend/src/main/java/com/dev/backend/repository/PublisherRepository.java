@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.dev.backend.constant.BaseStatus;
-import com.dev.backend.dto.author.AuthorWithProductCountResponse;
 import com.dev.backend.dto.publisher.PublisherWithProductCountResponse;
 import com.dev.backend.entity.Publisher;
 

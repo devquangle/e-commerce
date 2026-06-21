@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.dev.backend.constant.BaseStatus;
 import com.dev.backend.dto.series.SeriesRequest;
 import com.dev.backend.dto.series.SeriesResponse;
+import com.dev.backend.dto.series.SeriesWithProductCountResponse;
 import com.dev.backend.entity.Series;
 import com.dev.backend.exception.DuplicateFieldException;
 import com.dev.backend.exception.NotFoundException;
@@ -201,5 +202,10 @@ public class SeriesServiceImpl implements SeriesService {
         if (!errors.getErrors().isEmpty()) {
             throw errors;
         }
+    }
+
+    @Override
+    public List<SeriesWithProductCountResponse> findActiveSeriesWithProductCount() {
+        return seriesRepository.findActiveSeriesWithProductCount();
     }
 }
