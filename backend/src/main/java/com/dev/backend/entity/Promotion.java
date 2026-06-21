@@ -2,7 +2,12 @@ package com.dev.backend.entity;
 
 import java.time.LocalDateTime;
 
+import com.dev.backend.constant.BaseStatus;
+import com.dev.backend.constant.PromotionCampaignType;
+
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -19,18 +24,21 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "promotions")
 public class Promotion {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String name;
 
-    private Double value;
-
+    private Integer value;
 
     private LocalDateTime createdAt;
     private LocalDateTime startDate;
     private LocalDateTime expireDate;
 
+    @Enumerated(EnumType.STRING)
+    private PromotionCampaignType promotionType;
+    @Enumerated(EnumType.STRING)
+    private BaseStatus status;
 
 }

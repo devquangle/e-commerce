@@ -2,6 +2,7 @@ package com.dev.backend.service;
 
 import java.util.List;
 
+import com.dev.backend.constant.ProductBadge;
 import com.dev.backend.dto.product.ProductCardResponse;
 import com.dev.backend.dto.product.ProductFilterRequest;
 import com.dev.backend.dto.product.ProductRequest;
@@ -21,8 +22,6 @@ public interface ProductService {
 
     PageResponse<ProductResponse> pages(int page, int size, String keyword, String status);
 
-    PageResponse<ProductCardResponse> filterProducts(ProductFilterRequest request);
-
     Product save(Product product);
 
     ProductResponse add(ProductRequest productRequest);
@@ -34,5 +33,8 @@ public interface ProductService {
     void delete(Integer id);
 
     void validate(ProductRequest productRequest);
+
+    PageResponse<ProductCardResponse> filterProducts(ProductFilterRequest request);
+
 
 }

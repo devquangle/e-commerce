@@ -1,5 +1,9 @@
 package com.dev.backend.dto.product;
 
+import java.time.LocalDateTime;
+
+import com.dev.backend.constant.ProductBadge;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,8 +21,10 @@ public class ProductCardResponse {
     private Double rating;
     private Integer reviewCount;
     private Integer price;
-    private String bage;
-    private String urlImage;
-    private Integer promotionValue;
 
+    private String urlImage;
+  
+    private LocalDateTime createdAt;
+    private ProductBadge badge;
+    private PromotionResponse promotion;
 }

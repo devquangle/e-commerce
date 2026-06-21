@@ -1,5 +1,6 @@
 package com.dev.backend.service.impl;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -10,7 +11,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.dev.backend.constant.BaseStatus;
+import com.dev.backend.constant.ProductBadge;
 import com.dev.backend.constant.ProductStatus;
+import com.dev.backend.constant.PromotionCampaignType;
+import com.dev.backend.dto.product.ProductCardResponse;
+import com.dev.backend.dto.product.ProductFilterRequest;
 import com.dev.backend.dto.product.ProductRequest;
 import com.dev.backend.dto.product.ProductResponse;
 import com.dev.backend.entity.Product;
@@ -116,7 +121,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductResponse update(Integer id, ProductRequest request) {
-        Product product= findById(id);
+        Product product = findById(id);
         product.setName(TextUtils.capitalizeFully(request.getName().strip()));
         product.setSlug(TextUtils.toSlug(request.getName().strip()));
         product.setOriginalPrice(request.getOriginalPrice());
@@ -174,19 +179,32 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public PageResponse<com.dev.backend.dto.product.ProductCardResponse> filterProducts(com.dev.backend.dto.product.ProductFilterRequest request) {
-        int page = request.getPage() != null ? request.getPage() : 0;
-        int size = request.getSize() != null ? request.getSize() : 10;
-        
-        String sortBy = request.getSort() != null && !request.getSort().isEmpty() ? request.getSort() : "id";
-        Sort sort = Sort.by(Sort.Direction.DESC, sortBy);
-        if ("priceAsc".equals(request.getSort())) sort = Sort.by(Sort.Direction.ASC, "price");
-        if ("priceDesc".equals(request.getSort())) sort = Sort.by(Sort.Direction.DESC, "price");
-        
-        Pageable pageable = PageRequest.of(page, size, sort);
-        
-        Page<com.dev.backend.dto.product.ProductCardResponse> productPage = productRepository.filterProducts(request, pageable);
-        
+    public PageResponse<ProductCardResponse> filterProducts(
+            ProductFilterRequest request) {
+
+        int page = request.getPage() != null
+                ? request.getPage()
+                : 0;
+
+        int size = request.getSize() != null
+                ? request.getSize()
+                : 10;
+
+        Sort sort = buildSort(request.getSort());
+
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                sort);
+
+        Page<ProductCardResponse> productPage = productRepository.filterProducts(
+                request,
+                pageable);
+
+        productPage.getContent().forEach(product -> {
+            product.setBadge(generateBadge(product));
+        });
+
         return new PageResponse<>(
                 productPage.getContent(),
                 productPage.getNumber(),
@@ -195,4 +213,51 @@ public class ProductServiceImpl implements ProductService {
                 productPage.getTotalPages());
     }
 
+    private Sort buildSort(String sort) {
+
+        if (sort == null || sort.isBlank()) {
+            return Sort.by(Sort.Direction.DESC, "id");
+        }
+
+        return switch (sort) {
+            case "priceAsc" ->
+                Sort.by(Sort.Direction.ASC, "price");
+
+            case "priceDesc" ->
+                Sort.by(Sort.Direction.DESC, "price");
+
+            case "soldCount" ->
+                Sort.by(Sort.Direction.DESC, "soldCount");
+
+            case "rating" ->
+                Sort.by(Sort.Direction.DESC, "rating");
+
+            case "newest" ->
+                Sort.by(Sort.Direction.DESC, "id");
+
+            default ->
+                Sort.by(Sort.Direction.DESC, "id");
+        };
+    }
+
+    public ProductBadge generateBadge(ProductCardResponse product) {
+
+        if (product.getPromotion() != null
+                && product.getPromotion().getType() == PromotionCampaignType.FLASH_SALE) {
+            return ProductBadge.FLASH_SALE;
+        }
+
+        if (product.getSoldCount() != null
+                && product.getSoldCount() >= 1000) {
+            return ProductBadge.BEST_SELLER;
+        }
+
+        if (product.getCreatedAt() != null
+                && product.getCreatedAt()
+                        .isAfter(LocalDateTime.now().minusDays(30))) {
+            return ProductBadge.NEW;
+        }
+
+        return null;
+    }
 }

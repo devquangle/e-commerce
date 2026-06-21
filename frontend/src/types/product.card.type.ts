@@ -1,3 +1,9 @@
+type PromotionCampaignType =
+  | "FLASH_SALE"
+  | "PRODUCT_DISCOUNT"
+  | "SEASONAL"
+  | null;
+type ProductBadge = "FLASH_SALE" | "BEST_SELLER" | "NEW" | null;
 export interface ProductCard {
   id: number;
   slug: string; //url
@@ -6,7 +12,13 @@ export interface ProductCard {
   rating: number; // 0 → 5
   reviewCount: number; // số lượt đánh giá
   price: number;
-  bage: string; //Sản phẩm mới , sắp ra mắt , bán chạy ... do backend chèn qua
+  createdAt: string;
+  badge: ProductBadge;
   urlImage: string;
-  promosionValue: number;
+  promotion: PromotionResponse;
+}
+
+export interface PromotionResponse {
+  value: number;
+  type: PromotionCampaignType;
 }

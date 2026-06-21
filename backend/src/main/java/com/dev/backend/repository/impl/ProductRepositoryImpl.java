@@ -1,7 +1,9 @@
 package com.dev.backend.repository.impl;
 
+import com.dev.backend.constant.PromotionCampaignType;
 import com.dev.backend.dto.product.ProductCardResponse;
 import com.dev.backend.dto.product.ProductFilterRequest;
+import com.dev.backend.dto.product.PromotionResponse;
 import com.dev.backend.entity.*;
 import com.dev.backend.repository.ProductRepositoryCustom;
 import com.dev.backend.repository.specification.ProductSpecification;
@@ -32,7 +34,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
         // 1. Data Query
         CriteriaQuery<Tuple> query = cb.createTupleQuery();
         Root<Product> root = query.from(Product.class);
-
+        query.distinct(true);
         // Joins
         Join<Product, OrderItem> oiJoin = root.join("orderItems", JoinType.LEFT);
         Join<Product, Review> rJoin = root.join("reviews", JoinType.LEFT);
@@ -43,11 +45,9 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
         Join<PromotionProduct, Promotion> promoJoin = ppJoin.join("promotion", JoinType.LEFT);
         LocalDateTime now = LocalDateTime.now();
         promoJoin.on(
-            cb.and(
-                cb.lessThanOrEqualTo(promoJoin.get("startDate"), now),
-                cb.greaterThanOrEqualTo(promoJoin.get("expireDate"), now)
-            )
-        );
+                cb.and(
+                        cb.lessThanOrEqualTo(promoJoin.get("startDate"), now),
+                        cb.greaterThanOrEqualTo(promoJoin.get("expireDate"), now)));
 
         // Filter Predicates
         Predicate filterPredicate = ProductSpecification.buildPredicate(root, cb, request);
@@ -55,12 +55,13 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 
         // Group By
         query.groupBy(
-            root.get("id"),
-            root.get("slug"),
-            root.get("name"),
-            root.get("price"),
-            imgJoin.get("urlImage")
-        );
+                root.get("id"),
+                root.get("slug"),
+                root.get("name"),
+                root.get("price"),
+                root.get("createdAt"),
+                imgJoin.get("urlImage"),
+                promoJoin.get("type"));
 
         // Having (Rating Filter)
         Expression<Double> ratingExpr = cb.avg(rJoin.get("rate"));
@@ -70,16 +71,20 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 
         // Select (DTO Projection via Tuple to avoid strict type matching issues)
         query.select(cb.tuple(
-            root.get("id").alias("id"),
-            root.get("slug").alias("slug"),
-            root.get("name").alias("name"),
-            cb.sumAsLong(oiJoin.get("quantity")).alias("soldCount"),
-            ratingExpr.alias("rating"),
-            cb.countDistinct(rJoin.get("id")).alias("reviewCount"),
-            root.get("price").alias("price"),
-            imgJoin.get("urlImage").alias("urlImage"),
-            cb.max(promoJoin.get("value")).alias("promotionValue")
-        ));
+                root.get("id").alias("id"),
+                root.get("slug").alias("slug"),
+                root.get("name").alias("name"),
+                root.get("createdAt").alias("createdAt"),
+
+                cb.sumAsLong(oiJoin.get("quantity")).alias("soldCount"),
+                ratingExpr.alias("rating"),
+                cb.countDistinct(rJoin.get("id")).alias("reviewCount"),
+
+                root.get("price").alias("price"),
+                imgJoin.get("urlImage").alias("urlImage"),
+
+                cb.max(promoJoin.get("value")).alias("promotionValue"),
+                promoJoin.get("type").alias("promotionType")));
 
         // Sorting
         if (pageable.getSort().isSorted()) {
@@ -92,11 +97,16 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
                     case "promotionValue":
                         // Sorting by alias or expression can be tricky in some JPA providers.
                         // Ideally, we rebuild the expression for sorting.
-                        if ("soldCount".equals(order.getProperty())) path = (Path<?>) (Expression<?>) cb.sumAsLong(oiJoin.get("quantity"));
-                        else if ("rating".equals(order.getProperty())) path = (Path<?>) (Expression<?>) ratingExpr;
-                        else if ("reviewCount".equals(order.getProperty())) path = (Path<?>) (Expression<?>) cb.countDistinct(rJoin.get("id"));
-                        else if ("promotionValue".equals(order.getProperty())) path = (Path<?>) (Expression<?>) cb.max(promoJoin.get("value"));
-                        else path = root.get(order.getProperty());
+                        if ("soldCount".equals(order.getProperty()))
+                            path = (Path<?>) (Expression<?>) cb.sumAsLong(oiJoin.get("quantity"));
+                        else if ("rating".equals(order.getProperty()))
+                            path = (Path<?>) (Expression<?>) ratingExpr;
+                        else if ("reviewCount".equals(order.getProperty()))
+                            path = (Path<?>) (Expression<?>) cb.countDistinct(rJoin.get("id"));
+                        else if ("promotionValue".equals(order.getProperty()))
+                            path = (Path<?>) (Expression<?>) cb.max(promoJoin.get("value"));
+                        else
+                            path = root.get(order.getProperty());
                         break;
                     default:
                         path = root.get(order.getProperty());
@@ -118,23 +128,41 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
             res.setId(tuple.get("id", Integer.class));
             res.setSlug(tuple.get("slug", String.class));
             res.setName(tuple.get("name", String.class));
-            
+
             Number soldCount = tuple.get("soldCount", Number.class);
             res.setSoldCount(soldCount != null ? soldCount.intValue() : 0);
-            
+
             Number rating = tuple.get("rating", Number.class);
             res.setRating(rating != null ? rating.doubleValue() : 0.0);
-            
+
             Number reviewCount = tuple.get("reviewCount", Number.class);
             res.setReviewCount(reviewCount != null ? reviewCount.intValue() : 0);
-            
+
             res.setPrice(tuple.get("price", Integer.class));
-            res.setBage(""); // Default empty string
-            res.setUrlImage(tuple.get("urlImage", String.class));
-            
+
+            res.setCreatedAt(
+                    tuple.get("createdAt", LocalDateTime.class));
+
             Number promoValue = tuple.get("promotionValue", Number.class);
-            res.setPromotionValue(promoValue != null ? promoValue.intValue() : null);
-            
+
+            PromotionCampaignType promotionType = tuple.get("promotionType", PromotionCampaignType.class);
+
+            if (promoValue != null || promotionType != null) {
+
+                PromotionResponse promotion = new PromotionResponse();
+
+                promotion.setValue(
+                        promoValue != null
+                                ? promoValue.intValue()
+                                : null);
+
+                promotion.setType(
+                        promotionType);
+
+                res.setPromotion(
+                        promotion);
+            }
+
             return res;
         }).collect(Collectors.toList());
 
@@ -148,7 +176,8 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
         if (request.getRating() != null) {
             Join<Product, Review> countRJoin = countRoot.join("reviews", JoinType.LEFT);
             countQuery.select(cb.countDistinct(countRoot.get("id")));
-            countQuery.having(cb.greaterThanOrEqualTo(cb.coalesce(cb.avg(countRJoin.get("rate")), 0.0), request.getRating()));
+            countQuery.having(
+                    cb.greaterThanOrEqualTo(cb.coalesce(cb.avg(countRJoin.get("rate")), 0.0), request.getRating()));
             countQuery.groupBy(countRoot.get("id"));
             List<Long> countResult = entityManager.createQuery(countQuery).getResultList();
             total = (long) countResult.size();
@@ -159,4 +188,5 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 
         return new PageImpl<>(content, pageable, total);
     }
+
 }
