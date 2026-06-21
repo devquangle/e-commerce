@@ -172,12 +172,12 @@ export default function UpdateProduct() {
   // Khởi tạo Options sử dụng useMemo ổn định
   const genreOptions = useMemo(
     () =>
-      genresData.map((g: GenreResponse) => ({ label: g.name, value: g.id })),
+      genresData.map((g) => ({ label: g.name, value: g.id })),
     [genresData],
   );
   const authorOptions = useMemo(
     () =>
-      authorsData.map((a: ProductAuthorResponse) => ({ label: a.name, value: a.id })),
+      authorsData.map((a) => ({ label: a.name, value: a.id })),
     [authorsData],
   );
   const publisherOptions = useMemo(
@@ -349,7 +349,7 @@ export default function UpdateProduct() {
       const authorDescriptions = selectedAuthors
         .map(
           (a) =>
-            `- ${a?.name || "Chưa rõ"}: ${a?.description || "Chưa có mô tả."}`,
+            `- ${a?.name || "Chưa rõ"}: ${(a as any)?.description || "Chưa có mô tả."}`,
         )
         .join("<br/>\n");
       newDesc = newDesc.replace(

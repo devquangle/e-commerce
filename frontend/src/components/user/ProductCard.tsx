@@ -1,4 +1,4 @@
-import type { ProductCard as ProductCardType, ProductBadge, PromotionCampaignType } from "@/types/product.card.type";
+import type { ProductCard as ProductCardType, ProductBadge,  } from "@/types/product.card.type";
 import { getProductBadgeLabel, getPromotionCampaignLabel } from "@/types/product.card.type";
 import { Star } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -21,11 +21,7 @@ const getBadgeColor = (badge: ProductBadge | undefined | null) => {
   return "bg-indigo-500";
 };
 
-const getCampaignColor = (type: PromotionCampaignType | undefined | null) => {
-  if (type === "FLASH_SALE") return "bg-rose-500";
-  if (type === "SEASONAL") return "bg-blue-500";
-  return "bg-amber-500";
-};
+
 
 export default function ProductCard({ product }: Props) {
   const discountValue = product.promotion?.value || 0;
@@ -36,7 +32,6 @@ export default function ProductCard({ product }: Props) {
     : product.price;
 
   const badgeLabel = product.badge ? getProductBadgeLabel(product.badge) : null;
-  const campaignLabel = product.promotion?.type ? getPromotionCampaignLabel(product.promotion.type) : null;
 
   return (
     <Link

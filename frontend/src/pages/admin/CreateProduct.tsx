@@ -41,7 +41,7 @@ import type { ImageProductRequest } from "@/types/image";
 import type { ProductRequest } from "@/types/product.type";
 import type { GoogleBookResponse } from "@/types/googlebook";
 import type { GenreResponse } from "@/features/admin/genre/types/genre.type";
-import ProductService from "@/features/admin/product/services/product.service";
+import { useCreateProduct } from "@/features/admin/product/hooks/useProduct";
 
 const MAX_IMAGES = 6;
 
@@ -112,6 +112,8 @@ export default function CreateProduct() {
   const navigate = useNavigate();
   const replaceFileInputRef = useRef<HTMLInputElement>(null);
 
+  const { mutateAsync: createProduct, isPending: isCreating } = useCreateProduct();
+
   const [imageUploadMode, setImageUploadMode] = useState<"file" | "url">(
     "file",
   );
@@ -168,12 +170,12 @@ export default function CreateProduct() {
   // Khởi tạo Options sử dụng useMemo ổn định
   const genreOptions = useMemo(
     () =>
-      genresData.map((g: GenreResponse) => ({ label: g.name, value: g.id })),
+      genresData.map((g) => ({ label: g.name, value: g.id })),
     [genresData],
   );
   const authorOptions = useMemo(
     () =>
-      authorsData.map((a: AuthorResponse) => ({ label: a.name, value: a.id })),
+      authorsData.map((a) => ({ label: a.name, value: a.id })),
     [authorsData],
   );
   const publisherOptions = useMemo(
@@ -319,7 +321,7 @@ export default function CreateProduct() {
       const authorDescriptions = selectedAuthors
         .map(
           (a) =>
-            `- ${a?.name || "Chưa rõ"}: ${a?.description || "Chưa có mô tả."}`,
+            `- ${a?.name || "Chưa rõ"}: ${(a as any)?.description || "Chưa có mô tả."}`,
         )
         .join("<br/>\n");
       newDesc = newDesc.replace(
@@ -355,16 +357,15 @@ export default function CreateProduct() {
           ? await imageService.uploadImage(coverImages)
           : [];
 
-      await ProductService.create({
+      await createProduct({
         ...data,
         coverImages: uploadedImages,
       });
 
-      showSuccessToast("Thêm sản phẩm thành công!");
       handleReset();
       navigate("/admin/products");
-    } catch (error) {
-      showErrorToast(`Thêm sản phẩm thất bại! ${error}`);
+    } catch {
+      // Toast lỗi đã được xử lý bởi onError trong hook useCreateProduct
     }
   };
 
@@ -546,8 +547,8 @@ export default function CreateProduct() {
             >
               <RotateCcw size={15} /> Đặt lại
             </Button>
-            <Button type="submit" color="primary" className="w-full sm:w-auto">
-              <Save size={15} /> Lưu
+            <Button type="submit" color="primary" className="w-full sm:w-auto" disabled={isCreating}>
+              <Save size={15} /> {isCreating ? "Đang lưu..." : "Lưu"}
             </Button>
           </div>
         </div>

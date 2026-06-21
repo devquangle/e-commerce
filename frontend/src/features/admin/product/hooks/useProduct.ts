@@ -1,4 +1,3 @@
-
 import type { ProductRequest, ProductResponse } from "../types/product.type";
 import type { Pagination } from "@/types/pagination";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -25,9 +24,10 @@ export const useCreateProduct = () => {
 
   return useMutation({
     mutationFn: (req: ProductRequest) => ProductService.create(req),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["products-filter"] });
-
+    onSuccess: async () => {
+      await queryClient.refetchQueries({
+        queryKey: ["products-filter"],
+      });
       showSuccessToast("Thêm mới sản phẩm thành công!");
     },
     onError: (error: unknown) => {
@@ -46,7 +46,8 @@ export const useUpdateProduct = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({id,req}:{id:number,req: ProductRequest}) => ProductService.update(id,req),
+    mutationFn: ({ id, req }: { id: number; req: ProductRequest }) =>
+      ProductService.update(id, req),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products-filter"] });
 

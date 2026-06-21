@@ -2,12 +2,12 @@ import { ExternalLink } from "lucide-react";
 import PublisherStatusBadge from "./PublisherStatusBadge";
 import PublisherActionButtons from "./PublisherActionButtons";
 import { useState } from "react";
-import type { PublisherRes } from "../../types/publisher.type";
+import type { PublisherResponse } from "../types/publisher.type";
 import { SearchX } from "lucide-react";
 type Props = {
-  publishers: PublisherRes[];
-  onEdit: (publisher: PublisherRes) => void;
-  onDelete: (publisher: PublisherRes) => void;
+  publishers: PublisherResponse[];
+  onEdit: (publisher: PublisherResponse) => void;
+  onDelete: (publisher: PublisherResponse) => void;
 };
 
 const PublisherMobileCard = ({ publishers, onEdit, onDelete }: Props) => {
