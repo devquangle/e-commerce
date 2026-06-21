@@ -23,7 +23,7 @@ export function useProductFilter(initialOptions: ProductFilterOptions = {}) {
     try {
       const result = await ProductSearchService.search(filters);
       setData(result);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message || 'Fetch products failed');
     } finally {
       setIsLoading(false);

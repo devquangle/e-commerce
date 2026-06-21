@@ -1,5 +1,5 @@
 import { Filter, X } from "lucide-react";
-import FilterContent from "@/components/user/FilterContent";
+import FilterContent from "./FilterContent";
 import { SORT_OPTIONS, type ProductFilterOptions } from "../types/product.filter.options";
 
 interface FilterSidebarProps {
@@ -23,7 +23,7 @@ export default function FilterSidebar({
   return (
     <>
       {/* ASIDE DESKTOP */}
-      <aside className="hidden lg:block lg:w-[280px] flex-shrink-0">
+      <aside className="hidden lg:block lg:w-[280px] shrink-0">
         <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm">
           <h2 className="text-base font-bold text-slate-900 mb-5 pb-4 border-b border-slate-100 flex items-center gap-2">
             <Filter size={18} className="text-indigo-600" />

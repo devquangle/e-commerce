@@ -1,8 +1,9 @@
 import { useState } from "react";
+import { useBookFormData } from "@/hooks/useBookFormData";
 
 interface CheckboxListProps {
   title: string;
-  items: string[];
+  items: { id: number; name: string }[];
   limit: number;
 }
 
@@ -11,17 +12,6 @@ interface FilterContentProps {
   priceRange?: number; // Đổi thành dấu ? để phòng hờ file cha truyền thiếu
   setPriceRange?: (value: number) => void;
 }
-
-/* ================= DATA ================= */
-const categories = [
-  "Tiểu thuyết", "Kinh tế", "CNTT", "Thiếu nhi", 
-  "Lịch sử", "Kỹ năng sống", "Tâm lý", "Giáo dục"
-];
-
-const authors = [
-  "Nguyễn Nhật Ánh", "Dale Carnegie", "J.K Rowling", 
-  "Paulo Coelho", "Haruki Murakami", "Dan Brown", "Yuval Noah Harari"
-];
 
 /* ================= CHECKBOX LIST ================= */
 function CheckboxList({ title, items, limit = 5 }: CheckboxListProps) {
@@ -34,14 +24,18 @@ function CheckboxList({ title, items, limit = 5 }: CheckboxListProps) {
       <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">{title}</h4>
       <div className="space-y-2">
         {visibleItems.map(item => (
-          <label key={item} className="flex items-center gap-2.5 text-sm font-medium text-slate-600 cursor-pointer select-none hover:text-indigo-600 transition-colors">
+          <label key={item.id} className="flex items-center gap-2.5 text-sm font-medium text-slate-600 cursor-pointer select-none hover:text-indigo-600 transition-colors">
             <input 
               type="checkbox" 
+              value={item.id}
               className="w-4 h-4 rounded text-indigo-600 border-slate-300 focus:ring-indigo-500/20 cursor-pointer"
             />
-            {item}
+            {item.name}
           </label>
         ))}
+        {items.length === 0 && (
+          <span className="text-sm text-slate-400 italic">Không có dữ liệu</span>
+        )}
       </div>
       {hasMore && (
         <button
@@ -61,6 +55,8 @@ export default function FilterContent({
   setPriceRange 
 }: FilterContentProps) {
   
+  const { genresData, authorsData, isLoading } = useBookFormData();
+
   // Hàm format hiển thị tiền VNĐ (Ví dụ: 250.000 ₫)
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -73,12 +69,34 @@ export default function FilterContent({
     <div className="space-y-6">
 
       {/* THE LOAI */}
-      <CheckboxList title="Thể loại" items={categories} limit={5} />
+      <div>
+        {isLoading ? (
+          <div className="animate-pulse space-y-2">
+            <div className="h-4 bg-slate-100 rounded w-1/3 mb-4"></div>
+            <div className="h-4 bg-slate-100 rounded w-full"></div>
+            <div className="h-4 bg-slate-100 rounded w-full"></div>
+            <div className="h-4 bg-slate-100 rounded w-3/4"></div>
+          </div>
+        ) : (
+          <CheckboxList title="Thể loại" items={genresData} limit={5} />
+        )}
+      </div>
 
       <hr className="border-slate-100" />
 
       {/* TAC GIA */}
-      <CheckboxList title="Tác giả" items={authors} limit={5} />
+      <div>
+        {isLoading ? (
+          <div className="animate-pulse space-y-2">
+            <div className="h-4 bg-slate-100 rounded w-1/3 mb-4"></div>
+            <div className="h-4 bg-slate-100 rounded w-full"></div>
+            <div className="h-4 bg-slate-100 rounded w-full"></div>
+            <div className="h-4 bg-slate-100 rounded w-3/4"></div>
+          </div>
+        ) : (
+          <CheckboxList title="Tác giả" items={authorsData} limit={5} />
+        )}
+      </div>
 
       <hr className="border-slate-100" />
 

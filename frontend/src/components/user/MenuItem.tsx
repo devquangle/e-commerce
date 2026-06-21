@@ -1,7 +1,5 @@
 import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
 
-import AuthorService from "@/features/admin/author/services/author.service";
 import {
   ChevronDown,
   Star,
@@ -12,7 +10,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useState } from "react";
-import genreService from "@/features/admin/genre/services/genre.service";
+import { useBookFormData } from "@/hooks/useBookFormData";
 
 const menuItems = [
   { id: 3, label: "Giới thiệu", path: "/about" },
@@ -25,17 +23,9 @@ export default function MenuItem({ className = "" }) {
   // Thêm state để kiểm soát trạng thái hover trên Desktop
   const [isDesktopMenuOpen, setIsDesktopMenuOpen] = useState(false);
 
-  const { data: genres = [], isLoading: loadingGenres } = useQuery({
-    queryKey: ["public-genres"],
-    queryFn: () => genreService.fetchGenre(),
-    staleTime: 5 * 60 * 1000,
-  });
-
-  const { data: authors = [], isLoading: loadingAuthors } = useQuery({
-    queryKey: ["public-authors"],
-    queryFn: () => AuthorService.fetchAuthor(),
-    staleTime: 5 * 60 * 1000,
-  });
+  const { genresData: genres, authorsData: authors, isLoading } = useBookFormData();
+  const loadingGenres = isLoading;
+  const loadingAuthors = isLoading;
 
   const activeGenres = genres.filter((g) => g.status === "ACTIVE" || !g.status);
   const activeAuthors = authors.filter(
