@@ -8,6 +8,7 @@ import {
   BookOpen,
   Users,
   Sparkles,
+  LayoutGrid,
 } from "lucide-react";
 import { useState } from "react";
 import { useBookFormData } from "@/hooks/useBookFormData";
@@ -43,8 +44,9 @@ export default function MenuItem({ className = "" }) {
       >
         <div className="flex items-center justify-between py-4">
           <div
-            className="flex items-center gap-1 hover:text-indigo-600 font-medium"
+            className="flex items-center gap-1.5 hover:text-indigo-600 font-medium"
           >
+            <LayoutGrid size={18} />
             Danh mục
             <ChevronDown
               size={16}
@@ -93,7 +95,7 @@ export default function MenuItem({ className = "" }) {
                   ))}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 gap-y-2 pr-2 custom-scrollbar max-h-[340px] overflow-y-auto">
+                <div className="grid grid-cols-1 gap-y-2 pr-2 pb-2 custom-scrollbar max-h-[340px] overflow-y-auto">
                   {activeGenres.map((genre) => (
                     <Link
                       key={genre.id}
@@ -122,12 +124,12 @@ export default function MenuItem({ className = "" }) {
                         <div className="text-sm font-semibold text-slate-800 group-hover/item:text-indigo-700 transition-colors truncate">
                           {genre.name}
                         </div>
-                        {genre.totalProduct !== undefined && (
-                          <div className="text-xs text-slate-500 font-medium whitespace-nowrap">
-                            📚 {genre.totalProduct} sản phẩm
-                          </div>
-                        )}
                       </div>
+                      {genre.bookCount !== undefined && (
+                        <div className="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-100/50 whitespace-nowrap flex-shrink-0">
+                          {genre.bookCount} sách
+                        </div>
+                      )}
                     </Link>
                   ))}
                 </div>
@@ -156,7 +158,7 @@ export default function MenuItem({ className = "" }) {
                   ))}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 gap-y-2 pr-2 custom-scrollbar max-h-[340px] overflow-y-auto">
+                <div className="grid grid-cols-1 gap-y-2 pr-2 pb-2 custom-scrollbar max-h-[340px] overflow-y-auto">
                   {activeAuthors.map((author) => (
                     <Link
                       key={author.id}
@@ -185,6 +187,11 @@ export default function MenuItem({ className = "" }) {
                           {author.name}
                         </div>
                       </div>
+                      {author.bookCount !== undefined && (
+                        <div className="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-100/50 whitespace-nowrap flex-shrink-0">
+                          {author.bookCount} sách
+                        </div>
+                      )}
                     </Link>
                   ))}
                 </div>
