@@ -13,3 +13,11 @@ export interface SeriesResponse {
   description: string;
   status: BaseStatus;
 }
+
+
+export interface SeriesWithProductCountResponse {
+  id: number;
+  name: string;
+  slug: string;
+  bookCount: number | 0;
+}

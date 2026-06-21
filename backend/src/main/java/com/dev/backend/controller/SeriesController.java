@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dev.backend.dto.series.SeriesRequest;
 import com.dev.backend.dto.series.SeriesResponse;
+import com.dev.backend.dto.series.SeriesWithProductCountResponse;
 import com.dev.backend.response.PageResponse;
 import com.dev.backend.response.ResponseData;
 import com.dev.backend.response.ResponseUtil;
@@ -29,9 +30,9 @@ public class SeriesController {
     private final SeriesService seriesService;
 
     @GetMapping("/series")
-    public ResponseEntity<ResponseData<List<SeriesResponse>>> list() {
-        List<SeriesResponse> list = seriesService.findAll();
-        return ResponseUtil.success("Lấy danh sách thể loại thành công", list);
+    public ResponseEntity<ResponseData<List<SeriesWithProductCountResponse>>> list() {
+        List<SeriesWithProductCountResponse> items = seriesService.findActiveSeriesWithProductCount();
+        return ResponseUtil.success("Lấy danh sách thể loại thành công", items);
     }
 
     @GetMapping("/series/filter")

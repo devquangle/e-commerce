@@ -13,3 +13,11 @@ export interface PublisherRequest {
     street:string;
     status:BaseStatus;
 }
+
+
+export interface PublisherWithProductCountResponse {
+  id: number;
+  name: string;
+  slug: string;
+  bookCount: number | 0;
+}

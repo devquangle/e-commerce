@@ -18,3 +18,11 @@ export interface AuthorRequest {
   extract: string;
   status: BaseStatus;
 }
+
+export interface AuthorWithProductCountResponse {
+  id: number;
+  name: string;
+  slug: string;
+  urlImage: string;
+  bookCount: number | 0;
+}

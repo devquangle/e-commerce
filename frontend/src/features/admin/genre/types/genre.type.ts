@@ -17,7 +17,6 @@ export interface GenreWithProductCountResponse {
   id: number;
   name: string;
   slug: string;
-  status: BaseStatus;
   urlImage: string;
   bookCount: number | 0;
 }
