@@ -7,7 +7,7 @@ import type { AuthorRequest, AuthorResponse } from "../types/author";
 
 const AuthorService = {
   async fetchAuthor() {
-    const res = await apiAuth.get<ApiResponse<AuthorResponse[]>>("/admin/authors");
+    const res = await apiAuth.get<ApiResponse<AuthorResponse[]>>("/api/v1/authors");
     if (!res.data.success || !res.data.data) {
       throw new Error(res.data.message || "Fetch authors failed");
     }
@@ -15,7 +15,7 @@ const AuthorService = {
   },
   async create(data: AuthorRequest) {
     const res = await apiAuth.post<ApiResponse<AuthorResponse>>(
-      "/admin/authors",
+      "/api/v1/admin/authors",
       data,
     );
     if (!res.data.success || !res.data.data) {
@@ -26,7 +26,7 @@ const AuthorService = {
 
    async update(id:number,data: AuthorRequest) {
     const res = await apiAuth.put<ApiResponse<AuthorResponse>>(
-      `/admin/authors/${id}`,
+      `/api/v1/admin/authors/${id}`,
       data,
     );
     if (!res.data.success || !res.data.data) {
@@ -37,7 +37,7 @@ const AuthorService = {
 
   async filterAuthor(options?: options) {
     const res = await apiAuth.get<ApiResponse<Pagination<AuthorResponse>>>(
-      "/admin/authors/filter",
+      "/api/v1/admin/authors/filter",
       { params: options },
     );
     if (!res.data.success || !res.data.data) {
@@ -49,7 +49,7 @@ const AuthorService = {
 
   async delete(id: number) {
     const res = await apiAuth.delete<ApiResponse<null>>(
-      `/admin/authors/${id}`
+      `/api/v1/admin/authors/${id}`
     );
     if (!res.data.success) {
       throw new Error(res.data.message || "Delete author failed");

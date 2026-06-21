@@ -25,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/admin")
+@RequestMapping("/api/v1")
 public class PublisherController {
     private final PublisherService publisherService;
 
@@ -35,7 +35,7 @@ public class PublisherController {
         return ResponseUtil.success("Lấy danh nhà xuất bản thành công", items);
     }
 
-    @GetMapping("/publishers/filter")
+    @GetMapping("/admin/publishers/filter")
     public ResponseEntity<ResponseData<PageResponse<PublisherResponse>>> filter(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -45,20 +45,20 @@ public class PublisherController {
         return ResponseUtil.success("Lấy danh sách nhà xuất bản thành công", response);
     }
 
-    @PostMapping("/publishers")
+    @PostMapping("/admin/publishers")
     public ResponseEntity<ResponseData<PublisherResponse>> add(@RequestBody PublisherRequest publisherRequest) {
         PublisherResponse response = publisherService.add(publisherRequest);
         return ResponseUtil.success("Thêm nhà xuất bản  thành công.", response);
     }
 
-    @PutMapping("/publishers/{id}")
+    @PutMapping("/admin/publishers/{id}")
     public ResponseEntity<ResponseData<PublisherResponse>> update(@PathVariable Integer id,
             @RequestBody PublisherRequest publisherRequest) {
         PublisherResponse response = publisherService.update(id, publisherRequest);
         return ResponseUtil.success("Cập nhật nhà xuất bản  thành công.", response);
     }
 
-    @DeleteMapping("/publishers/{id}")
+    @DeleteMapping("/admin/publishers/{id}")
     public ResponseEntity<ResponseData<Void>> delete(@PathVariable Integer id) {
         publisherService.delete(id);
         return ResponseUtil.success("Xoá nhà xuất bản  thành công.", null);

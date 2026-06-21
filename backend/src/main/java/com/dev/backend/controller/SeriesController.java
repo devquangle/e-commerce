@@ -25,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/admin")
+@RequestMapping("/api/v1")
 public class SeriesController {
     private final SeriesService seriesService;
 
@@ -35,7 +35,7 @@ public class SeriesController {
         return ResponseUtil.success("Lấy danh sách thể loại thành công", items);
     }
 
-    @GetMapping("/series/filter")
+    @GetMapping("/admin/series/filter")
     public ResponseEntity<ResponseData<PageResponse<SeriesResponse>>> filter(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -45,20 +45,20 @@ public class SeriesController {
         return ResponseUtil.success("Lấy danh sách bộ truyện thành công", response);
     }
 
-    @PostMapping("/series")
+    @PostMapping("/admin/series")
     public ResponseEntity<ResponseData<SeriesResponse>> add(@RequestBody SeriesRequest seriesRequest) {
         SeriesResponse response = seriesService.add(seriesRequest);
         return ResponseUtil.success("Thêm bộ truyện  thành công.", response);
     }
 
-    @PutMapping("/series/{id}")
+    @PutMapping("/admin/series/{id}")
     public ResponseEntity<ResponseData<SeriesResponse>> update(@PathVariable Integer id,
             @RequestBody SeriesRequest seriesRequest) {
         SeriesResponse response = seriesService.update(id, seriesRequest);
         return ResponseUtil.success("Cập nhật bộ truyện thành công.", response);
     }
 
-    @DeleteMapping("/series/{id}")
+    @DeleteMapping("/admin/series/{id}")
     public ResponseEntity<ResponseData<Void>> delete(@PathVariable Integer id) {
         seriesService.delete(id);
         return ResponseUtil.success("Xoá bộ truyện thành công.", null);

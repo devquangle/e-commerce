@@ -6,7 +6,7 @@ import type { Pagination } from "@/types/pagination";
 
 const PublisherService = {
   async fetchPublisher() {
-    const res = await apiAuth.get<ApiResponse<PublisherResponse[]>>("/admin/publishers");
+    const res = await apiAuth.get<ApiResponse<PublisherResponse[]>>("/api/v1/publishers");
     if (!res.data.success || !res.data.data) {
       throw new Error(res.data.message || "Fetch publishers failed");
     }
@@ -14,7 +14,7 @@ const PublisherService = {
   },
   async create(data: PublisherRequest) {
     const res = await apiAuth.post<ApiResponse<PublisherResponse>>(
-      "/admin/publishers",
+      "/api/v1/admin/publishers",
       data,
     );
     if (!res.data.success || !res.data.data) {
@@ -25,7 +25,7 @@ const PublisherService = {
 
    async update(id:number,data: PublisherRequest) {
     const res = await apiAuth.put<ApiResponse<PublisherResponse>>(
-      `/admin/publishers/${id}`,
+      `/api/v1/admin/publishers/${id}`,
       data,
     );
     if (!res.data.success || !res.data.data) {
@@ -36,7 +36,7 @@ const PublisherService = {
 
   async filterPublisher(options?: options) {
     const res = await apiAuth.get<ApiResponse<Pagination<PublisherResponse>>>(
-      "/admin/publishers/filter",
+      "/api/v1/admin/publishers/filter",
       { params: options },
     );
     if (!res.data.success || !res.data.data) {
@@ -48,7 +48,7 @@ const PublisherService = {
 
   async delete(id: number) {
     const res = await apiAuth.delete<ApiResponse<null>>(
-      `/admin/publishers/${id}`
+      `/api/v1/admin/publishers/${id}`
     );
     if (!res.data.success) {
       throw new Error(res.data.message || "Delete publisher failed");

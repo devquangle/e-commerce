@@ -6,7 +6,7 @@ import type { Pagination } from "@/types/pagination";
 
 const SeriesService = {
   async fetchSeries() {
-    const res = await apiAuth.get<ApiResponse<SeriesResponse[]>>("/admin/series");
+    const res = await apiAuth.get<ApiResponse<SeriesResponse[]>>("/api/v1/series");
     if (!res.data.success || !res.data.data) {
       throw new Error(res.data.message || "Fetch series failed");
     }
@@ -14,7 +14,7 @@ const SeriesService = {
   },
   async create(data: SeriesRequest) {
     const res = await apiAuth.post<ApiResponse<SeriesResponse>>(
-      "/admin/series",
+      "/api/v1/admin/series",
       data,
     );
     if (!res.data.success || !res.data.data) {
@@ -25,7 +25,7 @@ const SeriesService = {
 
    async update(id:number,data: SeriesRequest) {
     const res = await apiAuth.put<ApiResponse<SeriesResponse>>(
-      `/admin/series/${id}`,
+      `/api/v1/admin/series/${id}`,
       data,
     );
     if (!res.data.success || !res.data.data) {
@@ -36,7 +36,7 @@ const SeriesService = {
 
   async filterSeries(options?: options) {
     const res = await apiAuth.get<ApiResponse<Pagination<SeriesResponse>>>(
-      "/admin/series/filter",
+      "/api/v1/admin/series/filter",
       { params: options },
     );
     if (!res.data.success || !res.data.data) {
@@ -48,7 +48,7 @@ const SeriesService = {
 
   async delete(id: number) {
     const res = await apiAuth.delete<ApiResponse<null>>(
-      `/admin/series/${id}`
+      `/api/v1/admin/series/${id}`
     );
     if (!res.data.success) {
       throw new Error(res.data.message || "Delete series failed");

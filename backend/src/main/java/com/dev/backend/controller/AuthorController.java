@@ -25,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/admin")
+@RequestMapping("/api/v1")
 public class AuthorController {
 
     private final AuthorService authorService;
@@ -36,7 +36,7 @@ public class AuthorController {
         return ResponseUtil.success("Lấy danh sách tác giả thành công", items);
     }
 
-    @GetMapping("/authors/filter")
+    @GetMapping("/admin/authors/filter")
     public ResponseEntity<ResponseData<PageResponse<AuthorResponse>>> filter(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -46,20 +46,20 @@ public class AuthorController {
         return ResponseUtil.success("Lấy danh sách tác giả thành công", response);
     }
 
-    @PostMapping("/authors")
+    @PostMapping("/admin/authors")
     public ResponseEntity<ResponseData<AuthorResponse>> add(@RequestBody AuthorRequest authorRequest) {
         AuthorResponse response = authorService.add(authorRequest);
         return ResponseUtil.success("Thêm tác giả thành công.", response);
     }
 
-    @PutMapping("/authors/{id}")
+    @PutMapping("/admin/authors/{id}")
     public ResponseEntity<ResponseData<AuthorResponse>> update(@PathVariable Integer id,
             @RequestBody AuthorRequest authorRequest) {
         AuthorResponse response = authorService.update(id, authorRequest);
         return ResponseUtil.success("Cập nhật tác giả thành công.", response);
     }
 
-    @DeleteMapping("/authors/{id}")
+    @DeleteMapping("/admin/authors/{id}")
     public ResponseEntity<ResponseData<Void>> delete(@PathVariable Integer id) {
         authorService.delete(id);
         return ResponseUtil.success("Cập nhật tác giả thành công.", null);
