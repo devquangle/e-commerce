@@ -30,13 +30,11 @@ public class AuthorController {
 
     private final AuthorService authorService;
 
-
-     @GetMapping("/authors")
+    @GetMapping("/authors")
     public ResponseEntity<ResponseData<List<AuthorWithProductCountResponse>>> list() {
         List<AuthorWithProductCountResponse> items = authorService.findActiveAuthorsWithProductCount();
         return ResponseUtil.success("Lấy danh sách tác giả thành công", items);
     }
-
 
     @GetMapping("/authors/filter")
     public ResponseEntity<ResponseData<PageResponse<AuthorResponse>>> filter(
