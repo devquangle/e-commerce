@@ -38,14 +38,14 @@ export default function ProductCard({ product }: Props) {
       to={`/product/${product.slug || product.id}`}
       className="
         group flex h-full flex-col overflow-hidden
-        rounded-2xl bg-white border border-slate-100 shadow-sm
+        card-custom
         transition-all duration-500 ease-out
         hover:-translate-y-1.5 hover:border-indigo-100 hover:shadow-[0_12px_40px_-12px_rgba(79,70,229,0.15)]
         relative
       "
     >
       {/* IMAGE SECTION */}
-      <div className="relative aspect-3/4 w-full bg-slate-50/80 overflow-hidden shrink-0 flex items-center justify-center p-4">
+      <div className="relative aspect-3/4 w-full bg-slate-50/80 overflow-hidden shrink-0 flex items-center justify-center">
         <img
           src={product.urlImage}
           alt={product.name}

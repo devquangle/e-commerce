@@ -89,17 +89,21 @@ export default function Header() {
 
                 {/* BẢNG MENU DROPDOWN */}
                 <div
-                  className={`absolute top-full right-0 pt-2 z-50 transition-all duration-200 origin-top-right min-w-44 max-w-[calc(100vw-1rem)]
+                  className={`absolute top-full right-0 pt-2 z-50 transition-all duration-300 ease-out origin-top-right min-w-44 max-w-[calc(100vw-1rem)]
             ${
               openAccount
                 ? "opacity-100 scale-100 translate-y-0 pointer-events-auto"
-                : "opacity-0 scale-95 -translate-y-1 pointer-events-none"
+                : "opacity-0 scale-90 -translate-y-2 pointer-events-none"
             }`}
                 >
                   <div className="bg-white border rounded-xl shadow-xl overflow-hidden mt-1">
                     <ul className="p-1.5 text-sm text-gray-700">
-                      {menuItems.map((item) => (
-                        <li key={item.id}>
+                      {menuItems.map((item, index) => (
+                        <li 
+                          key={item.id}
+                          className={`transition-all duration-300 ease-out transform ${openAccount ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4"}`}
+                          style={{ transitionDelay: `${index * 50}ms` }}
+                        >
                           {item.path ? (
                             <Link
                               className="block w-full px-4 py-2.5 rounded-lg hover:bg-gray-100 hover:text-indigo-600 transition-colors"

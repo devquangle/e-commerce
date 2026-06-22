@@ -54,12 +54,12 @@ export default function ProductSection({ title, products, link }: Props) {
           breakpoints={{
             640: { slidesPerView: 3, spaceBetween: 16 },
             768: { slidesPerView: 4, spaceBetween: 20 },
-            1024: { slidesPerView: 5, spaceBetween: 24 },
+            1024: { slidesPerView: 6, spaceBetween: 24 },
           }}
           className="section-products-swiper pb-2"
         >
           {products.slice(0, 15).map((product) => (
-            <SwiperSlide key={product.id} className="!h-auto">
+            <SwiperSlide key={product.id} className="h-auto!">
               <ProductCard product={product} />
             </SwiperSlide>
           ))}
