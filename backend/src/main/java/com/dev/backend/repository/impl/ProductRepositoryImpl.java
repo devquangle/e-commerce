@@ -5,7 +5,6 @@ import com.dev.backend.dto.product.ProductCardResponse;
 import com.dev.backend.dto.product.ProductFilterRequest;
 import com.dev.backend.dto.product.PromotionResponse;
 import com.dev.backend.entity.*;
-import com.dev.backend.entity.Order;
 import com.dev.backend.repository.ProductRepositoryCustom;
 import com.dev.backend.repository.specification.ProductSpecification;
 import jakarta.persistence.*;
