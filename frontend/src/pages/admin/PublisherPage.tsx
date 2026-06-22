@@ -14,9 +14,9 @@ import type { PublisherRequest, PublisherResponse } from "@/types/publisher";
 import { BaseStatus, getBaseStatusLabel } from "@/types/status";
 
 import { mapServerErrors } from "@/utils/mapServerErrors";
-import PublisherTable from "@/features/admin/publisher/components/PublisherTable";
-import PublisherMobileCard from "@/features/admin/publisher/components/PublisherMobileCard";
-import { useCreatePublisher, useDeletePublisher, useFilterPublisher, useUpdatePublisher } from "@/features/admin/publisher/hooks/usePublisher";
+import PublisherTable from "@/modules/admin/publisher/components/PublisherTable";
+import PublisherMobileCard from "@/modules/admin/publisher/components/PublisherMobileCard";
+import { useCreatePublisher, useDeletePublisher, useFilterPublisher, useUpdatePublisher } from "@/modules/admin/publisher/hooks/usePublisher";
 
 const initialFilterOptions = { keyword: "", status: "", page: 1, size: 10 };
 const initPublisher: PublisherRequest = {

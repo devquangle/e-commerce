@@ -1,9 +1,9 @@
 import Container from "@/components/common/Container";
 import ProductCard from "@/components/user/ProductCard";
-import ProductDescription from "@/features/user/product/components/ProductDescription";
-import ProductReviews from "@/features/user/product/components/ProductReviews";
-import ProductImages from "@/features/user/product/components/ProductImages";
-import ProductInfo from "@/features/user/product/components/ProductInfo";
+import ProductDescription from "@/modules/user/product/components/ProductDescription";
+import ProductReviews from "@/modules/user/product/components/ProductReviews";
+import ProductImages from "@/modules/user/product/components/ProductImages";
+import ProductInfo from "@/modules/user/product/components/ProductInfo";
 import {
   ChevronLeft,
   ChevronRight,

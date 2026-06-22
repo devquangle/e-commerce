@@ -1,26 +1,26 @@
 import { useState, useMemo, useCallback } from "react";
 import Pagination from "@/components/common/Pagination";
 import Loading from "@/components/common/Loading";
-import AuthorTable from "@/features/admin/author/components/AuthorTable";
-import AuthorMobileCard from "@/features/admin/author/components/AuthorMobileCard";
+import AuthorTable from "@/modules/admin/author/components/AuthorTable";
+import AuthorMobileCard from "@/modules/admin/author/components/AuthorMobileCard";
 
 import {
   useCreateAuthor,
   useFilterAuthor,
   useUpdateAuthor,
   useDeleteAuthor,
-} from "@/features/admin/author/hooks/useAuthor";
+} from "@/modules/admin/author/hooks/useAuthor";
 import { BaseStatus, getBaseStatusLabel } from "@/types/status";
 import type { AuthorRequest, AuthorResponse } from "@/types/author";
 import { showErrorToast } from "@/utils/toastUtil";
 import imageService from "@/services/imageService";
-import AuthorFormModal from "@/features/admin/author/components/AuthorFormModal";
+import AuthorFormModal from "@/modules/admin/author/components/AuthorFormModal";
 import { mapServerErrors } from "@/utils/mapServerErrors";
 import type { UseFormSetError } from "react-hook-form"; // Import thêm cái này
-import useAuthorFilter from "@/features/admin/author/hooks/useAuthorFilter";
-import AuthorHeader from "@/features/admin/author/components/AuthorHeader";
-import AuthorFilter from "@/features/admin/author/components/AuthorFilter";
-import AuthorDeleteModal from "@/features/admin/author/components/AuthorDeleteModal";
+import useAuthorFilter from "@/modules/admin/author/hooks/useAuthorFilter";
+import AuthorHeader from "@/modules/admin/author/components/AuthorHeader";
+import AuthorFilter from "@/modules/admin/author/components/AuthorFilter";
+import AuthorDeleteModal from "@/modules/admin/author/components/AuthorDeleteModal";
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export default function AuthorPage() {
   const [openDeleteModal, setOpenDeleteModal] = useState(false);

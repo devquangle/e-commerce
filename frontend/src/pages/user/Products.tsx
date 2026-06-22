@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import Container from "@/components/common/Container";
 import ProductCard from "@/components/user/ProductCard";
-import FilterSidebar from "@/features/user/product-search/components/FilterSidebar";
-import ProductToolbar from "@/features/user/product-search/components/ProductToolbar";
-import { useProductFilter } from "@/features/user/product-search/hooks/useProductFilter";
-import { useProductSearch } from "@/features/user/product-search/hooks/useProductSearch";
+import FilterSidebar from "@/modules/user/product-search/components/FilterSidebar";
+import ProductToolbar from "@/modules/user/product-search/components/ProductToolbar";
+import { useProductFilter } from "@/modules/user/product-search/hooks/useProductFilter";
+import { useProductSearch } from "@/modules/user/product-search/hooks/useProductSearch";
 import Pagination from "@/components/common/Pagination";
 
 export default function Products() {

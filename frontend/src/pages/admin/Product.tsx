@@ -8,9 +8,9 @@ import { BookOpen, Plus, RotateCcw, Search } from "lucide-react";
 
 
 import type { ProductResponse } from "@/types/product.type";
-import ProductTable from "@/features/admin/product/components/ProductTable";
-import ProductMobileCard from "@/features/admin/product/components/ProductMobileCard";
-import { useDeleteProduct, useFilterProduct } from "@/features/admin/product/hooks/useProduct";
+import ProductTable from "@/modules/admin/product/components/ProductTable";
+import ProductMobileCard from "@/modules/admin/product/components/ProductMobileCard";
+import { useDeleteProduct, useFilterProduct } from "@/modules/admin/product/hooks/useProduct";
 import type { BaseStatus } from "@/types/status";
 
 const initialFilterOptions = { keyword: "", status: "", page: 1, size: 10 };

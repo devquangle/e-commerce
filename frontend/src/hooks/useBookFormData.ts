@@ -1,9 +1,9 @@
 import { useQueries } from "@tanstack/react-query";
 
-import AuthorService from "@/features/admin/author/services/author.service";
-import SeriesService from "@/features/admin/series/services/series.service";
-import GenreService from "@/features/admin/genre/services/genre.service";
-import PublisherService from "@/features/admin/publisher/services/publisher.service";
+import AuthorService from "@/modules/admin/author/services/author.service";
+import SeriesService from "@/modules/admin/series/services/series.service";
+import GenreService from "@/modules/admin/genre/services/genre.service";
+import PublisherService from "@/modules/admin/publisher/services/publisher.service";
 
 export const useBookFormData = () => {
   const results = useQueries({

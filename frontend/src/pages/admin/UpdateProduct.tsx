@@ -15,7 +15,7 @@ import {
   Pencil,
 } from "lucide-react";
 
-import ProductDescriptionEditor from "@/features/admin/product/components/ProductDescriptionEditor";
+import ProductDescriptionEditor from "@/modules/admin/product/components/ProductDescriptionEditor";
 import SelectedMutil from "@/components/common/SelectedMutil";
 import SelectBox from "@/components/common/SelectedBox";
 import InputField from "@/components/common/InputField";
@@ -38,8 +38,8 @@ import {
 import type { ImageProductRequest } from "@/types/image";
 import type { ProductAuthorResponse, ProductRequest } from "@/types/product.type";
 import type { GoogleBookResponse } from "@/types/googlebook";
-import { useProductById, useUpdateProduct } from "@/features/admin/product/hooks/useProduct";
-import type { GenreResponse } from "@/features/admin/genre/types/genre.type";
+import { useProductById, useUpdateProduct } from "@/modules/admin/product/hooks/useProduct";
+import type { GenreResponse } from "@/modules/admin/genre/types/genre.type";
 
 const MAX_IMAGES = 6;
 

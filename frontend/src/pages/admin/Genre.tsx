@@ -18,18 +18,18 @@ import {
   useFilterGenre,
   useImportGenre,
   useUpdateGenre,
-} from "@/features/admin/genre/hooks/useGenre";
+} from "@/modules/admin/genre/hooks/useGenre";
 import type {
   GenreRequest,
   GenreResponse,
-} from "@/features/admin/genre/types/genre.type";
-import GenreTable from "@/features/admin/genre/components/GenreTable";
-import GenreMobileCard from "@/features/admin/genre/components/GenreMobileCard";
-import useGenreFilter from "@/features/admin/genre/hooks/useGenreFilter";
-import GenreDeleteModal from "@/features/admin/genre/components/GenreDeleteModal";
-import GenreHeader from "@/features/admin/genre/components/GenreHeader";
-import GenreFilter from "@/features/admin/genre/components/GenreFilter";
-import GenreFormModal from "@/features/admin/genre/components/GenreFormModal";
+} from "@/modules/admin/genre/types/genre.type";
+import GenreTable from "@/modules/admin/genre/components/GenreTable";
+import GenreMobileCard from "@/modules/admin/genre/components/GenreMobileCard";
+import useGenreFilter from "@/modules/admin/genre/hooks/useGenreFilter";
+import GenreDeleteModal from "@/modules/admin/genre/components/GenreDeleteModal";
+import GenreHeader from "@/modules/admin/genre/components/GenreHeader";
+import GenreFilter from "@/modules/admin/genre/components/GenreFilter";
+import GenreFormModal from "@/modules/admin/genre/components/GenreFormModal";
 
 export default function Genre() {
   const {

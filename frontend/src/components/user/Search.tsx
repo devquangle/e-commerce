@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { Search as SearchIcon, BookOpen, TrendingUp, Camera, X, Upload, Image as ImageIcon } from "lucide-react";
 import { formatMoney } from "@/utils/number.utils";
-import { baseProducts } from "@/features/user/home/data/mockData";
+import { baseProducts } from "@/modules/user/home/data/mockData";
 
 export default function Search() {
   const [keyword, setKeyword] = useState("");

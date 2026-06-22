@@ -1,10 +1,10 @@
 import Container from '@/components/common/Container';
-import HeroBanner from '@/features/user/home/components/HeroBanner';
-import HomeCategories from '@/features/user/home/components/HomeCategories';
-import FlashSaleSection from '@/features/user/home/components/FlashSaleSection';
-import ProductSection from '@/features/user/home/components/ProductSection';
-import Testimonials from '@/features/user/home/components/Testimonials';
-import BlogSection from '@/features/user/home/components/BlogSection';
+import HeroBanner from '@/modules/user/home/components/HeroBanner';
+import HomeCategories from '@/modules/user/home/components/HomeCategories';
+import FlashSaleSection from '@/modules/user/home/components/FlashSaleSection';
+import ProductSection from '@/modules/user/home/components/ProductSection';
+import Testimonials from '@/modules/user/home/components/Testimonials';
+import BlogSection from '@/modules/user/home/components/BlogSection';
 import { 
   banners, 
   categories, 
@@ -12,7 +12,7 @@ import {
   bestSellerProducts, 
   newProducts,
   highlyRatedProducts
-} from '@/features/user/home/data/mockData';
+} from '@/modules/user/home/data/mockData';
 
 export default function Home() {
   return (

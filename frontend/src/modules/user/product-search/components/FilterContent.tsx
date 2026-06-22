@@ -5,8 +5,8 @@ import { Building2, Layers, ChevronDown, Star } from "lucide-react";
 import Loading from "@/components/common/Loading";
 import type { GenreWithProductCountResponse } from "@/types/genre";
 import type { AuthorWithProductCountResponse } from "@/types/author";
-import type { PublisherWithProductCountResponse } from "@/features/admin/publisher/types/publisher.type";
-import type { SeriesWithProductCountResponse } from "@/features/admin/series/types/series.type";
+import type { PublisherWithProductCountResponse } from "@/modules/admin/publisher/types/publisher.type";
+import type { SeriesWithProductCountResponse } from "@/modules/admin/series/types/series.type";
 
 /* ================= TYPES ================= */
 

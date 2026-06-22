@@ -1,1 +1,1 @@
-export * from "@/features/admin/author/types/author.type";
+export * from "@/modules/admin/author/types/author.type";

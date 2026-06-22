@@ -15,9 +15,9 @@ import type { SeriesRequest, SeriesResponse } from "@/types/series";
 import { BaseStatus, getBaseStatusLabel } from "@/types/status";
 
 import { mapServerErrors } from "@/utils/mapServerErrors";
-import SeriesTable from "@/features/admin/series/components/SeriesTable";
-import SeriesMobileCard from "@/features/admin/series/components/SeriesMobileCard";
-import { useCreateSeries, useDeleteSeries, useFilterSeries, useUpdateSeries } from "@/features/admin/series/hooks/useSeries";
+import SeriesTable from "@/modules/admin/series/components/SeriesTable";
+import SeriesMobileCard from "@/modules/admin/series/components/SeriesMobileCard";
+import { useCreateSeries, useDeleteSeries, useFilterSeries, useUpdateSeries } from "@/modules/admin/series/hooks/useSeries";
 
 const initialFilterOptions = { keyword: "", status: "", page: 1, size: 10 };
 const initSeries: SeriesRequest = {
