@@ -63,7 +63,7 @@ const userRouter = [
         element: <Blogs />,
     },
     {
-        path: "/product/:id",
+        path: "/product",
         element: <ProductDetail />,
     },
     {

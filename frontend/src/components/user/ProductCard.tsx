@@ -35,7 +35,7 @@ export default function ProductCard({ product }: Props) {
 
   return (
     <Link
-      to={`/product/${product.slug || product.id}`}
+      to={`/product?slug=${product.slug}`}
       className="
         group flex h-full flex-col overflow-hidden
         card-custom

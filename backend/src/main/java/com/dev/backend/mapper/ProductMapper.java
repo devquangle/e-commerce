@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 import com.dev.backend.dto.product.ProductAuthorResponse;
+import com.dev.backend.dto.product.ProductDetailResponse;
 import com.dev.backend.dto.product.ProductGenreResponse;
 import com.dev.backend.dto.product.ProductImageResponse;
 import com.dev.backend.dto.product.ProductResponse;
@@ -57,6 +58,44 @@ public class ProductMapper {
         dto.setUrlImageDefault(urlImageDefault(product.getImages()));
         dto.setCoverImages(coverImageResponses(product.getImages()));
         return dto;
+    }
+
+    public ProductDetailResponse toDetail(Product product) {
+        if (product == null) {
+            return null;
+        }
+        ProductDetailResponse dto = new ProductDetailResponse();
+        dto.setId(product.getId());
+        dto.setName(product.getName());
+        dto.setSlug(product.getSlug());
+        dto.setIsbn(product.getIsbn());
+        dto.setOriginalPrice(product.getOriginalPrice());
+        dto.setPrice(product.getPrice());
+        dto.setQuantity(product.getQuantity());
+        dto.setWeight(product.getWeight());
+
+        // Tránh NullPointerException nếu publishYear bị null
+        dto.setPublishYear(product.getPublishYear() != null ? product.getPublishYear().toString() : null);
+        dto.setPages(product.getPages());
+
+        dto.setPublisherId(
+                product.getPublisher() != null
+                        ? product.getPublisher().getId()
+                        : null);
+
+        dto.setSeriesId(
+                product.getSeries() != null
+                        ? product.getSeries().getId()
+                        : null);
+        dto.setStatus(product.getStatus().name());
+
+        dto.setDescription(product.getDescription());
+
+        dto.setAuthorIds(setProductAuthorsId(product.getProductAuthors()));
+        dto.setGenreIds(setProductGenresId(product.getProductGenres()));
+        dto.setCoverImages(coverImageResponses(product.getImages()));
+        return dto;
+
     }
 
     private List<Integer> setProductAuthorsId(List<ProductAuthor> productAuthors) {
@@ -133,7 +172,6 @@ public class ProductMapper {
                 .map(img -> {
                     ProductImageResponse productImageResponse = new ProductImageResponse();
                     if (productImageResponse != null) {
-
                         productImageResponse.setUrl(img.getUrlImage());
                         productImageResponse.setIsThumbnail(img.isThumbnail());
                     }

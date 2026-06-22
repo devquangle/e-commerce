@@ -111,7 +111,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product findBySlug(String slug) {
-        return null;
+        return productRepository.findBySlug(slug).orElseThrow(
+                () -> new NotFoundException("Không tìm thấy sản phẩm với slug: " + slug));
     }
 
     @Override

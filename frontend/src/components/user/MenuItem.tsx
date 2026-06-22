@@ -24,18 +24,16 @@ export default function MenuItem({ className = "" }) {
   // Thêm state để kiểm soát trạng thái hover trên Desktop
   const [isDesktopMenuOpen, setIsDesktopMenuOpen] = useState(false);
 
-  const { genresData: genres, authorsData: authors, isLoading } = useBookFormData();
+  const {
+    genresData: genres,
+    authorsData: authors,
+    isLoading,
+  } = useBookFormData();
   const loadingGenres = isLoading;
   const loadingAuthors = isLoading;
 
-  const activeGenres = genres.filter(
-    (g) => (g.bookCount || 0) > 0
-  );
-  const activeAuthors = authors.filter(
-    (a) => (a.bookCount || 0) > 0
-  );
-
-
+  const activeGenres = genres.filter((g) => (g.bookCount || 0) > 0);
+  const activeAuthors = authors.filter((a) => (a.bookCount || 0) > 0);
 
   return (
     <ul className={className}>
@@ -45,9 +43,7 @@ export default function MenuItem({ className = "" }) {
         onMouseLeave={() => setIsDesktopMenuOpen(false)}
       >
         <div className="flex items-center justify-between py-4">
-          <div
-            className="flex items-center gap-1.5 hover:text-indigo-600 font-medium"
-          >
+          <div className="flex items-center gap-1.5 hover:text-indigo-600 font-medium">
             <LayoutGrid size={18} />
             Danh mục
             <ChevronDown
@@ -71,7 +67,13 @@ export default function MenuItem({ className = "" }) {
 
         {/* Dropdown Container */}
         <div
-          className={`lg:absolute lg:top-full lg:left-0 lg:w-full bg-white lg:rounded-3xl lg:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] lg:border border-slate-100/50 ${isMobileMenuOpen ? "block" : "hidden"} ${isDesktopMenuOpen ? "lg:block" : "lg:hidden"} transition-all duration-300 z-50`}
+          className={`lg:absolute lg:top-full lg:left-0 lg:w-full bg-white lg:rounded-3xl lg:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] lg:border border-slate-100/50 transition-all duration-300 ease-out z-50 origin-top
+            ${isMobileMenuOpen ? "block" : "hidden lg:block"}
+            ${
+              isDesktopMenuOpen
+                ? "lg:opacity-100 lg:translate-y-0 lg:pointer-events-auto lg:scale-100"
+                : "lg:opacity-0 lg:-translate-y-4 lg:pointer-events-none lg:scale-95"
+            }`}
         >
           <div className="flex flex-col lg:grid lg:grid-cols-12 p-4 lg:p-8 gap-6 lg:gap-8">
             {/* === CỘT 1: THỂ LOẠI === */}
@@ -96,7 +98,7 @@ export default function MenuItem({ className = "" }) {
                   ))}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 gap-y-2 pr-2 pb-2 custom-scrollbar max-h-[340px] overflow-y-auto">
+                <div className="grid grid-cols-1 gap-y-2 pr-2 pb-2 custom-scrollbar max-h-[340px] lg:max-h-none lg:flex-grow lg:h-0 overflow-y-auto">
                   {activeGenres.map((genre) => (
                     <Link
                       key={genre.id}
@@ -159,7 +161,7 @@ export default function MenuItem({ className = "" }) {
                   ))}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 gap-y-2 pr-2 pb-2 custom-scrollbar max-h-[340px] overflow-y-auto">
+                <div className="grid grid-cols-1 gap-y-2 pr-2 pb-2 custom-scrollbar max-h-[340px] lg:max-h-none lg:flex-grow lg:h-0 overflow-y-auto">
                   {activeAuthors.map((author) => (
                     <Link
                       key={author.id}
