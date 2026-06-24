@@ -15,6 +15,7 @@ import com.dev.backend.constant.ProductBadge;
 import com.dev.backend.constant.ProductStatus;
 import com.dev.backend.constant.PromotionCampaignType;
 import com.dev.backend.dto.product.ProductCardResponse;
+import com.dev.backend.dto.product.ProductDetailResponse;
 import com.dev.backend.dto.product.ProductFilterRequest;
 import com.dev.backend.dto.product.ProductRequest;
 import com.dev.backend.dto.product.ProductResponse;
@@ -86,9 +87,9 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductResponse edit(Integer id) {
-        ProductResponse productResponse = productMapper.toDTO(findById(id));
-        return productResponse;
+    public ProductDetailResponse edit(Integer id) {
+        ProductDetailResponse  dto= productMapper.toDetail(findById(id));
+        return dto;
     }
 
     @Override

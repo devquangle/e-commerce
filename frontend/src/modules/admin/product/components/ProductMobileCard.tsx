@@ -1,4 +1,5 @@
-import type { ProductResponse } from "@/types/product.type";
+import type { ProductResponse } from "../types/product.type";
+import type { BaseStatus } from "@/types/status";
 import { SearchX, BookOpen, Calendar, FileText, Weight, Building2, Layers } from "lucide-react";
 import ProductStatusBadge from "./ProductStatusBadge";
 import ProductActionButtons from "./ProductActionButtons";
@@ -53,7 +54,7 @@ const ProductMobileCard = ({ products, onDelete }: Props) => {
                     </span>
                     <div className="shrink-0">
                       <ProductStatusBadge
-                        status={product.quantity > 0 ? "ACTIVE" : "INACTIVE"}
+                        status={product.status as BaseStatus}
                       />
                     </div>
                   </div>
@@ -83,10 +84,10 @@ const ProductMobileCard = ({ products, onDelete }: Props) => {
               </div>
 
               {/* ===== TÁC GIẢ + THỂ LOẠI ===== */}
-              {((product.productAuthors && product.productAuthors.length > 0) || (product.productGenres && product.productGenres.length > 0)) && (
+              {((product.authorsName && product.authorsName.length > 0) || (product.genresName && product.genresName.length > 0)) && (
                 <div className="flex flex-wrap gap-1">
-                  <ExpandableAuthors authors={product.productAuthors} limit={2} />
-                  <ExpandableGenres genres={product.productGenres} limit={2} />
+                  <ExpandableAuthors authors={product.authorsName} limit={2} />
+                  <ExpandableGenres genres={product.genresName} limit={2} />
                 </div>
               )}
 

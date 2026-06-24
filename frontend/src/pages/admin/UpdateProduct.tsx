@@ -36,10 +36,9 @@ import {
 
 
 import type { ImageProductRequest } from "@/types/image";
-import type { ProductAuthorResponse, ProductRequest } from "@/types/product.type";
+import type { ProductRequest } from "@/types/product.type";
 import type { GoogleBookResponse } from "@/types/googlebook";
 import { useProductById, useUpdateProduct } from "@/modules/admin/product/hooks/useProduct";
-import type { GenreResponse } from "@/modules/admin/genre/types/genre.type";
 
 const MAX_IMAGES = 6;
 
@@ -201,8 +200,8 @@ export default function UpdateProduct() {
       weight: productData.weight,
       publishYear: productData.publishYear,
       pages: productData.pages,
-      authorIds: productData.productAuthors?.map((a) => a.id) ?? [],
-      genreIds: productData.productGenres?.map((g) => g.id) ?? [],
+      authorIds: productData.authorIds ?? [],
+      genreIds: productData.genreIds ?? [],
       publisherId: productData.publisherId ?? undefined,
       seriesId: productData.seriesId ?? undefined,
       status: "ACTIVE",
@@ -266,12 +265,43 @@ export default function UpdateProduct() {
 
   // Đồng bộ thông tin Sách vào HTML Table (Đã bọc Debounce 800ms cực mượt)
   useEffect(() => {
+    if (isFormLoading) return;
     const [authorIds, genreIds, publisherId, publishYear, pages, seriesId] =
       debouncedTaxonomy;
     const currentDesc = getValues("description");
     if (!currentDesc) return;
 
     let newDesc = currentDesc;
+
+    // Tự động khôi phục mục 3. Thông Tin Sách nếu bị mất hoặc bị xóa trong mô tả
+    const hasBookInfoSection = /3\.\s*Thông\s*Tin\s*Sách/i.test(newDesc) && /<table/i.test(newDesc);
+    if (!hasBookInfoSection) {
+      const defaultTable = `
+<hr />
+<h5><strong>3. Thông Tin Sách</strong></h5>
+<table>
+  <tbody>
+    <tr><th>Thuộc tính</th><th>Thông tin</th></tr>
+    <tr><td>Tác giả</td><td>[Tên tác giả]</td></tr>
+    <tr><td>Thể loại</td><td>[Tên thể loại]</td></tr>
+    <tr><td>Nhà xuất bản</td><td>[Tên nhà xuất bản]</td></tr>
+    <tr><td>Ngày xuất bản</td><td>[Ngày xuất bản]</td></tr>
+    <tr><td>Số trang</td><td>[Số trang]</td></tr>
+  </tbody>
+</table>
+<hr />
+`;
+      const targetAudienceRegex = /(<h5><strong>4\.\s*Đối\s*Tượng\s*Độc\s*Giả<\/strong><\/h5>|<h[1-6]>[^<]*4\.\s*Đối\s*Tượng\s*Độc\s*Giả[^<]*<\/h[1-6]>)/i;
+      const authorSectionRegex = /(<h5><strong>5\.\s*Về\s*Tác\s*Giả<\/strong><\/h5>|<h[1-6]>[^<]*5\.\s*Về\s*Tác\s*Giả[^<]*<\/h[1-6]>)/i;
+
+      if (targetAudienceRegex.test(newDesc)) {
+        newDesc = newDesc.replace(targetAudienceRegex, (match) => `${defaultTable}\n${match}`);
+      } else if (authorSectionRegex.test(newDesc)) {
+        newDesc = newDesc.replace(authorSectionRegex, (match) => `${defaultTable}\n${match}`);
+      } else {
+        newDesc = `${newDesc}\n${defaultTable}`;
+      }
+    }
 
     // Tác giả
     const authorNames = ((authorIds as number[]) || [])
@@ -370,6 +400,7 @@ export default function UpdateProduct() {
     authorsData,
     setValue,
     getValues,
+    isFormLoading,
   ]);
 
   // Xử lý Submit Form chính

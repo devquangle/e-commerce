@@ -1,6 +1,6 @@
 import { apiAuth } from "@/configs/axios";
 import type { ApiResponse } from "@/types/api-response";
-import type { ProductRequest, ProductResponse  } from "../types/product.type";
+import type { ProductRequest, ProductResponse, ProductDetailResponse } from "../types/product.type";
 import type { options } from "@/types/options.type";
 import type { Pagination } from "@/types/pagination";
 
@@ -13,7 +13,7 @@ const ProductService = {
     return res.data.data;
   },
     async getById(id: number) {
-    const res = await apiAuth.get<ApiResponse<ProductResponse>>(
+    const res = await apiAuth.get<ApiResponse<ProductDetailResponse>>(
       `/api/v1/admin/products/${id}`,
     );
     if (!res.data.success || !res.data.data) {

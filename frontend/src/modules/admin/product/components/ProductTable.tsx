@@ -13,6 +13,7 @@ import {
 import ProductStatusBadge from "./ProductStatusBadge";
 import ProductActionButtons from "./ProductActionButtons";
 import type { ProductResponse } from "../types/product.type";
+import type { BaseStatus } from "@/types/status";
 
 type Props = {
   products: ProductResponse[];
@@ -123,11 +124,11 @@ export default function ProductTable({ products, onDelete }: Props) {
                       {/* Tác giả + Thể loại */}
                       <div className="flex flex-wrap gap-1">
                         <ExpandableAuthors
-                          authors={product.productAuthors}
+                          authors={product.authorsName}
                           limit={3}
                         />
                         <ExpandableGenres
-                          genres={product.productGenres}
+                          genres={product.genresName}
                           limit={3}
                         />
                       </div>
@@ -218,7 +219,7 @@ export default function ProductTable({ products, onDelete }: Props) {
                 {/* ── TRẠNG THÁI ── */}
                 <td className="py-4 px-4 align-middle">
                   <ProductStatusBadge
-                    status={product.quantity > 0 ? "ACTIVE" : "INACTIVE"}
+                    status={product.status as BaseStatus}
                   />
                 </td>
 
@@ -256,7 +257,7 @@ export const ExpandableAuthors = ({
   authors,
   limit,
 }: {
-  authors: ProductResponse["productAuthors"];
+  authors: string[];
   limit: number;
 }) => {
   const [expanded, setExpanded] = useState(false);
@@ -272,14 +273,14 @@ export const ExpandableAuthors = ({
 
   return (
     <div className="flex flex-wrap gap-1 items-center">
-      {visible.map((a) => (
+      {visible.map((name, index) => (
         <span
-          key={`a-${a.id}`}
+          key={`a-${index}`}
           className="inline-flex items-center gap-1 bg-indigo-50 text-indigo-600 border border-indigo-100 px-1.5 py-0.5 rounded text-[10px]"
         >
           <BookOpen size={10} />
-          <span className="max-w-[100px] truncate" title={a.name}>
-            {a.name}
+          <span className="max-w-[100px] truncate" title={name}>
+            {name}
           </span>
         </span>
       ))}
@@ -314,7 +315,7 @@ export const ExpandableGenres = ({
   genres,
   limit,
 }: {
-  genres: ProductResponse["productGenres"];
+  genres: string[];
   limit: number;
 }) => {
   const [expanded, setExpanded] = useState(false);
@@ -326,14 +327,14 @@ export const ExpandableGenres = ({
 
   return (
     <div className="flex flex-wrap gap-1 items-center">
-      {visible.map((g) => (
+      {visible.map((name, index) => (
         <span
-          key={`g-${g.id}`}
+          key={`g-${index}`}
           className="inline-flex items-center gap-1 bg-slate-50 text-slate-500 border border-slate-200 px-1.5 py-0.5 rounded text-[10px]"
         >
           <Tag size={10} />
-          <span className="max-w-[100px] truncate" title={g.name}>
-            {g.name}
+          <span className="max-w-[100px] truncate" title={name}>
+            {name}
           </span>
         </span>
       ))}

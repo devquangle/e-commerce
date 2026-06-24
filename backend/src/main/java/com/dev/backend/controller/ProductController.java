@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dev.backend.dto.product.ProductCardResponse;
+import com.dev.backend.dto.product.ProductDetailResponse;
 import com.dev.backend.dto.product.ProductFilterRequest;
 import com.dev.backend.dto.product.ProductRequest;
 import com.dev.backend.dto.product.ProductResponse;
@@ -52,8 +53,8 @@ public class ProductController {
     }
 
     @GetMapping("/admin/products/{id}")
-    public ResponseEntity<ResponseData<ProductResponse>> edit(@PathVariable Integer id) {
-        ProductResponse response = productService.edit(id);
+    public ResponseEntity<ResponseData<ProductDetailResponse>> edit(@PathVariable Integer id) {
+        ProductDetailResponse response = productService.edit(id);
         return ResponseUtil.success("lấy thông tin phẩm thành công", response);
     }
 

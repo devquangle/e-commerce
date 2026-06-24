@@ -24,17 +24,12 @@ public class ProductResponse {
     private String publishYear;
     private Integer pages;
 
-    private Integer seriesId;
-    private Integer publisherId;
     private String status;
-    private String description;
 
-    private List<Integer> authorIds;
-    private List<Integer> genreIds;
+    private List<String> authorsName;
+    private List<String> genresName;
     private String publisherName;
     private String seriesName;
     private String urlImageDefault;
-    private List<ProductImageResponse> coverImages;
-    private List<ProductAuthorResponse> productAuthors;
-    private List<ProductGenreResponse> productGenres;
+
 }

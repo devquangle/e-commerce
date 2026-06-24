@@ -2,6 +2,7 @@ package com.dev.backend.service;
 
 import java.util.List;
 import com.dev.backend.dto.product.ProductCardResponse;
+import com.dev.backend.dto.product.ProductDetailResponse;
 import com.dev.backend.dto.product.ProductFilterRequest;
 import com.dev.backend.dto.product.ProductRequest;
 import com.dev.backend.dto.product.ProductResponse;
@@ -26,7 +27,7 @@ public interface ProductService {
 
     ProductResponse update(Integer id, ProductRequest productRequest);
 
-    ProductResponse edit(Integer id);
+    ProductDetailResponse edit(Integer id);
 
     void delete(Integer id);
 

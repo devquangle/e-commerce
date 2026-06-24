@@ -1,4 +1,4 @@
-import type { ProductResponse } from "@/types/product.type";
+import type { ProductResponse } from "../types/product.type";
 import { Edit, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 

@@ -1,4 +1,4 @@
-import type { ProductRequest, ProductResponse } from "../types/product.type";
+import type { ProductRequest, ProductResponse, ProductDetailResponse } from "../types/product.type";
 import type { Pagination } from "@/types/pagination";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { showErrorToast, showSuccessToast } from "@/utils/toastUtil";
@@ -87,7 +87,7 @@ export const useDeleteProduct = () => {
 };
 
 export const useProductById = (id: number | undefined) => {
-  return useQuery<ProductResponse>({
+  return useQuery<ProductDetailResponse>({
     queryKey: ["product", id],
     queryFn: () => ProductService.getById(id!),
     enabled: !!id,

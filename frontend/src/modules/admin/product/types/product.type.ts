@@ -1,6 +1,3 @@
-
-
-
 export interface ProductRequest {
   name: string;
   authorIds: number[];
@@ -30,24 +27,32 @@ export interface ProductResponse {
   weight: number;
   publishYear: string;
   pages: number;
-
+  status: string;
+  genresName: string[] | [];
+  authorsName: string[] | [];
   publisherName: string;
   seriesName: string;
+  urlImageDefault: string;
+}
+
+export interface ProductDetailResponse {
+  id: number;
+  name: string;
+  slug: string;
+  isbn: string;
+  originalPrice: number;
+  price: number;
+  quantity: number;
+  weight: number;
+  publishYear: string;
+  pages: number;
+  status: string;
+  description: string;
+  genreIds: number[] | [];
+  authorIds: number[] | [];
   publisherId: number | null;
   seriesId: number | null;
-  urlImageDefault: string;
-  description: string;
-  productGenres: ProductGenreResponse[] | [];
-  productAuthors: ProductAuthorResponse[] | [];
-  coverImages: ProductImageResponse[] | [];
-}
-export interface ProductGenreResponse {
-  id: number;
-  name: string;
-}
-export interface ProductAuthorResponse {
-  id: number;
-  name: string;
+  coverImages: ProductImageResponse[]|[];
 }
 
 export interface ProductImageResponse {

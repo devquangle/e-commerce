@@ -7,7 +7,7 @@ import SelectBox from "@/components/common/SelectedBox";
 import { BookOpen, Plus, RotateCcw, Search } from "lucide-react";
 
 
-import type { ProductResponse } from "@/types/product.type";
+import type { ProductResponse } from "@/modules/admin/product/types/product.type";
 import ProductTable from "@/modules/admin/product/components/ProductTable";
 import ProductMobileCard from "@/modules/admin/product/components/ProductMobileCard";
 import { useDeleteProduct, useFilterProduct } from "@/modules/admin/product/hooks/useProduct";
