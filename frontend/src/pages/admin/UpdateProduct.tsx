@@ -60,51 +60,27 @@ const INITIAL_FORM: ProductRequest = {
   status: "ACTIVE",
   coverImages: [],
   description: `
-    <h4><strong>Giới Thiệu Sách</strong></h4>
-    <p>Nhập phần giới thiệu ngắn gọn về cuốn sách tại đây. Mô tả nội dung chính, thông điệp nổi bật hoặc giá trị mà cuốn sách mang lại cho người đọc.</p>
+    <h2>Nội dung chính</h2>
+    <p>Tóm tắt cốt truyện hoặc chủ đề cuốn sách ngắn gọn, hấp dẫn tại đây. Mỗi đoạn văn nên có độ dài từ 3-5 câu để độc giả có thể dễ dàng nắm bắt thông tin và mạch truyện.</p>
     <img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=600" alt="Ảnh bìa sách" style="width: 40%; max-width: 100%; height: auto;" class="block mx-auto" />
     <p style="text-align:center; font-size: 14px; color: #666;"><em>Hình ảnh minh họa cho cuốn sách</em></p>
-    <hr />
-    <h5><strong>1. Nội Dung Chính</strong></h5>
-    <p>Mô tả ngắn gọn cốt truyện, kiến thức hoặc chủ đề chính của cuốn sách. Có thể chia thành nhiều đoạn văn để người đọc dễ theo dõi.</p>
-    <h5><strong>2. Điểm Nổi Bật</strong></h5>
+    
+    <h2>Điểm nổi bật</h2>
     <ul>
-      <li>Nội dung hấp dẫn và dễ tiếp cận.</li>
-      <li>Thông tin được trình bày rõ ràng, logic.</li>
-      <li>Phù hợp với nhiều nhóm độc giả.</li>
-      <li>Mang lại giá trị thực tiễn cho người đọc.</li>
+      <li>Nội dung sách hấp dẫn, dễ tiếp cận và được trình bày một cách khoa học.</li>
+      <li>Cung cấp nhiều bài học và ví dụ thực tiễn sâu sắc cho độc giả.</li>
+      <li>Ngôn từ lôi cuốn, văn phong mạch lạc và lối kể chuyện tự nhiên.</li>
     </ul>
-    <hr />
-    <h5><strong>3. Thông Tin Sách</strong></h5>
-    <table>
-      <tbody>
-        <tr><th>Thuộc tính</th><th>Thông tin</th></tr>
-        <tr><td>Tác giả</td><td>[Tên tác giả]</td></tr>
-        <tr><td>Thể loại</td><td>[Tên thể loại]</td></tr>
-        <tr><td>Nhà xuất bản</td><td>[Tên nhà xuất bản]</td></tr>
-        <tr><td>Ngày xuất bản</td><td>[Ngày xuất bản]</td></tr>
-        <tr><td>Số trang</td><td>[Số trang]</td></tr>
-      </tbody>
-    </table>
-    <hr />
-    <h5><strong>4. Đối Tượng Độc Giả</strong></h5>
-    <p>Cuốn sách phù hợp với những người quan tâm đến chủ đề này, học sinh, sinh viên hoặc người đi làm muốn mở rộng kiến thức.</p>
-    <hr />
-    <h5><strong>5. Về Tác Giả</strong></h5>
-    <p>Giới thiệu ngắn gọn về tác giả</p>
+    
+    <h2>Đối tượng độc giả</h2>
+    <ul>
+      <li>Các bạn học sinh, sinh viên muốn nâng cao hiểu biết về lĩnh vực này.</li>
+      <li>Người đi làm muốn tìm kiếm những giải pháp ứng dụng thực tế.</li>
+    </ul>
+    
+    <h2>Về tác giả</h2>
+    <p>Tác giả là chuyên gia uy tín với nhiều năm kinh nghiệm thực chiến trong ngành. Các tác phẩm xuất bản của tác giả luôn đón nhận sự hưởng ứng mạnh mẽ của đông đảo độc giả.</p>
   `,
-};
-
-// Helper cập nhật HTML table gọn gàng hơn
-const updateTableHtml = (html: string, rowLabel: string, newValue: string) => {
-  const regex = new RegExp(
-    `(<td[^>]*>(?:<p[^>]*>)?\\s*${rowLabel}\\s*(?:<\\/p>)?<\\/td>\\s*<td[^>]*>(?:<p[^>]*>)?)([\\s\\S]*?)(<\\/p>)?(<\\/td>)`,
-    "i",
-  );
-  return html.replace(
-    regex,
-    (_, p1, __, p3, p4) => `${p1}${newValue}${p3 || ""}${p4}`,
-  );
 };
 
 export default function UpdateProduct() {
@@ -189,6 +165,23 @@ export default function UpdateProduct() {
     [seriesData],
   );
 
+  const watchedAuthorIds = taxonomyWatch?.[0] as number[] | undefined;
+  const watchedGenreIds = taxonomyWatch?.[1] as number[] | undefined;
+
+  const watchedAuthorNames = useMemo(() => {
+    return (watchedAuthorIds || [])
+      .map((id) => authorOptions.find((a) => a.value === id)?.label)
+      .filter(Boolean)
+      .join(", ");
+  }, [watchedAuthorIds, authorOptions]);
+
+  const watchedGenreNames = useMemo(() => {
+    return (watchedGenreIds || [])
+      .map((id) => genreOptions.find((g) => g.value === id)?.label)
+      .filter(Boolean)
+      .join(", ");
+  }, [watchedGenreIds, genreOptions]);
+
   // Load dữ liệu sản phẩm vào form khi productData sẵn sàng
   useEffect(() => {
     if (!productData) return;
@@ -239,20 +232,22 @@ export default function UpdateProduct() {
 
         if (metadata.summary) {
           newDesc = newDesc.replace(
-            /<p>\s*Mô tả ngắn gọn cốt truyện[\s\S]*?<\/p>/,
+            /<p>\s*Tóm tắt cốt truyện hoặc chủ đề cuốn sách[\s\S]*?<\/p>/,
             `<p>${metadata.summary}</p>`,
           );
         }
         if (metadata.highlights?.length) {
+          const highlightsHtml = `<ul>\n${metadata.highlights.map(h => `      <li>${h}</li>`).join("\n")}\n    </ul>`;
           newDesc = newDesc.replace(
-            /<ul>\s*<li>Nội dung hấp dẫn[\s\S]*?<\/ul>/,
-            `<p>\n${metadata.highlights.join(", <br/>\n")}\n</p>`,
+            /<ul>\s*<li>Nội dung sách hấp dẫn[\s\S]*?<\/ul>/,
+            highlightsHtml,
           );
         }
         if (metadata.targetAudience?.length) {
+          const audienceHtml = `<ul>\n${metadata.targetAudience.map(a => `      <li>${a}</li>`).join("\n")}\n    </ul>`;
           newDesc = newDesc.replace(
-            /<p>\s*Cuốn sách phù hợp với những người quan tâm[\s\S]*?<\/p>/,
-            `<p>${metadata.targetAudience.join(", <br/>\n")}</p>`,
+            /<ul>\s*<li>Các bạn học sinh, sinh viên[\s\S]*?<\/ul>/,
+            audienceHtml,
           );
         }
 
@@ -265,138 +260,34 @@ export default function UpdateProduct() {
     [generateGroqDescription, getValues, setValue],
   );
 
-  // Đồng bộ thông tin Sách vào HTML Table (Đã bọc Debounce 800ms cực mượt)
+  // Đồng bộ thông tin Tác giả vào phần mô tả
   useEffect(() => {
     if (isFormLoading) return;
-    const [authorIds, genreIds, publisherId, publishYear, pages, seriesId] =
-      debouncedTaxonomy;
+    const [authorIds] = debouncedTaxonomy;
     const currentDesc = getValues("description");
     if (!currentDesc) return;
 
     let newDesc = currentDesc;
 
-    // Tự động khôi phục mục 3. Thông Tin Sách nếu bị mất hoặc bị xóa trong mô tả
-    const hasBookInfoSection =
-      /3\.\s*Thông\s*Tin\s*Sách/i.test(newDesc) && /<table/i.test(newDesc);
-    if (!hasBookInfoSection) {
-      const defaultTable = `
-<hr />
-<h5><strong>3. Thông Tin Sách</strong></h5>
-<table>
-  <tbody>
-    <tr><th>Thuộc tính</th><th>Thông tin</th></tr>
-    <tr><td>Tác giả</td><td>[Tên tác giả]</td></tr>
-    <tr><td>Thể loại</td><td>[Tên thể loại]</td></tr>
-    <tr><td>Nhà xuất bản</td><td>[Tên nhà xuất bản]</td></tr>
-    <tr><td>Ngày xuất bản</td><td>[Ngày xuất bản]</td></tr>
-    <tr><td>Số trang</td><td>[Số trang]</td></tr>
-  </tbody>
-</table>
-<hr />
-`;
-      const targetAudienceRegex =
-        /(<h5><strong>4\.\s*Đối\s*Tượng\s*Độc\s*Giả<\/strong><\/h5>|<h[1-6]>[^<]*4\.\s*Đối\s*Tượng\s*Độc\s*Giả[^<]*<\/h[1-6]>)/i;
-      const authorSectionRegex =
-        /(<h5><strong>5\.\s*Về\s*Tác\s*Giả<\/strong><\/h5>|<h[1-6]>[^<]*5\.\s*Về\s*Tác\s*Giả[^<]*<\/h[1-6]>)/i;
-
-      if (targetAudienceRegex.test(newDesc)) {
-        newDesc = newDesc.replace(
-          targetAudienceRegex,
-          (match) => `${defaultTable}\n${match}`,
-        );
-      } else if (authorSectionRegex.test(newDesc)) {
-        newDesc = newDesc.replace(
-          authorSectionRegex,
-          (match) => `${defaultTable}\n${match}`,
-        );
-      } else {
-        newDesc = `${newDesc}\n${defaultTable}`;
-      }
-    }
-
-    // Tác giả
-    const authorNames = ((authorIds as number[]) || [])
-      .map((id) => authorOptions.find((a) => a.value === id)?.label)
-      .filter(Boolean)
-      .join(", ");
-    newDesc = updateTableHtml(
-      newDesc,
-      "Tác giả",
-      authorNames || "[Tên tác giả]",
-    );
-
-    // Thể loại
-    const genreNames = ((genreIds as number[]) || [])
-      .map((id) => genreOptions.find((g) => g.value === id)?.label)
-      .filter(Boolean)
-      .join(", ");
-    newDesc = updateTableHtml(
-      newDesc,
-      "Thể loại",
-      genreNames || "[Tên thể loại]",
-    );
-
-    // Nhà xuất bản
-    const publisherName = publisherOptions.find(
-      (p) => p.value === publisherId,
-    )?.label;
-    newDesc = updateTableHtml(
-      newDesc,
-      "Nhà xuất bản",
-      publisherName || "[Tên nhà xuất bản]",
-    );
-
-    // Ngày xuất bản & Số trang
-    newDesc = updateTableHtml(
-      newDesc,
-      "Ngày xuất bản",
-      (publishYear as string) || "[Ngày xuất bản]",
-    );
-    newDesc = updateTableHtml(
-      newDesc,
-      "Số trang",
-      pages ? String(pages) : "[Số trang]",
-    );
-
-    // Xử lý hàng Series
-    const seriesRowRegex =
-      /(<tr[^>]*>[\s\S]*?<td[^>]*>(?:<p[^>]*>)?\s*Series\s*(?:<\/p>)?<\/td>[\s\S]*?<\/tr>)/i;
-    const hasSeriesRow = seriesRowRegex.test(newDesc);
-
-    if (seriesId) {
-      const seriesName =
-        seriesOptions.find((s) => s.value === seriesId)?.label ||
-        "[Tên series]";
-      if (hasSeriesRow) {
-        newDesc = updateTableHtml(newDesc, "Series", seriesName);
-      } else {
-        const pagesRowRegex =
-          /(<tr[^>]*>[\s\S]*?<td[^>]*>(?:<p[^>]*>)?\s*Số trang\s*(?:<\/p>)?<\/td>[\s\S]*?<\/tr>)/i;
-        newDesc = newDesc.replace(
-          pagesRowRegex,
-          (match) =>
-            `${match}\n    <tr>\n      <td>Series</td>\n      <td>${seriesName}</td>\n    </tr>`,
-        );
-      }
-    } else if (hasSeriesRow) {
-      newDesc = newDesc.replace(seriesRowRegex, "");
-    }
-
-    // Cập nhật mô tả chi tiết Tác giả ở phần 5
+    // Cập nhật mô tả chi tiết Tác giả
     const selectedAuthors = ((authorIds as number[]) || [])
       .map((id) => authorsData.find((a) => a.id === id))
-      .filter(Boolean);
+      .filter((author): author is NonNullable<typeof author> => !!author);
     if (selectedAuthors.length > 0) {
       const authorDescriptions = selectedAuthors
         .map(
           (a) =>
-            `- ${a?.name || "Chưa rõ"}: ${a?.description ?? "Chưa có mô tả."}`,
+            `- ${a.name || "Chưa rõ"}: ${a.description || "Chưa có mô tả."}`,
         )
         .join("<br/>\n");
-      newDesc = newDesc.replace(
-        /(<h5><strong>5\. Về Tác Giả<\/strong><\/h5>\s*)<p>[\s\S]*?<\/p>/i,
-        `$1<p>\n${authorDescriptions}\n</p>`,
-      );
+      
+      const authorRegex = /(<h2>\s*Về tác giả\s*<\/h2>\s*)<p>[\s\S]*?<\/p>/i;
+      if (authorRegex.test(newDesc)) {
+        newDesc = newDesc.replace(
+          authorRegex,
+          `$1<p>\n${authorDescriptions}\n</p>`,
+        );
+      }
     }
 
     if (newDesc !== currentDesc) {
@@ -404,10 +295,6 @@ export default function UpdateProduct() {
     }
   }, [
     debouncedTaxonomy,
-    authorOptions,
-    genreOptions,
-    publisherOptions,
-    seriesOptions,
     authorsData,
     setValue,
     getValues,
@@ -460,7 +347,18 @@ export default function UpdateProduct() {
     const availableSlots = MAX_IMAGES - coverImages.length;
     const filesToUpload = Array.from(files).slice(0, availableSlots);
 
-    const newImages: ImageProductRequest[] = filesToUpload.map((file) => ({
+    const validFiles: File[] = [];
+    for (const file of filesToUpload) {
+      if (file.size > 1048576) {
+        showWarningToast(`Ảnh "${file.name}" vượt quá 1MB và đã bị bỏ qua.`);
+      } else {
+        validFiles.push(file);
+      }
+    }
+
+    if (validFiles.length === 0) return;
+
+    const newImages: ImageProductRequest[] = validFiles.map((file) => ({
       file,
       url: URL.createObjectURL(file),
       isThumbnail: false,
@@ -527,6 +425,12 @@ export default function UpdateProduct() {
   const handleReplaceFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || replaceIndex === null) return;
+
+    if (file.size > 1048576) {
+      showWarningToast("Hình ảnh thay thế phải có kích thước dưới 1MB!");
+      e.target.value = "";
+      return;
+    }
 
     const oldImage = coverImages[replaceIndex];
     if (oldImage.url?.startsWith("blob:")) {
@@ -754,7 +658,7 @@ export default function UpdateProduct() {
                   }
                   if (selectedItem.description) {
                     updatedDesc = updatedDesc.replace(
-                      /<p>\s*Nhập phần giới thiệu ngắn gọn[\s\S]*?<\/p>/,
+                      /<p>\s*Tóm tắt cốt truyện hoặc chủ đề cuốn sách[\s\S]*?<\/p>/,
                       `<p>${selectedItem.description}</p>`,
                     );
                   }
@@ -1145,6 +1049,9 @@ export default function UpdateProduct() {
             <ProductDescriptionEditor
               value={field.value}
               onChange={field.onChange}
+              bookName={inputName}
+              authorNames={watchedAuthorNames}
+              genreNames={watchedGenreNames}
             />
           )}
         />

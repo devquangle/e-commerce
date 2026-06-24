@@ -28,6 +28,7 @@ export default function ProductDescriptionView({ editor }: Props) {
         [&_.ProseMirror_h6]:text-base
         [&_.ProseMirror_h6]:font-semibold
         [&_.ProseMirror_img]:block
+        [&_.ProseMirror_img]:mx-auto
         [&_.ProseMirror_img]:max-w-full
         [&_.ProseMirror_img]:h-auto
         [&_.ProseMirror_img]:rounded-md

@@ -6,7 +6,8 @@ import type { ProductFilterOptions } from "../types/product.filter.options";
 
 const ProductSearchService = {
   async search(options?: ProductFilterOptions) {
-    const params: Record<string, string | number | boolean | undefined> = { ...(options || {}) };
+    // allow array values temporarily; arrays will be stringified below
+    const params: Record<string, string | number | boolean | undefined | string[]> = { ...(options || {}) };
 
     // Backend expects 1-indexed page, same as frontend
 

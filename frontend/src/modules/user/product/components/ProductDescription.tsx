@@ -43,6 +43,7 @@ export default function ProductDescription({ product }: ProductDescriptionProps)
           className={`
             prose prose-sm md:prose-base max-w-none text-slate-600 leading-relaxed
             prose-p:mb-4 prose-a:text-blue-600 prose-img:rounded-xl prose-img:max-w-full
+            prose-img:mx-auto prose-img:block
             overflow-hidden transition-all duration-300
             ${!isExpanded ? 'max-h-[300px]' : ''}
           `}
@@ -52,21 +53,11 @@ export default function ProductDescription({ product }: ProductDescriptionProps)
             <div dangerouslySetInnerHTML={{ __html: product.description }} />
           ) : (
              <>
+               <h2>Nội dung chính</h2>
                <p>
-                 Marketing căn bản là cuốn sách gối đầu giường của mọi marketer. 
-                 Trong phiên bản tái bản mới nhất, tác giả đã cập nhật thêm những xu hướng 
-                 digital marketing hiện đại, giúp người đọc nắm bắt được sự chuyển dịch của thị trường.
+                 Nội dung chi tiết của cuốn sách này hiện đang được cập nhật. 
+                 Quý độc giả có thể tham khảo thêm các thông số kỹ thuật chi tiết của sách trong mục thuộc tính.
                </p>
-               <ul>
-                 {product.isbn && <li>ISBN: {product.isbn}</li>}
-                 {product.pages && <li>Số trang: {product.pages}</li>}
-                 {product.publisherName && <li>Nhà xuất bản: {product.publisherName}</li>}
-                 {product.publishYear && <li>Năm xuất bản: {product.publishYear}</li>}
-                 {!product.isbn && <li>ISBN: 978-604-1-12345-6</li>}
-                 {!product.pages && <li>Số trang: 720</li>}
-                 {!product.publisherName && <li>Nhà xuất bản: Nhà Xuất Bản Trẻ</li>}
-                 {!product.publishYear && <li>Năm xuất bản: 2024</li>}
-               </ul>
              </>
           )}
         </div>
