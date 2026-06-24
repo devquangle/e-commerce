@@ -388,10 +388,7 @@ export default function UpdateProduct() {
       .filter(Boolean);
     if (selectedAuthors.length > 0) {
       const authorDescriptions = selectedAuthors
-        .map(
-          (a) =>
-            `- ${a?.name || "Chưa rõ"}: ${(a as any)?.description || "Chưa có mô tả."}`,
-        )
+        .map((a) => `- ${a?.name || "Chưa rõ"}: ${a?.description ?? "Chưa có mô tả."}`)
         .join("<br/>\n");
       newDesc = newDesc.replace(
         /(<h5><strong>5\. Về Tác Giả<\/strong><\/h5>\s*)<p>[\s\S]*?<\/p>/i,
