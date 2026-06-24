@@ -48,8 +48,9 @@ export const useUpdateProduct = () => {
   return useMutation({
     mutationFn: ({ id, req }: { id: number; req: ProductRequest }) =>
       ProductService.update(id, req),
-    onSuccess: () => {
+    onSuccess: (_data, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["products-filter"] });
+      queryClient.invalidateQueries({ queryKey: ["product", id] });
 
       showSuccessToast("Cập nhật sản phẩm thành công!");
     },
