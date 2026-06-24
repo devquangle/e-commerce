@@ -13,31 +13,44 @@ import com.dev.backend.entity.Product;
 
 public interface ProductRepository extends JpaRepository<Product, Integer>, ProductRepositoryCustom {
 
-    @Query("""
-            SELECT DISTINCT p
-            FROM Product p
-            LEFT JOIN p.productAuthors pa
-            LEFT JOIN pa.author auth
-            LEFT JOIN p.productGenres pg
-            LEFT JOIN pg.genre gen
-            WHERE (
-                LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
-                OR LOWER(auth.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
-                OR LOWER(gen.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
-            )
-            AND (:status IS NULL OR p.status = :status)
-            """)
-    Page<Product> findByNameContainingIgnoreCase(
-            @Param("keyword") String keyword,
-            @Param("status") BaseStatus status,
-            Pageable pageable);
+        @Query(value = """
+                        SELECT DISTINCT p
+                        FROM Product p
+                        LEFT JOIN p.productAuthors pa
+                        LEFT JOIN pa.author auth
+                        LEFT JOIN p.productGenres pg
+                        LEFT JOIN pg.genre gen
+                        WHERE (
+                            LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                            OR LOWER(auth.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                            OR LOWER(gen.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                        )
+                        AND (:status IS NULL OR p.status = :status)
+                        """,
+               countQuery = """
+                        SELECT COUNT(DISTINCT p)
+                        FROM Product p
+                        LEFT JOIN p.productAuthors pa
+                        LEFT JOIN pa.author auth
+                        LEFT JOIN p.productGenres pg
+                        LEFT JOIN pg.genre gen
+                        WHERE (
+                            LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                            OR LOWER(auth.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                            OR LOWER(gen.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                        )
+                        AND (:status IS NULL OR p.status = :status)
+                        """)
+        Page<Product> findByNameContainingIgnoreCase(
+                        @Param("keyword") String keyword,
+                        @Param("status") BaseStatus status,
+                        Pageable pageable);
 
-    @EntityGraph(attributePaths = {
-            "publisher",
-            "series",
-            "images",
-            "productAuthors.author",
-            "productGenres.genre"
-    })
-    Optional<Product> findBySlug(String slug);
+        @EntityGraph(attributePaths = {
+                        "publisher",
+                        "series"
+        })
+        Optional<Product> findBySlug(String slug);
+
+        Optional<Product> findByName(String name);
 }

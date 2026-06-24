@@ -16,6 +16,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -47,6 +49,7 @@ public class Product extends BaseAuditableEntity<Integer> {
     @Column(name = "status", nullable = false)
     private ProductStatus status = ProductStatus.ACTIVE;
 
+    @Fetch(FetchMode.SUBSELECT)
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Image> images = new ArrayList<>();
 
@@ -58,8 +61,10 @@ public class Product extends BaseAuditableEntity<Integer> {
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PromotionProduct> promotionProducts = new ArrayList<>();
+    @Fetch(FetchMode.SUBSELECT)
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductGenre> productGenres = new ArrayList<>();
+    @Fetch(FetchMode.SUBSELECT)
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductAuthor> productAuthors = new ArrayList<>();
     @OneToMany(mappedBy = "product")

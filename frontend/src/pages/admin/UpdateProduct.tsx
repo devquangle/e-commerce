@@ -34,11 +34,13 @@ import {
   showWarningToast,
 } from "@/utils/toastUtil";
 
-
 import type { ImageProductRequest } from "@/types/image";
 import type { ProductRequest } from "@/types/product.type";
 import type { GoogleBookResponse } from "@/types/googlebook";
-import { useProductById, useUpdateProduct } from "@/modules/admin/product/hooks/useProduct";
+import {
+  useProductById,
+  useUpdateProduct,
+} from "@/modules/admin/product/hooks/useProduct";
 
 const MAX_IMAGES = 6;
 
@@ -54,7 +56,7 @@ const INITIAL_FORM: ProductRequest = {
   genreIds: [],
   publisherId: undefined,
   seriesId: undefined,
-  isbn:"0000000000000",
+  isbn: "0000000000000",
   status: "ACTIVE",
   coverImages: [],
   description: `
@@ -140,7 +142,8 @@ export default function UpdateProduct() {
     isError,
   } = useBookFormData();
 
-  const { data: productData, isLoading: isProductLoading } = useProductById(productId);
+  const { data: productData, isLoading: isProductLoading } =
+    useProductById(productId);
   const updateMutation = useUpdateProduct();
   const isLoading = isFormLoading || isProductLoading;
 
@@ -170,13 +173,11 @@ export default function UpdateProduct() {
 
   // Khởi tạo Options sử dụng useMemo ổn định
   const genreOptions = useMemo(
-    () =>
-      genresData.map((g) => ({ label: g.name, value: g.id })),
+    () => genresData.map((g) => ({ label: g.name, value: g.id })),
     [genresData],
   );
   const authorOptions = useMemo(
-    () =>
-      authorsData.map((a) => ({ label: a.name, value: a.id })),
+    () => authorsData.map((a) => ({ label: a.name, value: a.id })),
     [authorsData],
   );
   const publisherOptions = useMemo(
@@ -205,10 +206,11 @@ export default function UpdateProduct() {
       publisherId: productData.publisherId ?? undefined,
       seriesId: productData.seriesId ?? undefined,
       status: "ACTIVE",
-      coverImages: productData.coverImages?.map((img) => ({
-        url: img.url,
-        isThumbnail: img.isThumbnail,
-      })) ?? [],
+      coverImages:
+        productData.coverImages?.map((img) => ({
+          url: img.url,
+          isThumbnail: img.isThumbnail,
+        })) ?? [],
       description: productData.description,
     };
     reset(formValues);
@@ -274,7 +276,8 @@ export default function UpdateProduct() {
     let newDesc = currentDesc;
 
     // Tự động khôi phục mục 3. Thông Tin Sách nếu bị mất hoặc bị xóa trong mô tả
-    const hasBookInfoSection = /3\.\s*Thông\s*Tin\s*Sách/i.test(newDesc) && /<table/i.test(newDesc);
+    const hasBookInfoSection =
+      /3\.\s*Thông\s*Tin\s*Sách/i.test(newDesc) && /<table/i.test(newDesc);
     if (!hasBookInfoSection) {
       const defaultTable = `
 <hr />
@@ -291,13 +294,21 @@ export default function UpdateProduct() {
 </table>
 <hr />
 `;
-      const targetAudienceRegex = /(<h5><strong>4\.\s*Đối\s*Tượng\s*Độc\s*Giả<\/strong><\/h5>|<h[1-6]>[^<]*4\.\s*Đối\s*Tượng\s*Độc\s*Giả[^<]*<\/h[1-6]>)/i;
-      const authorSectionRegex = /(<h5><strong>5\.\s*Về\s*Tác\s*Giả<\/strong><\/h5>|<h[1-6]>[^<]*5\.\s*Về\s*Tác\s*Giả[^<]*<\/h[1-6]>)/i;
+      const targetAudienceRegex =
+        /(<h5><strong>4\.\s*Đối\s*Tượng\s*Độc\s*Giả<\/strong><\/h5>|<h[1-6]>[^<]*4\.\s*Đối\s*Tượng\s*Độc\s*Giả[^<]*<\/h[1-6]>)/i;
+      const authorSectionRegex =
+        /(<h5><strong>5\.\s*Về\s*Tác\s*Giả<\/strong><\/h5>|<h[1-6]>[^<]*5\.\s*Về\s*Tác\s*Giả[^<]*<\/h[1-6]>)/i;
 
       if (targetAudienceRegex.test(newDesc)) {
-        newDesc = newDesc.replace(targetAudienceRegex, (match) => `${defaultTable}\n${match}`);
+        newDesc = newDesc.replace(
+          targetAudienceRegex,
+          (match) => `${defaultTable}\n${match}`,
+        );
       } else if (authorSectionRegex.test(newDesc)) {
-        newDesc = newDesc.replace(authorSectionRegex, (match) => `${defaultTable}\n${match}`);
+        newDesc = newDesc.replace(
+          authorSectionRegex,
+          (match) => `${defaultTable}\n${match}`,
+        );
       } else {
         newDesc = `${newDesc}\n${defaultTable}`;
       }
@@ -720,7 +731,7 @@ export default function UpdateProduct() {
                   }
 
                   if (selectedItem.isbn) {
-                      setValue("isbn", selectedItem.isbn, {
+                    setValue("isbn", selectedItem.isbn, {
                       shouldDirty: true,
                     });
                   }

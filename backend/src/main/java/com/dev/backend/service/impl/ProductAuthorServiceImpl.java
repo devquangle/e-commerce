@@ -31,7 +31,7 @@ public class ProductAuthorServiceImpl implements ProductAuthorService {
     @Transactional
     @Override
     public void saveProductAuthors(Product product, List<Integer> authorIds) {
-        productAuthorRepository.deleteById(product.getId());
+        productAuthorRepository.deleteByProductId(product.getId());
         if (authorIds == null || authorIds.isEmpty()) {
             return;
         }
