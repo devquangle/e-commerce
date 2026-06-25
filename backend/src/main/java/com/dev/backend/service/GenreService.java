@@ -17,8 +17,7 @@ public interface GenreService {
 
     Genre save(Genre genre);
 
-    List<Genre> saveAll( List<Genre> list);
-
+    List<Genre> saveAll(List<Genre> list);
 
     Genre findById(Integer id);
 
@@ -30,7 +29,7 @@ public interface GenreService {
 
     GenreResponse updateGenre(Integer id, GenreRequest genreRequest);
 
-    PageResponse<GenreResponse> pageGenre(int page, int size, String keyword,String status);
+    PageResponse<GenreResponse> pageGenre(int page, int size, String keyword, String status);
 
     boolean existsByName(String name);
 
