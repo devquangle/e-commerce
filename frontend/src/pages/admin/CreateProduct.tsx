@@ -28,6 +28,7 @@ import { useGroqBook } from "@/hooks/useGroq";
 import useDebounce from "@/hooks/useDebounce";
 
 import imageService from "@/services/imageService";
+import { useProductSearchApi } from "@/modules/admin/product/hooks/useProductSearchApi";
 
 import {
   showErrorToast,
@@ -87,6 +88,7 @@ export default function CreateProduct() {
 
   const { mutateAsync: createProduct, isPending: isCreating } =
     useCreateProduct();
+  const { mutateAsync: fetchSearchApiImages } = useProductSearchApi();
 
   const [imageUploadMode, setImageUploadMode] = useState<"file" | "url">(
     "file",
@@ -199,8 +201,8 @@ export default function CreateProduct() {
 
         if (metadata.summary) {
           newDesc = newDesc.replace(
-            /<p>\s*Tóm tắt cốt truyện hoặc chủ đề cuốn sách[\s\S]*?<\/p>/,
-            `<p>${metadata.summary}</p>`,
+            /(<h2>\s*Nội dung chính\s*<\/h2>\s*)<p>[\s\S]*?<\/p>/,
+            `$1<p>${metadata.summary}</p>`,
           );
         }
         if (metadata.highlights?.length) {
@@ -578,7 +580,8 @@ export default function CreateProduct() {
                     </div>
                   );
                 }}
-                onSelect={(selectedItem) => {
+                onSelect={async (selectedItem) => {
+                  // 1. Set các giá trị form đồng bộ
                   setValue("name", selectedItem.name, { shouldDirty: true });
 
                   setValue(
@@ -618,6 +621,7 @@ export default function CreateProduct() {
                     },
                   );
 
+                  // 2. Set description với dữ liệu Google Books
                   let updatedDesc = INITIAL_FORM.description;
                   if (selectedItem.thumbnail) {
                     updatedDesc = updatedDesc.replace(
@@ -625,53 +629,56 @@ export default function CreateProduct() {
                       `src="${selectedItem.thumbnail}"`,
                     );
                   }
-                  if (selectedItem.description) {
-                    updatedDesc = updatedDesc.replace(
-                      /<p>\s*Tóm tắt cốt truyện hoặc chủ đề cuốn sách[\s\S]*?<\/p>/,
-                      `<p>${selectedItem.description}</p>`,
-                    );
-                  }
+                  // Thay phần "Nội dung chính" bằng description từ Google Books
+                  const bookDescription = selectedItem.description || `Cuốn sách "${selectedItem.name}" của ${selectedItem.authors?.join(", ") || "tác giả"}.`;
+                  updatedDesc = updatedDesc.replace(
+                    /<p>\s*Tóm tắt cốt truyện hoặc chủ đề cuốn sách[\s\S]*?<\/p>/,
+                    `<p>${bookDescription}</p>`,
+                  );
                   setValue("description", updatedDesc, { shouldDirty: true });
 
-                  // Gọi hàm AI Groq riêng biệt gọn gàng
-                  handleAIGenerateDescription(
-                    selectedItem.name,
-                    selectedItem.description || "",
-                  );
+                  // 3. Set ảnh thumbnail từ Google Books trước
+                  const thumbnailImage: ImageProductRequest = selectedItem.thumbnail
+                    ? { url: selectedItem.thumbnail, isThumbnail: true }
+                    : { url: "", isThumbnail: true };
 
-                  if (selectedItem.thumbnail) {
-                    const currentImages = getValues("coverImages") || [];
-                    if (currentImages.length === 0) {
-                      setValue(
-                        "coverImages",
-                        [{ url: selectedItem.thumbnail, isThumbnail: true }],
-                        { shouldDirty: true, shouldValidate: true },
-                      );
-                    } else {
-                      const newImages = [...currentImages];
-                      const thumbIndex = newImages.findIndex(
-                        (img) => img.isThumbnail,
-                      );
-                      if (thumbIndex >= 0) {
-                        newImages[thumbIndex] = {
-                          ...newImages[thumbIndex],
-                          url: selectedItem.thumbnail,
-                          file: undefined,
-                        };
-                      } else {
-                        newImages[0] = {
-                          ...newImages[0],
-                          url: selectedItem.thumbnail,
-                          file: undefined,
-                        };
-                      }
-                      setValue("coverImages", newImages, {
-                        shouldDirty: true,
-                        shouldValidate: true,
-                      });
-                    }
-                  }
+                  setValue("coverImages", [thumbnailImage], {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  });
+
                   trigger(["price", "originalPrice"]);
+
+                  // 4. Gọi Groq AI + SearchAPI ĐỒNG THỜI
+                  await Promise.allSettled([
+                    // API 1: Groq AI tạo mô tả
+                    handleAIGenerateDescription(
+                      selectedItem.name,
+                      selectedItem.description || "",
+                    ),
+                    // API 2: SearchAPI lấy 5 ảnh bổ sung
+                    fetchSearchApiImages(selectedItem.name)
+                      .then((result) => {
+                        const searchImages: ImageProductRequest[] = (result.urlImage || [])
+                          .slice(0, 5)
+                          .map((imageUrl) => ({
+                            url: imageUrl,
+                            isThumbnail: false,
+                          }));
+
+                        const currentImages = getValues("coverImages") || [];
+                        const combined = [...currentImages, ...searchImages].slice(0, MAX_IMAGES);
+                        setValue("coverImages", combined, {
+                          shouldDirty: true,
+                          shouldValidate: true,
+                        });
+                        showSuccessToast(`Đã tải ${searchImages.length} ảnh bổ sung từ SearchAPI!`);
+                      })
+                      .catch((error) => {
+                        console.error("SearchAPI error:", error);
+                        showWarningToast("Không thể tải ảnh bổ sung từ SearchAPI.");
+                      }),
+                  ]);
                 }}
               />
 

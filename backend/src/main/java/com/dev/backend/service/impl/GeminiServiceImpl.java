@@ -1,7 +1,9 @@
 package com.dev.backend.service.impl;
 
+import com.dev.backend.dto.gemini.BookMeta;
 import com.dev.backend.service.CloudinaryService;
 import com.dev.backend.service.GeminiService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.genai.Client;
 import com.google.genai.types.GenerateContentResponse;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +12,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +38,7 @@ public class GeminiServiceImpl implements GeminiService {
             logger.info("Target Pollinations URL: {}", imageUrl);
 
             byte[] imageBytes;
-            try (InputStream in =  URI.create(imageUrl).toURL().openStream()) {
+            try (InputStream in = URI.create(imageUrl).toURL().openStream()) {
                 imageBytes = in.readAllBytes();
             }
 
@@ -121,5 +124,44 @@ public class GeminiServiceImpl implements GeminiService {
 
     private String fallbackImage() {
         return "https://via.placeholder.com/1024x1024.png?text=Image+Generation+Failed";
+    }
+
+    @Override
+    public BookMeta generateBookMeta(String name, List<String> authors) {
+        String authorString = String.join(", ", authors);
+
+        String prompt = """
+                Analyze the book titled "%s" written by %s.
+                Provide a detailed, professional, and objective analysis including:
+                1. mainSummary: A concise 3-5 sentence summary.
+                2. highlights: 3-5 key bullet points.
+                3. artisticValue: 3-5 points about its artistic/literary values.
+                4. targetAudience: 3 ideal reader groups.
+                5. authorsBookMetas: Name and 2-3 sentence bio/expertise description for each author.
+
+                Return the response strictly as a JSON object matching this structure.
+                """.formatted(name, authorString);
+
+        try {
+            // Gọi Gemini với cấu trúc mong muốn
+            GenerateContentResponse response = client.models.generateContent(
+                    MODEL_ID,
+                    prompt,
+                    null // Ở đây bạn có thể cấu hình responseSchema nếu cần
+            );
+
+            String jsonText = response.text()
+                    .replaceAll("```json", "")
+                    .replaceAll("```", "")
+                    .trim();
+
+            // Parse JSON trả về thành object BookMeta
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(jsonText, BookMeta.class);
+
+        } catch (Exception e) {
+            logger.error("Failed to generate BookMeta for: {}", name, e);
+            return null; // Hoặc trả về object mặc định/error
+        }
     }
 }

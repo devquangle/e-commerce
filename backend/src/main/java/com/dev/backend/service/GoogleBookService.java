@@ -4,10 +4,10 @@ import com.dev.backend.dto.googlebook.GoogleBookApiResponse;
 import com.dev.backend.dto.googlebook.GoogleBookResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Collections;
 import java.util.List;
@@ -21,31 +21,29 @@ public class GoogleBookService {
     private final RestTemplate restTemplate;
 
     private static final String GOOGLE_BOOK_API = "https://www.googleapis.com/books/v1/volumes";
+    
     @Value("${app.google.books.api-key}")
     private String googleBooksApiKey;
 
     public List<GoogleBookResponse> searchBooks(String query) {
-
-        log.info("Searching Google Books: {}", query);
+        log.info("Searching Google Books for title: {}", query);
 
         try {
+            // Sử dụng UriComponentsBuilder để tự động xử lý encoding và param
+            String url = UriComponentsBuilder.fromUriString(GOOGLE_BOOK_API)
+                    .queryParam("q", "intitle:" + query.trim())
+                    .queryParam("maxResults", 20)
+                    .queryParam("key", googleBooksApiKey)
+                    .build()
+                    .toUriString();
 
-            String url = GOOGLE_BOOK_API +
-                    "?q={query}" +
-                    "&maxResults=20" +
-                    "&key={key}";
+            // In log để debug nếu cần kiểm tra URL thực tế
+            log.debug("Requesting URL: {}", url);
 
-            GoogleBookApiResponse apiResponse = restTemplate.getForObject(
-                    url,
-                    GoogleBookApiResponse.class,
-                    query.trim(),
-                    googleBooksApiKey);
+            GoogleBookApiResponse apiResponse = restTemplate.getForObject(url, GoogleBookApiResponse.class);
 
-            if (apiResponse == null
-                    || apiResponse.getItems() == null
-                    || apiResponse.getItems().isEmpty()) {
-
-                log.warn("No books found: {}", query);
+            if (apiResponse == null || apiResponse.getItems() == null || apiResponse.getItems().isEmpty()) {
+                log.warn("No books found for query: {}", query);
                 return Collections.emptyList();
             }
 
@@ -56,76 +54,52 @@ public class GoogleBookService {
                     .collect(Collectors.toList());
 
         } catch (Exception e) {
-
-            log.error("Error calling Google Books API", e);
-
-            throw new RuntimeException(
-                    "Failed to fetch Google Books API",
-                    e);
+            log.error("Error calling Google Books API for query: {}", query, e);
+            throw new RuntimeException("Failed to fetch Google Books API", e);
         }
     }
 
-    private GoogleBookResponse convertToResponse(
-            GoogleBookApiResponse.BookItem item) {
-
+    private GoogleBookResponse convertToResponse(GoogleBookApiResponse.BookItem item) {
         GoogleBookResponse response = new GoogleBookResponse();
-
         response.setVolumeId(item.getId());
 
-        if (item.getVolumeInfo() != null) {
-
-            GoogleBookApiResponse.VolumeInfo volumeInfo = item.getVolumeInfo();
-
+        GoogleBookApiResponse.VolumeInfo volumeInfo = item.getVolumeInfo();
+        if (volumeInfo != null) {
             response.setName(volumeInfo.getTitle());
-
             response.setAuthors(volumeInfo.getAuthors());
             response.setPublishedDate(volumeInfo.getPublishedDate());
-
             response.setDescription(volumeInfo.getDescription() != null ? volumeInfo.getDescription() : "");
-
             response.setPageCount(volumeInfo.getPageCount());
 
             if (volumeInfo.getImageLinks() != null) {
                 response.setThumbnail(volumeInfo.getImageLinks().getThumbnail());
             }
-
             response.setIsbn(extractIsbn(volumeInfo));
         }
 
         if (item.getSaleInfo() != null) {
-
             GoogleBookApiResponse.SaleInfo saleInfo = item.getSaleInfo();
-
             if (saleInfo.getListPrice() != null) {
                 response.setListPrice(saleInfo.getListPrice().getAmount());
             }
-
             if (saleInfo.getRetailPrice() != null) {
                 response.setRetailPrice(saleInfo.getRetailPrice().getAmount());
             }
         }
-
         return response;
     }
 
-    private String extractIsbn(
-            GoogleBookApiResponse.VolumeInfo volumeInfo) {
+    private String extractIsbn(GoogleBookApiResponse.VolumeInfo volumeInfo) {
+        if (volumeInfo.getIndustryIdentifiers() == null) return null;
 
-        if (volumeInfo.getIndustryIdentifiers() == null) {
-            return null;
-        }
-
-        return volumeInfo.getIndustryIdentifiers()
-                .stream()
+        return volumeInfo.getIndustryIdentifiers().stream()
                 .filter(i -> "ISBN_13".equals(i.getType()))
                 .map(i -> i.getIdentifier())
                 .findFirst()
-                .orElse(
-                        volumeInfo.getIndustryIdentifiers()
-                                .stream()
-                                .filter(i -> "ISBN_10".equals(i.getType()))
-                                .map(i -> i.getIdentifier())
-                                .findFirst()
-                                .orElse(null));
+                .orElse(volumeInfo.getIndustryIdentifiers().stream()
+                        .filter(i -> "ISBN_10".equals(i.getType()))
+                        .map(i -> i.getIdentifier())
+                        .findFirst()
+                        .orElse(null));
     }
 }

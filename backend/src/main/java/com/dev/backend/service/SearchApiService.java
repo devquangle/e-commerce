@@ -1,7 +1,8 @@
 package com.dev.backend.service;
 
-import java.util.List;
+
+import com.dev.backend.dto.searchapi.UrlImageResponse;
 
 public interface SearchApiService {
-    List<String> getTop5ImageLinks(String keyword);
+    UrlImageResponse getTop5ImageLinks(String keyword);
 }
