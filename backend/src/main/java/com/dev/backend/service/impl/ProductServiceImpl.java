@@ -109,7 +109,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional(readOnly = true)
     public ProductDetailResponse edit(Integer id) {
-        ProductDetailResponse  dto= productMapper.toDetail(findById(id));
+        ProductDetailResponse dto = productMapper.toDetail(findById(id));
         return dto;
     }
 
@@ -300,12 +300,12 @@ public class ProductServiceImpl implements ProductService {
                 size,
                 Sort.by(Sort.Direction.DESC, "id"));
 
-        BaseStatus baseStatus = (status == null || status.isBlank())
+        ProductStatus baseStatus = (status == null || status.isBlank())
                 ? null
-                : BaseStatus.valueOf(status);
+                : ProductStatus.valueOf(status);
 
         Page<Product> productPage = productRepository
-                .findByNameContainingIgnoreCase(keyword == null ? "" : keyword, baseStatus, pageable);
+                .filterProducts(keyword == null ? "" : keyword, baseStatus, pageable);
 
         List<ProductResponse> items = productPage.getContent().stream().map(productMapper::toDTO).toList();
 

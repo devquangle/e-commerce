@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import com.dev.backend.constant.BaseStatus;
+import com.dev.backend.constant.ProductStatus;
 import com.dev.backend.entity.Product;
 
 public interface ProductRepository extends JpaRepository<Product, Integer>, ProductRepositoryCustom {
@@ -19,9 +19,9 @@ public interface ProductRepository extends JpaRepository<Product, Integer>, Prod
                         WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
                         AND (:status IS NULL OR p.status = :status)
                         """)
-        Page<Product> findByNameContainingIgnoreCase(
+        Page<Product> filterProducts(
                         @Param("keyword") String keyword,
-                        @Param("status") BaseStatus status,
+                        @Param("status") ProductStatus status,
                         Pageable pageable);
 
         @EntityGraph(attributePaths = {
