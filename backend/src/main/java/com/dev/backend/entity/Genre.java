@@ -11,7 +11,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,19 +20,19 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Builder
 @Table(name = "genres")
 public class Genre extends BaseEntity<Integer> {
 
     @Column(nullable = false)
     private String name;
+
     @Column(unique = true, nullable = false)
     private String slug;
+
     private String urlImage;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    @Builder.Default
     private BaseStatus status = BaseStatus.ACTIVE;
 
     @OneToMany(mappedBy = "genre")

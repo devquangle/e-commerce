@@ -1,5 +1,6 @@
 package com.dev.backend.service.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -55,33 +56,40 @@ public class GenreServiceImpl implements GenreService {
 
         @Override
         public void insertData() {
-
                 if (genreRepository.count() > 0) {
                         return;
                 }
+                List<Genre> genres = new ArrayList<>();
+                genres.add(createGenre("Văn học"));
+                genres.add(createGenre("Kinh tế"));
+                genres.add(createGenre("Kỹ năng sống"));
+                genres.add(createGenre("Thiếu nhi"));
+                genres.add(createGenre("Giáo dục"));
+                genres.add(createGenre("Ngoại ngữ"));
+                genres.add(createGenre("Công nghệ thông tin"));
+                genres.add(createGenre("Lịch sử"));
+                genres.add(createGenre("Khoa học"));
+                genres.add(createGenre("Trinh thám"));
 
-                /* ================= PARENT ================= */
+                genres.add(createGenre("Tâm lý học"));
+                genres.add(createGenre("Y học - Sức khỏe"));
+                genres.add(createGenre("Tài chính cá nhân"));
+                genres.add(createGenre("Khởi nghiệp"));
+                genres.add(createGenre("Marketing - Bán hàng"));
+                genres.add(createGenre("Giao tiếp - Thuyết trình"));
+                genres.add(createGenre("Triết học"));
+                genres.add(createGenre("Tôn giáo - Tâm linh"));
+                genres.add(createGenre("Văn hóa - Du lịch"));
+                genres.add(createGenre("Tiểu sử - Hồi ký"));
+                genreRepository.saveAll(genres);
+        }
 
-                Genre novel = Genre.builder()
-                                .name("Tiểu thuyết")
-                                .status(BaseStatus.ACTIVE)
-                                .build();
-
-                Genre manga = Genre.builder()
-                                .name("Manga")
-                                .status(BaseStatus.ACTIVE)
-                                .build();
-
-                Genre economy = Genre.builder()
-                                .name("Kinh tế")
-                                .status(BaseStatus.ACTIVE)
-                                .build();
-
-                genreRepository.saveAll(List.of(
-                                novel,
-                                manga,
-                                economy));
-
+        private Genre createGenre(String name) {
+                Genre genre = new Genre();
+                genre.setName(TextUtils.capitalizeFully(name));
+                genre.setSlug(TextUtils.toSlug(name));
+                genre.setStatus(BaseStatus.ACTIVE);
+                return genre;
         }
 
         @Override

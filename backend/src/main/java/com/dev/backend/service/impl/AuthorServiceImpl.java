@@ -2,6 +2,7 @@ package com.dev.backend.service.impl;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -13,6 +14,7 @@ import com.dev.backend.constant.BaseStatus;
 import com.dev.backend.dto.author.AuthorRequest;
 import com.dev.backend.dto.author.AuthorResponse;
 import com.dev.backend.dto.author.AuthorWithProductCountResponse;
+import com.dev.backend.dto.wikipedia.WikipediaResponse;
 import com.dev.backend.entity.Author;
 import com.dev.backend.exception.DuplicateFieldException;
 import com.dev.backend.exception.NotFoundException;
@@ -20,6 +22,7 @@ import com.dev.backend.mapper.AuthorMapper;
 import com.dev.backend.repository.AuthorRepository;
 import com.dev.backend.response.PageResponse;
 import com.dev.backend.service.AuthorService;
+import com.dev.backend.service.WikipediaService;
 import com.dev.backend.util.TextUtils;
 
 import lombok.RequiredArgsConstructor;
@@ -32,6 +35,7 @@ public class AuthorServiceImpl implements AuthorService {
 
     private final AuthorRepository authorRepository;
     private final AuthorMapper authorMapper;
+    private final WikipediaService wikipediaService;
 
     @Override
     public List<AuthorResponse> findAll() {
@@ -139,58 +143,67 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Override
     public void insertData() {
-
-        List<Author> authors = List.of(
-                createAuthor(
-                        "Khác",
-                        null,
-                        null,
-                        null,
-                        "Tác giả không xác định hoặc nhóm khác"),
-
-                createAuthor(
-                        "Nguyễn Nhật Ánh",
-                        "Q7022893",
-                        "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Nguyen_Nhat_Anh_in_January_2019.png/330px-Nguyen_Nhat_Anh_in_January_2019.png",
-                        "https://vi.wikipedia.org/wiki/Nguy%E1%BB%85n_Nh%E1%BA%ADt_%C3%81nh",
-                        "Nguyễn Nhật Ánh là nhà văn Việt Nam nổi tiếng..."),
-
-                createAuthor(
-                        "Nam Cao",
-                        "Q11760",
-                        "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Portrait_of_Nam_Cao.jpg/330px-Portrait_of_Nam_Cao.jpg",
-                        "https://vi.wikipedia.org/wiki/Nam_Cao",
-                        "Nam Cao là một nhà văn..."),
-
-                createAuthor(
-                        "Tô Hoài",
-                        "Q13127",
-                        "https://upload.wikimedia.org/wikipedia/vi/thumb/7/73/Nhavan_t%C3%B4_ho%C3%A0i.jpg/330px-Nhavan_t%C3%B4_ho%C3%A0i.jpg",
-                        "https://vi.wikipedia.org/wiki/T%C3%B4_Ho%C3%A0i",
-                        "Tô Hoài là một nhà văn..."));
-        if (authorRepository.count() == 0) {
-            authorRepository.saveAll(authors);
+        if (authorRepository.count() > 0) {
+            return;
         }
+        // Danh sách tên các tác giả cần lấy thông tin
+        List<String> authorNames = List.of(
+                // Tác giả Việt Nam
+                "Nguyễn Nhật Ánh",
+                "Nam Cao",
+                "Tô Hoài",
+                "Nguyễn Du",
+                "Vũ Trọng Phụng",
+                "Thạch Lam",
+                "Nguyễn Huy Thiệp",
+                "Nguyễn Tuân",
+                "Xuân Diệu",
+                "Huy Cận",
 
+                // Tác giả quốc tế
+                "William Shakespeare", // Anh
+                "Leo Tolstoy", // Nga
+                "Fyodor Dostoevsky", // Nga
+                "Gabriel García Márquez", // Colombia
+                "Ernest Hemingway", // Mỹ
+                "Haruki Murakami", // Nhật Bản
+                "Victor Hugo", // Pháp
+                "Franz Kafka", // Séc
+                "Mark Twain", // Mỹ
+                "J.K. Rowling" // Anh
+        );
+        // Tạo danh sách Author bằng cách gọi Service cho từng tên
+        List<Author> authors = authorNames.stream()
+                .map(this::createAuthor)
+                .collect(Collectors.toList());
+
+        // Thêm trường hợp "Khác" nếu cần thiết
+        Author other = new Author();
+        other.setName("Khác");
+        other.setSlug("khac");
+        other.setDescription("Tác giả không xác định hoặc nhóm khác");
+        other.setStatus(BaseStatus.ACTIVE);
+        authors.add(other);
+
+        authorRepository.saveAll(authors);
     }
 
-    public Author createAuthor(
-            String name,
-            String wikibaseItem,
-            String image,
-            String urlBio,
-            String description) {
+    public Author createAuthor(String name) {
         Author a = new Author();
-        a.setName(name);
+        a.setName(TextUtils.capitalizeFully(name));
         a.setSlug(TextUtils.toSlug(name));
-        a.setWikibaseItem(wikibaseItem);
-        a.setUrlImage(image);
-        a.setUrlBio(urlBio);
-        a.setDescription(description);
+
+        WikipediaResponse response = wikipediaService.fetchApiInforAuthor(name);
+        if (response != null) {
+            a.setWikibaseItem(response.getWikibaseItem());
+            a.setUrlImage(response.getUrlImage());
+            a.setUrlBio(response.getUrlBio());
+            a.setDescription(response.getExtract());
+        }
+
         a.setStatus(BaseStatus.ACTIVE);
         return a;
     }
-
 
     @Override
     public List<AuthorWithProductCountResponse> findActiveAuthorsWithProductCount() {
