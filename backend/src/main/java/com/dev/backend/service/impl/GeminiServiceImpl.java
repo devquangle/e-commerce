@@ -126,42 +126,42 @@ public class GeminiServiceImpl implements GeminiService {
         return "https://via.placeholder.com/1024x1024.png?text=Image+Generation+Failed";
     }
 
-    @Override
-    public BookMeta generateBookMeta(String name, List<String> authors) {
-        String authorString = String.join(", ", authors);
+   @Override
+public BookMeta generateBookMeta(String name, List<String> authors) {
+    String authorString = String.join(", ", authors);
+    
+    // Yêu cầu trả về tiếng Việt và đúng định dạng
+    String prompt = """
+            Hãy phân tích cuốn sách tiêu đề "%s" của tác giả %s.
+            Yêu cầu nội dung:
+            1. mainSummary: Tóm tắt nội dung chính (10-15 câu).
+            2. highlights: 3-5 điểm nổi bật (dạng danh sách).
+            3. artisticValue: 3-5 giá trị nghệ thuật (dạng danh sách).
+            4. targetAudience: 3 nhóm độc giả mục tiêu (dạng danh sách).
+            5. authorsBookMetas: Tên tác giả và tiểu sử/chuyên môn (tối đa 10 câu) cho mỗi người.
+            
+            QUY ĐỊNH BẮT BUỘC:
+            - Trả về JSON thuần túy, không kèm giải thích.
+            - Phải sử dụng đúng tên các key: "mainSummary", "highlights", "artisticValue", "targetAudience", "authorsBookMetas".
+            - Trong "authorsBookMetas", sử dụng key là "name" và "bio".
+            - Nội dung phải bằng TIẾNG VIỆT.
+            """.formatted(name, authorString);
 
-        String prompt = """
-                Analyze the book titled "%s" written by %s.
-                Provide a detailed, professional, and objective analysis including:
-                1. mainSummary: A concise 3-5 sentence summary.
-                2. highlights: 3-5 key bullet points.
-                3. artisticValue: 3-5 points about its artistic/literary values.
-                4. targetAudience: 3 ideal reader groups.
-                5. authorsBookMetas: Name and 2-3 sentence bio/expertise description for each author.
+    try {
+        GenerateContentResponse response = client.models.generateContent(MODEL_ID, prompt, null);
 
-                Return the response strictly as a JSON object matching this structure.
-                """.formatted(name, authorString);
+        String jsonText = response.text()
+                .replaceAll("(?s).*?(\\{.*\\}).*", "$1") // Cố gắng lấy phần JSON nếu có rác xung quanh
+                .replaceAll("```json", "")
+                .replaceAll("```", "")
+                .trim();
 
-        try {
-            // Gọi Gemini với cấu trúc mong muốn
-            GenerateContentResponse response = client.models.generateContent(
-                    MODEL_ID,
-                    prompt,
-                    null // Ở đây bạn có thể cấu hình responseSchema nếu cần
-            );
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(jsonText, BookMeta.class);
 
-            String jsonText = response.text()
-                    .replaceAll("```json", "")
-                    .replaceAll("```", "")
-                    .trim();
-
-            // Parse JSON trả về thành object BookMeta
-            ObjectMapper mapper = new ObjectMapper();
-            return mapper.readValue(jsonText, BookMeta.class);
-
-        } catch (Exception e) {
-            logger.error("Failed to generate BookMeta for: {}", name, e);
-            return null; // Hoặc trả về object mặc định/error
-        }
+    } catch (Exception e) {
+        logger.error("Lỗi khi tạo BookMeta cho sách {}: {}", name, e.getMessage());
+        return null;
     }
+}
 }

@@ -22,7 +22,7 @@ public class GoogleBookResponse {
     private String description;
 
     private Integer pageCount;
-
+    private String language;
     private String isbn;
 
     private String thumbnail;

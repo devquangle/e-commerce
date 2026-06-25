@@ -11,8 +11,3 @@ export interface GoogleBookResponse {
   retailPrice: number | null;
 }
 
-export interface BookMetadataResponse {
-  summary: string;
-  highlights: string[];
-  targetAudience: string[];
-}

@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import GroqService from "@/services/groqService";
+import GroqService from "@/services/gemini.service";
 import type { BookMetadataResponse } from "@/types/googlebook";
 
 interface GroqRequest {

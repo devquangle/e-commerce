@@ -23,6 +23,7 @@ public class GoogleBookApiResponse {
         private List<String> authors;
         private String publishedDate;
         private Integer pageCount;
+        private String language;
         private String description;
         private List<IndustryIdentifiers> industryIdentifiers;
         private ImageLinks imageLinks;

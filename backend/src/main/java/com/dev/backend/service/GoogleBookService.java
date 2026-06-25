@@ -2,6 +2,8 @@ package com.dev.backend.service;
 
 import com.dev.backend.dto.googlebook.GoogleBookApiResponse;
 import com.dev.backend.dto.googlebook.GoogleBookResponse;
+import com.dev.backend.util.LanguageHelper;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,7 +23,7 @@ public class GoogleBookService {
     private final RestTemplate restTemplate;
 
     private static final String GOOGLE_BOOK_API = "https://www.googleapis.com/books/v1/volumes";
-    
+
     @Value("${app.google.books.api-key}")
     private String googleBooksApiKey;
 
@@ -32,6 +34,7 @@ public class GoogleBookService {
             // Sử dụng UriComponentsBuilder để tự động xử lý encoding và param
             String url = UriComponentsBuilder.fromUriString(GOOGLE_BOOK_API)
                     .queryParam("q", "intitle:" + query.trim())
+                    .queryParam("printType", "books")
                     .queryParam("maxResults", 20)
                     .queryParam("key", googleBooksApiKey)
                     .build()
@@ -68,9 +71,9 @@ public class GoogleBookService {
             response.setName(volumeInfo.getTitle());
             response.setAuthors(volumeInfo.getAuthors());
             response.setPublishedDate(volumeInfo.getPublishedDate());
-            response.setDescription(volumeInfo.getDescription() != null ? volumeInfo.getDescription() : "");
+            response.setDescription(volumeInfo.getDescription() != null ? volumeInfo.getDescription() : "Hiện chưa có mô tả cho cuốn sách này.");
             response.setPageCount(volumeInfo.getPageCount());
-
+            response.setLanguage(LanguageHelper.getLanguageName(volumeInfo.getLanguage()));
             if (volumeInfo.getImageLinks() != null) {
                 response.setThumbnail(volumeInfo.getImageLinks().getThumbnail());
             }
@@ -90,7 +93,8 @@ public class GoogleBookService {
     }
 
     private String extractIsbn(GoogleBookApiResponse.VolumeInfo volumeInfo) {
-        if (volumeInfo.getIndustryIdentifiers() == null) return null;
+        if (volumeInfo.getIndustryIdentifiers() == null)
+            return null;
 
         return volumeInfo.getIndustryIdentifiers().stream()
                 .filter(i -> "ISBN_13".equals(i.getType()))

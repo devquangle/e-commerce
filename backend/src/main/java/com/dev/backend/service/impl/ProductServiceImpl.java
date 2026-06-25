@@ -12,7 +12,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.dev.backend.constant.BaseStatus;
 import com.dev.backend.constant.ProductBadge;
 import com.dev.backend.constant.ProductStatus;
 import com.dev.backend.constant.PromotionCampaignType;
