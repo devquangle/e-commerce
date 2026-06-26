@@ -34,7 +34,6 @@ import useDebounce from "@/hooks/useDebounce";
 
 import imageService from "@/services/imageService";
 import {
-  showErrorToast,
   showSuccessToast,
   showWarningToast,
 } from "@/utils/toastUtil";
@@ -841,6 +840,9 @@ export default function UpdateProduct() {
                   name="weight"
                   type="number"
                   placeholder="Nhập trọng lượng.."
+                  rules={{
+                    required: "Trọng lượng là bắt buộc",
+                  }}
                   register={register}
                   error={errors?.weight}
                 />
@@ -850,6 +852,27 @@ export default function UpdateProduct() {
                   type="date"
                   register={register}
                   error={errors?.publishYear}
+                />
+                <InputField
+                  label="Isbn"
+                  name="isbn"
+                  type="text"
+                  register={register}
+                  error={errors?.isbn}
+                />
+                <Controller
+                  name="language"
+                  control={control}
+                  rules={{ required: "Ngôn ngữ là bắt buộc" }}
+                  render={({ field }) => (
+                    <SelectBox<string>
+                      searchable={true}
+                      label="Ngôn ngữ"
+                      options={languageOptions}
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  )}
                 />
                 <Controller
                   name="status"
@@ -862,30 +885,6 @@ export default function UpdateProduct() {
                         { label: "Hoạt động", value: "ACTIVE" },
                         { label: "Không hoạt động", value: "INACTIVE" },
                       ]}
-                      value={field.value}
-                      onChange={field.onChange}
-                    />
-                  )}
-                />
-                <InputField
-                  label="Isbn"
-                  name="isbn"
-                  type="text"
-                  register={register}
-                  rules={{
-                    required: "Isbn là bắt buộc",
-                  }}
-                  error={errors?.isbn}
-                />{" "}
-                <Controller
-                  name="language"
-                  control={control}
-                  rules={{ required: "Ngôn ngữ là bắt buộc" }}
-                  render={({ field }) => (
-                    <SelectBox<string>
-                      searchable={true}
-                      label="Ngôn ngữ"
-                      options={languageOptions}
                       value={field.value}
                       onChange={field.onChange}
                     />

@@ -134,7 +134,7 @@ export default function Product() {
               <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
-                placeholder="Tìm theo tên sách, ISBN..."
+                placeholder="Tìm theo tên sách..."
                 value={keyword}
                 onChange={(e) => handleKeywordChange(e.target.value)}
                 className="w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-10 pr-4 py-2.5 text-sm placeholder-slate-400 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100"

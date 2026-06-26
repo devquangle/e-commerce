@@ -1,9 +1,21 @@
 import type { ProductResponse } from "../types/product.type";
 import type { BaseStatus } from "@/types/status";
-import { SearchX, BookOpen, Calendar, FileText, Weight, Building2, Layers } from "lucide-react";
+import { SearchX, BookOpen, Calendar, FileText, Weight, Building2, Layers, Languages } from "lucide-react";
 import ProductStatusBadge from "./ProductStatusBadge";
 import ProductActionButtons from "./ProductActionButtons";
 import { ExpandableAuthors, ExpandableGenres } from "./ProductTable";
+
+import { registerLocale, getName } from "@cospired/i18n-iso-languages";
+import viLocale from "@cospired/i18n-iso-languages/langs/vi.json";
+
+registerLocale(viLocale);
+
+const getLanguageName = (code?: string) => {
+  if (!code) return "";
+  const name = getName(code, "vi");
+  if (!name) return code;
+  return name.charAt(0).toUpperCase() + name.slice(1);
+};
 
 type Props = {
   products: ProductResponse[];
@@ -59,11 +71,7 @@ const ProductMobileCard = ({ products, onDelete }: Props) => {
                     </div>
                   </div>
 
-                  {product.isbn && (
-                    <span className="text-[11px] text-slate-400 font-mono">
-                      {product.isbn}
-                    </span>
-                  )}
+                
                   {(product.publisherName || product.seriesName) && (
                     <div className="flex flex-wrap gap-1 mt-0.5">
                       {product.publisherName && (
@@ -91,8 +99,8 @@ const ProductMobileCard = ({ products, onDelete }: Props) => {
                 </div>
               )}
 
-              {/* ===== THÔNG TIN XUẤT BẢN ===== */}
-              {(product.publishYear || product.pages > 0 || product.weight > 0) && (
+              {/* ===== THÔNG TIN XUẤN BẢN ===== */}
+              {(product.publishYear || product.pages > 0 || product.weight > 0 || product.language) && (
                 <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500 border-t border-slate-100 pt-2.5">
                   {product.publishYear && (
                     <div className="flex items-center gap-1">
@@ -110,6 +118,12 @@ const ProductMobileCard = ({ products, onDelete }: Props) => {
                     <div className="flex items-center gap-1">
                       <Weight size={11} className="text-slate-400" />
                       <span>{product.weight}g</span>
+                    </div>
+                  )}
+                  {product.language && (
+                    <div className="flex items-center gap-1">
+                      <Languages size={11} className="text-slate-400" />
+                      <span>{getLanguageName(product.language)}</span>
                     </div>
                   )}
                 </div>

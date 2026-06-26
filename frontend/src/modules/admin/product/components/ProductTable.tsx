@@ -9,11 +9,24 @@ import {
   Weight,
   Building2,
   Layers,
+  Languages,
 } from "lucide-react";
 import ProductStatusBadge from "./ProductStatusBadge";
 import ProductActionButtons from "./ProductActionButtons";
 import type { ProductResponse } from "../types/product.type";
 import type { BaseStatus } from "@/types/status";
+
+import { registerLocale, getName } from "@cospired/i18n-iso-languages";
+import viLocale from "@cospired/i18n-iso-languages/langs/vi.json";
+
+registerLocale(viLocale);
+
+const getLanguageName = (code?: string) => {
+  if (!code) return "";
+  const name = getName(code, "vi");
+  if (!name) return code;
+  return name.charAt(0).toUpperCase() + name.slice(1);
+};
 
 type Props = {
   products: ProductResponse[];
@@ -96,11 +109,7 @@ export default function ProductTable({ products, onDelete }: Props) {
                         >
                           {product.name}
                         </p>
-                        {product.isbn && (
-                          <span className="text-[11px] text-slate-400 font-mono">
-                            {product.isbn}
-                          </span>
-                        )}
+                       
                       </div>
 
                       {/* NXB + Series */}
@@ -133,10 +142,11 @@ export default function ProductTable({ products, onDelete }: Props) {
                         />
                       </div>
 
-                      {/* ➌ Năm XB · Số trang · Trọng lượng */}
+                      {/* ➌ Năm XB · Số trang · Trọng lượng · Ngôn ngữ */}
                       {(product.publishYear ||
                         product.pages > 0 ||
-                        product.weight > 0) && (
+                        product.weight > 0 ||
+                        product.language) && (
                         <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-slate-400">
                           {product.publishYear && (
                             <span className="flex items-center gap-1">
@@ -154,6 +164,12 @@ export default function ProductTable({ products, onDelete }: Props) {
                             <span className="flex items-center gap-1">
                               <Weight size={10} />
                               {product.weight}g
+                            </span>
+                          )}
+                          {product.language && (
+                            <span className="flex items-center gap-1">
+                              <Languages size={10} />
+                              {getLanguageName(product.language)}
                             </span>
                           )}
                         </div>

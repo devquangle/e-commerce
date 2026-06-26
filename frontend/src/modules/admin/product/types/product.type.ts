@@ -21,13 +21,13 @@ export interface ProductResponse {
   id: number;
   name: string;
   slug: string;
-  isbn: string;
   originalPrice: number;
   price: number;
   quantity: number;
   weight: number;
   publishYear: string;
   pages: number;
+  language?: string;
   status: string;
   genresName: string[] | [];
   authorsName: string[] | [];

@@ -58,7 +58,7 @@ const INITIAL_FORM: ProductRequest = {
   genreIds: [],
   publisherId: undefined,
   seriesId: undefined,
-  isbn: "0000000000000",
+  isbn: "",
   status: "ACTIVE",
   coverImages: [],
   description: `
@@ -802,6 +802,9 @@ export default function CreateProduct() {
                   type="number"
                   placeholder="Nhập số trang.."
                   register={register}
+                  rules={{
+                    required: "Số trang là bắt buộc",
+                  }}
                   error={errors?.pages}
                 />
                 <InputField
@@ -809,6 +812,9 @@ export default function CreateProduct() {
                   name="weight"
                   type="number"
                   placeholder="Nhập trọng lượng.."
+                  rules={{
+                    required: "Trọng lượng là bắt buộc",
+                  }}
                   register={register}
                   error={errors?.weight}
                 />
@@ -816,10 +822,34 @@ export default function CreateProduct() {
                   label="Ngày xuất bản"
                   name="publishYear"
                   type="date"
+                  rules={{
+                    required: "Ngày xuất bản là bắt buộc",
+                  }}
                   register={register}
                   error={errors?.publishYear}
                 />
+                <InputField
+                  label="Isbn"
+                  name="isbn"
+                  type="text"
+                  register={register}
+                 
+                  error={errors?.isbn}
+                />
 
+                <Controller
+                  name="language"
+                  control={control}
+                  render={({ field }) => (
+                    <SelectBox<string>
+                      searchable={true}
+                      label="Ngôn ngữ"
+                      options={languageOptions}
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  )}
+                />
                 <Controller
                   name="status"
                   control={control}
@@ -831,30 +861,6 @@ export default function CreateProduct() {
                         { label: "Hoạt động", value: "ACTIVE" },
                         { label: "Không hoạt động", value: "INACTIVE" },
                       ]}
-                      value={field.value}
-                      onChange={field.onChange}
-                    />
-                  )}
-                />
-                <InputField
-                  label="Isbn"
-                  name="isbn"
-                  type="text"
-                  register={register}
-                  rules={{
-                    required: "Isbn là bắt buộc",
-                  }}
-                  error={errors?.isbn}
-                />
-                <Controller
-                  name="language"
-                  control={control}
-                  rules={{ required: "Ngôn ngữ là bắt buộc" }}
-                  render={({ field }) => (
-                    <SelectBox<string>
-                      searchable={true}
-                      label="Ngôn ngữ"
-                      options={languageOptions}
                       value={field.value}
                       onChange={field.onChange}
                     />
