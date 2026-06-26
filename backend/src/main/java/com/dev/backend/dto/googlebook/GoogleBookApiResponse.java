@@ -6,7 +6,6 @@ import lombok.Data;
 
 @Data
 public class GoogleBookApiResponse {
-    private String kind;
     private int totalItems;
     private List<BookItem> items;
 

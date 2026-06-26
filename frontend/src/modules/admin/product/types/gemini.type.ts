@@ -1,4 +1,12 @@
+export interface GeminiBookMetaResponse {
+  mainSummary: string;
+  highlights: string[] | [];
+  artisticValue: string[] | [];
+  targetAudience: string[] | [];
+  authorsBookMetas: AuthorsBookMeta[] | [];
+}
 
-export interface GeminiBookMetaResponse{
-    id:string
+export interface AuthorsBookMeta {
+  name: string;
+  bio: string;
 }

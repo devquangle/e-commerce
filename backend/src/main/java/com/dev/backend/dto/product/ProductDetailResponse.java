@@ -23,7 +23,7 @@ public class ProductDetailResponse {
     private Integer weight;
     private String publishYear;
     private Integer pages;
-
+    private String language;
     private Integer seriesId;
     private Integer publisherId;
     private String status;

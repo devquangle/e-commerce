@@ -41,7 +41,7 @@ public class Product extends BaseAuditableEntity<Integer> {
 
     private String isbn;
     private String slug;
-
+    private String language;
     private LocalDate publishYear;
     private Integer pages;
 

@@ -6,6 +6,7 @@ export interface ProductRequest {
   weight: number;
   publishYear: string;
   pages: number;
+  language: string;
   price: number;
   originalPrice: number;
   quantity: number;
@@ -46,13 +47,14 @@ export interface ProductDetailResponse {
   weight: number;
   publishYear: string;
   pages: number;
+  language: string;
   status: string;
   description: string;
   genreIds: number[] | [];
   authorIds: number[] | [];
   publisherId: number | null;
   seriesId: number | null;
-  coverImages: ProductImageResponse[]|[];
+  coverImages: ProductImageResponse[] | [];
 }
 
 export interface ProductImageResponse {

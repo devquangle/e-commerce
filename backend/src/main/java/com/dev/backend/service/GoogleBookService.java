@@ -2,7 +2,6 @@ package com.dev.backend.service;
 
 import com.dev.backend.dto.googlebook.GoogleBookApiResponse;
 import com.dev.backend.dto.googlebook.GoogleBookResponse;
-import com.dev.backend.util.LanguageHelper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,9 +32,29 @@ public class GoogleBookService {
         try {
             // Sử dụng UriComponentsBuilder để tự động xử lý encoding và param
             String url = UriComponentsBuilder.fromUriString(GOOGLE_BOOK_API)
-                    .queryParam("q", "intitle:" + query.trim())
+                    .queryParam("q", query.trim())
                     .queryParam("printType", "books")
-                    .queryParam("maxResults", 20)
+                    .queryParam("maxResults", 10)
+                    .queryParam("orderBy", "relevance")
+                    .queryParam(
+                            "fields",
+                            "totalItems,items(" +
+                                    "id," +
+                                    "volumeInfo(" +
+                                    "title," +
+                                    "authors," +
+                                    "publishedDate," +
+                                    "pageCount," +
+                                    "language," +
+                                    "description," +
+                                    "industryIdentifiers(type,identifier)," +
+                                    "imageLinks(thumbnail)" +
+                                    ")," +
+                                    "saleInfo(" +
+                                    "listPrice(amount,currencyCode)," +
+                                    "retailPrice(amount,currencyCode)" +
+                                    ")" +
+                                    ")")
                     .queryParam("key", googleBooksApiKey)
                     .build()
                     .toUriString();
@@ -71,9 +90,10 @@ public class GoogleBookService {
             response.setName(volumeInfo.getTitle());
             response.setAuthors(volumeInfo.getAuthors());
             response.setPublishedDate(volumeInfo.getPublishedDate());
-            response.setDescription(volumeInfo.getDescription() != null ? volumeInfo.getDescription() : "Hiện chưa có mô tả cho cuốn sách này.");
+            response.setDescription(volumeInfo.getDescription() != null ? volumeInfo.getDescription()
+                    : "Hiện chưa có mô tả cho cuốn sách này.");
             response.setPageCount(volumeInfo.getPageCount());
-            response.setLanguage(LanguageHelper.getLanguageName(volumeInfo.getLanguage()));
+            response.setLanguage(volumeInfo.getLanguage() != null ? volumeInfo.getLanguage() : "vi");
             if (volumeInfo.getImageLinks() != null) {
                 response.setThumbnail(volumeInfo.getImageLinks().getThumbnail());
             }

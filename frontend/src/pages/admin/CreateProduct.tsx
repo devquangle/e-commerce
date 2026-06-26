@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import {
@@ -21,25 +21,27 @@ import SelectBox from "@/components/common/SelectedBox";
 import InputField from "@/components/common/InputField";
 import SearchInput from "@/components/common/SearchInput";
 import Button from "@/components/common/Button";
+import Loading from "@/components/common/Loading";
+
+import { registerLocale, getNames } from "@cospired/i18n-iso-languages";
+import viLocale from "@cospired/i18n-iso-languages/langs/vi.json";
 
 import { useBookFormData } from "@/hooks/useBookFormData";
 import { useFilterGoogleBook } from "@/hooks/useGoogleBook";
-import { useGroqBook } from "@/hooks/useGroq";
+
 import useDebounce from "@/hooks/useDebounce";
 
 import imageService from "@/services/imageService";
 import { useProductSearchApi } from "@/modules/admin/product/hooks/useProductSearchApi";
+import { useGemini } from "@/modules/admin/product/hooks/useGemini";
 
-import {
-  showErrorToast,
-  showSuccessToast,
-  showWarningToast,
-} from "@/utils/toastUtil";
+import { showSuccessToast, showWarningToast } from "@/utils/toastUtil";
 
 import type { ImageProductRequest } from "@/types/image";
-import type { ProductRequest } from "@/types/product.type";
+
 import type { GoogleBookResponse } from "@/types/googlebook";
 import { useCreateProduct } from "@/modules/admin/product/hooks/useProduct";
+import type { ProductRequest } from "@/modules/admin/product/types/product.type";
 
 const MAX_IMAGES = 6;
 
@@ -51,6 +53,7 @@ const INITIAL_FORM: ProductRequest = {
   weight: 500,
   publishYear: "2020-01-01",
   pages: 200,
+  language: "vi",
   authorIds: [],
   genreIds: [],
   publisherId: undefined,
@@ -59,26 +62,31 @@ const INITIAL_FORM: ProductRequest = {
   status: "ACTIVE",
   coverImages: [],
   description: `
-    <h2>Nội dung chính</h2>
+    <h2 style="margin-top: 24px; margin-bottom: 12px;">Nội dung chính</h2>
     <p>Tóm tắt cốt truyện hoặc chủ đề cuốn sách ngắn gọn, hấp dẫn tại đây. Mỗi đoạn văn nên có độ dài từ 3-5 câu để độc giả có thể dễ dàng nắm bắt thông tin và mạch truyện.</p>
-    <img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=600" alt="Ảnh bìa sách" style="width: 40%; max-width: 100%; height: auto;" class="block mx-auto" />
-    <p style="text-align:center; font-size: 14px; color: #666;"><em>Hình ảnh minh họa cho cuốn sách</em></p>
     
-    <h2>Điểm nổi bật</h2>
+    <h2 style="margin-top: 24px; margin-bottom: 12px;">Điểm nổi bật</h2>
     <ul>
       <li>Nội dung sách hấp dẫn, dễ tiếp cận và được trình bày một cách khoa học.</li>
       <li>Cung cấp nhiều bài học và ví dụ thực tiễn sâu sắc cho độc giả.</li>
       <li>Ngôn từ lôi cuốn, văn phong mạch lạc và lối kể chuyện tự nhiên.</li>
     </ul>
     
-    <h2>Đối tượng độc giả</h2>
+    <h2 style="margin-top: 24px; margin-bottom: 12px;">Giá trị nghệ thuật</h2>
+    <ul>
+      <li>Phong cách viết độc đáo, sáng tạo và mang đậm dấu ấn cá nhân của tác giả.</li>
+      <li>Kết cấu tác phẩm chặt chẽ, logic và giàu tính thẩm mỹ.</li>
+      <li>Ngôn ngữ giàu hình ảnh, gợi cảm xúc và có chiều sâu văn học.</li>
+    </ul>
+    
+    <h2 style="margin-top: 24px; margin-bottom: 12px;">Đối tượng độc giả</h2>
     <ul>
       <li>Các bạn học sinh, sinh viên muốn nâng cao hiểu biết về lĩnh vực này.</li>
       <li>Người đi làm muốn tìm kiếm những giải pháp ứng dụng thực tế.</li>
     </ul>
     
-    <h2>Về tác giả</h2>
-    <p>Tác giả là chuyên gia uy tín với nhiều năm kinh nghiệm thực chiến trong ngành. Các tác phẩm xuất bản của tác giả luôn đón nhận sự hưởng ứng mạnh mẽ của đông đảo độc giả.</p>
+    <h2 style="margin-top: 24px; margin-bottom: 12px;">Về tác giả</h2>
+    <p><strong>Tác giả:</strong> Chuyên gia uy tín với nhiều năm kinh nghiệm thực chiến trong ngành. Các tác phẩm xuất bản luôn đón nhận sự hưởng ứng mạnh mẽ của đông đảo độc giả.</p>
   `,
 };
 
@@ -89,12 +97,25 @@ export default function CreateProduct() {
   const { mutateAsync: createProduct, isPending: isCreating } =
     useCreateProduct();
   const { mutateAsync: fetchSearchApiImages } = useProductSearchApi();
+  const { mutateAsync: fetchGeminiBookMeta } = useGemini();
 
+  const [isFetchingAI, setIsFetchingAI] = useState(false);
   const [imageUploadMode, setImageUploadMode] = useState<"file" | "url">(
     "file",
   );
   const [imageUrl, setImageUrl] = useState("");
   const [replaceIndex, setReplaceIndex] = useState<number | null>(null);
+
+  const languageOptions = useMemo(() => {
+    registerLocale(viLocale);
+    const names = getNames("vi");
+    return Object.entries(names)
+      .map(([code, name]) => ({
+        label: name.charAt(0).toUpperCase() + name.slice(1),
+        value: code,
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label, "vi"));
+  }, []);
 
   const {
     register,
@@ -141,7 +162,6 @@ export default function CreateProduct() {
 
   const { data: googleBooks = [], isFetching: isLoadingGoogleBooks } =
     useFilterGoogleBook(debouncedName);
-  const { mutateAsync: generateGroqDescription } = useGroqBook();
 
   // Khởi tạo Options sử dụng useMemo ổn định
   const genreOptions = useMemo(
@@ -187,48 +207,6 @@ export default function CreateProduct() {
     };
   }, [coverImages]);
 
-  // Tách hàm gọi AI tạo mô tả bằng Groq ra ngoài độc lập
-  const handleAIGenerateDescription = useCallback(
-    async (name: string, originalDesc: string) => {
-      try {
-        showSuccessToast("Đang dùng AI tạo mô tả chi tiết...");
-        const metadata = await generateGroqDescription({
-          name,
-          description: originalDesc,
-        });
-
-        let newDesc = getValues("description") || "";
-
-        if (metadata.summary) {
-          newDesc = newDesc.replace(
-            /(<h2>\s*Nội dung chính\s*<\/h2>\s*)<p>[\s\S]*?<\/p>/,
-            `$1<p>${metadata.summary}</p>`,
-          );
-        }
-        if (metadata.highlights?.length) {
-          const highlightsHtml = `<ul>\n${metadata.highlights.map(h => `      <li>${h}</li>`).join("\n")}\n    </ul>`;
-          newDesc = newDesc.replace(
-            /<ul>\s*<li>Nội dung sách hấp dẫn[\s\S]*?<\/ul>/,
-            highlightsHtml,
-          );
-        }
-        if (metadata.targetAudience?.length) {
-          const audienceHtml = `<ul>\n${metadata.targetAudience.map(a => `      <li>${a}</li>`).join("\n")}\n    </ul>`;
-          newDesc = newDesc.replace(
-            /<ul>\s*<li>Các bạn học sinh, sinh viên[\s\S]*?<\/ul>/,
-            audienceHtml,
-          );
-        }
-
-        setValue("description", newDesc, { shouldDirty: true });
-        showSuccessToast("Đã tự động tạo mô tả bằng AI thành công!");
-      } catch {
-        showErrorToast("Không thể tạo mô tả bằng AI. Đang dùng mô tả gốc.");
-      }
-    },
-    [generateGroqDescription, getValues, setValue],
-  );
-
   // Đồng bộ thông tin Tác giả vào phần mô tả
   useEffect(() => {
     const [authorIds] = debouncedTaxonomy;
@@ -245,11 +223,12 @@ export default function CreateProduct() {
       const authorDescriptions = selectedAuthors
         .map(
           (a) =>
-            `- ${a.name || "Chưa rõ"}: ${a.description || "Chưa có mô tả."}`,
+            `<strong>${a.name || "Chưa rõ"}:</strong> ${a.description || "Chưa có mô tả."}`,
         )
         .join("<br/>\n");
-      
-      const authorRegex = /(<h2>\s*Về tác giả\s*<\/h2>\s*)<p>[\s\S]*?<\/p>/i;
+
+      const authorRegex =
+        /(<h2[^>]*>\s*Về tác giả\s*<\/h2>\s*)<p>[\s\S]*?<\/p>/i;
       if (authorRegex.test(newDesc)) {
         newDesc = newDesc.replace(
           authorRegex,
@@ -261,12 +240,7 @@ export default function CreateProduct() {
     if (newDesc !== currentDesc) {
       setValue("description", newDesc, { shouldDirty: true });
     }
-  }, [
-    debouncedTaxonomy,
-    authorsData,
-    setValue,
-    getValues,
-  ]);
+  }, [debouncedTaxonomy, authorsData, setValue, getValues]);
 
   // Xử lý Submit Form chính
   const onSubmit = async (data: ProductRequest) => {
@@ -458,6 +432,9 @@ export default function CreateProduct() {
       onSubmit={handleSubmit(onSubmit)}
       className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch"
     >
+      {/* Loading overlay khi đang gọi AI + SearchAPI */}
+      {isFetchingAI && <Loading />}
+
       {/* 1. HEADER ACTIONS */}
       <div className="col-span-12 bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -605,6 +582,13 @@ export default function CreateProduct() {
                   setValue("isbn", selectedItem.isbn || INITIAL_FORM.isbn, {
                     shouldDirty: true,
                   });
+                  setValue(
+                    "language",
+                    selectedItem.language || INITIAL_FORM.language,
+                    {
+                      shouldDirty: true,
+                    },
+                  );
 
                   setValue(
                     "price",
@@ -623,14 +607,10 @@ export default function CreateProduct() {
 
                   // 2. Set description với dữ liệu Google Books
                   let updatedDesc = INITIAL_FORM.description;
-                  if (selectedItem.thumbnail) {
-                    updatedDesc = updatedDesc.replace(
-                      /src="https:\/\/images\.unsplash\.com\/photo-1544947950-fa07a98d237f\?q=80&w=600"/,
-                      `src="${selectedItem.thumbnail}"`,
-                    );
-                  }
                   // Thay phần "Nội dung chính" bằng description từ Google Books
-                  const bookDescription = selectedItem.description || `Cuốn sách "${selectedItem.name}" của ${selectedItem.authors?.join(", ") || "tác giả"}.`;
+                  const bookDescription =
+                    selectedItem.description ||
+                    `Cuốn sách "${selectedItem.name}" của ${selectedItem.authors?.join(", ") || "tác giả"}.`;
                   updatedDesc = updatedDesc.replace(
                     /<p>\s*Tóm tắt cốt truyện hoặc chủ đề cuốn sách[\s\S]*?<\/p>/,
                     `<p>${bookDescription}</p>`,
@@ -638,9 +618,10 @@ export default function CreateProduct() {
                   setValue("description", updatedDesc, { shouldDirty: true });
 
                   // 3. Set ảnh thumbnail từ Google Books trước
-                  const thumbnailImage: ImageProductRequest = selectedItem.thumbnail
-                    ? { url: selectedItem.thumbnail, isThumbnail: true }
-                    : { url: "", isThumbnail: true };
+                  const thumbnailImage: ImageProductRequest =
+                    selectedItem.thumbnail
+                      ? { url: selectedItem.thumbnail, isThumbnail: true }
+                      : { url: "", isThumbnail: true };
 
                   setValue("coverImages", [thumbnailImage], {
                     shouldDirty: true,
@@ -649,36 +630,107 @@ export default function CreateProduct() {
 
                   trigger(["price", "originalPrice"]);
 
-                  // 4. Gọi Groq AI + SearchAPI ĐỒNG THỜI
-                  await Promise.allSettled([
-                    // API 1: Groq AI tạo mô tả
-                    handleAIGenerateDescription(
-                      selectedItem.name,
-                      selectedItem.description || "",
-                    ),
-                    // API 2: SearchAPI lấy 5 ảnh bổ sung
-                    fetchSearchApiImages(selectedItem.name)
-                      .then((result) => {
-                        const searchImages: ImageProductRequest[] = (result.urlImage || [])
-                          .slice(0, 5)
-                          .map((imageUrl) => ({
-                            url: imageUrl,
-                            isThumbnail: false,
-                          }));
+                  // 4. Gọi Gemini AI + SearchAPI ĐỒNG THỜI, chờ cả 2 xong rồi cập nhật
+                  setIsFetchingAI(true);
+                  try {
+                    const [geminiResult, searchResult] =
+                      await Promise.allSettled([
+                        fetchGeminiBookMeta({
+                          name: selectedItem.name,
+                          authors: selectedItem.authors || [],
+                        }),
+                        fetchSearchApiImages(selectedItem.name),
+                      ]);
 
-                        const currentImages = getValues("coverImages") || [];
-                        const combined = [...currentImages, ...searchImages].slice(0, MAX_IMAGES);
-                        setValue("coverImages", combined, {
-                          shouldDirty: true,
-                          shouldValidate: true,
-                        });
-                        showSuccessToast(`Đã tải ${searchImages.length} ảnh bổ sung từ SearchAPI!`);
-                      })
-                      .catch((error) => {
-                        console.error("SearchAPI error:", error);
-                        showWarningToast("Không thể tải ảnh bổ sung từ SearchAPI.");
-                      }),
-                  ]);
+                    // Xử lý kết quả Gemini AI — cập nhật mô tả
+                    if (geminiResult.status === "fulfilled") {
+                      const metadata = geminiResult.value;
+                      let newDesc = getValues("description") || "";
+
+                      if (metadata.mainSummary) {
+                        newDesc = newDesc.replace(
+                          /(<h2[^>]*>\s*Nội dung chính\s*<\/h2>\s*)<p>[\s\S]*?<\/p>/,
+                          `$1<p>${metadata.mainSummary}</p>`,
+                        );
+                      }
+                      if (metadata.highlights?.length) {
+                        const highlightsHtml = `<ul>\n${metadata.highlights.map((h) => `      <li>${h}</li>`).join("\n")}\n    </ul>`;
+                        newDesc = newDesc.replace(
+                          /<ul>\s*<li>Nội dung sách hấp dẫn[\s\S]*?<\/ul>/,
+                          highlightsHtml,
+                        );
+                      }
+                      if (metadata.artisticValue?.length) {
+                        const artisticHtml = `<ul>\n${metadata.artisticValue.map((v) => `      <li>${v}</li>`).join("\n")}\n    </ul>`;
+                        newDesc = newDesc.replace(
+                          /<ul>\s*<li>Phong cách viết độc đáo[\s\S]*?<\/ul>/,
+                          artisticHtml,
+                        );
+                      }
+                      if (metadata.targetAudience?.length) {
+                        const audienceHtml = `<ul>\n${metadata.targetAudience.map((a) => `      <li>${a}</li>`).join("\n")}\n    </ul>`;
+                        newDesc = newDesc.replace(
+                          /<ul>\s*<li>Các bạn học sinh, sinh viên[\s\S]*?<\/ul>/,
+                          audienceHtml,
+                        );
+                      }
+                      if (metadata.authorsBookMetas?.length) {
+                        const authorDescriptions = metadata.authorsBookMetas
+                          .map((a) => `<strong>${a.name}:</strong> ${a.bio}`)
+                          .join("<br/>\n");
+                        const authorRegex =
+                          /(<h2[^>]*>\s*Về tác giả\s*<\/h2>\s*)<p>[\s\S]*?<\/p>/i;
+                        if (authorRegex.test(newDesc)) {
+                          newDesc = newDesc.replace(
+                            authorRegex,
+                            `$1<p>\n${authorDescriptions}\n</p>`,
+                          );
+                        }
+                      }
+
+                      setValue("description", newDesc, { shouldDirty: true });
+                      showSuccessToast(
+                        "Đã tự động tạo mô tả bằng AI thành công!",
+                      );
+                    } else {
+                      console.error("Gemini error:", geminiResult.reason);
+                      showWarningToast(
+                        "Không thể tạo mô tả bằng AI. Đang dùng mô tả gốc.",
+                      );
+                    }
+
+                    // Xử lý kết quả SearchAPI — cập nhật ảnh bổ sung
+                    if (searchResult.status === "fulfilled") {
+                      const allSearchUrls = searchResult.value.urlImage || [];
+                      const searchImages: ImageProductRequest[] = allSearchUrls
+                        .slice(0, 5)
+                        .map((imgUrl) => ({
+                          url: imgUrl,
+                          isThumbnail: false,
+                        }));
+
+                      const currentImages = getValues("coverImages") || [];
+                      const combined = [
+                        ...currentImages,
+                        ...searchImages,
+                      ].slice(0, MAX_IMAGES);
+                      setValue("coverImages", combined, {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      });
+
+                      showSuccessToast(
+                        `Đã tải ${searchImages.length} ảnh bổ sung từ SearchAPI!`,
+                      );
+                    } else {
+                      console.error("SearchAPI error:", searchResult.reason);
+                      showWarningToast(
+                        "Không thể tải ảnh bổ sung từ SearchAPI.",
+                      );
+                    }
+                  } finally {
+                    setIsFetchingAI(false);
+                  }
                 }}
               />
 
@@ -793,6 +845,20 @@ export default function CreateProduct() {
                     required: "Isbn là bắt buộc",
                   }}
                   error={errors?.isbn}
+                />
+                <Controller
+                  name="language"
+                  control={control}
+                  rules={{ required: "Ngôn ngữ là bắt buộc" }}
+                  render={({ field }) => (
+                    <SelectBox<string>
+                      searchable={true}
+                      label="Ngôn ngữ"
+                      options={languageOptions}
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  )}
                 />
               </div>
             </div>

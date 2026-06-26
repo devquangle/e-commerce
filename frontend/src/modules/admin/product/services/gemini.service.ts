@@ -1,15 +1,17 @@
 import { apiGuest } from "@/configs/axios";
 import type { ApiResponse } from "@/types/api-response";
-import type { BookMetadataResponse } from "@/types/googlebook";
+import type { GeminiBookMetaResponse } from "../types/gemini.type";
 
 const GeminiService = {
   async getBookMeta(name: string, authors: string[]) {
-    const res = await apiGuest.post<ApiResponse<BookMetadataResponse>>(
+    const res = await apiGuest.get<ApiResponse<GeminiBookMetaResponse>>(
       "/public/book-meta",
       {
-        name,
-        authors,
-      },
+        params: {
+          name,
+          authors,
+        },
+      }
     );
 
     if (!res.data.success || !res.data.data) {
@@ -19,4 +21,5 @@ const GeminiService = {
     return res.data.data;
   },
 };
+
 export default GeminiService;

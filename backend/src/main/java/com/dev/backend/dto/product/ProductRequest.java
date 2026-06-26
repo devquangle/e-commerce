@@ -20,7 +20,7 @@ public class ProductRequest {
     private Integer weight;
     private LocalDate publishYear;
     private Integer pages;
-
+    private String language;
     private Integer publisherId;
     private Integer seriesId;
     private String status;

@@ -11,7 +11,8 @@ import java.util.stream.Collectors;
 public class ProductMapper {
 
     public ProductResponse toDTO(Product product) {
-        if (product == null) return null;
+        if (product == null)
+            return null;
 
         ProductResponse dto = new ProductResponse();
         dto.setId(product.getId());
@@ -23,7 +24,7 @@ public class ProductMapper {
         dto.setQuantity(product.getQuantity());
         dto.setWeight(product.getWeight());
         dto.setPages(product.getPages());
-
+        dto.setLanguage(product.getLanguage());
 
         dto.setPublishYear(product.getPublishYear() != null ? product.getPublishYear().toString() : null);
         dto.setStatus(product.getStatus() != null ? product.getStatus().name() : null);
@@ -40,7 +41,8 @@ public class ProductMapper {
     }
 
     public ProductDetailResponse toDetail(Product product) {
-        if (product == null) return null;
+        if (product == null)
+            return null;
 
         ProductDetailResponse dto = new ProductDetailResponse();
         dto.setId(product.getId());
@@ -53,9 +55,10 @@ public class ProductMapper {
         dto.setWeight(product.getWeight());
         dto.setPublishYear(product.getPublishYear() != null ? product.getPublishYear().toString() : null);
         dto.setPages(product.getPages());
+        dto.setLanguage(product.getLanguage());
         dto.setPublisherId(product.getPublisher() != null ? product.getPublisher().getId() : null);
         dto.setSeriesId(product.getSeries() != null ? product.getSeries().getId() : null);
-        
+
         // Fixed: Null-safe status mapping
         dto.setStatus(product.getStatus() != null ? product.getStatus().name() : null);
         dto.setDescription(product.getDescription());
@@ -63,13 +66,14 @@ public class ProductMapper {
         dto.setAuthorIds(mapAuthorsToIds(product.getProductAuthors()));
         dto.setGenreIds(mapGenresToIds(product.getProductGenres()));
         dto.setCoverImages(coverImageResponses(product.getImages()));
-        
+
         return dto;
     }
 
     // Helper: Map Authors to Names
     private List<String> mapAuthorsToNames(List<ProductAuthor> list) {
-        if (list == null) return List.of();
+        if (list == null)
+            return List.of();
         return list.stream()
                 .filter(pa -> pa.getAuthor() != null)
                 .map(pa -> pa.getAuthor().getName())
@@ -78,7 +82,8 @@ public class ProductMapper {
 
     // Helper: Map Genres to Names
     private List<String> mapGenresToNames(List<ProductGenre> list) {
-        if (list == null) return List.of();
+        if (list == null)
+            return List.of();
         return list.stream()
                 .filter(pg -> pg.getGenre() != null)
                 .map(pg -> pg.getGenre().getName())
@@ -87,7 +92,8 @@ public class ProductMapper {
 
     // Helper: Map Authors to IDs
     private List<Integer> mapAuthorsToIds(List<ProductAuthor> list) {
-        if (list == null) return List.of();
+        if (list == null)
+            return List.of();
         return list.stream()
                 .filter(pa -> pa.getAuthor() != null)
                 .map(pa -> pa.getAuthor().getId())
@@ -96,7 +102,8 @@ public class ProductMapper {
 
     // Helper: Map Genres to IDs
     private List<Integer> mapGenresToIds(List<ProductGenre> list) {
-        if (list == null) return List.of();
+        if (list == null)
+            return List.of();
         return list.stream()
                 .filter(pg -> pg.getGenre() != null)
                 .map(pg -> pg.getGenre().getId())
@@ -104,7 +111,8 @@ public class ProductMapper {
     }
 
     private String urlImageDefault(List<Image> images) {
-        if (images == null || images.isEmpty()) return "";
+        if (images == null || images.isEmpty())
+            return "";
         return images.stream()
                 .filter(img -> img != null && img.isThumbnail())
                 .map(img -> img.getUrlImage())
@@ -113,7 +121,8 @@ public class ProductMapper {
     }
 
     private List<ProductImageResponse> coverImageResponses(List<Image> images) {
-        if (images == null || images.isEmpty()) return List.of();
+        if (images == null || images.isEmpty())
+            return List.of();
         return images.stream()
                 .filter(img -> img != null)
                 .map(img -> {

@@ -81,6 +81,7 @@ public class ProductServiceImpl implements ProductService {
         product.setWeight(request.getWeight());
         product.setPublishYear(request.getPublishYear());
         product.setPages(request.getPages());
+        product.setLanguage(request.getLanguage());
         product.setIsbn(request.getIsbn());
         product.setStatus(ProductStatus.valueOf(request.getStatus()));
         product.setDescription(request.getDescription());
@@ -160,6 +161,7 @@ public class ProductServiceImpl implements ProductService {
         product.setWeight(request.getWeight());
         product.setPublishYear(request.getPublishYear());
         product.setPages(request.getPages());
+        product.setLanguage(request.getLanguage());
         product.setIsbn(request.getIsbn());
         product.setStatus(ProductStatus.valueOf(request.getStatus()));
         product.setDescription(request.getDescription());

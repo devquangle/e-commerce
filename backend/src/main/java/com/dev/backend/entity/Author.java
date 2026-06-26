@@ -31,6 +31,7 @@ public class Author {
     private String name;
     private String slug;
     private String wikibaseItem;
+    @Column(columnDefinition = "TEXT")
     private String urlImage;
     private String urlBio;
     @Column(columnDefinition = "TEXT")

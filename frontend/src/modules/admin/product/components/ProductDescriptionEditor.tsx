@@ -184,12 +184,13 @@ export default function ProductDescriptionEditor({
   const bookAuthors = authorNames || "Tên tác giả";
   const bookGenres = genreNames || "Thể loại";
 
-  const aiPrompt = `Tôi có cuốn sách tên là "${bookTitle}", tác giả là "${bookAuthors}", thuộc thể loại "${bookGenres}".
+  const aiPrompt = `Tôi có cuốn sách tên là "${bookTitle}", tác giả là "${bookAuthors}".
 Hãy viết cho tôi nội dung mô tả sách chi tiết theo cấu trúc HTML chuẩn:
-- Một đoạn mở đầu hấp dẫn (H2).
-- 3-5 ý chính về điểm nổi bật của sách (dùng thẻ <ul> và <li>).
-- Đối tượng độc giả phù hợp.
-- Thông tin ngắn gọn về tác giả.
+- Nội dung chính (H2): Tóm tắt cốt truyện hoặc chủ đề cuốn sách ngắn gọn, hấp dẫn.
+- Điểm nổi bật (H2): 3-5 ý chính về điểm nổi bật của sách (dùng thẻ <ul> và <li>).
+- Giá trị nghệ thuật (H2): 3-5 ý về phong cách viết, nghệ thuật độc đáo của tác phẩm (dùng thẻ <ul> và <li>).
+- Đối tượng độc giả (H2): Nhóm độc giả phù hợp (dùng thẻ <ul> và <li>).
+- Về tác giả (H2): Giới thiệu tác giả nổi bật với cú pháp <strong>Tên tác giả:</strong> mô tả.
 
 Yêu cầu: Sử dụng thẻ <h2> cho các đề mục, giọng văn chuyên nghiệp, thuyết phục.`;
 
@@ -269,7 +270,7 @@ Yêu cầu: Sử dụng thẻ <h2> cho các đề mục, giọng văn chuyên ng
               <div className="flex items-start gap-2">
                 <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-100 font-bold text-indigo-600">1</span>
                 <div>
-                  <strong className="text-slate-800">Tiêu đề phụ:</strong> Sử dụng thẻ <code>H2</code> cho các đề mục chính (<em>Nội dung chính, Điểm nổi bật, Đối tượng độc giả, Về tác giả</em>).
+                  <strong className="text-slate-800">Tiêu đề phụ:</strong> Sử dụng thẻ <code>H2</code> cho các đề mục chính (<em>Nội dung chính, Điểm nổi bật, Giá trị nghệ thuật, Đối tượng độc giả, Về tác giả</em>).
                 </div>
               </div>
               <div className="flex items-start gap-2">
@@ -281,25 +282,13 @@ Yêu cầu: Sử dụng thẻ <h2> cho các đề mục, giọng văn chuyên ng
               <div className="flex items-start gap-2">
                 <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-100 font-bold text-indigo-600">3</span>
                 <div>
-                  <strong className="text-slate-800">Danh sách:</strong> Sử dụng Bullet list (dấu chấm tròn) cho phần <em>Điểm nổi bật</em> hoặc <em>Đối tượng độc giả</em> để thông tin trực quan hơn.
+                  <strong className="text-slate-800">Danh sách:</strong> Sử dụng Bullet list (dấu chấm tròn) cho phần <em>Điểm nổi bật</em>, <em>Giá trị nghệ thuật</em> hoặc <em>Đối tượng độc giả</em> để thông tin trực quan hơn.
                 </div>
               </div>
             </div>
             <div className="space-y-2.5">
               <div className="flex items-start gap-2">
                 <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-100 font-bold text-indigo-600">4</span>
-                <div>
-                  <strong className="text-slate-800">Hình ảnh tối ưu:</strong> Dung lượng ảnh dưới <strong className="text-rose-600">1MB</strong>. Đảm bảo căn giữa ảnh và luôn có chú thích (caption) in nghiêng ở ngay bên dưới.
-                </div>
-              </div>
-              <div className="flex items-start gap-2">
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-100 font-bold text-indigo-600">5</span>
-                <div>
-                  <strong className="text-slate-800">Bảng dữ liệu:</strong> Chỉ sử dụng bảng cho thông số kỹ thuật đặc biệt khác. <strong className="text-rose-600">Không lặp lại</strong> thông tin thuộc tính (Tác giả, Thể loại, NXB...).
-                </div>
-              </div>
-              <div className="flex items-start gap-2">
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-100 font-bold text-indigo-600">6</span>
                 <div>
                   <strong className="text-slate-800">Giọng văn:</strong> Khách quan, lôi cuốn, thuyết phục độc giả và tránh các lỗi chính tả.
                 </div>
@@ -335,8 +324,6 @@ Yêu cầu: Sử dụng thẻ <h2> cho các đề mục, giọng văn chuyên ng
               <span><strong>Tên sách:</strong> {bookTitle}</span>
               <span>•</span>
               <span><strong>Tác giả:</strong> {bookAuthors}</span>
-              <span>•</span>
-              <span><strong>Thể loại:</strong> {bookGenres}</span>
             </div>
           </div>
         )}

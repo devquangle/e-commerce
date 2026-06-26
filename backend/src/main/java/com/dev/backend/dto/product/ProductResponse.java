@@ -1,6 +1,5 @@
 package com.dev.backend.dto.product;
 
-
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,7 +22,7 @@ public class ProductResponse {
     private Integer weight;
     private String publishYear;
     private Integer pages;
-
+    private String language;
     private String status;
 
     private List<String> authorsName;
