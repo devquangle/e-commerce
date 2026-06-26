@@ -1,19 +1,11 @@
 import Container from "@/components/common/Container";
-import ProductCard from "@/components/user/ProductCard";
-import ProductDescription from "@/modules/user/product/components/ProductDescription";
-import ProductReviews from "@/modules/user/product/components/ProductReviews";
-import ProductImages from "@/modules/user/product/components/ProductImages";
-import ProductInfo from "@/modules/user/product/components/ProductInfo";
-import {
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
-
-// Swiper
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Manipulation } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/navigation";
+import ProductDescription from "@/modules/user/product-detail/components/ProductDescription";
+import ProductReviews from "@/modules/user/product-detail/components/ProductReviews";
+import ProductImages from "@/modules/user/product-detail/components/ProductImages";
+import ProductInfo from "@/modules/user/product-detail/components/ProductInfo";
+import ProductTable from "@/modules/user/product-detail/components/ProductTable";
+import RelatedProducts from "@/modules/user/product-detail/components/RelatedProducts";
+import { ShieldCheck, Truck, RotateCcw } from "lucide-react";
 import type { ProductCard as ProductCardType } from "@/types/product.card.type";
 
 const mockProduct = {
@@ -122,6 +114,8 @@ export default function ProductDetailPage() {
     isbn: "978-604-1-12345-6",
     pages: 720,
     publishYear: "2024",
+    weight: 450,
+    language: "vi",
   };
 
   const mockOverview = {
@@ -164,65 +158,69 @@ export default function ProductDetailPage() {
   ];
 
   return (
-    <Container className="max-w-7xl p-2 ">
-      {/* ==================== MAIN PRODUCT SECTION ==================== */}
-      <div className="bg-white rounded-3xl shadow-sm border border-slate-200/60 p-4 md:p-8 my-4">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
-          <ProductImages product={mockProductResponse} mockImages={mockProduct.images} />
-          <ProductInfo 
-            product={mockProductResponse} 
-            rating={mockProduct.rating} 
-            reviewCount={mockProduct.reviewCount} 
-            soldCount={mockProduct.soldCount} 
-          />
-        </div>
-      </div>
-
-      {/* ==================== PRODUCT DETAILS ==================== */}
-      <ProductDescription product={mockProductResponse} />
-      <ProductReviews overview={mockOverview} comments={mockComments} />
-
-      {/* ==================== RELATED PRODUCTS (Swiper Manipulation) ==================== */}
-     
-      <div className="relative">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-slate-900">
-            Sản phẩm tương tự
-          </h2>
-          <div className="flex items-center gap-2">
-            <button className="related-prev w-10 h-10 bg-white border border-slate-200 rounded-full shadow-sm flex items-center justify-center text-slate-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
-              <ChevronLeft size={20} />
-            </button>
-            <button className="related-next w-10 h-10 bg-white border border-slate-200 rounded-full shadow-sm flex items-center justify-center text-slate-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
-              <ChevronRight size={20} />
-            </button>
+    <Container className="max-w-7xl p-2">
+      {/* 2-Column layout for Main Product & Specifications & Description */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 my-4 items-start">
+        
+        {/* LEFT COLUMN: Images, Policies */}
+        <div className="lg:col-span-4 lg:sticky lg:top-4 h-fit flex flex-col gap-4">
+          <div className="card-custom !p-6">
+            <ProductImages product={mockProductResponse} mockImages={mockProduct.images} />
+          </div>
+          
+          {/* Commitments / Policies */}
+          <div className="card-custom !p-6 flex flex-col gap-3">
+            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Chính sách ưu đãi</h3>
+            
+            <div className="flex items-start gap-3 text-slate-700">
+              <div className="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 shrink-0 mt-0.5">
+                <ShieldCheck size={16} />
+              </div>
+              <span className="text-xs leading-snug">
+                <span className="font-bold">100% Sách gốc:</span> Đảm bảo sách chính hãng, chất lượng cao từ các nhà xuất bản.
+              </span>
+            </div>
+            
+            <div className="flex items-start gap-3 text-slate-700">
+              <div className="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-600 shrink-0 mt-0.5">
+                <Truck size={16} />
+              </div>
+              <span className="text-xs leading-snug">
+                <span className="font-bold">Giao hàng hỏa tốc:</span> Nhận hàng trong vòng 2h tại khu vực nội thành.
+              </span>
+            </div>
+            
+            <div className="flex items-start gap-3 text-slate-700">
+              <div className="w-7 h-7 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-600 shrink-0 mt-0.5">
+                <RotateCcw size={16} />
+              </div>
+              <span className="text-xs leading-snug">
+                <span className="font-bold">Đổi trả 30 ngày:</span> Hỗ trợ đổi trả miễn phí nếu sản phẩm có lỗi từ NSX.
+              </span>
+            </div>
           </div>
         </div>
 
-        <div className="overflow-hidden -mx-4 px-4 py-4">
-          <Swiper
-            modules={[Navigation, Manipulation]}
-            navigation={{
-              nextEl: ".related-next",
-              prevEl: ".related-prev",
-            }}
-            spaceBetween={16}
-            slidesPerView={2}
-            breakpoints={{
-              640: { slidesPerView: 2, spaceBetween: 16 },
-              768: { slidesPerView: 3, spaceBetween: 20 },
-              1024: { slidesPerView: 4, spaceBetween: 24 },
-            }}
-            className="related-products-swiper"
-          >
-            {relatedProducts.map((product) => (
-              <SwiperSlide key={product.id} className="h-auto!">
-                <ProductCard product={product} />
-              </SwiperSlide>
-            ))}
-          </Swiper>
+        {/* RIGHT COLUMN: Info, Specs Table, Description */}
+        <div className="lg:col-span-8 flex flex-col gap-6">
+          <div className="card-custom !p-6">
+            <ProductInfo 
+              product={mockProductResponse} 
+              rating={mockProduct.rating} 
+              reviewCount={mockProduct.reviewCount} 
+              soldCount={mockProduct.soldCount}
+            />
+          </div>
+
+          <ProductTable product={mockProductResponse} />
+          <ProductDescription product={mockProductResponse} />
         </div>
+
       </div>
+
+      {/* FULL WIDTH BOTTOM SECTIONS */}
+      <ProductReviews overview={mockOverview} comments={mockComments} />
+      <RelatedProducts relatedProducts={relatedProducts} />
     </Container>
   );
 }
