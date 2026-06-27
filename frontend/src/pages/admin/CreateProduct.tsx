@@ -99,12 +99,14 @@ export default function CreateProduct() {
   const { mutateAsync: fetchSearchApiImages } = useProductSearchApi();
   const { mutateAsync: fetchGeminiBookMeta } = useGemini();
 
+  const [isSaving, setIsSaving] = useState(false);
   const [isFetchingAI, setIsFetchingAI] = useState(false);
   const [imageUploadMode, setImageUploadMode] = useState<"file" | "url">(
     "file",
   );
   const [imageUrl, setImageUrl] = useState("");
   const [replaceIndex, setReplaceIndex] = useState<number | null>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const languageOptions = useMemo(() => {
     registerLocale(viLocale);
@@ -145,6 +147,8 @@ export default function CreateProduct() {
   const coverImages = useMemo(() => coverImagesRaw || [], [coverImagesRaw]);
   const inputName = useWatch({ control, name: "name" }) || "";
   const debouncedName = useDebounce(inputName, 1000);
+  const watchedPrice = useWatch({ control, name: "price" });
+  const watchedOriginalPrice = useWatch({ control, name: "originalPrice" });
 
   // Watch riêng biệt nhóm dữ liệu đồng bộ Table để tối ưu re-render qua debounce
   const taxonomyWatch = useWatch({
@@ -158,7 +162,6 @@ export default function CreateProduct() {
       "seriesId",
     ],
   });
-  const debouncedTaxonomy = useDebounce(taxonomyWatch, 800); // Tránh băm nát CPU khi user đang chọn liên tục
 
   const { data: googleBooks = [], isFetching: isLoadingGoogleBooks } =
     useFilterGoogleBook(debouncedName);
@@ -182,7 +185,6 @@ export default function CreateProduct() {
   );
 
   const watchedAuthorIds = taxonomyWatch?.[0] as number[] | undefined;
-  const watchedGenreIds = taxonomyWatch?.[1] as number[] | undefined;
 
   const watchedAuthorNames = useMemo(() => {
     return (watchedAuthorIds || [])
@@ -190,13 +192,6 @@ export default function CreateProduct() {
       .filter(Boolean)
       .join(", ");
   }, [watchedAuthorIds, authorOptions]);
-
-  const watchedGenreNames = useMemo(() => {
-    return (watchedGenreIds || [])
-      .map((id) => genreOptions.find((g) => g.value === id)?.label)
-      .filter(Boolean)
-      .join(", ");
-  }, [watchedGenreIds, genreOptions]);
 
   // Clean up Object URL tránh tràn bộ nhớ (Memory Leak)
   useEffect(() => {
@@ -207,41 +202,6 @@ export default function CreateProduct() {
     };
   }, [coverImages]);
 
-  // Đồng bộ thông tin Tác giả vào phần mô tả
-  useEffect(() => {
-    const [authorIds] = debouncedTaxonomy;
-    const currentDesc = getValues("description");
-    if (!currentDesc) return;
-
-    let newDesc = currentDesc;
-
-    // Cập nhật mô tả chi tiết Tác giả
-    const selectedAuthors = ((authorIds as number[]) || [])
-      .map((id) => authorsData.find((a) => a.id === id))
-      .filter((author): author is NonNullable<typeof author> => !!author);
-    if (selectedAuthors.length > 0) {
-      const authorDescriptions = selectedAuthors
-        .map(
-          (a) =>
-            `<strong>${a.name || "Chưa rõ"}:</strong> ${a.description || "Chưa có mô tả."}`,
-        )
-        .join("<br/>\n");
-
-      const authorRegex =
-        /(<h2[^>]*>\s*Về tác giả\s*<\/h2>\s*)<p>[\s\S]*?<\/p>/i;
-      if (authorRegex.test(newDesc)) {
-        newDesc = newDesc.replace(
-          authorRegex,
-          `$1<p>\n${authorDescriptions}\n</p>`,
-        );
-      }
-    }
-
-    if (newDesc !== currentDesc) {
-      setValue("description", newDesc, { shouldDirty: true });
-    }
-  }, [debouncedTaxonomy, authorsData, setValue, getValues]);
-
   // Xử lý Submit Form chính
   const onSubmit = async (data: ProductRequest) => {
     try {
@@ -249,6 +209,8 @@ export default function CreateProduct() {
         showWarningToast("Vui lòng thêm ít nhất một ảnh sản phẩm!");
         return;
       }
+
+      setIsSaving(true);
 
       const uploadedImages: ImageProductRequest[] =
         coverImages.length > 0
@@ -264,6 +226,8 @@ export default function CreateProduct() {
       navigate("/admin/products");
     } catch {
       // Toast lỗi đã được xử lý bởi onError trong hook useCreateProduct
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -417,8 +381,7 @@ export default function CreateProduct() {
     );
   };
 
-  if (isLoading)
-    return <div className="p-6 text-center">Đang tải dữ liệu form...</div>;
+  if (isLoading) return <Loading message="Đang tải dữ liệu form..." />;
   if (isError)
     return (
       <div className="p-6 text-center text-red-500">
@@ -432,8 +395,15 @@ export default function CreateProduct() {
       onSubmit={handleSubmit(onSubmit)}
       className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch"
     >
-      {/* Loading overlay khi đang gọi AI + SearchAPI */}
-      {isFetchingAI && <Loading />}
+      {/* Loading overlay khi đang gọi AI + SearchAPI hoặc đang lưu */}
+      {(isFetchingAI || isSaving) && (
+        <Loading
+          message={
+            isSaving ? "Đang lưu sản phẩm..." : "Đang đồng bộ dữ liệu AI..."
+          }
+          subMessage="Vui lòng chờ trong giây lát..."
+        />
+      )}
 
       {/* 1. HEADER ACTIONS */}
       <div className="col-span-12 bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
@@ -469,9 +439,10 @@ export default function CreateProduct() {
               type="submit"
               color="primary"
               className="w-full sm:w-auto"
-              disabled={isCreating}
+              disabled={isCreating || isSaving}
             >
-              <Save size={15} /> {isCreating ? "Đang lưu..." : "Lưu"}
+              <Save size={15} />{" "}
+              {isCreating || isSaving ? "Đang lưu..." : "Lưu"}
             </Button>
           </div>
         </div>
@@ -615,6 +586,45 @@ export default function CreateProduct() {
                     /<p>\s*Tóm tắt cốt truyện hoặc chủ đề cuốn sách[\s\S]*?<\/p>/,
                     `<p>${bookDescription}</p>`,
                   );
+
+                  // Tìm kiếm tác giả khớp với Google Books để tự động điền vào form và lấy tiểu sử
+                  const matchedAuthors = (selectedItem.authors || [])
+                    .map((authorName) =>
+                      authorsData.find(
+                        (a) =>
+                          a.name?.toLowerCase().trim() ===
+                          authorName.toLowerCase().trim(),
+                      ),
+                    )
+                    .filter(
+                      (author): author is NonNullable<typeof author> =>
+                        !!author,
+                    );
+
+                  if (matchedAuthors.length > 0) {
+                    setValue(
+                      "authorIds",
+                      matchedAuthors.map((a) => a.id),
+                      { shouldDirty: true, shouldValidate: true },
+                    );
+
+                    const authorDescriptions = matchedAuthors
+                      .map(
+                        (a) =>
+                          `<strong>${a.name || "Chưa rõ"}:</strong> ${a.description || "Chưa có mô tả."}`,
+                      )
+                      .join("<br/>\n");
+
+                    const authorRegex =
+                      /(<h2[^>]*>\s*Về tác giả\s*<\/h2>\s*)<p>[\s\S]*?<\/p>/i;
+                    if (authorRegex.test(updatedDesc)) {
+                      updatedDesc = updatedDesc.replace(
+                        authorRegex,
+                        `$1<p>\n${authorDescriptions}\n</p>`,
+                      );
+                    }
+                  }
+
                   setValue("description", updatedDesc, { shouldDirty: true });
 
                   // 3. Set ảnh thumbnail từ Google Books trước
@@ -748,11 +758,6 @@ export default function CreateProduct() {
                       value: 0,
                       message: "Giá nhập phải lớn hơn hoặc bằng 0",
                     },
-                    validate: (value) =>
-                      !getValues("price") ||
-                      Number(value) <= Number(getValues("price")) ||
-                      "Giá nhập không được lớn hơn giá bán",
-                    onChange: () => trigger("price"),
                   }}
                   error={errors.originalPrice}
                 />
@@ -770,11 +775,6 @@ export default function CreateProduct() {
                       value: 0,
                       message: "Giá bán phải lớn hơn hoặc bằng 0",
                     },
-                    validate: (value) =>
-                      !getValues("originalPrice") ||
-                      Number(value) >= Number(getValues("originalPrice")) ||
-                      "Giá bán không được nhỏ hơn giá nhập",
-                    onChange: () => trigger("originalPrice"),
                   }}
                   error={errors.price}
                 />
@@ -795,6 +795,30 @@ export default function CreateProduct() {
                   }}
                   error={errors?.quantity}
                 />
+
+                {typeof watchedPrice === "number" &&
+                typeof watchedOriginalPrice === "number" &&
+                watchedPrice < watchedOriginalPrice ? (
+                  <div className="col-span-1 md:col-span-2 lg:col-span-3 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 text-amber-700 dark:text-amber-400 text-xs font-medium">
+                    <svg
+                      className="w-4 h-4 text-amber-500 shrink-0 animate-bounce"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2.5}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                      />
+                    </svg>
+                    <span>
+                      Giá bán đang thấp hơn giá nhập, bạn có chắc chắn muốn tiếp
+                      tục?
+                    </span>
+                  </div>
+                ) : null}
 
                 <InputField
                   label="Số trang"
@@ -833,7 +857,6 @@ export default function CreateProduct() {
                   name="isbn"
                   type="text"
                   register={register}
-                 
                   error={errors?.isbn}
                 />
 
@@ -1064,6 +1087,14 @@ export default function CreateProduct() {
                 <div className="absolute top-2 right-2 flex gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition">
                   <button
                     type="button"
+                    title="Xem ảnh"
+                    onClick={() => setPreviewImage(image.url || "")}
+                    className="flex items-center justify-center w-7 h-7 rounded-full bg-slate-800 text-white hover:bg-slate-700 shadow-sm cursor-pointer"
+                  >
+                    <Eye size={12} />
+                  </button>
+                  <button
+                    type="button"
                     title="Thay thế ảnh"
                     onClick={() => {
                       setReplaceIndex(index);
@@ -1126,11 +1157,47 @@ export default function CreateProduct() {
               onChange={field.onChange}
               bookName={inputName}
               authorNames={watchedAuthorNames}
-              genreNames={watchedGenreNames}
             />
           )}
         />
       </div>
+
+      {/* Lightbox Preview */}
+      {previewImage && (
+        <div
+          className="fixed inset-0 z-10000 flex items-center justify-center bg-black/85 backdrop-blur-sm transition-opacity duration-300"
+          onClick={() => setPreviewImage(null)}
+        >
+          <button
+            type="button"
+            className="absolute top-4 right-4 text-white/70 hover:text-white bg-slate-900/50 hover:bg-slate-900/80 p-2.5 rounded-full transition-colors cursor-pointer"
+            onClick={() => setPreviewImage(null)}
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+
+          <div className="max-w-[90%] max-h-[90%] flex items-center justify-center p-4">
+            <img
+              src={previewImage}
+              alt="Xem ảnh lớn"
+              className="max-w-full max-h-[85vh] rounded-xl object-contain shadow-2xl border border-slate-800"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
     </form>
   );
 }

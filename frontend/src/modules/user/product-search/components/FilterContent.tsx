@@ -283,7 +283,7 @@ export default function FilterContent({
     <div className="space-y-5">
       <FilterSection title="Thể loại" defaultOpen={!!filters?.genres?.length}>
         {isLoading ? (
-          <Loading />
+          <Loading inline />
         ) : (
           <CheckboxList
             items={activeGenres}
@@ -298,7 +298,7 @@ export default function FilterContent({
 
       <FilterSection title="Tác giả" defaultOpen={!!filters?.authors?.length}>
         {isLoading ? (
-          <Loading />
+          <Loading inline />
         ) : (
           <CheckboxList
             items={activeAuthors}
@@ -313,7 +313,7 @@ export default function FilterContent({
 
       <FilterSection title="Nhà xuất bản" defaultOpen={!!filters?.publisher}>
         {isLoading ? (
-          <Loading />
+          <Loading inline />
         ) : (
           <RadioList
             items={activePublishers}
@@ -327,7 +327,7 @@ export default function FilterContent({
 
       <FilterSection title="Series" defaultOpen={!!filters?.series}>
         {isLoading ? (
-          <Loading />
+          <Loading inline />
         ) : (
           <RadioList
             items={activeSeries}

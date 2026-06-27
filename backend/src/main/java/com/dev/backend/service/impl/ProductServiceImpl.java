@@ -53,8 +53,6 @@ public class ProductServiceImpl implements ProductService {
     private final PublisherService publisherService;
     private final ProductGenreService productGenreService;
     private final ProductAuthorService productAuthorService;
-    private final AuthorService authorService;
-    private final GenreService genreService;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -196,98 +194,7 @@ public class ProductServiceImpl implements ProductService {
     private void validate(ProductRequest request, Integer id) {
         DuplicateFieldException errors = new DuplicateFieldException(new HashMap<>());
 
-        if (request.getName() == null || request.getName().isBlank()) {
-            errors.addError("name", "Tên sản phẩm không được để trống");
-        } else {
-            String slug = TextUtils.toSlug(request.getName().strip());
-            Optional<Product> existingProduct = productRepository.findBySlug(slug);
-            if (existingProduct.isPresent() && (id == null || !existingProduct.get().getId().equals(id))) {
-                errors.addError("name", "Sản phẩm với tên này (hoặc đường dẫn slug) đã tồn tại");
-            }
-        }
-
-        if (request.getOriginalPrice() == null) {
-            errors.addError("originalPrice", "Giá gốc không được để trống");
-        } else if (request.getOriginalPrice() < 0) {
-            errors.addError("originalPrice", "Giá gốc không được âm");
-        }
-
-        if (request.getPrice() == null) {
-            errors.addError("price", "Giá bán không được để trống");
-        } else if (request.getPrice() < 0) {
-            errors.addError("price", "Giá bán không được âm");
-        }
-
-        if (request.getQuantity() == null) {
-            errors.addError("quantity", "Số lượng không được để trống");
-        } else if (request.getQuantity() < 0) {
-            errors.addError("quantity", "Số lượng không được âm");
-        }
-
-        if (request.getWeight() == null) {
-            errors.addError("weight", "Trọng lượng không được để trống");
-        } else if (request.getWeight() < 0) {
-            errors.addError("weight", "Trọng lượng không được âm");
-        }
-
-        if (request.getPages() != null && request.getPages() <= 0) {
-            errors.addError("pages", "Số trang phải lớn hơn 0");
-        }
-
-        if (request.getStatus() == null || request.getStatus().isBlank()) {
-            errors.addError("status", "Trạng thái không được để trống");
-        } else {
-            try {
-                ProductStatus.valueOf(request.getStatus());
-            } catch (IllegalArgumentException e) {
-                errors.addError("status", "Trạng thái không hợp lệ");
-            }
-        }
-
-        if (request.getPublisherId() == null) {
-            errors.addError("publisherId", "Nhà xuất bản không được để trống");
-        } else {
-            try {
-                publisherService.findById(request.getPublisherId());
-            } catch (NotFoundException e) {
-                errors.addError("publisherId", "Nhà xuất bản không tồn tại");
-            }
-        }
-
-        if (request.getSeriesId() != null) {
-            try {
-                seriesService.findById(request.getSeriesId());
-            } catch (NotFoundException e) {
-                errors.addError("seriesId", "Bộ series sách không tồn tại");
-            }
-        }
-
-        if (request.getGenreIds() == null || request.getGenreIds().isEmpty()) {
-            errors.addError("genreIds", "Danh mục thể loại không được để trống");
-        } else {
-            for (Integer genreId : request.getGenreIds()) {
-                try {
-                    genreService.findById(genreId);
-                } catch (NotFoundException e) {
-                    errors.addError("genreIds", "Thể loại với ID " + genreId + " không tồn tại");
-                    break;
-                }
-            }
-        }
-
-        if (request.getAuthorIds() == null || request.getAuthorIds().isEmpty()) {
-            errors.addError("authorIds", "Danh sách tác giả không được để trống");
-        } else {
-            for (Integer authorId : request.getAuthorIds()) {
-                try {
-                    authorService.findById(authorId);
-                } catch (NotFoundException e) {
-                    errors.addError("authorIds", "Tác giả với ID " + authorId + " không tồn tại");
-                    break;
-                }
-            }
-        }
-
+    
         if (!errors.getErrors().isEmpty()) {
             throw errors;
         }

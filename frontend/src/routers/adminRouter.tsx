@@ -13,66 +13,86 @@ import UpdateProduct from "@/pages/admin/UpdateProduct";
 import AuthorPage from "@/pages/admin/AuthorPage";
 import PublisherPage from "@/pages/admin/PublisherPage";
 import SeriesPage from "@/pages/admin/SeriesPage";
+import VoucherPage from "@/pages/admin/VoucherPage";
+import CreatePromotion from "@/pages/admin/CreatePromotion";
+import UpdatePromotion from "@/pages/admin/UpdatePromotion";
+import { Navigate } from "react-router-dom";
 
 const adminRouter = [
   {
-    path: "/admin/dashboard",
+    path: "",
+    element: <Navigate to="dashboard" replace />,
+  },
+  {
+    path: "dashboard",
     element: <Dashboard />,
   },
   {
-    path: "/admin/products",
+    path: "products",
     element: <Product />,
   },
   {
-    path: "/admin/genres",
+    path: "genres",
     element: <Genre />,
   },
   {
-    path: "/admin/promotions",
+    path: "promotions",
     element: <Promotion />,
   },
   {
-    path: "/admin/orders",
+    path: "vouchers",
+    element: <VoucherPage />,
+  },
+  {
+    path: "orders",
     element: <Order />,
   },
   {
-    path: "/admin/order-items",
+    path: "order-items",
     element: <OrderItem />,
   },
   {
-    path: "/admin/analytics/revenue",
+    path: "analytics/revenue",
     element: <Revenue />,
   },
   {
-    path: "/admin/analytics/best-sellers",
+    path: "analytics/best-sellers",
     element: <TopProduct />,
   },
   {
-    path: "/admin/reviews",
+    path: "reviews",
     element: <Review />,
   },
   {
-    path: "/admin/chats",
+    path: "chats",
     element: <Chat />,
   },
   {
-    path: "/admin/add-product",
+    path: "add-product",
     element: <CreateProduct />,
   },
   {
-    path: "/admin/edit-product/:id",
+    path: "edit-product/:id",
     element: <UpdateProduct />,
   },
   {
-    path: "/admin/authors",
+    path: "add-promotion",
+    element: <CreatePromotion />,
+  },
+  {
+    path: "edit-promotion/:id",
+    element: <UpdatePromotion />,
+  },
+  {
+    path: "authors",
     element: <AuthorPage />,
   },
   {
-    path: "/admin/publishers",
+    path: "publishers",
     element: <PublisherPage />,
   },
   {
-    path: "/admin/collections",
+    path: "collections",
     element: <SeriesPage />,
   },
 ];

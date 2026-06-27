@@ -32,7 +32,6 @@ type Props = {
   onChange: (val: string) => void;
   bookName?: string;
   authorNames?: string;
-  genreNames?: string;
 };
 
 const CustomImage = Image.extend({
@@ -61,7 +60,6 @@ export default function ProductDescriptionEditor({
   onChange,
   bookName,
   authorNames,
-  genreNames,
 }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -182,7 +180,6 @@ export default function ProductDescriptionEditor({
 
   const bookTitle = bookName || "Tên sách";
   const bookAuthors = authorNames || "Tên tác giả";
-  const bookGenres = genreNames || "Thể loại";
 
   const aiPrompt = `Tôi có cuốn sách tên là "${bookTitle}", tác giả là "${bookAuthors}".
 Hãy viết cho tôi nội dung mô tả sách chi tiết theo cấu trúc HTML chuẩn:

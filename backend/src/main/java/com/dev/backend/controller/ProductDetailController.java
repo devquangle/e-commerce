@@ -2,16 +2,11 @@ package com.dev.backend.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.dev.backend.dto.product.ProductCardResponse;
-import com.dev.backend.dto.product.ProductDetailResponse;
-import com.dev.backend.dto.product.ProductFilterRequest;
 import com.dev.backend.entity.Product;
-import com.dev.backend.response.PageResponse;
 import com.dev.backend.response.ResponseData;
 import com.dev.backend.response.ResponseUtil;
 import com.dev.backend.service.ProductService;

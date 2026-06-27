@@ -37,7 +37,8 @@ public class Promotion {
     private LocalDateTime expireDate;
 
     @Enumerated(EnumType.STRING)
-    private PromotionCampaignType promotionType;
+    private PromotionCampaignType promotionCampaignType;
+
     @Enumerated(EnumType.STRING)
     private BaseStatus status;
 

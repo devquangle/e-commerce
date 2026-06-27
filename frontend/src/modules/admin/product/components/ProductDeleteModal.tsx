@@ -1,5 +1,5 @@
 import Modal from "@/components/common/Modal";
-import type { ProductResponse } from "@/types/product";
+import type { ProductResponse } from "../types/product.type";
 
 interface ProductDeleteModalProps {
   isOpen: boolean;

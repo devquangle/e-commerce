@@ -34,7 +34,7 @@ public class GoogleBookService {
             String url = UriComponentsBuilder.fromUriString(GOOGLE_BOOK_API)
                     .queryParam("q", query.trim())
                     .queryParam("printType", "books")
-                    .queryParam("maxResults", 10)
+                    .queryParam("maxResults", 20)
                     .queryParam("orderBy", "relevance")
                     .queryParam(
                             "fields",

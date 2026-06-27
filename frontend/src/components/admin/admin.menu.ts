@@ -7,7 +7,6 @@ import {
   FolderTree,
   ShoppingCart,
   Star,
-  Megaphone,
   Image,
   MessageCircle,
   BarChart3,
@@ -16,6 +15,8 @@ import {
   Library,
   Building2,
   Feather,
+  Percent,
+  Ticket,
 } from "lucide-react";
 
 export const menuGroups: MenuGroup[] = [
@@ -103,11 +104,18 @@ export const menuGroups: MenuGroup[] = [
         id: 41,
         label: "Giảm giá",
         path: "/admin/promotions",
-        icon: Megaphone,
+        icon: Percent,
         role: [Role.SUPER_ADMIN, Role.ADMIN, Role.PROMOTION_MANAGER],
       },
       {
         id: 42,
+        label: "Voucher",
+        path: "/admin/vouchers",
+        icon: Ticket,
+        role: [Role.SUPER_ADMIN, Role.ADMIN, Role.PROMOTION_MANAGER],
+      },
+      {
+        id: 43,
         label: "Banner",
         path: "/admin/banners",
         icon: Image,
