@@ -1,6 +1,6 @@
 package com.dev.backend.entity;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import com.dev.backend.constant.BaseStatus;
 import com.dev.backend.constant.PromotionCampaignType;
@@ -30,9 +30,9 @@ public class Promotion {
     private Integer id;
     private String name;
 
-    private LocalDateTime createdAt;
-    private LocalDateTime startDate;
-    private LocalDateTime expireDate;
+    private LocalDate createdAt;
+    private LocalDate startDate;
+    private LocalDate expireDate;
 
     @Enumerated(EnumType.STRING)
     private PromotionCampaignType promotionCampaignType;

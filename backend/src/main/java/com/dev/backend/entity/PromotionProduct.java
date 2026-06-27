@@ -22,6 +22,12 @@ public class PromotionProduct {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    private Integer discountValue;
+
+    private Integer maxQuantity;
+
+    private Integer soldQuantity;
     
     @ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
     @JoinColumn(name = "promotion_id")

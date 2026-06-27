@@ -99,7 +99,7 @@ export default function SelectBox<T>({
         onClick={() => !disabled && setOpen((prev) => !prev)}
         className={`
           w-full rounded-xl border border-slate-200 bg-white/70 h-11 px-4 text-sm 
-          cursor-pointer flex items-center justify-between min-h-11 transition-all 
+          cursor-pointer flex items-center justify-between min-h-11 transition-all m-0
           hover:border-slate-300
           ${
             disabled

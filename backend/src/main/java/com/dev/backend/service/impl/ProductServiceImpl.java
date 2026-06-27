@@ -3,7 +3,6 @@ package com.dev.backend.service.impl;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.HashMap;
-import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,8 +31,6 @@ import com.dev.backend.service.ProductGenreService;
 import com.dev.backend.service.ProductService;
 import com.dev.backend.service.PublisherService;
 import com.dev.backend.service.SeriesService;
-import com.dev.backend.service.AuthorService;
-import com.dev.backend.service.GenreService;
 import com.dev.backend.util.TextUtils;
 
 import jakarta.persistence.EntityManager;

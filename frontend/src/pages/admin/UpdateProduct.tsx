@@ -5,7 +5,7 @@ import {
   BookOpen,
   Save,
   Trash2,
-  DollarSign,
+  SlidersHorizontal,
   FileText,
   Image as ImageIcon,
   ArrowLeft,
@@ -444,47 +444,56 @@ export default function UpdateProduct() {
       )}
 
       {/* 1. HEADER ACTIONS */}
-      <div className="col-span-12 bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="col-span-12 flex flex-col gap-4 md:flex-row md:items-center md:justify-between card-custom">
+        <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <Link
-              to="/admin/products"
-              className="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors"
-            >
-              <ArrowLeft size={18} />
-            </Link>
-            <h1 className="text-xl font-bold text-slate-900 tracking-tight">
+            <div className="rounded-lg bg-indigo-50 p-2 text-indigo-600">
+              <BookOpen size={22} />
+            </div>
+            <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
               Cập nhật sản phẩm{productData ? ` — ${productData.name}` : ""}
             </h1>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <Button
-              type="button"
-              color="secondary"
-              className="w-full sm:w-auto"
-            >
-              <Eye size={15} /> Xem nháp
-            </Button>
-            <Button
-              type="button"
-              onClick={handleReset}
-              color="warning"
-              className="w-full sm:w-auto"
-            >
-              <RotateCcw size={15} /> Đặt lại
-            </Button>
-            <Button
-              type="submit"
-              color="primary"
-              className="w-full sm:w-auto"
-              disabled={updateMutation.isPending || isSaving}
-            >
-              <Save size={15} />
-              {updateMutation.isPending || isSaving
-                ? "Đang lưu..."
-                : "Lưu thay đổi"}
-            </Button>
-          </div>
+          <p className="text-sm text-slate-500">
+            Chỉnh sửa thông tin chi tiết và cập nhật dữ liệu cho sản phẩm sách.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2.5">
+          <Button
+            type="button"
+            color="secondary"
+            className="w-full sm:w-auto cursor-pointer"
+            onClick={() => navigate("/admin/products")}
+          >
+            <ArrowLeft size={18} /> Quay lại
+          </Button>
+          <Button
+            type="button"
+            color="secondary"
+            className="w-full sm:w-auto cursor-pointer"
+          >
+            <Eye size={18} /> Xem nháp
+          </Button>
+          <Button
+            type="button"
+            onClick={handleReset}
+            color="warning"
+            className="w-full sm:w-auto cursor-pointer"
+          >
+            <RotateCcw size={18} /> Đặt lại
+          </Button>
+          <Button
+            type="submit"
+            color="primary"
+            className="w-full sm:w-auto cursor-pointer"
+            disabled={updateMutation.isPending || isSaving}
+          >
+            <Save size={18} />{" "}
+            {updateMutation.isPending || isSaving
+              ? "Đang lưu..."
+              : "Lưu thay đổi"}
+          </Button>
         </div>
       </div>
 
@@ -919,9 +928,9 @@ export default function UpdateProduct() {
 
       {/* 3. RIGHT COLUMN: TAXONOMY */}
       <div className="col-span-12 xl:col-span-5 space-y-6 xl:h-full">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-4 xl:h-full">
+        <div className="card-custom space-y-4 xl:h-full">
           <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
-            <DollarSign size={18} className="text-indigo-600" />
+            <SlidersHorizontal size={18} className="text-indigo-600" />
             <h2 className="text-base font-bold text-slate-900">Thuộc tính</h2>
           </div>
 
@@ -1014,7 +1023,7 @@ export default function UpdateProduct() {
       </div>
 
       {/* 4. IMAGE UPLOAD SECTION */}
-      <div className="col-span-12 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+      <div className="col-span-12 card-custom space-y-4">
         <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
           <ImageIcon size={18} className="text-indigo-600" />
           <h2 className="text-base font-bold text-slate-900">Ảnh sản phẩm</h2>
@@ -1162,7 +1171,7 @@ export default function UpdateProduct() {
       </div>
 
       {/* 5. DESCRIPTION */}
-      <div className="col-span-12 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+      <div className="col-span-12 card-custom space-y-4">
         <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
           <FileText size={18} className="text-indigo-600" />
           <h2 className="text-base font-bold text-slate-900">Mô tả chi tiết</h2>
