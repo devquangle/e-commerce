@@ -44,7 +44,7 @@
    
 }
 @utility card-custom {
-  @apply bg-white rounded-lg border border-slate-100 p-3 shadow-sm sm:p-4;
+  @apply bg-white rounded-lg border border-slate-100 p-6 shadow-sm ;
 }
 :root {
   --radius: 0.625rem;

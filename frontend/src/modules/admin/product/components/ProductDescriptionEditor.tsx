@@ -201,7 +201,7 @@ Yêu cầu: Sử dụng thẻ <h2> cho các đề mục, giọng văn chuyên ng
 
   return (
     <div className="space-y-4">
-      <div className="border rounded-xl overflow-hidden shadow-sm relative bg-white">
+      <div className="overflow-hidden relative bg-white rounded-lg border border-slate-100 p-2 shadow-sm">
         <ProductDescriptionToolbar
           editor={editor}
           onPickImage={() => fileRef.current?.click()}
@@ -229,7 +229,7 @@ Yêu cầu: Sử dụng thẻ <h2> cho các đề mục, giọng văn chuyên ng
       </div>
 
       {/* SEO Guidelines & AI Prompt Helper Box */}
-      <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+      <div className="card-custom space-y-4">
         <div className="flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-200 pb-3 gap-3">
           <div className="flex items-center gap-2">
             <Sparkles size={18} className="text-violet-600 animate-pulse" />

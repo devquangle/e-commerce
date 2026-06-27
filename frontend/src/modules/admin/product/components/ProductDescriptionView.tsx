@@ -10,7 +10,7 @@ export default function ProductDescriptionView({ editor }: Props) {
     <EditorContent
       editor={editor}
       className="
-        tiptap min-h-[250px] p-4
+        tiptap min-h-[250px] p-2
         [&_.ProseMirror]:min-h-[250px]
         [&_.ProseMirror]:outline-none
         

@@ -150,19 +150,6 @@ export default function CreateProduct() {
   const watchedPrice = useWatch({ control, name: "price" });
   const watchedOriginalPrice = useWatch({ control, name: "originalPrice" });
 
-  // Watch riêng biệt nhóm dữ liệu đồng bộ Table để tối ưu re-render qua debounce
-  const taxonomyWatch = useWatch({
-    control,
-    name: [
-      "authorIds",
-      "genreIds",
-      "publisherId",
-      "publishYear",
-      "pages",
-      "seriesId",
-    ],
-  });
-
   const { data: googleBooks = [], isFetching: isLoadingGoogleBooks } =
     useFilterGoogleBook(debouncedName);
 
@@ -184,7 +171,7 @@ export default function CreateProduct() {
     [seriesData],
   );
 
-  const watchedAuthorIds = taxonomyWatch?.[0] as number[] | undefined;
+  const watchedAuthorIds = useWatch({ control, name: "authorIds" });
 
   const watchedAuthorNames = useMemo(() => {
     return (watchedAuthorIds || [])
