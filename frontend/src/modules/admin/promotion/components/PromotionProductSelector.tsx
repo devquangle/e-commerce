@@ -12,12 +12,16 @@ import {
   Weight,
   Languages,
   SearchX,
+  Loader2,
 } from "lucide-react";
 import Pagination from "@/components/common/Pagination";
 import type { ProductResponse } from "@/modules/admin/product/types/product.type";
+import { useFilterProduct } from "@/modules/admin/product/hooks/useProduct";
+import useProductFilter from "@/modules/admin/product/hooks/useProductFilter";
 import useDebounce from "@/hooks/useDebounce";
 import { registerLocale, getName } from "@cospired/i18n-iso-languages";
 import viLocale from "@cospired/i18n-iso-languages/langs/vi.json";
+import { formatMoney } from "@/utils/number.utils";
 
 registerLocale(viLocale);
 
@@ -28,210 +32,85 @@ const getLanguageName = (code?: string) => {
   return name.charAt(0).toUpperCase() + name.slice(1);
 };
 
+import type { PromotionProducts } from "../types/promotion.type";
+
 export interface ProductSelectorItem extends ProductResponse {
   importPrice: number;
 }
 
-const dummyProducts: ProductSelectorItem[] = [
-  {
-    id: 101,
-    name: "Đắc Nhân Tâm (Bìa Cứng)",
-    slug: "dac-nhan-tam",
-    originalPrice: 120000,
-    price: 96000,
-    importPrice: 75000,
-    quantity: 150,
-    weight: 400,
-    publishYear: "2023",
-    pages: 320,
-    language: "en",
-    status: "ACTIVE",
-    genresName: ["Kỹ năng sống", "Tâm lý"],
-    authorsName: ["Dale Carnegie"],
-    publisherName: "NXB Tổng Hợp TPHCM",
-    seriesName: "Tủ Sách Chữa Lành",
-    urlImageDefault: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=150&auto=format&fit=crop&q=80",
-  },
-  {
-    id: 102,
-    name: "Nhà Giả Kim (Tái bản 2024)",
-    slug: "nha-gia-kim",
-    originalPrice: 89000,
-    price: 79000,
-    importPrice: 65000,
-    quantity: 230,
-    weight: 250,
-    publishYear: "2024",
-    pages: 225,
-    language: "es",
-    status: "ACTIVE",
-    genresName: ["Văn học", "Tiểu thuyết"],
-    authorsName: ["Paulo Coelho"],
-    publisherName: "NXB Hội Nhà Văn",
-    seriesName: "Sách Bán Chạy",
-    urlImageDefault: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=150&auto=format&fit=crop&q=80",
-  },
-  {
-    id: 103,
-    name: "Tuổi Trẻ Đáng Giá Bao Nhiêu?",
-    slug: "tuoi-tre-dang-gia-bao-nhieu",
-    originalPrice: 90000,
-    price: 72000,
-    importPrice: 60000,
-    quantity: 85,
-    weight: 300,
-    publishYear: "2022",
-    pages: 280,
-    language: "vi",
-    status: "ACTIVE",
-    genresName: ["Kỹ năng sống"],
-    authorsName: ["Rosie Nguyễn"],
-    publisherName: "NXB Nhã Nam",
-    seriesName: "Cảm Hứng Sống",
-    urlImageDefault: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=150&auto=format&fit=crop&q=80",
-  },
-  {
-    id: 104,
-    name: "Cây Cam Ngọt Của Tôi",
-    slug: "cay-cam-ngot-cua-toi",
-    originalPrice: 108000,
-    price: 90000,
-    importPrice: 70000,
-    quantity: 310,
-    weight: 320,
-    publishYear: "2023",
-    pages: 244,
-    language: "pt",
-    status: "ACTIVE",
-    genresName: ["Văn học nước ngoài"],
-    authorsName: ["José Mauro de Vasconcelos"],
-    publisherName: "NXB Hội Nhà Văn",
-    seriesName: "Kinh Điển thế giới",
-    urlImageDefault: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=150&auto=format&fit=crop&q=80",
-  },
-  {
-    id: 105,
-    name: "Hạt Giống Tâm Hồn - Tập 1",
-    slug: "hat-giong-tam-hon-1",
-    originalPrice: 65000,
-    price: 52000,
-    importPrice: 50000,
-    quantity: 45,
-    weight: 200,
-    publishYear: "2021",
-    pages: 180,
-    language: "vi",
-    status: "ACTIVE",
-    genresName: ["Hạt giống tâm hồn"],
-    authorsName: ["Nhiều tác giả"],
-    publisherName: "NXB First News",
-    seriesName: "Hạt Giống Tâm Hồn",
-    urlImageDefault: "https://images.unsplash.com/photo-1532012164546-f43249488629?w=150&auto=format&fit=crop&q=80",
-  },
-  {
-    id: 106,
-    name: "Tâm Lý Học Về Tiền",
-    slug: "tam-ly-hoc-ve-tien",
-    originalPrice: 180000,
-    price: 144000,
-    importPrice: 120000,
-    quantity: 120,
-    weight: 420,
-    publishYear: "2023",
-    pages: 350,
-    language: "en",
-    status: "ACTIVE",
-    genresName: ["Kinh tế", "Tài chính"],
-    authorsName: ["Morgan Housel"],
-    publisherName: "NXB 139",
-    seriesName: "Tài Chính Thông Minh",
-    urlImageDefault: "https://images.unsplash.com/photo-1592496431122-2349e0fbc666?w=150&auto=format&fit=crop&q=80",
-  },
-  {
-    id: 107,
-    name: "Tư Duy Nhanh Và Chậm",
-    slug: "tu-duy-nhanh-va-cham",
-    originalPrice: 240000,
-    price: 192000,
-    importPrice: 160000,
-    quantity: 95,
-    weight: 550,
-    publishYear: "2022",
-    pages: 610,
-    language: "en",
-    status: "ACTIVE",
-    genresName: ["Tâm lý học"],
-    authorsName: ["Daniel Kahneman"],
-    publisherName: "NXB Thế Giới",
-    seriesName: "Tri Thức Tương Lai",
-    urlImageDefault: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=150&auto=format&fit=crop&q=80",
-  },
-];
-
 interface PromotionProductSelectorProps {
   selectedIds: number[];
   onChange: (ids: number[]) => void;
+  onProductsDataChange?: (products: PromotionProducts[]) => void;
 }
 
 const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
   selectedIds,
   onChange,
+  onProductsDataChange,
 }) => {
-  const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(5);
+  // SỬ DỤNG HOOK USEPRODUCTFILTER CHUẨN HOÁ
+  const {
+    keyword,
+    page,
+    size,
+    debouncedKeyword,
+    setPage,
+    setSize,
+    handleKeywordChange,
+  } = useProductFilter();
 
-  const [discountsMap, setDiscountsMap] = useState<Record<number, number>>({
-    101: 10,
-    102: 10,
-    103: 10,
-    104: 10,
-    105: 10,
-    106: 10,
-    107: 10,
+  // SỬ DỤNG HOOK USEFILTERPRODUCT ĐỂ LẤY DỮ LIỆU SẢN PHẨM TỪ SERVER
+  const { data: productPagination, isLoading } = useFilterProduct({
+    keyword: debouncedKeyword || undefined,
+    page,
+    size: size || 10,
   });
 
-  const [promoQuantities, setPromoQuantities] = useState<Record<number, number>>({
-    101: 20,
-    102: 20,
-    103: 20,
-    104: 20,
-    105: 20,
-    106: 20,
-    107: 20,
-  });
+  const [discountsMap, setDiscountsMap] = useState<Record<number, number>>({});
+  const [promoQuantities, setPromoQuantities] = useState<Record<number, number>>({});
 
-  const filteredProducts = useMemo(() => {
-    return dummyProducts.filter((product) => {
-      const matchSearch =
-        product.name.toLowerCase().includes(search.toLowerCase().trim()) ||
-        (product.authorsName &&
-          product.authorsName.some((a) =>
-            a.toLowerCase().includes(search.toLowerCase().trim())
-          ));
-      return matchSearch;
-    });
-  }, [search]);
+  useEffect(() => {
+    if (onProductsDataChange) {
+      const data: PromotionProducts[] = selectedIds.map((id) => {
+        const discount = discountsMap[id] ?? 10;
+        const qty = promoQuantities[id] ?? 10;
+        return {
+          id,
+          localDiscount: discount,
+          localQty: qty,
+        };
+      });
+      onProductsDataChange(data);
+    }
+  }, [selectedIds, discountsMap, promoQuantities, onProductsDataChange]);
 
-  const paginatedProducts = useMemo(() => {
-    const start = (page - 1) * pageSize;
-    return filteredProducts.slice(start, start + pageSize);
-  }, [filteredProducts, page, pageSize]);
+  // CHUYỂN ĐỔI VÀ DỰ PHÒNG DỮ LIỆU CHUẨN
+  const productsList: ProductSelectorItem[] = useMemo(() => {
+    if (productPagination?.items && productPagination.items.length > 0) {
+      return productPagination.items.map((p) => ({
+        ...p,
+        importPrice: p.originalPrice,
+      }));
+    }
+    return [];
+  }, [productPagination]);
 
-  const totalPages = Math.ceil(filteredProducts.length / pageSize) || 1;
+  const totalPages = productPagination?.totalPages || 1;
+  const totalItems = productPagination?.totalItems || 0;
 
   const isAllPaginatedSelected = useMemo(() => {
-    if (paginatedProducts.length === 0) return false;
-    return paginatedProducts.every((p) => selectedIds.includes(p.id));
-  }, [paginatedProducts, selectedIds]);
+    if (productsList.length === 0) return false;
+    return productsList.every((p) => selectedIds.includes(p.id));
+  }, [productsList, selectedIds]);
 
   const handleToggleSelectAll = () => {
     if (isAllPaginatedSelected) {
-      const paginatedIds = paginatedProducts.map((p) => p.id);
+      const paginatedIds = productsList.map((p) => p.id);
       onChange(selectedIds.filter((id) => !paginatedIds.includes(id)));
     } else {
       const newIds = Array.from(
-        new Set([...selectedIds, ...paginatedProducts.map((p) => p.id)])
+        new Set([...selectedIds, ...productsList.map((p) => p.id)])
       );
       onChange(newIds);
     }
@@ -255,18 +134,22 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
     });
   }, []);
 
-  const handleQuantityChange = useCallback((id: number, val: number) => {
-    const product = dummyProducts.find((p) => p.id === id);
-    const maxStock = product ? product.quantity : 0;
-    const safeVal = isNaN(val) ? 0 : val < 0 ? 0 : val > maxStock ? maxStock : val;
-    setPromoQuantities((prev) => {
-      if (prev[id] === safeVal) return prev;
-      return {
-        ...prev,
-        [id]: safeVal,
-      };
-    });
-  }, []);
+  const handleQuantityChange = useCallback(
+    (id: number, val: number) => {
+      const product = productsList.find((p) => p.id === id);
+      const maxStock = product ? product.quantity : 0;
+      const safeVal =
+        isNaN(val) ? 0 : val < 0 ? 0 : val > maxStock ? maxStock : val;
+      setPromoQuantities((prev) => {
+        if (prev[id] === safeVal) return prev;
+        return {
+          ...prev,
+          [id]: safeVal,
+        };
+      });
+    },
+    [productsList]
+  );
 
   return (
     <div className="card-custom space-y-5">
@@ -290,24 +173,26 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
           </div>
         </div>
 
-        {/* SEARCH BAR */}
+        {/* SEARCH BAR — KẾT NỐI VỚI USEPRODUCTFILTER */}
         <div className="relative w-full sm:w-72">
           <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
             placeholder="Tìm tên sách hoặc tác giả..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
+            value={keyword}
+            onChange={(e) => handleKeywordChange(e.target.value)}
             className="w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-10 pr-3.5 py-2 text-xs placeholder-slate-400 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100 shadow-2xs"
           />
         </div>
       </div>
 
       {/* TABLE */}
-      <div className="hidden md:block overflow-x-auto rounded-xl border border-slate-200/80">
+      <div className="hidden md:block overflow-x-auto rounded-xl border border-slate-200/80 relative">
+        {isLoading && (
+          <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] flex items-center justify-center z-10">
+            <Loader2 className="animate-spin text-indigo-600" size={28} />
+          </div>
+        )}
         <table className="w-full text-left text-sm border-collapse">
           <thead className="bg-slate-50 border-b border-slate-200">
             <tr className="text-slate-500">
@@ -335,7 +220,7 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
                 Giá cuối cùng
               </th>
               <th className="py-3.5 px-4 font-semibold text-xs uppercase tracking-wider w-24 text-center">
-                Tồn kho
+                 Số lượng
               </th>
               <th className="py-3.5 px-4 font-semibold text-xs uppercase tracking-wider w-36 text-right">
                 Số lượng áp dụng
@@ -343,7 +228,7 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 bg-white">
-            {paginatedProducts.length === 0 ? (
+            {productsList.length === 0 ? (
               <tr>
                 <td colSpan={8} className="py-14 text-center">
                   <div className="flex flex-col items-center justify-center gap-2 text-slate-400">
@@ -357,13 +242,13 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
                 </td>
               </tr>
             ) : (
-              paginatedProducts.map((product) => (
+              productsList.map((product) => (
                 <ProductRow
                   key={product.id}
                   product={product}
                   isSelected={selectedIds.includes(product.id)}
                   initialDiscount={discountsMap[product.id] ?? 10}
-                  initialPromoQty={promoQuantities[product.id] ?? 20}
+                  initialPromoQty={promoQuantities[product.id] ?? 10}
                   onToggleSelect={() => handleToggleSelectOne(product.id)}
                   onDiscountChange={(val) => handleDiscountChange(product.id, val)}
                   onQuantityChange={(val) => handleQuantityChange(product.id, val)}
@@ -374,15 +259,15 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
         </table>
       </div>
 
-      {/* PAGINATION */}
+      {/* PAGINATION — KẾT NỐI VỚI USEPRODUCTFILTER & USEFILTERPRODUCT */}
       <Pagination
         currentPage={page}
         totalPages={totalPages}
         onPageChange={setPage}
-        totalItems={filteredProducts.length}
-        pageSize={pageSize}
-        onPageSizeChange={(size) => {
-          setPageSize(size);
+        totalItems={totalItems}
+        pageSize={size}
+        onPageSizeChange={(s) => {
+          setSize(s);
           setPage(1);
         }}
       />
@@ -410,15 +295,12 @@ const ProductRow: React.FC<ProductRowProps> = ({
   onDiscountChange,
   onQuantityChange,
 }) => {
-  // Local state cho typing mượt mà
   const [localDiscount, setLocalDiscount] = useState<string>(initialDiscount.toString());
   const [localQty, setLocalQty] = useState<string>(initialPromoQty.toString());
 
-  // Debounce 300ms theo yêu cầu Clean Code
   const debouncedDiscountStr = useDebounce(localDiscount, 300);
   const debouncedQtyStr = useDebounce(localQty, 300);
 
-  // Cập nhật khi initial thay đổi từ ngoài
   useEffect(() => {
     setLocalDiscount(initialDiscount.toString());
   }, [initialDiscount]);
@@ -446,12 +328,16 @@ const ProductRow: React.FC<ProductRowProps> = ({
   };
 
   const onDiscountChangeRef = useRef(onDiscountChange);
-  onDiscountChangeRef.current = onDiscountChange;
-
   const onQuantityChangeRef = useRef(onQuantityChange);
-  onQuantityChangeRef.current = onQuantityChange;
 
-  // Xử lý sync với parent sau khi debounce
+  useEffect(() => {
+    onDiscountChangeRef.current = onDiscountChange;
+  }, [onDiscountChange]);
+
+  useEffect(() => {
+    onQuantityChangeRef.current = onQuantityChange;
+  }, [onQuantityChange]);
+
   useEffect(() => {
     const num = parseFloat(debouncedDiscountStr);
     const safeVal = isNaN(num) ? 0 : num < 0 ? 0 : num > 100 ? 100 : num;
@@ -482,12 +368,6 @@ const ProductRow: React.FC<ProductRowProps> = ({
 
   const isSellAtLoss = finalPrice < product.importPrice;
 
-  const formatPrice = (price: number) =>
-    new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(price);
-
   return (
     <tr
       onClick={onToggleSelect}
@@ -508,7 +388,7 @@ const ProductRow: React.FC<ProductRowProps> = ({
         />
       </td>
 
-      {/* THÔNG TIN SẢN PHẨM (Y HỆT PRODUCTTABLE VỚI KHOẢNG CÁCH NỚI RỘNG) */}
+      {/* THÔNG TIN SẢN PHẨM */}
       <td className="py-5 px-4 align-middle">
         <div className="flex gap-3.5 items-stretch">
           {/* Ảnh bìa */}
@@ -601,18 +481,18 @@ const ProductRow: React.FC<ProductRowProps> = ({
       {/* GIÁ NHẬP */}
       <td className="py-5 px-4 align-middle">
         <span className="text-sm text-slate-600 font-medium">
-          {formatPrice(product.importPrice)}
+          {formatMoney(product.importPrice)}
         </span>
       </td>
 
       {/* GIÁ BÁN HIỆN TẠI */}
       <td className="py-5 px-4 align-middle">
         <span className="font-bold text-slate-700 text-sm">
-          {formatPrice(product.price)}
+          {formatMoney(product.price)}
         </span>
       </td>
 
-      {/* MỨC GIẢM GIÁ (%) — ĐỘ TƯƠNG PHẢN CAO */}
+      {/* MỨC GIẢM GIÁ (%) */}
       <td
         className="py-5 px-4 align-middle text-center"
         onClick={(e) => e.stopPropagation()}
@@ -635,12 +515,12 @@ const ProductRow: React.FC<ProductRowProps> = ({
         </div>
       </td>
 
-      {/* GIÁ BÁN CUỐI CÙNG — CẢNH BÁO TOOLTIP CỐ ĐỊNH CHIỀU CAO (KHÔNG NHẢY LAYOUT) */}
+      {/* GIÁ BÁN CUỐI CÙNG */}
       <td className="py-5 px-4 align-middle">
-        <div className="flex flex-col gap-1 justify-center min-h-[44px]">
+        <div className="flex flex-col gap-1 justify-center min-h-11">
           <div className="flex items-center gap-1.5">
             <span className="font-extrabold text-indigo-600 text-sm">
-              {formatPrice(finalPrice)}
+              {formatMoney(finalPrice)}
             </span>
             {isSellAtLoss && (
               <span
@@ -686,7 +566,7 @@ const ProductRow: React.FC<ProductRowProps> = ({
         </div>
       </td>
 
-      {/* SỐ LƯỢNG ÁP DỤNG — ĐỘ TƯƠNG PHẢN CAO */}
+      {/* SỐ LƯỢNG ÁP DỤNG */}
       <td
         className="py-5 px-4 align-middle text-right"
         onClick={(e) => e.stopPropagation()}

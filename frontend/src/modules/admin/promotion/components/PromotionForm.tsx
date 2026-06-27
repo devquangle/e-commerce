@@ -1,8 +1,13 @@
 import React, { useEffect } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { Calendar, Percent, Flame, Sparkles } from "lucide-react";
-import { type PromotionResponse, type PromotionRequest, campaignTypeLabels } from "../types/promotion.type";
-import { BaseStatus, getBaseStatusLabel } from "@/types/status";
+import {
+  type PromotionResponse,
+   type PromotionRequest,
+  campaignTypeLabels,
+} from "../types/promotion.type";
+import { BaseStatus } from "@/types/status";
+import SelectBox from "@/components/common/SelectedBox";
 
 interface PromotionFormProps {
   initialData?: PromotionResponse | null;
@@ -23,7 +28,6 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
   } = useForm<PromotionRequest>({
     defaultValues: {
       name: "",
-      discountValue: 0,
       startDate: "2026-06-01",
       endDate: "2026-06-30",
       status: BaseStatus.ACTIVE,
@@ -41,7 +45,6 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
     if (initialData) {
       reset({
         name: initialData.name,
-        discountValue: initialData.discountValue || 0,
         startDate: initialData.startDate,
         endDate: initialData.endDate,
         status: initialData.status,
@@ -50,7 +53,6 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
     } else {
       reset({
         name: "",
-        discountValue: 0,
         startDate: new Date().toISOString().split("T")[0],
         endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
           .toISOString()
@@ -62,37 +64,51 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
   }, [initialData, reset]);
 
   const onFormSubmit = (data: PromotionRequest) => {
-    onSubmit(data);
+
+    onSubmit(data)
   };
 
   return (
     <div className="card-custom space-y-6">
-      <form id="promotion-form" onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
+      <form
+        id="promotion-form"
+        onSubmit={handleSubmit(onFormSubmit)}
+        className="space-y-6"
+      >
         {/* FORM GRID */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Tên chương trình */}
           <div className="space-y-1.5 md:col-span-2">
             <label className="text-xs font-semibold text-slate-700">
-              Tên chương trình khuyến mãi <span className="text-rose-500">*</span>
+              Tên chương trình khuyến mãi{" "}
+              <span className="text-rose-500">*</span>
             </label>
             <input
               type="text"
               placeholder="Ví dụ: Khuyến Mãi Chào Hè 2026"
-              {...register("name", { required: "Vui lòng nhập tên chương trình" })}
+              {...register("name", {
+                required: "Vui lòng nhập tên chương trình",
+              })}
               className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 bg-slate-50/50 outline-none transition-all focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
             />
             {errors.name && (
-              <p className="text-xs text-rose-500 font-medium">{errors.name.message}</p>
+              <p className="text-xs text-rose-500 font-medium">
+                {errors.name.message}
+              </p>
             )}
           </div>
 
           {/* Loại chiến dịch (promotionCampaignType) */}
           <div className="space-y-1.5 md:col-span-2">
-            <label className="text-xs font-semibold text-slate-700">Loại chiến dịch (Campaign Type)</label>
+            <label className="text-xs font-semibold text-slate-700">
+              Loại chiến dịch
+            </label>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <button
                 type="button"
-                onClick={() => setValue("promotionCampaignType", "PRODUCT_DISCOUNT")}
+                onClick={() =>
+                  setValue("promotionCampaignType", "PRODUCT_DISCOUNT")
+                }
                 className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
                   selectedCampaignType === "PRODUCT_DISCOUNT"
                     ? "border-indigo-600 bg-indigo-50 text-indigo-700 shadow-sm"
@@ -153,17 +169,22 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
             </div>
 
             {/* Trạng thái (status) */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700">Trạng thái áp dụng</label>
-              <select
-                {...register("status")}
-                className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 bg-slate-50/50 outline-none transition-all focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 cursor-pointer"
-              >
-                <option value={BaseStatus.ACTIVE}>{getBaseStatusLabel(BaseStatus.ACTIVE)}</option>
-                <option value={BaseStatus.INACTIVE}>{getBaseStatusLabel(BaseStatus.INACTIVE)}</option>
-                <option value={BaseStatus.DELETED}>{getBaseStatusLabel(BaseStatus.DELETED)}</option>
-              </select>
-            </div>
+            <Controller
+              name="status"
+              control={control}
+              render={({ field }) => (
+                <SelectBox<BaseStatus>
+                  searchable={false}
+                  label="Trạng thái"
+                  options={[
+                    { label: "Hoạt động", value: BaseStatus.ACTIVE },
+                    { label: "Tạm Ngưng", value: BaseStatus.INACTIVE },
+                  ]}
+                  value={field.value as BaseStatus}
+                  onChange={field.onChange}
+                />
+              )}
+            />
           </div>
         </div>
       </form>

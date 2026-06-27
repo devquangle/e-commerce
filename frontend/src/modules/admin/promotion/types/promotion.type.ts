@@ -22,9 +22,15 @@ export interface PromotionResponse {
 
 export interface PromotionRequest {
   name: string;
-  discountValue: number;
   startDate: string;
   endDate: string;
   status: PromotionStatus;
   promotionCampaignType: PromotionCampaignType;
+  promotionProducts: PromotionProducts[] | [];
+}
+
+export interface PromotionProducts {
+  id: number;
+  localDiscount: number;
+  localQty: number;
 }

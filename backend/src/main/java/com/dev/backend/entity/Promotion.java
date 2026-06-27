@@ -30,8 +30,6 @@ public class Promotion {
     private Integer id;
     private String name;
 
-    private Integer value;
-
     private LocalDateTime createdAt;
     private LocalDateTime startDate;
     private LocalDateTime expireDate;

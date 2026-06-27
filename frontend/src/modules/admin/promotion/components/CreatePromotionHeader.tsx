@@ -1,19 +1,15 @@
 import { ArrowLeft, Save, Tag } from "lucide-react";
 import Button from "@/components/common/Button";
-import { useNavigate } from "react-router-dom";
 
 interface CreatePromotionHeaderProps {
   onSave?: () => void;
+  onBack?: () => void;
 }
 
 export default function CreatePromotionHeader({
   onSave,
+  onBack,
 }: CreatePromotionHeaderProps) {
-  const navigate = useNavigate();
-
-  const handleBack = () => {
-    navigate("/admin/promotions");
-  };
 
   return (
     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between card-custom">
@@ -39,7 +35,7 @@ export default function CreatePromotionHeader({
           type="button"
           color="secondary"
           className="w-full sm:w-auto cursor-pointer"
-          onClick={handleBack}
+          onClick={onBack}
         >
           <ArrowLeft size={18} />
           Quay lại
