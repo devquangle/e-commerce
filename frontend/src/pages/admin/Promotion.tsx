@@ -196,6 +196,9 @@ export default function Promotion() {
   const [promotions, setPromotions] = useState<PromotionResponse[]>(initialPromotions);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
+  const [campaignTypeFilter, setCampaignTypeFilter] = useState("ALL");
+  const [startDateFilter, setStartDateFilter] = useState("");
+  const [endDateFilter, setEndDateFilter] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
@@ -204,9 +207,14 @@ export default function Promotion() {
       const matchSearch = promo.name.toLowerCase().includes(search.toLowerCase().trim());
       const matchStatus =
         statusFilter === "ALL" ? true : promo.status === statusFilter;
-      return matchSearch && matchStatus;
+      const matchCampaignType =
+        campaignTypeFilter === "ALL" ? true : promo.promotionCampaignType === campaignTypeFilter;
+      const matchStartDate = startDateFilter ? promo.startDate >= startDateFilter : true;
+      const matchEndDate = endDateFilter ? promo.endDate <= endDateFilter : true;
+
+      return matchSearch && matchStatus && matchCampaignType && matchStartDate && matchEndDate;
     });
-  }, [promotions, search, statusFilter]);
+  }, [promotions, search, statusFilter, campaignTypeFilter, startDateFilter, endDateFilter]);
 
   const paginatedPromotions = useMemo(() => {
     const start = (page - 1) * pageSize;
@@ -218,6 +226,9 @@ export default function Promotion() {
   const handleResetFilter = () => {
     setSearch("");
     setStatusFilter("ALL");
+    setCampaignTypeFilter("ALL");
+    setStartDateFilter("");
+    setEndDateFilter("");
     setPage(1);
   };
 
@@ -245,12 +256,27 @@ export default function Promotion() {
         <PromotionFilter
           search={search}
           statusFilter={statusFilter}
+          campaignTypeFilter={campaignTypeFilter}
+          startDateFilter={startDateFilter}
+          endDateFilter={endDateFilter}
           onSearchChange={(s) => {
             setSearch(s);
             setPage(1);
           }}
           onStatusFilterChange={(st) => {
             setStatusFilter(st);
+            setPage(1);
+          }}
+          onCampaignTypeFilterChange={(ct) => {
+            setCampaignTypeFilter(ct);
+            setPage(1);
+          }}
+          onStartDateFilterChange={(sd) => {
+            setStartDateFilter(sd);
+            setPage(1);
+          }}
+          onEndDateFilterChange={(ed) => {
+            setEndDateFilter(ed);
             setPage(1);
           }}
           onReset={handleResetFilter}

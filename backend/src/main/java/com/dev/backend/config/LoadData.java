@@ -7,6 +7,7 @@ import com.dev.backend.constant.Permission;
 import com.dev.backend.entity.Role;
 import com.dev.backend.service.AuthorService;
 import com.dev.backend.service.GenreService;
+import com.dev.backend.service.PromotionService;
 import com.dev.backend.service.PublisherService;
 import com.dev.backend.service.RegisterService;
 import com.dev.backend.service.RoleService;
@@ -28,7 +29,8 @@ public class LoadData implements ApplicationRunner {
     private final AuthorService authorService;
     private final PublisherService publisherService;
 
-    private final SeriesService seriesService; 
+    private final SeriesService seriesService;
+    private final PromotionService promotionService;
 
     @Override
     public void run(org.springframework.boot.ApplicationArguments args) throws Exception {
@@ -53,7 +55,7 @@ public class LoadData implements ApplicationRunner {
         publisherService.insertData();
 
         seriesService.insertData();
-
+        promotionService.insertData();
     }
 
 }

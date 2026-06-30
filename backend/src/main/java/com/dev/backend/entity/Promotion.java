@@ -1,16 +1,20 @@
 package com.dev.backend.entity;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.dev.backend.constant.BaseStatus;
 import com.dev.backend.constant.PromotionCampaignType;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -39,5 +43,8 @@ public class Promotion {
 
     @Enumerated(EnumType.STRING)
     private BaseStatus status;
+
+    @OneToMany(mappedBy = "promotion", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PromotionProduct> promotionProducts = new ArrayList<>();
 
 }

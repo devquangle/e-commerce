@@ -1,6 +1,6 @@
 import { BaseStatus } from "@/types/status";
 
-export type PromotionStatus = BaseStatus;
+
 export type PromotionCampaignType =
   | "FLASH_SALE"
   | "PRODUCT_DISCOUNT"
@@ -16,7 +16,7 @@ export interface PromotionResponse {
   discountValue: number;
   startDate: string;
   endDate: string;
-  status: PromotionStatus;
+  status: BaseStatus;
   promotionCampaignType: PromotionCampaignType;
 }
 
@@ -24,7 +24,7 @@ export interface PromotionRequest {
   name: string;
   startDate: string;
   endDate: string;
-  status: PromotionStatus;
+  status: BaseStatus;
   promotionCampaignType: PromotionCampaignType;
   promotionProducts: PromotionProducts[] | [];
 }
