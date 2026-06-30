@@ -42,10 +42,7 @@ const PromotionTable: React.FC<PromotionTableProps> = ({
               STT
             </th>
             <th className="py-3.5 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50">
-              Tên chương trình
-            </th>
-            <th className="py-3.5 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50">
-              Loại chiến dịch
+              Chương trình khuyến mãi
             </th>
             <th className="py-3.5 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50">
               Mức giảm giá
@@ -64,7 +61,7 @@ const PromotionTable: React.FC<PromotionTableProps> = ({
         <tbody className="divide-y divide-slate-100">
           {promotions.length === 0 ? (
             <tr>
-              <td colSpan={7} className="py-8 text-center text-slate-400">
+              <td colSpan={6} className="py-8 text-center text-slate-400">
                 Không tìm thấy chương trình khuyến mãi nào.
               </td>
             </tr>
@@ -77,14 +74,14 @@ const PromotionTable: React.FC<PromotionTableProps> = ({
                 <td className="py-4 px-4 font-medium text-slate-600">
                   {(page - 1) * pageSize + index + 1}
                 </td>
-                <td className="py-4 px-4 font-bold text-slate-900">
-                  {promo.name}
-                </td>
-                <td className="py-4 px-4 text-slate-700 font-medium">
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-semibold">
-                    <Tag size={12} className="text-slate-500" />
-                    {campaignTypeLabels[promo.promotionCampaignType] || promo.promotionCampaignType}
-                  </span>
+                <td className="py-4 px-4">
+                  <div className="flex flex-col gap-1.5">
+                    <span className="font-bold text-slate-900">{promo.name}</span>
+                    <span className="inline-flex items-center gap-1 self-start px-2 py-0.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-semibold">
+                      <Tag size={12} className="text-slate-500" />
+                      {campaignTypeLabels[promo.promotionCampaignType] || promo.promotionCampaignType}
+                    </span>
+                  </div>
                 </td>
                 <td className="py-4 px-4 text-slate-700 font-semibold">
                   Giảm {promo.discountValue}%

@@ -66,6 +66,22 @@ const PromotionFilter: React.FC<PromotionFilterProps> = ({
 
       {/* Bottom row: Filters */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+        {/* Status */}
+        <div>
+          <SelectBox<string>
+            label="Trạng thái"
+            options={[
+              { label: "Tất cả trạng thái", value: "ALL" },
+              { label: "Hoạt động", value: BaseStatus.ACTIVE },
+              { label: "Tạm ngưng", value: BaseStatus.INACTIVE },
+              { label: "Đã xóa", value: BaseStatus.DELETED },
+            ]}
+            value={statusFilter}
+            onChange={(val) => onStatusFilterChange(val || "ALL")}
+            searchable={false}
+          />
+        </div>
+
         {/* Campaign Type */}
         <div>
           <SelectBox<string>
@@ -113,22 +129,6 @@ const PromotionFilter: React.FC<PromotionFilterProps> = ({
                   onEndDateFilterChange,
                 )) as unknown as UseFormRegister<FieldValues>
             }
-          />
-        </div>
-
-        {/* Status */}
-        <div>
-          <SelectBox<string>
-            label="Trạng thái"
-            options={[
-              { label: "Tất cả trạng thái", value: "ALL" },
-              { label: "Hoạt động", value: BaseStatus.ACTIVE },
-              { label: "Tạm ngưng", value: BaseStatus.INACTIVE },
-              { label: "Đã xóa", value: BaseStatus.DELETED },
-            ]}
-            value={statusFilter}
-            onChange={(val) => onStatusFilterChange(val || "ALL")}
-            searchable={false}
           />
         </div>
       </div>

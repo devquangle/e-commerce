@@ -17,6 +17,6 @@ public interface PromotionService {
 
     Promotion addPromotion(PromotionRequest promotionRequest);
 
-    PageResponse<PromotionResponse> pages(PromotionFilter filter);
+    PageResponse<PromotionResponse> search(PromotionFilter filter);
 
 }

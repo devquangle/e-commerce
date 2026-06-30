@@ -41,17 +41,21 @@ const PromotionMobileCard: React.FC<PromotionMobileCardProps> = ({
           >
             {/* ID & STATUS */}
             <div className="flex justify-between items-start">
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1.5 flex-1 min-w-0 pr-2">
                 <span className="inline-block self-start px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 text-xs font-mono font-bold">
                   #{promo.id}
                 </span>
-                <span className="text-sm font-semibold text-slate-900">
+                <span className="text-sm font-bold text-slate-900 leading-tight">
                   {promo.name}
+                </span>
+                <span className="inline-flex items-center gap-1 self-start px-2 py-0.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-semibold">
+                  <Tag size={12} className="text-slate-500" />
+                  {campaignTypeLabels[promo.promotionCampaignType] || promo.promotionCampaignType}
                 </span>
               </div>
 
               <span
-                className={`text-xs px-2.5 py-0.5 rounded-full ${statusClass(
+                className={`text-xs px-2.5 py-0.5 rounded-full shrink-0 ${statusClass(
                   promo.status
                 )}`}
               >
@@ -61,13 +65,6 @@ const PromotionMobileCard: React.FC<PromotionMobileCardProps> = ({
 
             {/* DETAILS */}
             <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-slate-500 font-medium">Loại chiến dịch:</span>
-                <span className="text-slate-800 font-bold flex items-center gap-1">
-                  <Tag size={12} className="text-slate-400" />
-                  {campaignTypeLabels[promo.promotionCampaignType] || promo.promotionCampaignType}
-                </span>
-              </div>
               <div className="flex justify-between">
                 <span className="text-slate-500 font-medium">Mức giảm giá:</span>
                 <span className="text-slate-800 font-bold">

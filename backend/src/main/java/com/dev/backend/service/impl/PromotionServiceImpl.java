@@ -70,7 +70,7 @@ public class PromotionServiceImpl implements PromotionService {
     }
 
     @Override
-    public PageResponse<PromotionResponse> pages(PromotionFilter filter) {
+    public PageResponse<PromotionResponse> search(PromotionFilter filter) {
         FilterValidator.validatePage(filter.getPage(), filter.getSize());
         FilterValidator.validateDateRange(
                 filter.getStartDate(),
