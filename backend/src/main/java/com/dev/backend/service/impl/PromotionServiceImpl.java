@@ -83,6 +83,13 @@ public class PromotionServiceImpl implements PromotionService {
         }
 
         @Override
+        public void delete(Integer id) {
+                Promotion promotion = findById(id);
+                promotion.setStatus(BaseStatus.DELETED);
+                savePromotion(promotion);
+        }
+
+        @Override
         public Promotion savePromotion(Promotion promotion) {
                 return promotionRepository.save(promotion);
         }

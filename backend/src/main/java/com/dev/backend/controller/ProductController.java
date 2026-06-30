@@ -1,6 +1,7 @@
 package com.dev.backend.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -64,4 +65,11 @@ public class ProductController {
         ProductResponse response = productService.update(id, request);
         return ResponseUtil.success("Cập nhật sản phẩm thành công", response);
     }
+
+    @DeleteMapping("/admin/products/{id}")
+    public ResponseEntity<ResponseData<Void>> delete(@PathVariable Integer id) {
+        productService.delete(id);
+        return ResponseUtil.success("Xoá sản phẩm thành công.", null);
+    }
+
 }

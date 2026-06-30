@@ -69,3 +69,24 @@ export const useUpdatePromotion = () => {
     },
   });
 };
+
+export const useDeletePromotion = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) => PromotionService.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["promotion-search"] });
+      showSuccessToast("Xóa chương trình khuyến mãi thành công!");
+    },
+    onError: (error: unknown) => {
+      let errorMsg = "Đã xảy ra lỗi khi xóa chương trình khuyến mãi.";
+      if (axios.isAxiosError(error)) {
+        errorMsg = error.response?.data?.message || error.message || errorMsg;
+      } else if (error instanceof Error) {
+        errorMsg = error.message;
+      }
+      showErrorToast(errorMsg);
+    },
+  });
+};

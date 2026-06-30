@@ -26,4 +26,5 @@ public interface PromotionService {
 
     PromotionDetailResponse edit(Integer id);
 
+    void delete(Integer id);
 }

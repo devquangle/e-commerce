@@ -53,5 +53,14 @@ const PromotionService = {
     }
     return res.data.data;
   },
+  async delete(id: number) {
+    const res = await apiAuth.delete<ApiResponse<null>>(
+      `/api/v1/admin/promotions/${id}`,
+    );
+    if (!res.data.success) {
+      throw new Error(res.data.message || "Delete promotion failed");
+    }
+    return res.data;
+  },
 };
 export default PromotionService;

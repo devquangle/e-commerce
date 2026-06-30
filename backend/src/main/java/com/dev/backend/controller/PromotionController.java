@@ -1,6 +1,7 @@
 package com.dev.backend.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,4 +54,11 @@ public class PromotionController {
         PromotionResponse response = promotionService.updatePromotion(id, promotionRequest);
         return ResponseUtil.success("Cập nhật chương trình khuyến mãi thành công.", response);
     }
+
+    @DeleteMapping("/admin/promotions/{id}")
+    public ResponseEntity<ResponseData<Void>> delete(@PathVariable Integer id) {
+        promotionService.delete(id);
+        return ResponseUtil.success("Xoá chương trình khuyến mãi thành công.", null);
+    }
+
 }

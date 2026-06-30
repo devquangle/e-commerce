@@ -6,7 +6,7 @@ import type { ProductResponse } from "@/modules/admin/product/types/product.type
 import ProductTable from "@/modules/admin/product/components/ProductTable";
 import ProductMobileCard from "@/modules/admin/product/components/ProductMobileCard";
 import { useDeleteProduct, useFilterProduct } from "@/modules/admin/product/hooks/useProduct";
-import type { BaseStatus } from "@/types/status";
+import { BaseStatus, getBaseStatusLabel } from "@/types/status";
 import useProductFilter from "@/modules/admin/product/hooks/useProductFilter";
 import ProductHeader from "@/modules/admin/product/components/ProductHeader";
 import ProductFilter from "@/modules/admin/product/components/ProductFilter";
@@ -14,8 +14,12 @@ import ProductDeleteModal from "@/modules/admin/product/components/ProductDelete
 
 const statusOptions: { label: string; value: BaseStatus | null }[] = [
   { label: "Tất cả trạng thái", value: null },
-  { label: "Đang bán", value: "ACTIVE" },
-  { label: "Ngừng bán", value: "INACTIVE" },
+  ...(Object.values(BaseStatus) as BaseStatus[])
+    .filter((v) => v !== BaseStatus.DELETED)
+    .map((value) => ({
+      label: getBaseStatusLabel(value),
+      value,
+    })),
 ];
 
 export default function Product() {

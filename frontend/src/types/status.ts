@@ -12,7 +12,7 @@ export const BaseStatusConfig: Record<
   { label: string }
 > = {
   ACTIVE: { label: "Hoạt động" },
-  INACTIVE: { label: "Ngừng hoạt động" },
+  INACTIVE: { label: "Tạm ngưng" },
   DELETED: { label: "Đã xóa" },
 };
 
