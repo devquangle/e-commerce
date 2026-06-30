@@ -1,8 +1,10 @@
+import "regenerator-runtime/runtime";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { Search as SearchIcon, BookOpen, TrendingUp, Camera, X, Upload, Image as ImageIcon } from "lucide-react";
+import { Mic, Search as SearchIcon, BookOpen, TrendingUp, Camera, X, Upload, Image as ImageIcon } from "lucide-react";
 import { formatMoney } from "@/utils/number.utils";
 import { baseProducts } from "@/modules/user/home/data/mockData";
+import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
 
 export default function Search() {
   const [keyword, setKeyword] = useState("");
@@ -14,6 +16,55 @@ export default function Search() {
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const {
+    transcript,
+    listening,
+    resetTranscript,
+    browserSupportsSpeechRecognition,
+    isMicrophoneAvailable,
+  } = useSpeechRecognition();
+
+  useEffect(() => {
+    if (transcript) {
+      const timer = setTimeout(() => {
+        setKeyword(transcript);
+        setIsFocused(true);
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [transcript]);
+
+  useEffect(() => {
+    console.log("Speech Recognition Status -> Listening:", listening, "| Mic Available:", isMicrophoneAvailable, "| Transcript:", transcript);
+  }, [listening, isMicrophoneAvailable, transcript]);
+
+  useEffect(() => {
+    const recognition = SpeechRecognition.getRecognition();
+    if (recognition) {
+      const handleError = (event: Event) => {
+        const errEvent = event as unknown as { error: string; message?: string };
+        console.error("Speech Recognition Native Error:", errEvent.error, errEvent.message || "");
+      };
+      recognition.addEventListener("error", handleError);
+      return () => {
+        recognition.removeEventListener("error", handleError);
+      };
+    }
+  }, []);
+
+  const handleMicClick = () => {
+    if (!browserSupportsSpeechRecognition) {
+      alert("Trình duyệt của bạn không hỗ trợ nhận diện giọng nói.");
+      return;
+    }
+    if (listening) {
+      SpeechRecognition.stopListening();
+    } else {
+      resetTranscript();
+      SpeechRecognition.startListening({ language: "vi-VN", continuous: false });
+    }
+  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -88,7 +139,7 @@ export default function Search() {
           value={keyword}
           onChange={(e) => { setKeyword(e.target.value); setShowImageSearch(false); }}
           onFocus={() => { setIsFocused(true); setShowImageSearch(false); }}
-          placeholder="Tìm kiếm sách..."
+          placeholder={listening ? "Đang lắng nghe giọng nói..." : "Tìm kiếm sách..."}
           className="
             w-full
             rounded-full border border-slate-300
@@ -100,6 +151,19 @@ export default function Search() {
           "
         />
         <div className="absolute right-1 top-1 flex items-center gap-1">
+          {/* Nút tìm bằng giọng nói */}
+          <button
+            onClick={handleMicClick}
+            className={`h-8 w-8 shrink-0 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300 ${
+              listening 
+                ? "bg-rose-50 border border-rose-200 text-rose-600 animate-pulse shadow-sm shadow-rose-100" 
+                : "text-slate-400 hover:text-indigo-600 hover:bg-indigo-50"
+            }`}
+            aria-label="Tìm bằng giọng nói"
+            title={listening ? "Đang nghe... Nhấp để dừng" : "Tìm kiếm bằng giọng nói"}
+          >
+            <Mic size={16} />
+          </button>
           {/* Nút tìm bằng ảnh */}
           <button
             onClick={() => { setShowImageSearch(true); setIsFocused(true); setKeyword(""); }}
@@ -108,13 +172,6 @@ export default function Search() {
             title="Tìm kiếm bằng hình ảnh"
           >
             <Camera size={16} />
-          </button>
-          {/* Nút tìm kiếm text */}
-          <button
-            className="h-8 w-8 shrink-0 rounded-full bg-indigo-600 text-white flex items-center justify-center cursor-pointer hover:bg-indigo-700 transition-colors"
-            aria-label="Tìm kiếm"
-          >
-            <SearchIcon size={16} />
           </button>
         </div>
 
