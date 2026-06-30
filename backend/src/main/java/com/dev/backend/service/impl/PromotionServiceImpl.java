@@ -50,8 +50,18 @@ public class PromotionServiceImpl implements PromotionService {
         public PromotionResponse addPromotion(PromotionRequest promotionRequest) {
                 Promotion promotion = new Promotion();
                 setPromotionRequest(promotion, promotionRequest);
+                promotion.setCreatedAt(LocalDate.now());
                 Promotion saved = savePromotion(promotion);
-                promotionProductService.savePromotionProducts(saved, promotionRequest.getPromotionProducts());
+                promotionProductService.addPromotionProducts(saved, promotionRequest.getPromotionProducts());
+                return promotionMapper.toDTO(saved);
+        }
+
+        @Override
+        public PromotionResponse updatePromotion(Integer id, PromotionRequest promotionRequest) {
+                Promotion promotion = findByIdWithPromotionProducts(id);
+                setPromotionRequest(promotion, promotionRequest);
+                Promotion saved = savePromotion(promotion);
+                promotionProductService.updatePromotionProducts(saved, promotionRequest.getPromotionProducts());
                 return promotionMapper.toDTO(saved);
         }
 

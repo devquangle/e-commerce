@@ -52,9 +52,9 @@ export const useUpdatePromotion = () => {
   return useMutation({
     mutationFn: ({ id, req }: { id: number; req: PromotionRequest }) =>
       PromotionService.update(id, req),
-    onSuccess: (_, variables) => {
+    onSuccess: (_data, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["promotion-search"] });
-      queryClient.invalidateQueries({ queryKey: ["promotion-detail", variables.id] });
+      queryClient.invalidateQueries({ queryKey: ["promotion-detail",id] });
 
       showSuccessToast("Cập nhật chương trình khuyến mãi thành công!");
     },

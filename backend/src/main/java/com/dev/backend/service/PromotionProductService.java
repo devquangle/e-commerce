@@ -6,9 +6,10 @@ import com.dev.backend.dto.promotion.PromotionProductRequest;
 import com.dev.backend.entity.Promotion;
 import com.dev.backend.entity.PromotionProduct;
 
-
 public interface PromotionProductService {
     PromotionProduct savePromotionProduct(PromotionProduct promotionProduct);
 
-    void savePromotionProducts (Promotion promotion,List<PromotionProductRequest> promotionProducts);
+    void addPromotionProducts(Promotion promotion, List<PromotionProductRequest> promotionProducts);
+
+    void updatePromotionProducts(Promotion promotion, List<PromotionProductRequest> newProducts);
 }

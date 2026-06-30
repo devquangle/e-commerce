@@ -20,6 +20,8 @@ public interface PromotionService {
 
     PromotionResponse addPromotion(PromotionRequest promotionRequest);
 
+    PromotionResponse updatePromotion(Integer id, PromotionRequest promotionRequest);
+
     PageResponse<PromotionResponse> search(PromotionFilter filter);
 
     PromotionDetailResponse edit(Integer id);

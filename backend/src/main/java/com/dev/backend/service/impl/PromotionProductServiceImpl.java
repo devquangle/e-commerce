@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.dev.backend.dto.promotion.PromotionProductRequest;
 import com.dev.backend.entity.Promotion;
@@ -27,13 +28,37 @@ public class PromotionProductServiceImpl implements PromotionProductService {
     }
 
     @Override
-    public void savePromotionProducts(
+    @Transactional
+    public void addPromotionProducts(
             Promotion promotion,
             List<PromotionProductRequest> requests) {
 
         List<PromotionProduct> entities = new ArrayList<>();
 
         for (PromotionProductRequest item : requests) {
+
+            PromotionProduct pp = new PromotionProduct();
+
+            pp.setPromotion(promotion);
+            pp.setProduct(productService.findById(item.getId()));
+            pp.setDiscountValue(item.getLocalDiscount());
+            pp.setMaxQuantity(item.getLocalQty());
+            pp.setSoldQuantity(0);
+
+            entities.add(pp);
+        }
+
+        promotionProductRepository.saveAll(entities);
+    }
+
+    @Override
+    @Transactional
+    public void updatePromotionProducts(Promotion promotion, List<PromotionProductRequest> newProducts) {
+        promotionProductRepository.deleteByPromotionId(promotion.getId());
+
+        List<PromotionProduct> entities = new ArrayList<>();
+
+        for (PromotionProductRequest item : newProducts) {
 
             PromotionProduct pp = new PromotionProduct();
 
