@@ -1,6 +1,5 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
 import PromotionHeader from "@/modules/admin/promotion/components/PromotionHeader";
 import PromotionFilter from "@/modules/admin/promotion/components/PromotionFilter";
 import PromotionTable from "@/modules/admin/promotion/components/PromotionTable";
@@ -8,7 +7,7 @@ import PromotionMobileCard from "@/modules/admin/promotion/components/PromotionM
 import Pagination from "@/components/common/Pagination";
 import type { PromotionResponse } from "@/modules/admin/promotion/types/promotion.type";
 import useSearchPromotion from "@/modules/admin/promotion/hooks/useSearchPromotion";
-import PromotionService from "@/modules/admin/promotion/services/promotion.service";
+import { useSearchPromotion as useSearchPromotionQuery } from "@/modules/admin/promotion/hooks/usePromotion";
 
 
 
@@ -35,29 +34,14 @@ export default function Promotion() {
     handleResetFilter,
   } = useSearchPromotion();
 
-  const { data } = useQuery({
-    queryKey: [
-      "promotions-search",
-      {
-        keyword: debouncedKeyword || undefined,
-        startDate: startDate || undefined,
-        endDate: endDate || undefined,
-        promotionCampaignType: promotionCampaignType === "ALL" ? undefined : promotionCampaignType,
-        status: status === "ALL" ? undefined : status,
-        page,
-        size: pageSize,
-      },
-    ],
-    queryFn: () =>
-      PromotionService.search({
-        keyword: debouncedKeyword || undefined,
-        startDate: startDate || undefined,
-        endDate: endDate || undefined,
-        promotionCampaignType: promotionCampaignType === "ALL" ? undefined : promotionCampaignType,
-        status: status === "ALL" ? undefined : status,
-        page,
-        size: pageSize,
-      }),
+  const { data } = useSearchPromotionQuery({
+    keyword: debouncedKeyword || undefined,
+    startDate: startDate || undefined,
+    endDate: endDate || undefined,
+    promotionCampaignType: promotionCampaignType === "ALL" ? undefined : promotionCampaignType,
+    status: status === "ALL" ? undefined : status,
+    page,
+    size: pageSize,
   });
 
   const promotionsList = useMemo(() => {

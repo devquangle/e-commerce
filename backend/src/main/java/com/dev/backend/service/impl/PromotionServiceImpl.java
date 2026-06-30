@@ -12,10 +12,12 @@ import org.springframework.stereotype.Service;
 
 import com.dev.backend.constant.BaseStatus;
 import com.dev.backend.constant.PromotionCampaignType;
+import com.dev.backend.dto.promotion.PromotionDetailResponse;
 import com.dev.backend.dto.promotion.PromotionFilter;
 import com.dev.backend.dto.promotion.PromotionRequest;
 import com.dev.backend.dto.promotion.PromotionResponse;
 import com.dev.backend.entity.Promotion;
+import com.dev.backend.exception.NotFoundException;
 import com.dev.backend.mapper.PromotionMapper;
 import com.dev.backend.repository.PromotionRepository;
 import com.dev.backend.response.PageResponse;
@@ -37,27 +39,37 @@ public class PromotionServiceImpl implements PromotionService {
 
         private Promotion setPromotionRequest(Promotion promotion, PromotionRequest request) {
                 promotion.setName(request.getName());
-                promotion.setStartDate(request.getCreateDate());
+                promotion.setStartDate(request.getStartDate());
                 promotion.setExpireDate(request.getEndDate());
                 promotion.setStatus(BaseStatus.from(request.getStatus()));
                 promotion.setPromotionCampaignType(PromotionCampaignType.from(request.getPromotionCampaignType()));
-
                 return promotion;
         }
 
         @Override
-        public Promotion addPromotion(PromotionRequest promotionRequest) {
+        public PromotionResponse addPromotion(PromotionRequest promotionRequest) {
                 Promotion promotion = new Promotion();
                 setPromotionRequest(promotion, promotionRequest);
                 Promotion saved = savePromotion(promotion);
                 promotionProductService.savePromotionProducts(saved, promotionRequest.getPromotionProducts());
-                return null;
+                return promotionMapper.toDTO(saved);
+        }
+
+        @Override
+        public Promotion findByIdWithPromotionProducts(Integer id) {
+                return promotionRepository.findByIdWithPromotionProducts(id)
+                                .orElseThrow(() -> new NotFoundException("Không tìm thấy chương trình khuyến mãi"));
         }
 
         @Override
         public Promotion findById(Integer id) {
-                // TODO Auto-generated method stub
-                return null;
+                return promotionRepository.findById(id)
+                                .orElseThrow(() -> new NotFoundException("Không tìm thấy chương trình khuyến mãi"));
+        }
+
+        @Override
+        public PromotionDetailResponse edit(Integer id) {
+                return promotionMapper.toDetailDTO(findByIdWithPromotionProducts(id));
         }
 
         @Override

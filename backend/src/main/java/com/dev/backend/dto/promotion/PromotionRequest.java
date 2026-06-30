@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,11 +22,11 @@ public class PromotionRequest {
     @NotBlank(message = "Tên chương trình không được để trống")
     private String name;
 
-    @NotBlank(message = "Ngày bắt đầu không được để trống")
+    @NotNull(message = "Ngày bắt đầu không được để trống")
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate createDate;
+    private LocalDate startDate;
 
-    @NotBlank(message = "Ngày kết thúc không được để trống")
+    @NotNull(message = "Ngày kết thúc không được để trống")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate endDate;
 

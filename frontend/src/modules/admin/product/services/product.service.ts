@@ -1,18 +1,24 @@
 import { apiAuth } from "@/configs/axios";
 import type { ApiResponse } from "@/types/api-response";
-import type { ProductRequest, ProductResponse, ProductDetailResponse } from "../types/product.type";
+import type {
+  ProductRequest,
+  ProductResponse,
+  ProductDetailResponse,
+} from "../types/product.type";
 import type { options } from "@/types/options.type";
 import type { Pagination } from "@/types/pagination";
 
 const ProductService = {
   async fetchProduct() {
-    const res = await apiAuth.get<ApiResponse<ProductResponse[]>>("/api/v1/admin/products");
+    const res = await apiAuth.get<ApiResponse<ProductResponse[]>>(
+      "/api/v1/admin/products",
+    );
     if (!res.data.success || !res.data.data) {
       throw new Error(res.data.message || "Fetch products failed");
     }
     return res.data.data;
   },
-    async getById(id: number) {
+  async getById(id: number) {
     const res = await apiAuth.get<ApiResponse<ProductDetailResponse>>(
       `/api/v1/admin/products/${id}`,
     );
@@ -32,7 +38,7 @@ const ProductService = {
     return res.data.data;
   },
 
-   async update(id:number,data: ProductRequest) {
+  async update(id: number, data: ProductRequest) {
     const res = await apiAuth.put<ApiResponse<ProductResponse>>(
       `/api/v1/admin/products/${id}`,
       data,
@@ -57,14 +63,13 @@ const ProductService = {
 
   async delete(id: number) {
     const res = await apiAuth.delete<ApiResponse<null>>(
-      `/api/v1/admin/products/${id}`
+      `/api/v1/admin/products/${id}`,
     );
     if (!res.data.success) {
       throw new Error(res.data.message || "Delete product failed");
     }
     return res.data;
   },
-  
 };
 
 export default ProductService;

@@ -13,7 +13,6 @@ export const campaignTypeLabels: Record<PromotionCampaignType, string> = {
 export interface PromotionResponse {
   id: number;
   name: string;
-  discountValue: number;
   startDate: string;
   endDate: string;
   status: BaseStatus;
@@ -33,4 +32,14 @@ export interface PromotionProducts {
   id: number;
   localDiscount: number;
   localQty: number;
+}
+
+export interface PromotionDetailResponse{
+  id:number;
+  name: string;
+  startDate: string;
+  endDate: string;
+  status: BaseStatus;
+  promotionCampaignType: PromotionCampaignType;
+  promotionProducts: PromotionProducts[] | [];
 }

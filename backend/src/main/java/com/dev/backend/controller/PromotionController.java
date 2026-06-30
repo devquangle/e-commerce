@@ -3,18 +3,22 @@ package com.dev.backend.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.dev.backend.dto.product.ProductCardResponse;
-import com.dev.backend.dto.product.ProductFilterRequest;
+import com.dev.backend.dto.promotion.PromotionDetailResponse;
 import com.dev.backend.dto.promotion.PromotionFilter;
+import com.dev.backend.dto.promotion.PromotionRequest;
 import com.dev.backend.dto.promotion.PromotionResponse;
 import com.dev.backend.response.PageResponse;
 import com.dev.backend.response.ResponseData;
 import com.dev.backend.response.ResponseUtil;
 import com.dev.backend.service.PromotionService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -24,10 +28,22 @@ public class PromotionController {
     private final PromotionService promotionService;
 
     @GetMapping("/admin/promotions/search")
-    public ResponseEntity<ResponseData<PageResponse<PromotionResponse>>> searchProducts(
+    public ResponseEntity<ResponseData<PageResponse<PromotionResponse>>> search(
             @ModelAttribute PromotionFilter request) {
         PageResponse<PromotionResponse> response = promotionService.search(request);
         return ResponseUtil.success("Lọc sản phẩm thành công", response);
+    }
+
+    @PostMapping("/admin/promotions")
+    public ResponseEntity<ResponseData<PromotionResponse>> add(@Valid @RequestBody PromotionRequest promotionRequest) {
+        PromotionResponse response = promotionService.addPromotion(promotionRequest);
+        return ResponseUtil.success("Thêm chương trình khuyến mãi thành công.", response);
+    }
+
+    @GetMapping("/admin/promotions/{id}")
+    public ResponseEntity<ResponseData<PromotionDetailResponse>> edit(@PathVariable Integer id) {
+        PromotionDetailResponse response = promotionService.edit(id);
+        return ResponseUtil.success("Lấy thông tin chương trình khuyến mãi thành công.", response);
     }
 
 }

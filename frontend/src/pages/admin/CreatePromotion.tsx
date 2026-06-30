@@ -4,12 +4,13 @@ import CreatePromotionHeader from "@/modules/admin/promotion/components/CreatePr
 import PromotionForm from "@/modules/admin/promotion/components/PromotionForm";
 import PromotionProductSelector from "@/modules/admin/promotion/components/PromotionProductSelector";
 import type { PromotionRequest, PromotionProducts } from "@/modules/admin/promotion/types/promotion.type";
-import { showSuccessToast } from "@/utils/toastUtil";
+import { useCreatePromotion } from "@/modules/admin/promotion/hooks/usePromotion";
 
 export default function CreatePromotion() {
   const navigate = useNavigate();
   const [selectedProductIds, setSelectedProductIds] = useState<number[]>([]);
   const [promotionProductsData, setPromotionProductsData] = useState<PromotionProducts[]>([]);
+  const createMutation = useCreatePromotion();
 
   const handleProductsDataChange = useCallback((products: PromotionProducts[]) => {
     setPromotionProductsData(products);
@@ -21,13 +22,11 @@ export default function CreatePromotion() {
       promotionProducts: promotionProductsData,
     };
 
-    console.log("=== PROMOTION REQUEST ===", fullRequest);
-    console.log("=== PROMOTION PRODUCTS (ĐƯỢC CHECKED) ===", fullRequest.promotionProducts);
-
-    showSuccessToast(
-      `Đã tạo khuyến mãi "${fullRequest.name}" cho ${fullRequest.promotionProducts.length} sản phẩm thành công! Xem Console log.`
-    );
-    navigate("/admin/promotions");
+    createMutation.mutate(fullRequest, {
+      onSuccess: () => {
+        navigate("/admin/promotions");
+      },
+    });
   };
 
   const handleCancel = () => {

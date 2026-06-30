@@ -5,13 +5,14 @@ import {
   type PromotionRequest,
   type PromotionCampaignType,
   campaignTypeLabels,
+  type PromotionDetailResponse,
 } from "../types/promotion.type";
 import { BaseStatus } from "@/types/status";
 import SelectBox from "@/components/common/SelectedBox";
 import InputField from "@/components/common/InputField";
 
 interface PromotionFormProps {
-  initialData?: PromotionResponse | null;
+  initialData?: PromotionResponse | PromotionDetailResponse | null;
   onSubmit: (data: PromotionRequest) => void;
 }
 

@@ -42,12 +42,14 @@ interface PromotionProductSelectorProps {
   selectedIds: number[];
   onChange: (ids: number[]) => void;
   onProductsDataChange?: (products: PromotionProducts[]) => void;
+  initialProducts?: PromotionProducts[];
 }
 
 const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
   selectedIds,
   onChange,
   onProductsDataChange,
+  initialProducts,
 }) => {
   // SỬ DỤNG HOOK USEPRODUCTFILTER CHUẨN HOÁ
   const {
@@ -69,6 +71,19 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
 
   const [discountsMap, setDiscountsMap] = useState<Record<number, number>>({});
   const [promoQuantities, setPromoQuantities] = useState<Record<number, number>>({});
+
+  useEffect(() => {
+    if (initialProducts && initialProducts.length > 0) {
+      const discounts: Record<number, number> = {};
+      const quantities: Record<number, number> = {};
+      initialProducts.forEach((p) => {
+        discounts[p.id] = p.localDiscount;
+        quantities[p.id] = p.localQty;
+      });
+      setDiscountsMap(discounts);
+      setPromoQuantities(quantities);
+    }
+  }, [initialProducts]);
 
   useEffect(() => {
     if (onProductsDataChange) {

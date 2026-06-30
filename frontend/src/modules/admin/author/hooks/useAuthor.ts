@@ -1,5 +1,5 @@
 
-import type { AuthorRequest, AuthorResponse } from "@/types/author";
+import type { AuthorRequest, AuthorResponse, AuthorWithProductCountResponse } from "@/types/author";
 import type { Pagination } from "@/types/pagination";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { showErrorToast, showSuccessToast } from "@/utils/toastUtil";
@@ -8,7 +8,7 @@ import type { options } from "@/types/options.type";
 import AuthorService from "../services/author.service";
 
 export const useAuthor = () => {
-  return useQuery<AuthorResponse[]>({
+  return useQuery<AuthorWithProductCountResponse[]>({
     queryKey: ["authors"],
     queryFn: AuthorService.fetchAuthor,
   });
