@@ -47,10 +47,10 @@ public class PromotionController {
         return ResponseUtil.success("Lấy thông tin chương trình khuyến mãi thành công.", response);
     }
 
-
-     @PutMapping("/admin/promotions/{id}")
-    public ResponseEntity<ResponseData<PromotionResponse>> update(@PathVariable Integer id,@Valid @RequestBody PromotionRequest promotionRequest) {
-        PromotionResponse response = promotionService.updatePromotion(id,promotionRequest);
+    @PutMapping("/admin/promotions/{id}")
+    public ResponseEntity<ResponseData<PromotionResponse>> update(@PathVariable Integer id,
+            @Valid @RequestBody PromotionRequest promotionRequest) {
+        PromotionResponse response = promotionService.updatePromotion(id, promotionRequest);
         return ResponseUtil.success("Cập nhật chương trình khuyến mãi thành công.", response);
     }
 }

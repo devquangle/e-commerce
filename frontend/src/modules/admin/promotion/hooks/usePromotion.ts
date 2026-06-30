@@ -54,7 +54,7 @@ export const useUpdatePromotion = () => {
       PromotionService.update(id, req),
     onSuccess: (_data, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["promotion-search"] });
-      queryClient.invalidateQueries({ queryKey: ["promotion-detail",id] });
+      queryClient.invalidateQueries({ queryKey: ["promotion-detail", id] });
 
       showSuccessToast("Cập nhật chương trình khuyến mãi thành công!");
     },

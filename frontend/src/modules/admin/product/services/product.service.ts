@@ -9,15 +9,7 @@ import type { options } from "@/types/options.type";
 import type { Pagination } from "@/types/pagination";
 
 const ProductService = {
-  async fetchProduct() {
-    const res = await apiAuth.get<ApiResponse<ProductResponse[]>>(
-      "/api/v1/admin/products",
-    );
-    if (!res.data.success || !res.data.data) {
-      throw new Error(res.data.message || "Fetch products failed");
-    }
-    return res.data.data;
-  },
+ 
   async getById(id: number) {
     const res = await apiAuth.get<ApiResponse<ProductDetailResponse>>(
       `/api/v1/admin/products/${id}`,

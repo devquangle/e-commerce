@@ -1,4 +1,10 @@
-import React, { useState, useMemo, useEffect, useCallback, useRef } from "react";
+import React, {
+  useState,
+  useMemo,
+  useEffect,
+  useCallback,
+  useRef,
+} from "react";
 import {
   Search,
   BookOpen,
@@ -15,9 +21,14 @@ import {
   Loader2,
 } from "lucide-react";
 import Pagination from "@/components/common/Pagination";
-import type { ProductResponse } from "@/modules/admin/product/types/product.type";
+import type {
+  ProductDetailResponse,
+  ProductResponse,
+} from "@/modules/admin/product/types/product.type";
 import { useFilterProduct } from "@/modules/admin/product/hooks/useProduct";
 import useProductFilter from "@/modules/admin/product/hooks/useProductFilter";
+import { useQueries } from "@tanstack/react-query";
+import ProductService from "@/modules/admin/product/services/product.service";
 import useDebounce from "@/hooks/useDebounce";
 import { registerLocale, getName } from "@cospired/i18n-iso-languages";
 import viLocale from "@cospired/i18n-iso-languages/langs/vi.json";
@@ -62,28 +73,97 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
     handleKeywordChange,
   } = useProductFilter();
 
-  // SỬ DỤNG HOOK USEFILTERPRODUCT ĐỂ LẤY DỮ LIỆU SẢN PHẨM TỪ SERVER
-  const { data: productPagination, isLoading } = useFilterProduct({
-    keyword: debouncedKeyword || undefined,
-    page,
-    size: size || 10,
+  // SỬ DỤNG HOOK USEFILTERPRODUCT ĐỂ LẤY DỮ LIỆU SẢN PHẨM PHÂN TRANG TỪ SERVER
+  const { data: productPagination, isLoading: isFilterLoading } =
+    useFilterProduct({
+      keyword: debouncedKeyword || undefined,
+      page,
+      size: size || 10,
+    });
+
+  // Lấy chi tiết các sản phẩm được chọn bằng useQueries (không dùng useProduct)
+  const selectedProductQueries = useQueries({
+    queries: selectedIds.map((id) => ({
+      queryKey: ["product", id],
+      queryFn: () => ProductService.getById(id),
+      enabled: !!id,
+    })),
   });
 
-  const [discountsMap, setDiscountsMap] = useState<Record<number, number>>({});
-  const [promoQuantities, setPromoQuantities] = useState<Record<number, number>>({});
+  const selectedProductsDetails = useMemo(() => {
+    return selectedProductQueries
+      .map((q) => q.data)
+      .filter((data): data is ProductDetailResponse => !!data)
+      .map((d): ProductResponse => {
+        const thumbnail =
+          d.coverImages?.find((img) => img.isThumbnail)?.url || "";
+        return {
+          id: d.id,
+          name: d.name,
+          slug: d.slug,
+          originalPrice: d.originalPrice,
+          price: d.price,
+          quantity: d.quantity,
+          weight: d.weight,
+          publishYear: d.publishYear,
+          pages: d.pages,
+          language: d.language,
+          status: d.status,
+          genresName: [],
+          authorsName: [],
+          publisherName: "",
+          seriesName: "",
+          urlImageDefault: thumbnail || (d.coverImages?.[0]?.url ?? ""),
+        };
+      });
+  }, [selectedProductQueries]);
 
-  useEffect(() => {
-    if (initialProducts && initialProducts.length > 0) {
+  const isDetailsLoading = useMemo(() => {
+    return selectedProductQueries.some((q) => q.isLoading);
+  }, [selectedProductQueries]);
+
+  const isLoading = isFilterLoading || isDetailsLoading;
+
+  const [discountsMap, setDiscountsMap] = useState<Record<number, number>>(
+    () => {
       const discounts: Record<number, number> = {};
-      const quantities: Record<number, number> = {};
+      if (initialProducts) {
+        initialProducts.forEach((p) => {
+          discounts[p.id] = p.localDiscount;
+        });
+      }
+      return discounts;
+    },
+  );
+
+  const [promoQuantities, setPromoQuantities] = useState<
+    Record<number, number>
+  >(() => {
+    const quantities: Record<number, number> = {};
+    if (initialProducts) {
+      initialProducts.forEach((p) => {
+        quantities[p.id] = p.localQty;
+      });
+    }
+    return quantities;
+  });
+
+  const [prevInitialProducts, setPrevInitialProducts] =
+    useState(initialProducts);
+
+  if (initialProducts !== prevInitialProducts) {
+    setPrevInitialProducts(initialProducts);
+    const discounts: Record<number, number> = {};
+    const quantities: Record<number, number> = {};
+    if (initialProducts) {
       initialProducts.forEach((p) => {
         discounts[p.id] = p.localDiscount;
         quantities[p.id] = p.localQty;
       });
-      setDiscountsMap(discounts);
-      setPromoQuantities(quantities);
     }
-  }, [initialProducts]);
+    setDiscountsMap(discounts);
+    setPromoQuantities(quantities);
+  }
 
   useEffect(() => {
     if (onProductsDataChange) {
@@ -100,16 +180,41 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
     }
   }, [selectedIds, discountsMap, promoQuantities, onProductsDataChange]);
 
-  // CHUYỂN ĐỔI VÀ DỰ PHÒNG DỮ LIỆU CHUẨN
-  const productsList: ProductSelectorItem[] = useMemo(() => {
-    if (productPagination?.items && productPagination.items.length > 0) {
-      return productPagination.items.map((p) => ({
-        ...p,
-        importPrice: p.originalPrice,
-      }));
-    }
-    return [];
+  // Lấy các sản phẩm phân trang từ Server
+  const serverItems = useMemo(() => {
+    return productPagination?.items || [];
   }, [productPagination]);
+
+  // Tìm các sản phẩm được chọn nhưng không có trên trang hiện tại để chèn lên đầu
+  const prependedItems = useMemo(() => {
+    if (selectedIds.length === 0) return [];
+
+    const serverItemIds = new Set(serverItems.map((item) => item.id));
+    const missingIds = selectedIds.filter((id) => !serverItemIds.has(id));
+
+    let missingProducts = selectedProductsDetails.filter((p) =>
+      missingIds.includes(p.id),
+    );
+
+    // Lọc theo từ khóa tìm kiếm nếu có
+    if (debouncedKeyword) {
+      const kw = debouncedKeyword.toLowerCase();
+      missingProducts = missingProducts.filter((p) =>
+        p.name.toLowerCase().includes(kw),
+      );
+    }
+
+    return missingProducts;
+  }, [selectedProductsDetails, selectedIds, serverItems, debouncedKeyword]);
+
+  // Kết hợp danh sách sản phẩm: Sản phẩm chọn từ trang khác lên đầu, sản phẩm trang hiện tại ở sau
+  const productsList: ProductSelectorItem[] = useMemo(() => {
+    const combined = [...prependedItems, ...serverItems];
+    return combined.map((p) => ({
+      ...p,
+      importPrice: p.originalPrice,
+    }));
+  }, [prependedItems, serverItems]);
 
   const totalPages = productPagination?.totalPages || 1;
   const totalItems = productPagination?.totalItems || 0;
@@ -125,7 +230,7 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
       onChange(selectedIds.filter((id) => !paginatedIds.includes(id)));
     } else {
       const newIds = Array.from(
-        new Set([...selectedIds, ...productsList.map((p) => p.id)])
+        new Set([...selectedIds, ...productsList.map((p) => p.id)]),
       );
       onChange(newIds);
     }
@@ -153,8 +258,13 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
     (id: number, val: number) => {
       const product = productsList.find((p) => p.id === id);
       const maxStock = product ? product.quantity : 0;
-      const safeVal =
-        isNaN(val) ? 0 : val < 0 ? 0 : val > maxStock ? maxStock : val;
+      const safeVal = isNaN(val)
+        ? 0
+        : val < 0
+          ? 0
+          : val > maxStock
+            ? maxStock
+            : val;
       setPromoQuantities((prev) => {
         if (prev[id] === safeVal) return prev;
         return {
@@ -163,7 +273,7 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
         };
       });
     },
-    [productsList]
+    [productsList],
   );
 
   return (
@@ -183,7 +293,8 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
               </span>
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">
-              Tích chọn sản phẩm, nhập mức giảm giá (%) và số lượng áp dụng cho từng sản phẩm
+              Tích chọn sản phẩm, nhập mức giảm giá (%) và số lượng áp dụng cho
+              từng sản phẩm
             </p>
           </div>
         </div>
@@ -235,7 +346,7 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
                 Giá cuối cùng
               </th>
               <th className="py-3.5 px-4 font-semibold text-xs uppercase tracking-wider w-24 text-center">
-                 Số lượng
+                Số lượng
               </th>
               <th className="py-3.5 px-4 font-semibold text-xs uppercase tracking-wider w-36 text-right">
                 Số lượng áp dụng
@@ -265,8 +376,12 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
                   initialDiscount={discountsMap[product.id] ?? 10}
                   initialPromoQty={promoQuantities[product.id] ?? 10}
                   onToggleSelect={() => handleToggleSelectOne(product.id)}
-                  onDiscountChange={(val) => handleDiscountChange(product.id, val)}
-                  onQuantityChange={(val) => handleQuantityChange(product.id, val)}
+                  onDiscountChange={(val) =>
+                    handleDiscountChange(product.id, val)
+                  }
+                  onQuantityChange={(val) =>
+                    handleQuantityChange(product.id, val)
+                  }
                 />
               ))
             )}
@@ -310,7 +425,9 @@ const ProductRow: React.FC<ProductRowProps> = ({
   onDiscountChange,
   onQuantityChange,
 }) => {
-  const [localDiscount, setLocalDiscount] = useState<string>(initialDiscount.toString());
+  const [localDiscount, setLocalDiscount] = useState<string>(
+    initialDiscount.toString(),
+  );
   const [localQty, setLocalQty] = useState<string>(initialPromoQty.toString());
 
   const debouncedDiscountStr = useDebounce(localDiscount, 300);
@@ -345,6 +462,9 @@ const ProductRow: React.FC<ProductRowProps> = ({
   const onDiscountChangeRef = useRef(onDiscountChange);
   const onQuantityChangeRef = useRef(onQuantityChange);
 
+  const initialDiscountRef = useRef(initialDiscount);
+  const initialPromoQtyRef = useRef(initialPromoQty);
+
   useEffect(() => {
     onDiscountChangeRef.current = onDiscountChange;
   }, [onDiscountChange]);
@@ -354,23 +474,37 @@ const ProductRow: React.FC<ProductRowProps> = ({
   }, [onQuantityChange]);
 
   useEffect(() => {
+    initialDiscountRef.current = initialDiscount;
+  }, [initialDiscount]);
+
+  useEffect(() => {
+    initialPromoQtyRef.current = initialPromoQty;
+  }, [initialPromoQty]);
+
+  useEffect(() => {
     const num = parseFloat(debouncedDiscountStr);
     const safeVal = isNaN(num) ? 0 : num < 0 ? 0 : num > 100 ? 100 : num;
-    if (safeVal !== initialDiscount) {
+    if (safeVal !== initialDiscountRef.current) {
       onDiscountChangeRef.current(safeVal);
     }
-  }, [debouncedDiscountStr, initialDiscount]);
+  }, [debouncedDiscountStr]);
 
   useEffect(() => {
     const num = parseInt(debouncedQtyStr, 10);
     if (!isNaN(num) && num > product.quantity) {
       setLocalQty(product.quantity.toString());
     }
-    const safeVal = isNaN(num) ? 0 : num < 0 ? 0 : num > product.quantity ? product.quantity : num;
-    if (safeVal !== initialPromoQty) {
+    const safeVal = isNaN(num)
+      ? 0
+      : num < 0
+        ? 0
+        : num > product.quantity
+          ? product.quantity
+          : num;
+    if (safeVal !== initialPromoQtyRef.current) {
       onQuantityChangeRef.current(safeVal);
     }
-  }, [debouncedQtyStr, product.quantity, initialPromoQty]);
+  }, [debouncedQtyStr, product.quantity]);
 
   const currentDiscountNum = useMemo(() => {
     const num = parseFloat(localDiscount);

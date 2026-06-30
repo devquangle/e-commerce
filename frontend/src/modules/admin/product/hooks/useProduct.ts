@@ -6,12 +6,7 @@ import axios from "axios";
 import type { options } from "@/types/options.type";
 import ProductService from "../services/product.service";
 
-export const useProduct = () => {
-  return useQuery<ProductResponse[]>({
-    queryKey: ["products"],
-    queryFn: ProductService.fetchProduct,
-  });
-};
+
 export const useFilterProduct = (options?: options) => {
   return useQuery<Pagination<ProductResponse>>({
     queryKey: ["products-filter", options],
