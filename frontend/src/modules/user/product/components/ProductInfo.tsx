@@ -87,7 +87,7 @@ export default function ProductInfo({ product, rating = 0, reviewCount = 0, sold
         )}
 
         {/* NXB & Series */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
           {product.publisherName && (
             <div className="flex items-center gap-2">
               <span className="text-slate-500">Nhà xuất bản:</span>
@@ -124,7 +124,7 @@ export default function ProductInfo({ product, rating = 0, reviewCount = 0, sold
       </div>
 
       {/* Hành động (Mua, Giỏ, Yêu thích) */}
-      <div className="flex flex-col sm:flex-row gap-6 mb-8 border-b border-slate-100 pb-8">
+      <div className="flex flex-col sm:flex-row gap-4 mb-8 border-b border-slate-100 pb-8">
         {/* Số lượng */}
         <div className="flex flex-col gap-2">
           <span className="text-sm font-semibold text-slate-700">

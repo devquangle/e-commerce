@@ -431,7 +431,7 @@ export default function UpdateProduct() {
     <form
       id="create-product-form"
       onSubmit={handleSubmit(onSubmit)}
-      className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch"
+      className="grid grid-cols-1 xl:grid-cols-12 gap-4 items-stretch"
     >
       {/* Loading overlay khi đang gọi AI + SearchAPI hoặc đang lưu */}
       {(isFetchingAI || isSaving) && (

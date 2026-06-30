@@ -160,7 +160,7 @@ export default function ProductDetailPage() {
   return (
     <Container className="max-w-7xl p-2">
       {/* 2-Column layout for Main Product & Specifications & Description */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 my-4 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 my-4 items-start">
         
         {/* LEFT COLUMN: Images, Policies */}
         <div className="lg:col-span-4 lg:sticky lg:top-4 h-fit flex flex-col gap-4">
@@ -202,7 +202,7 @@ export default function ProductDetailPage() {
         </div>
 
         {/* RIGHT COLUMN: Info, Specs Table, Description */}
-        <div className="lg:col-span-8 flex flex-col gap-6">
+        <div className="lg:col-span-8 flex flex-col gap-4">
           <div className="card-custom !p-6">
             <ProductInfo 
               product={mockProductResponse} 

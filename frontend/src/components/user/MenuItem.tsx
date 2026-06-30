@@ -75,7 +75,7 @@ export default function MenuItem({ className = "" }) {
                 : "lg:opacity-0 lg:-translate-y-4 lg:pointer-events-none lg:scale-95"
             }`}
         >
-          <div className="flex flex-col lg:grid lg:grid-cols-12 p-4 lg:p-8 gap-6 lg:gap-8">
+          <div className="flex flex-col lg:grid lg:grid-cols-12 p-4 lg:p-8 gap-4 lg:gap-8">
             {/* === CỘT 1: THỂ LOẠI === */}
             <div className="lg:col-span-4 flex flex-col">
               <div className="flex items-center justify-between border-b-2 border-gradient-to-r from-indigo-200 to-transparent pb-3 mb-5">

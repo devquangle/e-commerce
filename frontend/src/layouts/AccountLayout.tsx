@@ -10,7 +10,7 @@ export default function AccountLayout() {
                 variant="mobile"
                 className="flex lg:hidden gap-2 overflow-x-auto py-2"
             />
-            <div className="flex flex-col lg:flex-row gap-6">
+            <div className="flex flex-col lg:flex-row gap-4">
                 {/* Sidebar desktop */}
                 <aside className="account-sidebar hidden lg:block w-65 border rounded-2xl shrink-0">
                     <AccountMenu />

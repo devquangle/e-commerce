@@ -15,7 +15,7 @@ export default function About() {
             <p>
               Được thành lập với sứ mệnh lan toả văn hoá đọc, chúng tôi cam kết cung cấp 100% sách bản quyền từ các nhà xuất bản uy tín trong và ngoài nước. Dù bạn là người yêu văn học, đam mê kinh doanh hay đang tìm kiếm những cuốn sách thiếu nhi bổ ích, chúng tôi đều có thể đáp ứng.
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8 pb-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-8 pb-4">
               <div className="text-center p-6 bg-blue-50 rounded-2xl">
                 <div className="text-3xl font-black text-blue-600 mb-2">10K+</div>
                 <div className="font-medium text-slate-700">Đầu sách</div>

@@ -107,7 +107,7 @@ export default function Revenue() {
         </div>
 
         {/* CHART GRID */}
-        <div className="grid grid-cols-6 items-end gap-2 sm:gap-6 border-b border-slate-100 pb-4 h-64">
+        <div className="grid grid-cols-6 items-end gap-2 sm:gap-4 border-b border-slate-100 pb-4 h-64">
           {monthlyRevenue.map((row) => {
             const height = Math.round((row.revenue / maxRevenue) * 100);
 

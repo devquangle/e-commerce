@@ -85,7 +85,7 @@ export default function Profile() {
         </h2>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6">
+      <div className="flex flex-col lg:flex-row gap-4">
 
         {/* Form thông tin */}
         <div className="flex-1">

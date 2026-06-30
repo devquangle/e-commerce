@@ -70,7 +70,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
         className="space-y-6"
       >
         {/* FORM GRID */}
-        <div className="grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 gap-4">
           {/* Tên chương trình */}
           <InputField<PromotionRequest>
             label="Tên chương trình khuyến mãi"

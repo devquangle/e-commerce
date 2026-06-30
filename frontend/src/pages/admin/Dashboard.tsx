@@ -120,7 +120,7 @@ export default function Dashboard() {
       </div>
 
       {/* RECENT ORDERS & GOALS */}
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-3">
         {/* RECENT ORDERS */}
         <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-xs lg:col-span-2">
           <div className="flex items-center justify-between mb-6">
