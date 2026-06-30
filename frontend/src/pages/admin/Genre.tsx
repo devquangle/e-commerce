@@ -5,7 +5,6 @@ import type { UseFormSetError } from "react-hook-form";
 import { mapServerErrors } from "@/utils/mapServerErrors";
 import {
   showErrorToast,
-  showInfoToast,
   showSuccessToast,
 } from "@/utils/toastUtil";
 import Pagination from "@/components/common/Pagination";

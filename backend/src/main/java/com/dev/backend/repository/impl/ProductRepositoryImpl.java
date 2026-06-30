@@ -1,5 +1,6 @@
 package com.dev.backend.repository.impl;
 
+import com.dev.backend.constant.BaseStatus;
 import com.dev.backend.constant.PromotionCampaignType;
 import com.dev.backend.dto.product.ProductCardResponse;
 import com.dev.backend.dto.product.ProductFilterRequest;
@@ -12,6 +13,7 @@ import jakarta.persistence.criteria.*;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,10 +45,11 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
         Join<Product, PromotionProduct> ppJoin = root.join("promotionProducts", JoinType.LEFT);
         Join<PromotionProduct, Promotion> promoJoin = ppJoin.join("promotion", JoinType.LEFT);
 
-        LocalDateTime now = LocalDateTime.now();
+        LocalDate now = LocalDate.now();
 
         promoJoin.on(
                 cb.and(
+                        cb.equal(promoJoin.get("status"), BaseStatus.ACTIVE),
                         cb.lessThanOrEqualTo(promoJoin.get("startDate"), now),
                         cb.greaterThanOrEqualTo(promoJoin.get("expireDate"), now)
                 )
@@ -64,7 +67,11 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
         Expression<Double> ratingExpr = cb.avg(rJoin.get("rate"));
         Expression<Long> soldExpr = cb.sumAsLong(oiJoin.get("quantity"));
         Expression<Long> reviewExpr = cb.countDistinct(rJoin.get("id"));
-        Expression<Integer> promoValueExpr = cb.max(promoJoin.get("value"));
+        Expression<Integer> promoValueExpr = cb.max(
+                cb.<Integer>selectCase()
+                        .when(cb.isNotNull(promoJoin.get("id")), ppJoin.get("discountValue"))
+                        .otherwise(cb.nullLiteral(Integer.class))
+        );
 
         // =========================
         // SUBQUERY FOR IMAGE (FIX NULL + NO DUPLICATE)
@@ -87,7 +94,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
                 root.get("name"),
                 root.get("price"),
                 root.get("createdAt"),
-                promoJoin.get("promotionType")
+                promoJoin.get("promotionCampaignType")
         );
 
         // =========================
@@ -119,7 +126,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
                 imgSub.alias("urlImage"),
 
                 promoValueExpr.alias("promotionValue"),
-                promoJoin.get("promotionType").alias("promotionType")
+                promoJoin.get("promotionCampaignType").alias("promotionType")
         ));
 
         // =========================

@@ -42,7 +42,7 @@ public class Promotion {
     private PromotionCampaignType promotionCampaignType;
 
     @Enumerated(EnumType.STRING)
-    private BaseStatus status;
+    private BaseStatus status = BaseStatus.ACTIVE;
 
     @OneToMany(mappedBy = "promotion")
     private List<PromotionProduct> promotionProducts = new ArrayList<>();

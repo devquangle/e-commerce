@@ -26,7 +26,9 @@ public interface ProductRepository extends JpaRepository<Product, Integer>, Prod
 
         @EntityGraph(attributePaths = {
                         "publisher",
-                        "series"
+                        "series",
+                        "promotionProducts"
+
         })
         Optional<Product> findBySlug(String slug);
 

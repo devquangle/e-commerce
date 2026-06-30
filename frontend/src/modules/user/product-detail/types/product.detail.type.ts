@@ -3,8 +3,8 @@ export interface ProductResponse {
   name: string;
   slug: string;
   isbn: string;
-  originalPrice: number;
-  price: number;
+  discountValue:number; //%
+  price: number; //giá bán
   quantity: number;
   weight: number;
   publishYear: string;

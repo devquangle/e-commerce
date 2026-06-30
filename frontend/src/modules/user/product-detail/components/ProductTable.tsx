@@ -148,7 +148,7 @@ export default function ProductTable({ product }: ProductTableProps) {
   const hasMore = fields.length > limit;
 
   return (
-    <div className="card-custom !p-6">
+    <div className="card-custom">
       <h2 className="text-xl md:text-2xl font-bold text-slate-900 mb-6">Thông tin chi tiết</h2>
 
       <div className="flex flex-col text-sm divide-y divide-slate-100">

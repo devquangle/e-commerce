@@ -21,19 +21,16 @@ export default function ProductInfo({
   const handleIncrease = () => setQuantity((prev) => prev + 1);
 
   const price = product.price || 0;
-  const originalPrice = product.originalPrice || price;
-  const discountPercent = originalPrice > price ? Math.round((1 - price / originalPrice) * 100) : 0;
+  const discountPercent = product.discountValue || 0;
+  const hasDiscount = discountPercent > 0 && discountPercent < 100;
+  const originalPrice = hasDiscount
+    ? Math.round(price / (1 - discountPercent / 100))
+    : price;
   
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4">
       <div>
-        {/* Badges */}
-        <div className="flex flex-wrap gap-2 mb-3">
-          <span className="px-3 py-1 bg-amber-500/10 text-amber-700 text-[11px] font-extrabold uppercase tracking-wider rounded-full border border-amber-500/20 flex items-center gap-1.5 w-fit">
-            <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
-            Sách bán chạy
-          </span>
-        </div>
+       
 
         {/* Title */}
         <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 leading-tight mb-3 tracking-tight">
@@ -63,7 +60,7 @@ export default function ProductInfo({
           <span className="text-3xl md:text-4xl font-extrabold text-blue-600 tracking-tight">
             {price.toLocaleString()} ₫
           </span>
-          {originalPrice > price && (
+          {hasDiscount && (
             <div className="flex items-center gap-2">
               <span className="text-base text-slate-400 line-through font-medium">
                 {originalPrice.toLocaleString()} ₫
@@ -77,7 +74,7 @@ export default function ProductInfo({
       </div>
 
       {/* Action Controls & Buttons */}
-      <div className="flex flex-col gap-4 mb-4 border-b border-slate-100 pb-5">
+      <div className="flex flex-col gap-4 border-b border-slate-100">
         <div className="flex flex-col sm:flex-row gap-4 items-end">
           {/* Quantity Selector */}
           <div className="flex flex-col gap-2 shrink-0 w-full sm:w-auto">

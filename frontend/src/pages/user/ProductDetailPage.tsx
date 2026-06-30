@@ -5,7 +5,7 @@ import ProductImages from "@/modules/user/product-detail/components/ProductImage
 import ProductInfo from "@/modules/user/product-detail/components/ProductInfo";
 import ProductTable from "@/modules/user/product-detail/components/ProductTable";
 import RelatedProducts from "@/modules/user/product-detail/components/RelatedProducts";
-import { ShieldCheck, Truck, RotateCcw } from "lucide-react";
+
 import type { ProductCard as ProductCardType } from "@/types/product.card.type";
 
 const mockProduct = {
@@ -164,46 +164,16 @@ export default function ProductDetailPage() {
         
         {/* LEFT COLUMN: Images, Policies */}
         <div className="lg:col-span-4 lg:sticky lg:top-4 h-fit flex flex-col gap-4">
-          <div className="card-custom !p-6">
+          <div className="card-custom ">
             <ProductImages product={mockProductResponse} mockImages={mockProduct.images} />
           </div>
           
-          {/* Commitments / Policies */}
-          <div className="card-custom !p-6 flex flex-col gap-3">
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Chính sách ưu đãi</h3>
-            
-            <div className="flex items-start gap-3 text-slate-700">
-              <div className="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 shrink-0 mt-0.5">
-                <ShieldCheck size={16} />
-              </div>
-              <span className="text-xs leading-snug">
-                <span className="font-bold">100% Sách gốc:</span> Đảm bảo sách chính hãng, chất lượng cao từ các nhà xuất bản.
-              </span>
-            </div>
-            
-            <div className="flex items-start gap-3 text-slate-700">
-              <div className="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-600 shrink-0 mt-0.5">
-                <Truck size={16} />
-              </div>
-              <span className="text-xs leading-snug">
-                <span className="font-bold">Giao hàng hỏa tốc:</span> Nhận hàng trong vòng 2h tại khu vực nội thành.
-              </span>
-            </div>
-            
-            <div className="flex items-start gap-3 text-slate-700">
-              <div className="w-7 h-7 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-600 shrink-0 mt-0.5">
-                <RotateCcw size={16} />
-              </div>
-              <span className="text-xs leading-snug">
-                <span className="font-bold">Đổi trả 30 ngày:</span> Hỗ trợ đổi trả miễn phí nếu sản phẩm có lỗi từ NSX.
-              </span>
-            </div>
-          </div>
+         
         </div>
 
         {/* RIGHT COLUMN: Info, Specs Table, Description */}
         <div className="lg:col-span-8 flex flex-col gap-4">
-          <div className="card-custom !p-6">
+          <div className="card-custom ">
             <ProductInfo 
               product={mockProductResponse} 
               rating={mockProduct.rating} 

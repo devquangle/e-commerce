@@ -34,7 +34,7 @@ export default function ProductDescription({ product }: ProductDescriptionProps)
   }, [product.description, showButton]);
 
   return (
-    <div className="card-custom !p-6">
+    <div className="card-custom">
       <h2 className="text-xl md:text-2xl font-bold text-slate-900 mb-6">Mô tả sản phẩm</h2>
       
       <div className="relative">
