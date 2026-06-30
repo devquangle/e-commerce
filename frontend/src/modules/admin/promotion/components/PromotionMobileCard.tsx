@@ -2,6 +2,7 @@ import React from "react";
 import { Calendar, Edit, Trash2, Tag } from "lucide-react";
 import { campaignTypeLabels, type PromotionResponse } from "../types/promotion.type";
 import { BaseStatus, getBaseStatusLabel } from "@/types/status";
+import { formatToMMDDYYYY } from "@/utils/formatDate.utils";
 
 interface PromotionMobileCardProps {
   promotions: PromotionResponse[];
@@ -66,16 +67,10 @@ const PromotionMobileCard: React.FC<PromotionMobileCardProps> = ({
             {/* DETAILS */}
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-slate-500 font-medium">Mức giảm giá:</span>
-                <span className="text-slate-800 font-bold">
-                  Giảm {promo.discountValue}%
-                </span>
-              </div>
-              <div className="flex justify-between">
                 <span className="text-slate-500 font-medium">Thời gian:</span>
                 <span className="text-slate-700 font-medium text-xs flex items-center gap-1">
                   <Calendar size={13} className="text-slate-400" />
-                  {promo.startDate} - {promo.endDate}
+                  {formatToMMDDYYYY(promo.startDate)} - {formatToMMDDYYYY(promo.endDate)}
                 </span>
               </div>
             </div>

@@ -9,15 +9,7 @@ public class FilterValidator {
         return keyword == null ? "" : keyword.trim();
     }
 
-    public static void validatePage(Integer page, Integer size) {
-        if (page == null || page < 0) {
-            throw new BadRequestException("Trang phải lớn hơn hoặc bằng 0.");
-        }
-
-        if (size == null || size <= 0) {
-            throw new BadRequestException("Kích thước trang phải lớn hơn 0.");
-        }
-    }
+ 
 
     public static void validateDateRange(
             LocalDate startDate,

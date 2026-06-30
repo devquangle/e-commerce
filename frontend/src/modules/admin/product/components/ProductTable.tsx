@@ -18,6 +18,7 @@ import type { BaseStatus } from "@/types/status";
 
 import { registerLocale, getName } from "@cospired/i18n-iso-languages";
 import viLocale from "@cospired/i18n-iso-languages/langs/vi.json";
+import { formatMoney } from "@/utils/number.utils";
 
 registerLocale(viLocale);
 
@@ -34,11 +35,6 @@ type Props = {
 };
 
 export default function ProductTable({ products, onDelete }: Props) {
-  const formatPrice = (price: number) =>
-    new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(price);
 
   return (
     <div className="hidden md:block overflow-x-auto">
@@ -181,7 +177,7 @@ export default function ProductTable({ products, onDelete }: Props) {
                 {/* ── GIÁ NHẬP ── */}
                 <td className="py-4 px-4 align-middle">
                   <span className="text-sm text-slate-600 font-medium">
-                    {formatPrice(product.originalPrice)}
+                    {formatMoney(product.originalPrice)}
                   </span>
                 </td>
 
@@ -189,7 +185,7 @@ export default function ProductTable({ products, onDelete }: Props) {
                 <td className="py-4 px-4 align-middle">
                   <div className="flex flex-col gap-0.5">
                     <span className="font-bold text-indigo-600 text-sm">
-                      {formatPrice(product.price)}
+                      {formatMoney(product.price)}
                     </span>
                     {product.originalPrice > product.price && (
                       <span className="text-[11px] text-rose-500 font-semibold">

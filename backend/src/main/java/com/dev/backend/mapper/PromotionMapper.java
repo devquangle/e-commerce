@@ -13,6 +13,11 @@ public class PromotionMapper {
         }
         PromotionResponse response = new PromotionResponse();
         response.setId(promotion.getId());
+        response.setName(promotion.getName());
+        response.setStartDate(promotion.getStartDate().toString());
+        response.setEndDate(promotion.getExpireDate().toString());
+        response.setStatus(promotion.getStatus());
+        response.setPromotionCampaignType(promotion.getPromotionCampaignType());
         return response;
     }
 }

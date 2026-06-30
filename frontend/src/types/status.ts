@@ -16,5 +16,8 @@ export const BaseStatusConfig: Record<
   DELETED: { label: "Đã xóa" },
 };
 
-export const getBaseStatusLabel = (status: BaseStatus) =>
-  BaseStatusConfig[status].label;
+export const getBaseStatusLabel = (status?: BaseStatus | string) => {
+  if (!status) return "Không xác định";
+  const upperStatus = String(status).toUpperCase() as BaseStatus;
+  return BaseStatusConfig[upperStatus]?.label || String(status);
+};

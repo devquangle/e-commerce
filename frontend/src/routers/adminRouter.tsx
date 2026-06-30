@@ -2,7 +2,7 @@ import Dashboard from "@/pages/admin/Dashboard";
 import Genre from "@/pages/admin/Genre";
 import Order from "@/pages/admin/Order";
 import OrderItem from "@/pages/admin/Order-item";
-import Product from "@/pages/admin/Product";
+import Product from "@/pages/admin/ProductPage";
 import Promotion from "@/pages/admin/Promotion";
 import Revenue from "@/pages/admin/Revenue";
 import TopProduct from "@/pages/admin/TopProduct";

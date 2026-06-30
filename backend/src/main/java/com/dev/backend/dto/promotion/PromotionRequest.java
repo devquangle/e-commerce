@@ -36,5 +36,5 @@ public class PromotionRequest {
     private String promotionCampaignType;
     @NotEmpty(message = "Danh sách sản phẩm không được để trống")
     @Valid
-    private List<PromotionProduct> promotionProducts;
+    private List<PromotionProductRequest> promotionProducts;
 }

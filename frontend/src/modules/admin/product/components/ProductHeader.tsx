@@ -1,4 +1,4 @@
-import { Plus, Users } from "lucide-react";
+import { Plus, BookOpen } from "lucide-react";
 import Button from "@/components/common/Button";
 
 interface ProductHeaderProps {
@@ -13,16 +13,16 @@ export default function ProductHeader({
       <div className="space-y-1">
         <div className="flex items-center gap-2">
           <div className="rounded-lg bg-indigo-50 p-2 text-indigo-600">
-            <Users size={22} />
+            <BookOpen size={22} />
           </div>
 
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
-            Quản lý tác giả
+            Quản lý sản phẩm
           </h1>
         </div>
 
         <p className="text-sm text-slate-500">
-          Quản lý danh sách tác giả, thông tin và tiểu sử.
+          Quản lý danh sách sách, giá bán và tồn kho trong hệ thống.
         </p>
       </div>
 
@@ -33,7 +33,7 @@ export default function ProductHeader({
         onClick={onCreate}
       >
         <Plus size={18} />
-        Thêm tác giả
+        Thêm sản phẩm
       </Button>
     </div>
   );

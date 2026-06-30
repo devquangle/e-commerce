@@ -44,7 +44,7 @@ public class Promotion {
     @Enumerated(EnumType.STRING)
     private BaseStatus status;
 
-    @OneToMany(mappedBy = "promotion", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "promotion")
     private List<PromotionProduct> promotionProducts = new ArrayList<>();
 
 }

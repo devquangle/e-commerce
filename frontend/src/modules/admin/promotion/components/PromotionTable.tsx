@@ -2,6 +2,7 @@ import React from "react";
 import { Calendar, Edit, Trash2, Tag } from "lucide-react";
 import { campaignTypeLabels, type PromotionResponse } from "../types/promotion.type";
 import { BaseStatus, getBaseStatusLabel } from "@/types/status";
+import { formatToMMDDYYYY } from "@/utils/formatDate.utils";
 
 interface PromotionTableProps {
   promotions: PromotionResponse[];
@@ -45,10 +46,7 @@ const PromotionTable: React.FC<PromotionTableProps> = ({
               Chương trình khuyến mãi
             </th>
             <th className="py-3.5 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50">
-              Mức giảm giá
-            </th>
-            <th className="py-3.5 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50">
-              Thời gian áp dụng
+              Thời gian (mm/dd/yyyy)
             </th>
             <th className="py-3.5 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50">
               Trạng thái
@@ -61,7 +59,7 @@ const PromotionTable: React.FC<PromotionTableProps> = ({
         <tbody className="divide-y divide-slate-100">
           {promotions.length === 0 ? (
             <tr>
-              <td colSpan={6} className="py-8 text-center text-slate-400">
+              <td colSpan={5} className="py-8 text-center text-slate-400">
                 Không tìm thấy chương trình khuyến mãi nào.
               </td>
             </tr>
@@ -83,13 +81,10 @@ const PromotionTable: React.FC<PromotionTableProps> = ({
                     </span>
                   </div>
                 </td>
-                <td className="py-4 px-4 text-slate-700 font-semibold">
-                  Giảm {promo.discountValue}%
-                </td>
                 <td className="py-4 px-4 text-slate-500">
                   <span className="inline-flex items-center gap-1.5 text-xs">
                     <Calendar size={14} className="text-slate-400" />
-                    {promo.startDate} - {promo.endDate}
+                    {formatToMMDDYYYY(promo.startDate)} - {formatToMMDDYYYY(promo.endDate)}
                   </span>
                 </td>
                 <td className="py-4 px-4">

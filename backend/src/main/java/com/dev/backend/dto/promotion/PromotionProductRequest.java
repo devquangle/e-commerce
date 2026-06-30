@@ -13,7 +13,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class PromotionProduct {
+public class PromotionProductRequest {
     @NotNull(message = "ID sản phẩm không được để trống")
     @Positive
     private Integer id;

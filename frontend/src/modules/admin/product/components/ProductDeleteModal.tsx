@@ -18,15 +18,15 @@ export default function ProductDeleteModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Xóa tác giả"
+      title="Xóa sản phẩm"
       onConfirm={onConfirm}
-      confirmText="Xóa tác giả"
+      confirmText="Xóa sản phẩm"
       cancelText="Hủy"
     >
       <div className="py-2">
         {product && (
           <p className="text-base text-slate-700">
-            Bạn có chắc chắn muốn xóa tác giả{" "}
+            Bạn có chắc chắn muốn xóa sản phẩm{" "}
             <span className="font-bold text-slate-900">
               "{product.name}"
             </span>

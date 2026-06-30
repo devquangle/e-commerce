@@ -1,6 +1,7 @@
 package com.dev.backend.dto.promotion;
 
 import com.dev.backend.constant.BaseStatus;
+import com.dev.backend.constant.PromotionCampaignType;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,8 +15,10 @@ import lombok.Setter;
 public class PromotionResponse {
     private Integer id;
     private String name;
-    private Integer discountValue;
+
     private String startDate;
     private String endDate;
     private BaseStatus status;
+    private PromotionCampaignType promotionCampaignType;
+
 }
