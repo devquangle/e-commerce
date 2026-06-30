@@ -7,6 +7,7 @@ import PromotionMobileCard from "@/modules/admin/promotion/components/PromotionM
 import Pagination from "@/components/common/Pagination";
 import type { PromotionResponse } from "@/modules/admin/promotion/types/promotion.type";
 import { BaseStatus } from "@/types/status";
+import useSearchPromotion from "@/modules/admin/promotion/hooks/useSearchPromotion";
 
 const initialPromotions: PromotionResponse[] = [
   {
@@ -194,27 +195,39 @@ const initialPromotions: PromotionResponse[] = [
 export default function Promotion() {
   const navigate = useNavigate();
   const [promotions, setPromotions] = useState<PromotionResponse[]>(initialPromotions);
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("ALL");
-  const [campaignTypeFilter, setCampaignTypeFilter] = useState("ALL");
-  const [startDateFilter, setStartDateFilter] = useState("");
-  const [endDateFilter, setEndDateFilter] = useState("");
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+
+  const {
+    keyword,
+    startDate,
+    endDate,
+    promotionCampaignType,
+    status,
+    page,
+    size: pageSize,
+    debouncedKeyword,
+    setPage,
+    setSize: setPageSize,
+    handleKeywordChange,
+    handleStartDateChange,
+    handleEndDateChange,
+    handleCampaignTypeChange,
+    handleStatusChange,
+    handleResetFilter,
+  } = useSearchPromotion();
 
   const filteredPromotions = useMemo(() => {
     return promotions.filter((promo) => {
-      const matchSearch = promo.name.toLowerCase().includes(search.toLowerCase().trim());
+      const matchSearch = promo.name.toLowerCase().includes(debouncedKeyword.toLowerCase().trim());
       const matchStatus =
-        statusFilter === "ALL" ? true : promo.status === statusFilter;
+        status === "ALL" ? true : promo.status === status;
       const matchCampaignType =
-        campaignTypeFilter === "ALL" ? true : promo.promotionCampaignType === campaignTypeFilter;
-      const matchStartDate = startDateFilter ? promo.startDate >= startDateFilter : true;
-      const matchEndDate = endDateFilter ? promo.endDate <= endDateFilter : true;
+        promotionCampaignType === "ALL" ? true : promo.promotionCampaignType === promotionCampaignType;
+      const matchStartDate = startDate ? promo.startDate >= startDate : true;
+      const matchEndDate = endDate ? promo.endDate <= endDate : true;
 
       return matchSearch && matchStatus && matchCampaignType && matchStartDate && matchEndDate;
     });
-  }, [promotions, search, statusFilter, campaignTypeFilter, startDateFilter, endDateFilter]);
+  }, [promotions, debouncedKeyword, status, promotionCampaignType, startDate, endDate]);
 
   const paginatedPromotions = useMemo(() => {
     const start = (page - 1) * pageSize;
@@ -222,15 +235,6 @@ export default function Promotion() {
   }, [filteredPromotions, page, pageSize]);
 
   const totalPages = Math.ceil(filteredPromotions.length / pageSize) || 1;
-
-  const handleResetFilter = () => {
-    setSearch("");
-    setStatusFilter("ALL");
-    setCampaignTypeFilter("ALL");
-    setStartDateFilter("");
-    setEndDateFilter("");
-    setPage(1);
-  };
 
   const handleCreateClick = () => {
     navigate("/admin/add-promotion");
@@ -254,31 +258,16 @@ export default function Promotion() {
       {/* FILTER & DATA */}
       <div className="card-custom">
         <PromotionFilter
-          search={search}
-          statusFilter={statusFilter}
-          campaignTypeFilter={campaignTypeFilter}
-          startDateFilter={startDateFilter}
-          endDateFilter={endDateFilter}
-          onSearchChange={(s) => {
-            setSearch(s);
-            setPage(1);
-          }}
-          onStatusFilterChange={(st) => {
-            setStatusFilter(st);
-            setPage(1);
-          }}
-          onCampaignTypeFilterChange={(ct) => {
-            setCampaignTypeFilter(ct);
-            setPage(1);
-          }}
-          onStartDateFilterChange={(sd) => {
-            setStartDateFilter(sd);
-            setPage(1);
-          }}
-          onEndDateFilterChange={(ed) => {
-            setEndDateFilter(ed);
-            setPage(1);
-          }}
+          search={keyword}
+          statusFilter={status}
+          campaignTypeFilter={promotionCampaignType}
+          startDateFilter={startDate}
+          endDateFilter={endDate}
+          onSearchChange={handleKeywordChange}
+          onStatusFilterChange={handleStatusChange}
+          onCampaignTypeFilterChange={handleCampaignTypeChange}
+          onStartDateFilterChange={handleStartDateChange}
+          onEndDateFilterChange={handleEndDateChange}
           onReset={handleResetFilter}
         />
 
