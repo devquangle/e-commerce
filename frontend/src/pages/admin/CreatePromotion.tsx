@@ -10,6 +10,7 @@ export default function CreatePromotion() {
   const navigate = useNavigate();
   const [selectedProductIds, setSelectedProductIds] = useState<number[]>([]);
   const [promotionProductsData, setPromotionProductsData] = useState<PromotionProducts[]>([]);
+  const [promoDates, setPromoDates] = useState<{ startDate: string; endDate: string }>({ startDate: "", endDate: "" });
   const createMutation = useCreatePromotion();
 
   const handleProductsDataChange = useCallback((products: PromotionProducts[]) => {
@@ -39,13 +40,15 @@ export default function CreatePromotion() {
       <CreatePromotionHeader onBack={handleCancel} />
 
       {/* FORM THÔNG TIN CHUNG KHUYẾN MÃI */}
-      <PromotionForm initialData={null} onSubmit={handleSubmit} />
+      <PromotionForm initialData={null} onSubmit={handleSubmit} onValuesChange={setPromoDates} />
 
       {/* DANH SÁCH SẢN PHẨM ÁP DỤNG */}
       <PromotionProductSelector
         selectedIds={selectedProductIds}
         onChange={setSelectedProductIds}
         onProductsDataChange={handleProductsDataChange}
+        promoStartDate={promoDates.startDate}
+        promoEndDate={promoDates.endDate}
       />
     </div>
   );

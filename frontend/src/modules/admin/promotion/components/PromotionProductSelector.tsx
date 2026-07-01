@@ -55,6 +55,9 @@ interface PromotionProductSelectorProps {
   onChange: (ids: number[]) => void;
   onProductsDataChange?: (products: PromotionProducts[]) => void;
   initialProducts?: PromotionProducts[];
+  promoStartDate?: string;
+  promoEndDate?: string;
+  currentPromotionId?: number;
 }
 
 const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
@@ -62,6 +65,9 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
   onChange,
   onProductsDataChange,
   initialProducts,
+  promoStartDate,
+  promoEndDate,
+  currentPromotionId,
 }) => {
   // SỬ DỤNG HOOK USEPRODUCTFILTER CHUẨN HOÁ
   const {
@@ -80,6 +86,7 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
       keyword: debouncedKeyword || undefined,
       page,
       size: size || 10,
+      status: "ACTIVE"
     });
 
   // Lấy chi tiết các sản phẩm được chọn bằng useQueries (không dùng useProduct)
@@ -131,7 +138,7 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
       const discounts: Record<number, number> = {};
       if (initialProducts) {
         initialProducts.forEach((p) => {
-          discounts[p.id] = p.localDiscount;
+          discounts[p.productId] = p.localDiscount;
         });
       }
       return discounts;
@@ -144,7 +151,7 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
     const quantities: Record<number, number> = {};
     if (initialProducts) {
       initialProducts.forEach((p) => {
-        quantities[p.id] = p.localQty;
+        quantities[p.productId] = p.localQty;
       });
     }
     return quantities;
@@ -159,8 +166,8 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
     const quantities: Record<number, number> = {};
     if (initialProducts) {
       initialProducts.forEach((p) => {
-        discounts[p.id] = p.localDiscount;
-        quantities[p.id] = p.localQty;
+        discounts[p.productId] = p.localDiscount;
+        quantities[p.productId] = p.localQty;
       });
     }
     setDiscountsMap(discounts);
@@ -173,7 +180,7 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
         const discount = discountsMap[id] ?? 10;
         const qty = promoQuantities[id] ?? 10;
         return {
-          id,
+          productId: id,
           localDiscount: discount,
           localQty: qty,
         };
@@ -375,6 +382,9 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
                   onQuantityChange={(val) =>
                     handleQuantityChange(product.id, val)
                   }
+                  promoStartDate={promoStartDate}
+                  promoEndDate={promoEndDate}
+                  currentPromotionId={currentPromotionId}
                 />
               ))
             )}
@@ -407,7 +417,24 @@ interface ProductRowProps {
   onToggleSelect: () => void;
   onDiscountChange: (val: number) => void;
   onQuantityChange: (val: number) => void;
+  promoStartDate?: string;
+  promoEndDate?: string;
+  currentPromotionId?: number;
 }
+
+const isOverlapping = (
+  start1: string,
+  end1: string,
+  start2: string,
+  end2: string
+) => {
+  if (!start1 || !end1 || !start2 || !end2) return false;
+  const s1 = new Date(start1).getTime();
+  const e1 = new Date(end1).getTime();
+  const s2 = new Date(start2).getTime();
+  const e2 = new Date(end2).getTime();
+  return !(e1 < s2 || s1 > e2);
+};
 
 const ProductRow: React.FC<ProductRowProps> = ({
   product,
@@ -417,6 +444,9 @@ const ProductRow: React.FC<ProductRowProps> = ({
   onToggleSelect,
   onDiscountChange,
   onQuantityChange,
+  promoStartDate,
+  promoEndDate,
+  currentPromotionId,
 }) => {
   const [localDiscount, setLocalDiscount] = useState<string>(
     initialDiscount.toString(),
@@ -510,6 +540,24 @@ const ProductRow: React.FC<ProductRowProps> = ({
 
   const isSellAtLoss = finalPrice < product.importPrice;
 
+  const hasOverlap = useMemo(() => {
+    if (!promoStartDate || !promoEndDate || !product.promotions) return false;
+    return product.promotions.some((promo) => {
+      if (currentPromotionId && promo.id === currentPromotionId) {
+        return false;
+      }
+      return isOverlapping(promoStartDate, promoEndDate, promo.startDate, promo.endDate);
+    });
+  }, [product.promotions, promoStartDate, promoEndDate, currentPromotionId]);
+
+  const tdClass = (extra: string = "") => {
+    const base = "py-5 px-4 align-middle transition-all duration-200";
+    if (hasOverlap && isSelected) {
+      return `${base} bg-rose-50/25 border-y border-red-300 first:border-l first:rounded-l-xl last:border-r last:rounded-r-xl ${extra}`;
+    }
+    return `${base} ${extra}`;
+  };
+
   return (
     <tr
       onClick={onToggleSelect}
@@ -519,7 +567,7 @@ const ProductRow: React.FC<ProductRowProps> = ({
     >
       {/* CHECKBOX */}
       <td
-        className="py-5 px-4 text-center align-middle"
+        className={tdClass("text-center")}
         onClick={(e) => e.stopPropagation()}
       >
         <input
@@ -531,7 +579,7 @@ const ProductRow: React.FC<ProductRowProps> = ({
       </td>
 
       {/* THÔNG TIN SẢN PHẨM */}
-      <td className="py-5 px-4 align-middle">
+      <td className={tdClass()}>
         <div className="flex gap-3.5 items-stretch">
           {/* Ảnh bìa */}
           <div className="shrink-0 mt-0.5">
@@ -621,7 +669,7 @@ const ProductRow: React.FC<ProductRowProps> = ({
       </td>
 
       {/* GIÁ & CHIẾT KHẤU / MỨC GIẢM */}
-      <td className="py-5 px-4 align-middle">
+      <td className={tdClass()}>
         <div className="flex flex-col gap-2 justify-center min-h-11">
           {/* Hàng 1: Giá nhập & Giá bán */}
           <div className="flex items-center gap-2">
@@ -675,7 +723,7 @@ const ProductRow: React.FC<ProductRowProps> = ({
 
       {/* SỐ LƯỢNG (TỒN KHO & ÁP DỤNG) */}
       <td
-        className="py-5 px-4 align-middle text-right"
+        className={tdClass("text-right")}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex flex-col gap-1 items-end justify-center min-h-11">
@@ -717,8 +765,14 @@ const ProductRow: React.FC<ProductRowProps> = ({
       </td>
 
       {/* CHƯƠNG TRÌNH ĐANG THAM GIA */}
-      <td className="py-5 px-4 align-middle text-left" onClick={(e) => e.stopPropagation()}>
+      <td className={tdClass("text-left")} onClick={(e) => e.stopPropagation()}>
         <div className="flex flex-col gap-1.5 justify-center min-h-11 max-w-[280px]">
+          {hasOverlap && isSelected && (
+            <div className="flex items-center gap-1 bg-rose-50 border border-rose-200 text-rose-700 px-2 py-1 rounded-lg text-[10px] font-bold mb-1.5 w-fit">
+              <AlertTriangle size={12} className="text-rose-600" />
+              <span>Trùng lịch chương trình khác!</span>
+            </div>
+          )}
           {product.promotions && product.promotions.length > 0 ? (
             product.promotions.map((promo, idx) => (
               <div key={idx} className="flex flex-col gap-0.5 border-b border-slate-100/60 last:border-0 pb-1.5 last:pb-0">

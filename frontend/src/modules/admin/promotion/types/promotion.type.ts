@@ -29,7 +29,7 @@ export interface PromotionRequest {
 }
 
 export interface PromotionProducts {
-  id: number;
+  productId: number;
   localDiscount: number;
   localQty: number;
 }

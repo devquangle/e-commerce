@@ -39,7 +39,7 @@ public class PromotionMapper {
                         .stream()
                         .map(pp -> {
                             PromotionProductResponse item = new PromotionProductResponse();
-                            item.setId(pp.getProduct().getId());
+                            item.setProductId(pp.getProduct().getId());
                             item.setLocalDiscount(pp.getDiscountValue());
                             item.setLocalQty(pp.getMaxQuantity());
                             return item;

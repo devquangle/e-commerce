@@ -17,11 +17,12 @@ export default function UpdatePromotion() {
 
   const [selectedProductIds, setSelectedProductIds] = useState<number[]>([]);
   const [promotionProductsData, setPromotionProductsData] = useState<PromotionProducts[]>([]);
+  const [promoDates, setPromoDates] = useState<{ startDate: string; endDate: string }>({ startDate: "", endDate: "" });
 
   // Đồng bộ sản phẩm từ DB sang local state khi tải xong
   useEffect(() => {
     if (promotion?.promotionProducts) {
-      setSelectedProductIds(promotion.promotionProducts.map((p) => p.id));
+      setSelectedProductIds(promotion.promotionProducts.map((p) => p.productId));
       setPromotionProductsData(promotion.promotionProducts);
     }
   }, [promotion]);
@@ -60,7 +61,7 @@ export default function UpdatePromotion() {
       <UpdatePromotionHeader id={id} onBack={handleCancel} />
 
       {/* FORM THÔNG TIN CHUNG KHUYẾN MÃI */}
-      <PromotionForm initialData={promotion} onSubmit={handleSubmit} />
+      <PromotionForm initialData={promotion} onSubmit={handleSubmit} onValuesChange={setPromoDates} />
 
       {/* DANH SÁCH SẢN PHẨM ÁP DỤNG */}
       <PromotionProductSelector
@@ -68,6 +69,9 @@ export default function UpdatePromotion() {
         onChange={setSelectedProductIds}
         onProductsDataChange={handleProductsDataChange}
         initialProducts={promotion?.promotionProducts}
+        promoStartDate={promoDates.startDate}
+        promoEndDate={promoDates.endDate}
+        currentPromotionId={promoId}
       />
     </div>
   );

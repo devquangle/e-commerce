@@ -37,6 +37,7 @@ public class ProductResponse {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class ProductPromotionDto {
+        private Integer id;
         private String name;
         private String campaignType;
         private Integer discountPercentage;

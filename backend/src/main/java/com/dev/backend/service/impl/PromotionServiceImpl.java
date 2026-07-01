@@ -85,7 +85,7 @@ public class PromotionServiceImpl implements PromotionService {
                 }
 
                 for (PromotionProductRequest ppReq : request.getPromotionProducts()) {
-                        Integer productId = ppReq.getId();
+                        Integer productId = ppReq.getProductId();
                         Product product = productRepository.findById(productId)
                                 .orElseThrow(() -> new NotFoundException("Không tìm thấy sản phẩm với ID: " + productId));
 

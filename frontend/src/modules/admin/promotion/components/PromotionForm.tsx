@@ -14,11 +14,13 @@ import InputField from "@/components/common/InputField";
 interface PromotionFormProps {
   initialData?: PromotionResponse | PromotionDetailResponse | null;
   onSubmit: (data: PromotionRequest) => void;
+  onValuesChange?: (values: { startDate: string; endDate: string }) => void;
 }
 
 const PromotionForm: React.FC<PromotionFormProps> = ({
   initialData,
   onSubmit,
+  onValuesChange,
 }) => {
   const {
     register,
@@ -26,6 +28,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
     reset,
     control,
     formState: { errors },
+    watch,
   } = useForm<PromotionRequest>({
     defaultValues: {
       name: "",
@@ -35,6 +38,15 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
       promotionCampaignType: "PRODUCT_DISCOUNT",
     },
   });
+
+  const watchedStartDate = watch("startDate");
+  const watchedEndDate = watch("endDate");
+
+  useEffect(() => {
+    if (onValuesChange) {
+      onValuesChange({ startDate: watchedStartDate, endDate: watchedEndDate });
+    }
+  }, [watchedStartDate, watchedEndDate, onValuesChange]);
 
   useEffect(() => {
     if (initialData) {

@@ -40,11 +40,10 @@ public class PromotionProductServiceImpl implements PromotionProductService {
             PromotionProduct pp = new PromotionProduct();
 
             pp.setPromotion(promotion);
-            pp.setProduct(productService.findById(item.getId()));
+            pp.setProduct(productService.findById(item.getProductId()));
             pp.setDiscountValue(item.getLocalDiscount());
             pp.setMaxQuantity(item.getLocalQty());
             pp.setSoldQuantity(0);
-
             entities.add(pp);
         }
 
@@ -63,7 +62,7 @@ public class PromotionProductServiceImpl implements PromotionProductService {
             PromotionProduct pp = new PromotionProduct();
 
             pp.setPromotion(promotion);
-            pp.setProduct(productService.findById(item.getId()));
+            pp.setProduct(productService.findById(item.getProductId()));
             pp.setDiscountValue(item.getLocalDiscount());
             pp.setMaxQuantity(item.getLocalQty());
             pp.setSoldQuantity(0);

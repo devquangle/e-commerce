@@ -41,6 +41,7 @@ public class ProductMapper {
                 .filter(pp -> pp.getPromotion() != null && pp.getPromotion().getStatus() != com.dev.backend.constant.BaseStatus.DELETED)
                 .map(pp -> {
                     ProductResponse.ProductPromotionDto promoDto = new ProductResponse.ProductPromotionDto();
+                    promoDto.setId(pp.getPromotion().getId());
                     promoDto.setName(pp.getPromotion().getName());
                     promoDto.setCampaignType(pp.getPromotion().getPromotionCampaignType() != null ? pp.getPromotion().getPromotionCampaignType().name() : "");
                     promoDto.setDiscountPercentage(pp.getDiscountValue());
@@ -86,6 +87,7 @@ public class ProductMapper {
                 .filter(pp -> pp.getPromotion() != null && pp.getPromotion().getStatus() != com.dev.backend.constant.BaseStatus.DELETED)
                 .map(pp -> {
                     ProductResponse.ProductPromotionDto promoDto = new ProductResponse.ProductPromotionDto();
+                    promoDto.setId(pp.getPromotion().getId());
                     promoDto.setName(pp.getPromotion().getName());
                     promoDto.setCampaignType(pp.getPromotion().getPromotionCampaignType() != null ? pp.getPromotion().getPromotionCampaignType().name() : "");
                     promoDto.setDiscountPercentage(pp.getDiscountValue());

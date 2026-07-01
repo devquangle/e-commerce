@@ -18,6 +18,7 @@ export interface ProductRequest {
 }
 
 export interface ProductPromotionDto {
+  id: number;
   name: string;
   campaignType: string;
   discountPercentage: number;

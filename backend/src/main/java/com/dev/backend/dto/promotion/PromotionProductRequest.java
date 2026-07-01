@@ -16,7 +16,7 @@ import lombok.Setter;
 public class PromotionProductRequest {
     @NotNull(message = "ID sản phẩm không được để trống")
     @Positive
-    private Integer id;
+    private Integer productId;
     @NotNull(message = "Phần trăm giảm giá không được để trống")
     @Min(value = 1, message = "Phần trăm giảm giá phải từ 1%")
     @Max(value = 100, message = "Phần trăm giảm giá không được vượt quá 100%")

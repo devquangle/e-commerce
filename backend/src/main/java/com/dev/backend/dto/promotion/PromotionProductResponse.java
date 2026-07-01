@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 public class PromotionProductResponse {
 
-    private Integer id;
+    private Integer productId;
     private Integer localDiscount;
     private Integer localQty;
 }
