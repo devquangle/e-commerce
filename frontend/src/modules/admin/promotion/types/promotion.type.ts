@@ -25,10 +25,10 @@ export interface PromotionRequest {
   endDate: string;
   status: BaseStatus;
   promotionCampaignType: PromotionCampaignType;
-  promotionProducts: PromotionProducts[] | [];
+  promotionProducts: PromotionProductResponse[] | [];
 }
 
-export interface PromotionProducts {
+export interface PromotionProductResponse {
   productId: number;
   localDiscount: number;
   localQty: number;
@@ -41,5 +41,5 @@ export interface PromotionDetailResponse{
   endDate: string;
   status: BaseStatus;
   promotionCampaignType: PromotionCampaignType;
-  promotionProducts: PromotionProducts[] | [];
+  promotionProducts: PromotionProductResponse[] | [];
 }

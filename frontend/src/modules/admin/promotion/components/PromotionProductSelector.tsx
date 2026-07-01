@@ -43,7 +43,7 @@ const getLanguageName = (code?: string) => {
   return name.charAt(0).toUpperCase() + name.slice(1);
 };
 
-import type { PromotionProducts, PromotionCampaignType } from "../types/promotion.type";
+import type { PromotionProductResponse, PromotionCampaignType } from "../types/promotion.type";
 import { campaignTypeLabels } from "../types/promotion.type";
 
 export interface ProductSelectorItem extends ProductResponse {
@@ -53,8 +53,8 @@ export interface ProductSelectorItem extends ProductResponse {
 interface PromotionProductSelectorProps {
   selectedIds: number[];
   onChange: (ids: number[]) => void;
-  onProductsDataChange?: (products: PromotionProducts[]) => void;
-  initialProducts?: PromotionProducts[];
+  onProductsDataChange?: (products: PromotionProductResponse[]) => void;
+  initialProducts?: PromotionProductResponse[];
   promoStartDate?: string;
   promoEndDate?: string;
   currentPromotionId?: number;
@@ -176,7 +176,7 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
 
   useEffect(() => {
     if (onProductsDataChange) {
-      const data: PromotionProducts[] = selectedIds.map((id) => {
+      const data: PromotionProductResponse[] = selectedIds.map((id) => {
         const discount = discountsMap[id] ?? 10;
         const qty = promoQuantities[id] ?? 10;
         return {
