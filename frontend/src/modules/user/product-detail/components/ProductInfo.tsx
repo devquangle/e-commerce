@@ -54,7 +54,7 @@ export default function ProductInfo({
       </div>
 
       {/* Pricing */}
-      <div className="bg-gradient-to-br from-slate-50 to-slate-100/50 border border-slate-100/80 p-5 rounded-2xl">
+      <div className="bg-linear-to-r from-slate-50 to-slate-100/50 border border-slate-100/80 p-5 rounded-2xl">
         <div className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Giá bán</div>
         <div className="flex items-baseline gap-3 flex-wrap">
           <span className="text-3xl md:text-4xl font-extrabold text-blue-600 tracking-tight">
@@ -114,7 +114,7 @@ export default function ProductInfo({
               <Heart size={20} />
             </button>
 
-            <button className="h-12 px-8 bg-gradient-to-r from-rose-500 to-red-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-rose-500/25 hover:shadow-red-600/35 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 flex-1">
+            <button className="h-12 px-8 bg-linear-to-r from-rose-500 to-red-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-rose-500/25 hover:shadow-red-600/35 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 flex-1">
               Mua ngay
             </button>
           </div>

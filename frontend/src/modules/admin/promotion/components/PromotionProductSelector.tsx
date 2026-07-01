@@ -43,7 +43,8 @@ const getLanguageName = (code?: string) => {
   return name.charAt(0).toUpperCase() + name.slice(1);
 };
 
-import type { PromotionProducts } from "../types/promotion.type";
+import type { PromotionProducts, PromotionCampaignType } from "../types/promotion.type";
+import { campaignTypeLabels } from "../types/promotion.type";
 
 export interface ProductSelectorItem extends ProductResponse {
   importPrice: number;
@@ -114,6 +115,7 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
           publisherName: "",
           seriesName: "",
           urlImageDefault: thumbnail || (d.coverImages?.[0]?.url ?? ""),
+          promotions: d.promotions,
         };
       });
   }, [selectedProductQueries]);
@@ -333,30 +335,21 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
               <th className="py-3.5 px-4 font-semibold text-xs uppercase tracking-wider min-w-[340px]">
                 Thông tin sản phẩm
               </th>
-              <th className="py-3.5 px-4 font-semibold text-xs uppercase tracking-wider w-32">
-                Giá nhập
+              <th className="py-3.5 px-4 font-semibold text-xs uppercase tracking-wider w-72">
+                Thông tin giá & Giảm giá
               </th>
-              <th className="py-3.5 px-4 font-semibold text-xs uppercase tracking-wider w-32">
-                Giá bán
-              </th>
-              <th className="py-3.5 px-4 font-semibold text-xs uppercase tracking-wider w-36 text-center text-indigo-600">
-                Mức giảm (%)
-              </th>
-              <th className="py-3.5 px-4 font-semibold text-xs uppercase tracking-wider w-40">
-                Giá cuối cùng
-              </th>
-              <th className="py-3.5 px-4 font-semibold text-xs uppercase tracking-wider w-24 text-center">
+              <th className="py-3.5 px-4 font-semibold text-xs uppercase tracking-wider w-40 text-right">
                 Số lượng
               </th>
-              <th className="py-3.5 px-4 font-semibold text-xs uppercase tracking-wider w-36 text-right">
-                Số lượng áp dụng
+              <th className="py-3.5 px-4 font-semibold text-xs uppercase tracking-wider w-72 text-left">
+                Chương trình đã tham gia
               </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 bg-white">
             {productsList.length === 0 ? (
               <tr>
-                <td colSpan={8} className="py-14 text-center">
+                <td colSpan={5} className="py-14 text-center">
                   <div className="flex flex-col items-center justify-center gap-2 text-slate-400">
                     <div className="p-3 bg-slate-50 rounded-full mb-1 animate-pulse">
                       <SearchX size={32} strokeWidth={1.5} />
@@ -627,113 +620,129 @@ const ProductRow: React.FC<ProductRowProps> = ({
         </div>
       </td>
 
-      {/* GIÁ NHẬP */}
+      {/* GIÁ & CHIẾT KHẤU / MỨC GIẢM */}
       <td className="py-5 px-4 align-middle">
-        <span className="text-sm text-slate-600 font-medium">
-          {formatMoney(product.importPrice)}
-        </span>
-      </td>
-
-      {/* GIÁ BÁN HIỆN TẠI */}
-      <td className="py-5 px-4 align-middle">
-        <span className="font-bold text-slate-700 text-sm">
-          {formatMoney(product.price)}
-        </span>
-      </td>
-
-      {/* MỨC GIẢM GIÁ (%) */}
-      <td
-        className="py-5 px-4 align-middle text-center"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="inline-flex items-center gap-1">
-          <input
-            type="number"
-            min={0}
-            max={100}
-            disabled={!isSelected}
-            value={localDiscount}
-            onChange={(e) => setLocalDiscount(e.target.value)}
-            className={`w-16 px-2.5 py-1.5 text-xs font-extrabold text-center rounded-xl border outline-none transition-all ${
-              isSelected
-                ? "border-slate-300 bg-white text-indigo-700 shadow-2xs hover:border-indigo-400 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100/70"
-                : "border-slate-200 bg-slate-100/80 text-slate-400 cursor-not-allowed"
-            }`}
-          />
-          <span className="text-xs font-bold text-slate-500">%</span>
-        </div>
-      </td>
-
-      {/* GIÁ BÁN CUỐI CÙNG */}
-      <td className="py-5 px-4 align-middle">
-        <div className="flex flex-col gap-1 justify-center min-h-11">
-          <div className="flex items-center gap-1.5">
-            <span className="font-extrabold text-indigo-600 text-sm">
-              {formatMoney(finalPrice)}
-            </span>
-            {isSellAtLoss && (
-              <span
-                title="Cảnh báo: Giá bán cuối cùng đang thấp hơn giá nhập! Bạn có chắc chắn muốn tiếp tục?"
-                className="inline-flex items-center justify-center p-1 rounded-full bg-amber-100 text-amber-700 hover:bg-amber-200 transition-colors cursor-help"
-              >
-                <AlertTriangle size={14} className="text-amber-600" />
-              </span>
-            )}
+        <div className="flex flex-col gap-2 justify-center min-h-11">
+          {/* Hàng 1: Giá nhập & Giá bán */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 text-xs text-slate-500">
+              <span className="font-semibold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded text-[9px]">Nhập</span>
+              <span className="font-medium">{formatMoney(product.importPrice)}</span>
+            </div>
+            <span className="text-slate-300 text-xs">|</span>
+            <div className="flex items-center gap-1.5 text-xs">
+              <span className="font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100 px-1.5 py-0.5 rounded text-[9px]">Bán</span>
+              <span className="font-bold text-slate-700">{formatMoney(product.price)}</span>
+            </div>
           </div>
-          {isSellAtLoss && (
-            <span className="text-[10px] font-semibold text-amber-700 leading-tight">
-              Giá bán &lt; Giá nhập
-            </span>
-          )}
+
+          {/* Hàng 2: Mức giảm (%) & Giá cuối cùng */}
+          <div className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-1">
+              <input
+                type="number"
+                min={0}
+                max={100}
+                disabled={!isSelected}
+                value={localDiscount}
+                onChange={(e) => setLocalDiscount(e.target.value)}
+                className={`w-14 px-2 py-1 text-xs font-extrabold text-center rounded-lg border outline-none transition-all ${
+                  isSelected
+                    ? "border-slate-300 bg-white text-indigo-700 hover:border-indigo-400 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
+                    : "border-slate-200 bg-slate-100/80 text-slate-400 cursor-not-allowed"
+                }`}
+              />
+              <span className="text-xs font-bold text-slate-500">%</span>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <span className="text-slate-400 text-xs font-medium">→</span>
+              <span className="font-extrabold text-indigo-600 text-sm">
+                {formatMoney(finalPrice)}
+              </span>
+              {isSellAtLoss && (
+                <span
+                  title="Cảnh báo: Giá bán cuối cùng đang thấp hơn giá nhập! Bạn có chắc chắn muốn tiếp tục?"
+                  className="inline-flex items-center justify-center p-1 rounded-full bg-amber-100 text-amber-700 hover:bg-amber-200 transition-colors cursor-help"
+                >
+                  <AlertTriangle size={12} className="text-amber-600" />
+                </span>
+              )}
+            </div>
+          </div>
         </div>
       </td>
 
-      {/* TỒN KHO */}
-      <td className="py-5 px-4 align-middle text-center">
-        <div className="flex flex-col items-center gap-0.5">
-          <span
-            className={`font-bold text-sm ${
-              product.quantity === 0
-                ? "text-rose-600"
-                : product.quantity <= 10
-                  ? "text-amber-600"
-                  : "text-slate-700"
-            }`}
-          >
-            {product.quantity}
-          </span>
-          {product.quantity === 0 && (
-            <span className="text-[10px] text-rose-500 font-medium">
-              Hết hàng
-            </span>
-          )}
-          {product.quantity > 0 && product.quantity <= 10 && (
-            <span className="text-[10px] text-amber-500 font-medium">
-              Sắp hết
-            </span>
-          )}
-        </div>
-      </td>
-
-      {/* SỐ LƯỢNG ÁP DỤNG */}
+      {/* SỐ LƯỢNG (TỒN KHO & ÁP DỤNG) */}
       <td
         className="py-5 px-4 align-middle text-right"
         onClick={(e) => e.stopPropagation()}
       >
-        <input
-          type="number"
-          min={1}
-          max={product.quantity}
-          disabled={!isSelected}
-          value={localQty}
-          onChange={(e) => handleQtyInputChange(e.target.value)}
-          onBlur={handleQtyBlur}
-          className={`w-20 px-2.5 py-1.5 text-xs font-extrabold text-right rounded-xl border outline-none transition-all ${
-            isSelected
-              ? "border-slate-300 bg-white text-slate-900 shadow-2xs hover:border-indigo-400 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100/70"
-              : "border-slate-200 bg-slate-100/80 text-slate-400 cursor-not-allowed"
-          }`}
-        />
+        <div className="flex flex-col gap-1 items-end justify-center min-h-11">
+          <div className="flex items-center gap-1 text-[11px] text-slate-500 font-medium">
+            <span>Tồn kho:</span>
+            <span
+              className={`font-bold ${
+                product.quantity === 0
+                  ? "text-rose-600"
+                  : product.quantity <= 10
+                    ? "text-amber-600"
+                    : "text-slate-700"
+              }`}
+            >
+              {product.quantity}
+            </span>
+            {product.quantity === 0 && (
+              <span className="text-[9px] text-rose-500 font-semibold bg-rose-50 px-1 py-0.2 rounded border border-rose-100">Hết</span>
+            )}
+            {product.quantity > 0 && product.quantity <= 10 && (
+              <span className="text-[9px] text-amber-500 font-semibold bg-amber-50 px-1 py-0.2 rounded border border-amber-100">Sắp hết</span>
+            )}
+          </div>
+          <input
+            type="number"
+            min={1}
+            max={product.quantity}
+            disabled={!isSelected}
+            value={localQty}
+            onChange={(e) => handleQtyInputChange(e.target.value)}
+            onBlur={handleQtyBlur}
+            className={`w-20 px-2 py-1 text-xs font-extrabold text-right rounded-lg border outline-none transition-all ${
+              isSelected
+                ? "border-slate-300 bg-white text-slate-900 shadow-2xs hover:border-indigo-400 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
+                : "border-slate-200 bg-slate-100/80 text-slate-400 cursor-not-allowed"
+            }`}
+          />
+        </div>
+      </td>
+
+      {/* CHƯƠNG TRÌNH ĐANG THAM GIA */}
+      <td className="py-5 px-4 align-middle text-left" onClick={(e) => e.stopPropagation()}>
+        <div className="flex flex-col gap-1.5 justify-center min-h-11 max-w-[280px]">
+          {product.promotions && product.promotions.length > 0 ? (
+            product.promotions.map((promo, idx) => (
+              <div key={idx} className="flex flex-col gap-0.5 border-b border-slate-100/60 last:border-0 pb-1.5 last:pb-0">
+                <div className="flex items-center gap-1 text-xs text-slate-800 font-semibold line-clamp-1" title={promo.name}>
+                  <Tag size={10} className="text-indigo-500 shrink-0" />
+                  <span>{promo.name}</span>
+                </div>
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-slate-500 font-medium">
+                  <span className="bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded-md text-[9px] font-bold">
+                    {campaignTypeLabels[promo.campaignType as PromotionCampaignType] || promo.campaignType}
+                  </span>
+                  <span className="bg-rose-50 text-rose-700 px-1.5 py-0.5 rounded-md text-[9px] font-bold">
+                    -{promo.discountPercentage}%
+                  </span>
+                </div>
+                <div className="text-[9px] text-slate-400 font-medium mt-0.5">
+                  {promo.startDate} đến {promo.endDate}
+                </div>
+              </div>
+            ))
+          ) : (
+            <span className="text-xs text-slate-400 italic">Chưa tham gia chương trình nào</span>
+          )}
+        </div>
       </td>
     </tr>
   );

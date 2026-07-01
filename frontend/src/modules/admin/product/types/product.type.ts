@@ -17,6 +17,14 @@ export interface ProductRequest {
   description: string;
 }
 
+export interface ProductPromotionDto {
+  name: string;
+  campaignType: string;
+  discountPercentage: number;
+  startDate: string;
+  endDate: string;
+}
+
 export interface ProductResponse {
   id: number;
   name: string;
@@ -34,6 +42,7 @@ export interface ProductResponse {
   publisherName: string;
   seriesName: string;
   urlImageDefault: string;
+  promotions?: ProductPromotionDto[];
 }
 
 export interface ProductDetailResponse {
@@ -55,6 +64,7 @@ export interface ProductDetailResponse {
   publisherId: number | null;
   seriesId: number | null;
   coverImages: ProductImageResponse[] | [];
+  promotions?: ProductPromotionDto[];
 }
 
 export interface ProductImageResponse {

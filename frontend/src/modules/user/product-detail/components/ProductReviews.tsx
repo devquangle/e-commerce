@@ -20,7 +20,7 @@ export default function ProductReviews({ overview, comments }: ProductReviewsPro
   const showButton = filteredComments.length > initialCommentsCount;
 
   return (
-    <div className="card-custom !p-6 mb-8">
+    <div className="card-custom mb-8">
       <h2 className="text-2xl font-bold text-slate-900 mb-6">Đánh giá sản phẩm</h2>
       
       <div className="flex flex-col md:flex-row items-center gap-8 mb-10 p-6 bg-slate-50 rounded-2xl border border-slate-100">

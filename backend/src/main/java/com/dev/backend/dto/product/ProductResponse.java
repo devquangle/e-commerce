@@ -30,4 +30,17 @@ public class ProductResponse {
     private String seriesName;
     private String urlImageDefault;
 
+    private List<ProductPromotionDto> promotions;
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class ProductPromotionDto {
+        private String name;
+        private String campaignType;
+        private Integer discountPercentage;
+        private String startDate;
+        private String endDate;
+    }
 }

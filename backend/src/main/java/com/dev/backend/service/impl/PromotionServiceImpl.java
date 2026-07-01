@@ -20,10 +20,16 @@ import com.dev.backend.entity.Promotion;
 import com.dev.backend.exception.NotFoundException;
 import com.dev.backend.mapper.PromotionMapper;
 import com.dev.backend.repository.PromotionRepository;
+import com.dev.backend.repository.ProductRepository;
+import com.dev.backend.entity.Product;
+import com.dev.backend.entity.PromotionProduct;
+import com.dev.backend.dto.promotion.PromotionProductRequest;
+import com.dev.backend.exception.BadRequestException;
 import com.dev.backend.response.PageResponse;
 import com.dev.backend.service.PromotionProductService;
 import com.dev.backend.service.PromotionService;
 import com.dev.backend.util.FilterValidator;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -36,6 +42,7 @@ public class PromotionServiceImpl implements PromotionService {
         private final PromotionRepository promotionRepository;
         private final PromotionMapper promotionMapper;
         private final PromotionProductService promotionProductService;
+        private final ProductRepository productRepository;
 
         private Promotion setPromotionRequest(Promotion promotion, PromotionRequest request) {
                 promotion.setName(request.getName());
@@ -47,7 +54,9 @@ public class PromotionServiceImpl implements PromotionService {
         }
 
         @Override
+        @Transactional
         public PromotionResponse addPromotion(PromotionRequest promotionRequest) {
+                validateOverlap(null, promotionRequest);
                 Promotion promotion = new Promotion();
                 setPromotionRequest(promotion, promotionRequest);
                 promotion.setCreatedAt(LocalDate.now());
@@ -57,12 +66,58 @@ public class PromotionServiceImpl implements PromotionService {
         }
 
         @Override
+        @Transactional
         public PromotionResponse updatePromotion(Integer id, PromotionRequest promotionRequest) {
+                validateOverlap(id, promotionRequest);
                 Promotion promotion = findByIdWithPromotionProducts(id);
                 setPromotionRequest(promotion, promotionRequest);
                 Promotion saved = savePromotion(promotion);
                 promotionProductService.updatePromotionProducts(saved, promotionRequest.getPromotionProducts());
                 return promotionMapper.toDTO(saved);
+        }
+
+        private void validateOverlap(Integer promotionId, PromotionRequest request) {
+                LocalDate reqStart = request.getStartDate();
+                LocalDate reqEnd = request.getEndDate();
+
+                if (request.getPromotionProducts() == null || request.getPromotionProducts().isEmpty()) {
+                        return;
+                }
+
+                for (PromotionProductRequest ppReq : request.getPromotionProducts()) {
+                        Integer productId = ppReq.getId();
+                        Product product = productRepository.findById(productId)
+                                .orElseThrow(() -> new NotFoundException("Không tìm thấy sản phẩm với ID: " + productId));
+
+                        if (product.getPromotionProducts() != null) {
+                                for (PromotionProduct pp : product.getPromotionProducts()) {
+                                        Promotion otherPromo = pp.getPromotion();
+                                        if (otherPromo == null || otherPromo.getStatus() == BaseStatus.DELETED) {
+                                                continue;
+                                        }
+
+                                        // Bỏ qua chính nó khi cập nhật
+                                        if (promotionId != null && otherPromo.getId().equals(promotionId)) {
+                                                continue;
+                                        }
+
+                                        LocalDate otherStart = otherPromo.getStartDate();
+                                        LocalDate otherEnd = otherPromo.getExpireDate();
+
+                                        // Kiểm tra trùng lặp: !(reqEnd.isBefore(otherStart) || reqStart.isAfter(otherEnd))
+                                        if (!(reqEnd.isBefore(otherStart) || reqStart.isAfter(otherEnd))) {
+                                                throw new BadRequestException(
+                                                        String.format("Sản phẩm '%s' đang tham gia chương trình '%s' (%s đến %s). Thời gian chương trình mới không được trùng lặp!",
+                                                                product.getName(),
+                                                                otherPromo.getName(),
+                                                                otherStart.toString(),
+                                                                otherEnd.toString()
+                                                        )
+                                                );
+                                        }
+                                }
+                        }
+                }
         }
 
         @Override

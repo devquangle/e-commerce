@@ -64,7 +64,7 @@ export default function ProductDescription({ product }: ProductDescriptionProps)
         
         {/* Lớp phủ mờ (Fade out gradient) khi chưa mở rộng */}
         {!isExpanded && showButton && (
-          <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none" />
+          <div className="absolute bottom-0 left-0 right-0 h-28 bg-linear-to-t from-white via-white/80 to-transparent pointer-events-none" />
         )}
       </div>
 
