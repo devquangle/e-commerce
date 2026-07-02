@@ -58,11 +58,11 @@ export default function Promotion() {
   const totalItems = data?.totalItems || 0;
 
   const handleCreateClick = () => {
-    navigate("/admin/add-promotion");
+    navigate("/admin/promotion/add");
   };
 
   const handleEditClick = (promo: PromotionResponse) => {
-    navigate(`/admin/edit-promotion/${promo.id}`);
+    navigate(`/admin/promotion/edit/${promo.id}`);
   };
 
   const handleDeleteClick = useCallback((id: number) => {

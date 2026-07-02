@@ -74,7 +74,7 @@ export default function Product() {
     <>
       <div className="flex-1 grid grid-cols-1 gap-4 auto-rows-max">
         {/* HEADER */}
-        <ProductHeader onCreate={() => navigate("/admin/add-product")} />
+        <ProductHeader onCreate={() => navigate("/admin/product/add")} />
 
         {/* FILTER & TABLE */}
         <div className="card-custom">

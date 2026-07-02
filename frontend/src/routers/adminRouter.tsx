@@ -68,19 +68,19 @@ const adminRouter = [
     element: <Chat />,
   },
   {
-    path: "add-product",
+    path: "product/add",
     element: <CreateProduct />,
   },
   {
-    path: "edit-product/:id",
+    path: "product/edit/:id",
     element: <UpdateProduct />,
   },
   {
-    path: "add-promotion",
+    path: "promotion/add",
     element: <CreatePromotion />,
   },
   {
-    path: "edit-promotion/:id",
+    path: "promotion/edit/:id",
     element: <UpdatePromotion />,
   },
   {

@@ -12,7 +12,7 @@ const ProductActionButtons = ({ item, onDelete, mobile = false }: Props) => {
   return (
     <div className={mobile ? "flex gap-2" : "inline-flex gap-2"}>
       <Link
-        to={`/admin/edit-product/${item.id}`}
+        to={`/admin/product/edit/${item.id}`}
         className={
           mobile
             ? "inline-flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white py-2 text-xs font-semibold text-slate-700 transition-all hover:bg-slate-50"

@@ -9,6 +9,7 @@ import UserLayout from "./layouts/UserLayout";
 import AdminLayout from "./layouts/AdminLayout";
 import userRouter from "./routers/userRouter";
 import adminRouter from "./routers/adminRouter";
+import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -34,6 +35,10 @@ const router = createBrowserRouter([
         path: "admin",
         element: <AdminLayout />,
         children: adminRouter,
+      },
+      {
+        path: "*",
+        element: <NotFound />,
       },
     ],
   },
