@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import {
   type PromotionResponse,
   type PromotionRequest,
@@ -17,6 +17,23 @@ interface PromotionFormProps {
   onValuesChange?: (values: { startDate: string; endDate: string }) => void;
 }
 
+const getLocalTodayStr = () => {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const getLocalFutureDateStr = (days: number) => {
+  const date = new Date();
+  date.setDate(date.getDate() + days);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
 const PromotionForm: React.FC<PromotionFormProps> = ({
   initialData,
   onSubmit,
@@ -27,24 +44,45 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
     handleSubmit,
     reset,
     control,
-    formState: { errors },
-    watch,
+    formState: { errors, dirtyFields },
+    setValue,
+    trigger,
   } = useForm<PromotionRequest>({
+    mode: "onChange",
     defaultValues: {
       name: "",
-      startDate: "2026-06-01",
-      endDate: "2026-06-30",
+      startDate: getLocalTodayStr(),
+      endDate: getLocalFutureDateStr(30),
       status: BaseStatus.ACTIVE,
       promotionCampaignType: "PRODUCT_DISCOUNT",
     },
   });
 
-  const watchedStartDate = watch("startDate");
-  const watchedEndDate = watch("endDate");
+  const watchedStartDate = useWatch({ control, name: "startDate" }) as
+    | string
+    | "";
+  const watchedEndDate = useWatch({ control, name: "endDate" }) as string | "";
+
+  useEffect(() => {
+    if (dirtyFields.startDate && watchedStartDate) {
+      const start = new Date(watchedStartDate);
+      if (!isNaN(start.getTime())) {
+        const end = new Date(start.getTime() + 30 * 24 * 60 * 60 * 1000);
+        const endStr = end.toISOString().split("T")[0];
+        setValue("endDate", endStr, { shouldDirty: true, shouldValidate: true });
+      }
+    }
+    if (watchedStartDate) {
+      trigger("endDate");
+    }
+  }, [watchedStartDate, dirtyFields.startDate, setValue, trigger]);
 
   useEffect(() => {
     if (onValuesChange) {
-      onValuesChange({ startDate: watchedStartDate, endDate: watchedEndDate });
+      onValuesChange({
+        startDate: watchedStartDate ?? "",
+        endDate: watchedEndDate ?? "",
+      });
     }
   }, [watchedStartDate, watchedEndDate, onValuesChange]);
 
@@ -60,10 +98,8 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
     } else {
       reset({
         name: "",
-        startDate: new Date().toISOString().split("T")[0],
-        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-          .toISOString()
-          .split("T")[0],
+        startDate: getLocalTodayStr(),
+        endDate: getLocalFutureDateStr(30),
         status: BaseStatus.ACTIVE,
         promotionCampaignType: "PRODUCT_DISCOUNT",
       });
@@ -94,7 +130,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
           />
 
           {/* HÀNG GỒM: NGÀY BẮT ĐẦU, NGÀY KẾT THÚC, LOẠI CHIẾN DỊCH, TRẠNG THÁI */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
             {/* Ngày bắt đầu */}
             <InputField<PromotionRequest>
               label="Ngày bắt đầu"
@@ -111,7 +147,16 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
               name="endDate"
               type="date"
               register={register}
-              rules={{ required: "Chọn ngày kết thúc" }}
+              rules={{
+                required: "Chọn ngày kết thúc",
+                validate: (value) => {
+                  if (!watchedStartDate || !value) return true;
+                  return (
+                    value > watchedStartDate ||
+                    "Ngày kết thúc phải sau ngày bắt đầu"
+                  );
+                },
+              }}
               error={errors.endDate}
             />
 

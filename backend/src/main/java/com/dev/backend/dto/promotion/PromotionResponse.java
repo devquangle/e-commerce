@@ -15,7 +15,6 @@ import lombok.Setter;
 public class PromotionResponse {
     private Integer id;
     private String name;
-
     private String startDate;
     private String endDate;
     private BaseStatus status;

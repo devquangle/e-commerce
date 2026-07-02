@@ -4,10 +4,11 @@
  * @returns Chuỗi đã định dạng kèm chữ VND (Ví dụ: 1.000.000 VND)
  */
 export function formatMoney(value: number | undefined | null): string {
-  if (value === undefined || value === null || isNaN(value)) {
-    return "0 VND";
-  }
-  return `${value.toLocaleString("vi-VN")} đ`;
+   const vndFormatter = new Intl.NumberFormat("vi-VN", {
+     style: "currency",
+     currency: "VND",
+   });
+   return vndFormatter.format(value ?? 0);
 }
 
 /**

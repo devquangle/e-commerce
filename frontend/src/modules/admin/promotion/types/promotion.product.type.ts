@@ -1,4 +1,5 @@
 import type { PromotionCampaignType } from "./promotion.type";
+import type { ProductResponse } from "@/modules/admin/product/types/product.type";
 
 export interface PromotionProductMappingResponse {
   productId: number;
@@ -15,4 +16,9 @@ export interface PromotionProductDetailResponse {
   startDate: string;
   endDate?: string;
   expireDate: string;
+}
+
+export interface ProductWithPromotions {
+  product: ProductResponse;
+  promotions: PromotionProductDetailResponse[];
 }

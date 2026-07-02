@@ -30,11 +30,13 @@ import useProductFilter from "@/modules/admin/product/hooks/useProductFilter";
 import { useQueries } from "@tanstack/react-query";
 import ProductService from "@/modules/admin/product/services/product.service";
 import { useGetPromotionProducts } from "../hooks/usePromotionProduct";
-import type { PromotionProductDetailResponse } from "../types/promotion.product.type";
+import type { PromotionProductDetailResponse, ProductWithPromotions } from "../types/promotion.product.type";
 import useDebounce from "@/hooks/useDebounce";
 import { registerLocale, getName } from "@cospired/i18n-iso-languages";
 import viLocale from "@cospired/i18n-iso-languages/langs/vi.json";
 import { formatMoney } from "@/utils/number.utils";
+import { formatToMMDDYYYY } from "@/utils/formatDate.utils";
+import { showWarningToast } from "@/utils/toastUtil";
 
 registerLocale(viLocale);
 
@@ -48,9 +50,7 @@ const getLanguageName = (code?: string) => {
 import type { PromotionProductResponse, PromotionCampaignType } from "../types/promotion.type";
 import { campaignTypeLabels } from "../types/promotion.type";
 
-export interface ProductSelectorItem extends ProductResponse {
-  importPrice: number;
-}
+
 
 interface PromotionProductSelectorProps {
   selectedIds: number[];
@@ -60,6 +60,7 @@ interface PromotionProductSelectorProps {
   promoStartDate?: string;
   promoEndDate?: string;
   currentPromotionId?: number;
+  onValidationErrorChange?: (hasError: boolean) => void;
 }
 
 const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
@@ -70,6 +71,7 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
   promoStartDate,
   promoEndDate,
   currentPromotionId,
+  onValidationErrorChange,
 }) => {
   // SỬ DỤNG HOOK USEPRODUCTFILTER CHUẨN HOÁ
   const {
@@ -100,6 +102,10 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
     })),
   });
 
+  const selectedQueriesHash = selectedProductQueries
+    .map((q) => `${q.data?.id || ""}-${q.data?.name || ""}-${q.isLoading}`)
+    .join("|");
+
   const selectedProductsDetails = useMemo(() => {
     return selectedProductQueries
       .map((q) => q.data)
@@ -124,14 +130,15 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
           publisherName: "",
           seriesName: "",
           urlImageDefault: thumbnail || (d.coverImages?.[0]?.url ?? ""),
-          promotions: d.promotions,
         };
       });
-  }, [selectedProductQueries]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedQueriesHash]);
 
   const isDetailsLoading = useMemo(() => {
     return selectedProductQueries.some((q) => q.isLoading);
-  }, [selectedProductQueries]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedQueriesHash]);
 
   const isLoading = isFilterLoading || isDetailsLoading;
 
@@ -191,6 +198,7 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
     }
   }, [selectedIds, discountsMap, promoQuantities, onProductsDataChange]);
 
+
   // Lấy các sản phẩm phân trang từ Server
   const serverItems = useMemo(() => {
     return productPagination?.items || [];
@@ -219,17 +227,16 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
   }, [selectedProductsDetails, selectedIds, serverItems, debouncedKeyword]);
 
   // Kết hợp danh sách sản phẩm: Sản phẩm chọn từ trang khác lên đầu, sản phẩm trang hiện tại ở sau
-  const productsList: ProductSelectorItem[] = useMemo(() => {
-    const combined = [...prependedItems, ...serverItems];
-    return combined.map((p) => ({
-      ...p,
-      importPrice: p.originalPrice,
-    }));
+  const productsList: ProductResponse[] = useMemo(() => {
+    return [...prependedItems, ...serverItems];
   }, [prependedItems, serverItems]);
+
+  const productIdsHash = productsList.map((p) => p.id).join(",");
 
   const productIdsForQuery = useMemo(() => {
     return productsList.map((p) => p.id);
-  }, [productsList]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [productIdsHash]);
 
   const { data: promotionsMappingList } = useGetPromotionProducts(productIdsForQuery);
 
@@ -242,6 +249,40 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
     }
     return map;
   }, [promotionsMappingList]);
+
+  const productsWithPromotions = useMemo<ProductWithPromotions[]>(() => {
+    return productsList.map((p) => ({
+      product: p,
+      promotions: promotionsMap.get(p.id) || [],
+    }));
+  }, [productsList, promotionsMap]);
+
+  const hasValidationError = useMemo(() => {
+    return selectedIds.some((id) => {
+      const product = productsList.find((p) => p.id === id);
+      if (!product) return false;
+      const promotions = promotionsMap.get(id) || [];
+      
+      const otherPromotions = promotions.filter((promo) => {
+        if (currentPromotionId && promo.promotionId === currentPromotionId) {
+          return false;
+        }
+        return true;
+      });
+
+      const allocatedQty = otherPromotions.reduce((sum, promo) => sum + promo.maxQuantity, 0);
+      const availableStock = Math.max(0, product.quantity - allocatedQty);
+      
+      const qty = promoQuantities[id] ?? 10;
+      return qty > availableStock;
+    });
+  }, [selectedIds, productsList, promotionsMap, currentPromotionId, promoQuantities]);
+
+  useEffect(() => {
+    if (onValidationErrorChange) {
+      onValidationErrorChange(hasValidationError);
+    }
+  }, [hasValidationError, onValidationErrorChange]);
 
   const totalPages = productPagination?.totalPages || 1;
   const totalItems = productPagination?.totalItems || 0;
@@ -386,24 +427,23 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
                 </td>
               </tr>
             ) : (
-              productsList.map((product) => (
+              productsWithPromotions.map((item) => (
                 <ProductRow
-                  key={product.id}
-                  product={product}
-                  isSelected={selectedIds.includes(product.id)}
-                  initialDiscount={discountsMap[product.id] ?? 10}
-                  initialPromoQty={promoQuantities[product.id] ?? 10}
-                  onToggleSelect={() => handleToggleSelectOne(product.id)}
+                  key={item.product.id}
+                  item={item}
+                  isSelected={selectedIds.includes(item.product.id)}
+                  initialDiscount={discountsMap[item.product.id] ?? 10}
+                  initialPromoQty={promoQuantities[item.product.id] ?? 10}
+                  onToggleSelect={() => handleToggleSelectOne(item.product.id)}
                   onDiscountChange={(val) =>
-                    handleDiscountChange(product.id, val)
+                    handleDiscountChange(item.product.id, val)
                   }
                   onQuantityChange={(val) =>
-                    handleQuantityChange(product.id, val)
+                    handleQuantityChange(item.product.id, val)
                   }
                   promoStartDate={promoStartDate}
                   promoEndDate={promoEndDate}
                   currentPromotionId={currentPromotionId}
-                  promotions={promotionsMap.get(product.id) || []}
                 />
               ))
             )}
@@ -429,7 +469,7 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
 
 // ─── SUB-COMPONENT PRODUCTROW VỚI DEBOUNCE VÀ HIGH CONTRAST INPUTS ──────
 interface ProductRowProps {
-  product: ProductSelectorItem;
+  item: ProductWithPromotions;
   isSelected: boolean;
   initialDiscount: number;
   initialPromoQty: number;
@@ -439,7 +479,6 @@ interface ProductRowProps {
   promoStartDate?: string;
   promoEndDate?: string;
   currentPromotionId?: number;
-  promotions: PromotionProductDetailResponse[];
 }
 
 const isOverlapping = (
@@ -457,7 +496,7 @@ const isOverlapping = (
 };
 
 const ProductRow: React.FC<ProductRowProps> = ({
-  product,
+  item,
   isSelected,
   initialDiscount,
   initialPromoQty,
@@ -467,8 +506,40 @@ const ProductRow: React.FC<ProductRowProps> = ({
   promoStartDate,
   promoEndDate,
   currentPromotionId,
-  promotions,
 }) => {
+  
+  const { product, promotions } = item;
+
+  const overlappingPromotions = useMemo(() => {
+    if (!promoStartDate || !promoEndDate || !promotions) return [];
+    return promotions.filter((promo) => {
+      if (currentPromotionId && promo.promotionId === currentPromotionId) {
+        return false;
+      }
+      return isOverlapping(promoStartDate, promoEndDate, promo.startDate, promo.expireDate);
+    });
+  }, [promotions, promoStartDate, promoEndDate, currentPromotionId]);
+
+  const hasOverlap = overlappingPromotions.length > 0;
+
+  const otherPromotions = useMemo(() => {
+    if (!promotions) return [];
+    return promotions.filter((promo) => {
+      if (currentPromotionId && promo.promotionId === currentPromotionId) {
+        return false;
+      }
+      return true;
+    });
+  }, [promotions, currentPromotionId]);
+
+  const allocatedQty = useMemo(() => {
+    return otherPromotions.reduce((sum, promo) => sum + promo.maxQuantity, 0);
+  }, [otherPromotions]);
+
+  const availableStock = useMemo(() => {
+    return Math.max(0, product.quantity - allocatedQty);
+  }, [product.quantity, allocatedQty]);
+
   const [localDiscount, setLocalDiscount] = useState<string>(
     initialDiscount.toString(),
   );
@@ -482,13 +553,22 @@ const ProductRow: React.FC<ProductRowProps> = ({
   }, [initialDiscount]);
 
   useEffect(() => {
-    setLocalQty(initialPromoQty.toString());
-  }, [initialPromoQty]);
+    if (availableStock === 0) {
+      setLocalQty("0");
+    } else {
+      setLocalQty(initialPromoQty.toString());
+    }
+  }, [initialPromoQty, availableStock]);
 
   const handleQtyInputChange = (valStr: string) => {
     const num = parseInt(valStr, 10);
-    if (!isNaN(num) && num > product.quantity) {
-      setLocalQty(product.quantity.toString());
+    const maxVal = availableStock;
+    if (availableStock === 0) {
+      setLocalQty("0");
+      return;
+    }
+    if (!isNaN(num) && num > maxVal) {
+      setLocalQty(maxVal.toString());
     } else {
       setLocalQty(valStr);
     }
@@ -496,10 +576,15 @@ const ProductRow: React.FC<ProductRowProps> = ({
 
   const handleQtyBlur = () => {
     const num = parseInt(localQty, 10);
+    const maxVal = availableStock;
+    if (availableStock === 0) {
+      setLocalQty("0");
+      return;
+    }
     if (isNaN(num) || num < 1) {
       setLocalQty("1");
-    } else if (num > product.quantity) {
-      setLocalQty(product.quantity.toString());
+    } else if (num > maxVal) {
+      setLocalQty(maxVal.toString());
     }
   };
 
@@ -535,20 +620,28 @@ const ProductRow: React.FC<ProductRowProps> = ({
 
   useEffect(() => {
     const num = parseInt(debouncedQtyStr, 10);
-    if (!isNaN(num) && num > product.quantity) {
-      setLocalQty(product.quantity.toString());
+    const maxVal = availableStock;
+    if (availableStock === 0) {
+      setLocalQty("0");
+      if (initialPromoQtyRef.current !== 0) {
+        onQuantityChangeRef.current(0);
+      }
+      return;
+    }
+    if (!isNaN(num) && num > maxVal) {
+      setLocalQty(maxVal.toString());
     }
     const safeVal = isNaN(num)
       ? 0
       : num < 0
         ? 0
-        : num > product.quantity
-          ? product.quantity
+        : num > maxVal
+          ? maxVal
           : num;
     if (safeVal !== initialPromoQtyRef.current) {
       onQuantityChangeRef.current(safeVal);
     }
-  }, [debouncedQtyStr, product.quantity]);
+  }, [debouncedQtyStr, availableStock]);
 
   const currentDiscountNum = useMemo(() => {
     const num = parseFloat(localDiscount);
@@ -559,17 +652,7 @@ const ProductRow: React.FC<ProductRowProps> = ({
     return Math.round(product.price * (1 - currentDiscountNum / 100));
   }, [product.price, currentDiscountNum]);
 
-  const isSellAtLoss = finalPrice < product.importPrice;
-
-  const hasOverlap = useMemo(() => {
-    if (!promoStartDate || !promoEndDate || !promotions) return false;
-    return promotions.some((promo) => {
-      if (currentPromotionId && promo.promotionId === currentPromotionId) {
-        return false;
-      }
-      return isOverlapping(promoStartDate, promoEndDate, promo.startDate, promo.expireDate);
-    });
-  }, [promotions, promoStartDate, promoEndDate, currentPromotionId]);
+  const isSellAtLoss = finalPrice < product.originalPrice;
 
   const tdClass = (extra: string = "") => {
     const base = "py-5 px-4 align-middle transition-all duration-200";
@@ -581,7 +664,13 @@ const ProductRow: React.FC<ProductRowProps> = ({
 
   return (
     <tr
-      onClick={onToggleSelect}
+      onClick={() => {
+        if (availableStock === 0 && !isSelected) {
+          showWarningToast("Sản phẩm này không đủ số lượng khả dụng do đã tham gia chương trình khác!");
+          return;
+        }
+        onToggleSelect();
+      }}
       className={`cursor-pointer transition-colors group ${
         isSelected ? "bg-indigo-50/40" : "hover:bg-slate-50/60"
       }`}
@@ -594,7 +683,13 @@ const ProductRow: React.FC<ProductRowProps> = ({
         <input
           type="checkbox"
           checked={isSelected}
-          onChange={onToggleSelect}
+          onChange={() => {
+            if (availableStock === 0 && !isSelected) {
+              showWarningToast("Sản phẩm này không đủ số lượng khả dụng do đã tham gia chương trình khác!");
+              return;
+            }
+            onToggleSelect();
+          }}
           className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
         />
       </td>
@@ -696,7 +791,7 @@ const ProductRow: React.FC<ProductRowProps> = ({
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1.5 text-xs text-slate-500">
               <span className="font-semibold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded text-[9px]">Nhập</span>
-              <span className="font-medium">{formatMoney(product.importPrice)}</span>
+              <span className="font-medium">{formatMoney(product.originalPrice)}</span>
             </div>
             <span className="text-slate-300 text-xs">|</span>
             <div className="flex items-center gap-1.5 text-xs">
@@ -715,7 +810,7 @@ const ProductRow: React.FC<ProductRowProps> = ({
                 disabled={!isSelected}
                 value={localDiscount}
                 onChange={(e) => setLocalDiscount(e.target.value)}
-                className={`w-14 px-2 py-1 text-xs font-extrabold text-center rounded-lg border outline-none transition-all ${
+                className={`w-20 px-2 py-1 text-xs font-extrabold text-center rounded-lg border outline-none transition-all ${
                   isSelected
                     ? "border-slate-300 bg-white text-indigo-700 hover:border-indigo-400 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
                     : "border-slate-200 bg-slate-100/80 text-slate-400 cursor-not-allowed"
@@ -768,6 +863,11 @@ const ProductRow: React.FC<ProductRowProps> = ({
               <span className="text-[9px] text-amber-500 font-semibold bg-amber-50 px-1 py-0.2 rounded border border-amber-100">Sắp hết</span>
             )}
           </div>
+          {allocatedQty > 0 && (
+            <div className="text-[10px] text-slate-500 font-medium mt-0.5">
+              Đã tham gia: <span className="font-bold text-amber-600">{allocatedQty}</span> (Khả dụng: <span className="font-bold text-emerald-600">{availableStock}</span>)
+            </div>
+          )}
           <input
             type="number"
             min={1}
@@ -778,48 +878,123 @@ const ProductRow: React.FC<ProductRowProps> = ({
             onBlur={handleQtyBlur}
             className={`w-20 px-2 py-1 text-xs font-extrabold text-right rounded-lg border outline-none transition-all ${
               isSelected
-                ? "border-slate-300 bg-white text-slate-900 shadow-2xs hover:border-indigo-400 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
+                ? parseInt(localQty, 10) > availableStock
+                  ? "border-rose-300 bg-rose-50/10 text-rose-700 focus:border-rose-500 focus:ring-rose-100"
+                  : "border-slate-300 bg-white text-slate-900 shadow-2xs hover:border-indigo-400 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
                 : "border-slate-200 bg-slate-100/80 text-slate-400 cursor-not-allowed"
             }`}
           />
+          {isSelected && parseInt(localQty, 10) > availableStock && (
+            <span className="text-[9px] text-rose-600 font-semibold bg-rose-50 px-1.5 py-0.5 rounded border border-rose-100 mt-1 block text-right max-w-[150px]">
+              Số lượng vượt quá mức khả dụng!
+            </span>
+          )}
         </div>
       </td>
 
       {/* CHƯƠNG TRÌNH ĐANG THAM GIA */}
       <td className={tdClass("text-left")} onClick={(e) => e.stopPropagation()}>
-        <div className="flex flex-col gap-1.5 justify-center min-h-11 max-w-[280px]">
-          {hasOverlap && isSelected && (
-            <div className="flex items-center gap-1 bg-rose-50 border border-rose-200 text-rose-700 px-2 py-1 rounded-lg text-[10px] font-bold mb-1.5 w-fit">
-              <AlertTriangle size={12} className="text-rose-600" />
-              <span>Trùng lịch chương trình khác!</span>
-            </div>
-          )}
-          {promotions && promotions.length > 0 ? (
-            promotions.map((promo, idx) => (
-              <div key={idx} className="flex flex-col gap-0.5 border-b border-slate-100/60 last:border-0 pb-1.5 last:pb-0">
-                <div className="flex items-center gap-1 text-xs text-slate-800 font-semibold line-clamp-1" title={promo.name}>
-                  <Tag size={10} className="text-indigo-500 shrink-0" />
-                  <span>{promo.name}</span>
-                </div>
-                <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-slate-500 font-medium">
-                  <span className="bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded-md text-[9px] font-bold">
-                    {campaignTypeLabels[promo.promotionCampaignType as PromotionCampaignType] || promo.promotionCampaignType}
-                  </span>
-                  <span className="bg-rose-50 text-rose-700 px-1.5 py-0.5 rounded-md text-[9px] font-bold">
-                    -{promo.discountValue}%
-                  </span>
-                </div>
-                <div className="text-[9px] text-slate-400 font-medium mt-0.5">
-                  {promo.startDate} đến {promo.expireDate}
-                </div>
-              </div>
-            ))
-          ) : (
-            <span className="text-xs text-slate-400 italic">Chưa tham gia chương trình nào</span>
-          )}
-        </div>
+        <ExpandablePromotions
+          promotions={promotions}
+          hasOverlap={hasOverlap}
+          isSelected={isSelected}
+        />
       </td>
     </tr>
+  );
+};
+
+// ─── COMPONENT HIỂN THỊ CHƯƠNG TRÌNH KHUYẾN MÃI EXPANDABLE ──────
+interface ExpandablePromotionsProps {
+  promotions: PromotionProductDetailResponse[];
+  hasOverlap: boolean;
+  isSelected: boolean;
+}
+
+const ExpandablePromotions: React.FC<ExpandablePromotionsProps> = ({
+  promotions,
+  hasOverlap,
+  isSelected,
+}) => {
+  const [expanded, setExpanded] = useState(false);
+
+  if (!promotions || promotions.length === 0) {
+    return (
+      <span className="text-xs text-slate-400 italic">
+        Chưa tham gia chương trình nào
+      </span>
+    );
+  }
+
+  const visiblePromotions = expanded ? promotions : promotions.slice(0, 1);
+  const hasMore = promotions.length > 1;
+
+  return (
+    <div className="flex flex-col gap-1.5 justify-center min-h-11 max-w-[280px]">
+      {hasOverlap && isSelected && (
+        <div className="flex items-center gap-1 bg-rose-50 border border-rose-200 text-rose-700 px-2 py-1 rounded-lg text-[10px] font-bold mb-1.5 w-fit">
+          <AlertTriangle size={12} className="text-rose-600" />
+          <span>Trùng lịch chương trình khác!</span>
+        </div>
+      )}
+      <div className="flex flex-col gap-1.5">
+        {visiblePromotions.map((promo, idx) => (
+          <div
+            key={idx}
+            className="flex flex-col gap-0.5 border-b border-slate-100/60 last:border-0 pb-1.5 last:pb-0"
+          >
+            <div
+              className="flex items-center gap-1 text-xs text-slate-800 font-semibold line-clamp-1"
+              title={promo.name}
+            >
+              <Tag size={10} className="text-indigo-500 shrink-0" />
+              <span>{promo.name}</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-slate-500 font-medium">
+              <span className="bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded-md text-[9px] font-bold">
+                {campaignTypeLabels[promo.promotionCampaignType as PromotionCampaignType] ||
+                  promo.promotionCampaignType}
+              </span>
+              <span className="bg-rose-50 text-rose-700 px-1.5 py-0.5 rounded-md text-[9px] font-bold">
+                -{promo.discountValue}%
+              </span>
+              <span className="bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded-md text-[9px] font-bold">
+                SL: {promo.maxQuantity}
+              </span>
+            </div>
+            <div className="text-[9px] text-slate-400 font-medium mt-0.5">
+              {formatToMMDDYYYY(promo.startDate)} đến {formatToMMDDYYYY(promo.expireDate)}
+            </div>
+          </div>
+        ))}
+      </div>
+      {hasMore && !expanded && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setExpanded(true);
+          }}
+          className="inline-flex items-center text-[10px] font-bold text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100/80 px-2 py-0.5 rounded-md cursor-pointer transition-all duration-200 mt-1 shadow-2xs hover:shadow-xs active:scale-95 w-fit"
+        >
+          Xem thêm ({promotions.length - 1})
+        </button>
+      )}
+      {hasMore && expanded && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setExpanded(false);
+          }}
+          className="inline-flex items-center text-[10px] font-bold text-slate-500 hover:text-slate-600 bg-slate-100 hover:bg-slate-200/80 px-2 py-0.5 rounded-md cursor-pointer transition-all duration-200 mt-1 shadow-2xs hover:shadow-xs active:scale-95 w-fit"
+        >
+          Thu gọn
+        </button>
+      )}
+    </div>
   );
 };
 

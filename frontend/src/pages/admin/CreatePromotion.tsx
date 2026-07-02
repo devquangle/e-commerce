@@ -5,12 +5,14 @@ import PromotionForm from "@/modules/admin/promotion/components/PromotionForm";
 import PromotionProductSelector from "@/modules/admin/promotion/components/PromotionProductSelector";
 import type { PromotionRequest, PromotionProductResponse } from "@/modules/admin/promotion/types/promotion.type";
 import { useCreatePromotion } from "@/modules/admin/promotion/hooks/usePromotion";
+import { showErrorToast } from "@/utils/toastUtil";
 
 export default function CreatePromotion() {
   const navigate = useNavigate();
   const [selectedProductIds, setSelectedProductIds] = useState<number[]>([]);
   const [promotionProductsData, setPromotionProductsData] = useState<PromotionProductResponse[]>([]);
   const [promoDates, setPromoDates] = useState<{ startDate: string; endDate: string }>({ startDate: "", endDate: "" });
+  const [hasProductValidationError, setHasProductValidationError] = useState(false);
   const createMutation = useCreatePromotion();
 
   const handleProductsDataChange = useCallback((products: PromotionProductResponse[]) => {
@@ -18,6 +20,11 @@ export default function CreatePromotion() {
   }, []);
 
   const handleSubmit = (formData: PromotionRequest) => {
+    if (hasProductValidationError) {
+      showErrorToast("Có sản phẩm vượt quá số lượng khả dụng. Vui lòng kiểm tra lại!");
+      return;
+    }
+
     const fullRequest: PromotionRequest = {
       ...formData,
       promotionProducts: promotionProductsData,
@@ -49,6 +56,7 @@ export default function CreatePromotion() {
         onProductsDataChange={handleProductsDataChange}
         promoStartDate={promoDates.startDate}
         promoEndDate={promoDates.endDate}
+        onValidationErrorChange={setHasProductValidationError}
       />
     </div>
   );

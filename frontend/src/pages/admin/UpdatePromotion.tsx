@@ -6,6 +6,7 @@ import PromotionProductSelector from "@/modules/admin/promotion/components/Promo
 import type { PromotionRequest, PromotionProductResponse } from "@/modules/admin/promotion/types/promotion.type";
 import { useGetPromotionDetail, useUpdatePromotion } from "@/modules/admin/promotion/hooks/usePromotion";
 import Loading from "@/components/common/Loading";
+import { showErrorToast } from "@/utils/toastUtil";
 
 export default function UpdatePromotion() {
   const navigate = useNavigate();
@@ -18,10 +19,12 @@ export default function UpdatePromotion() {
   const [selectedProductIds, setSelectedProductIds] = useState<number[]>([]);
   const [promotionProductsData, setPromotionProductsData] = useState<PromotionProductResponse[]>([]);
   const [promoDates, setPromoDates] = useState<{ startDate: string; endDate: string }>({ startDate: "", endDate: "" });
+  const [hasProductValidationError, setHasProductValidationError] = useState(false);
 
   // Đồng bộ sản phẩm từ DB sang local state khi tải xong
   useEffect(() => {
     if (promotion?.promotionProducts) {
+      // eslint-disable-next-line
       setSelectedProductIds(promotion.promotionProducts.map((p) => p.productId));
       setPromotionProductsData(promotion.promotionProducts);
     }
@@ -32,6 +35,11 @@ export default function UpdatePromotion() {
   }, []);
 
   const handleSubmit = (formData: PromotionRequest) => {
+    if (hasProductValidationError) {
+      showErrorToast("Có sản phẩm vượt quá số lượng khả dụng. Vui lòng kiểm tra lại!");
+      return;
+    }
+
     const fullRequest: PromotionRequest = {
       ...formData,
       promotionProducts: promotionProductsData,
@@ -72,6 +80,7 @@ export default function UpdatePromotion() {
         promoStartDate={promoDates.startDate}
         promoEndDate={promoDates.endDate}
         currentPromotionId={promoId}
+        onValidationErrorChange={setHasProductValidationError}
       />
     </div>
   );

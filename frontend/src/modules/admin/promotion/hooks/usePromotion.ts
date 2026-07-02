@@ -24,6 +24,9 @@ export const useCreatePromotion = () => {
     mutationFn: (req: PromotionRequest) => PromotionService.create(req),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["promotion-search"] });
+      queryClient.invalidateQueries({
+        queryKey: ["promotion-products-mapping"],
+      });
       showSuccessToast("Thêm chương trình khuyến mãi thành công!");
     },
     onError: (error: unknown) => {
@@ -55,7 +58,9 @@ export const useUpdatePromotion = () => {
     onSuccess: (_data, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["promotion-search"] });
       queryClient.invalidateQueries({ queryKey: ["promotion-detail", id] });
-
+      queryClient.invalidateQueries({
+        queryKey: ["promotion-products-mapping"],
+      });
       showSuccessToast("Cập nhật chương trình khuyến mãi thành công!");
     },
     onError: (error: unknown) => {
@@ -77,6 +82,9 @@ export const useDeletePromotion = () => {
     mutationFn: (id: number) => PromotionService.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["promotion-search"] });
+      queryClient.invalidateQueries({
+        queryKey: ["promotion-products-mapping"],
+      });
       showSuccessToast("Xóa chương trình khuyến mãi thành công!");
     },
     onError: (error: unknown) => {
