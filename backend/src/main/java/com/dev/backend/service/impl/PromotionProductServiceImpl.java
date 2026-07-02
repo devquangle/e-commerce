@@ -1,11 +1,14 @@
 package com.dev.backend.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.dev.backend.dto.promotion.PromotionProductMappingResponse;
 import com.dev.backend.dto.promotion.PromotionProductRequest;
 import com.dev.backend.entity.Promotion;
 import com.dev.backend.entity.PromotionProduct;
@@ -71,5 +74,34 @@ public class PromotionProductServiceImpl implements PromotionProductService {
         }
 
         promotionProductRepository.saveAll(entities);
+    }
+
+    @Override
+    public List<PromotionProductMappingResponse> promotionMappingResponses(List<Integer> productIds) {
+
+        List<PromotionProduct> promotionProducts = promotionProductRepository.findPromotionByProductIds(productIds);
+
+        Map<Integer, List<PromotionProductMappingResponse.PromotionProductDetailResponse>> grouped = new HashMap<>();
+
+        for (PromotionProduct pp : promotionProducts) {
+            grouped.computeIfAbsent(
+                    pp.getProduct().getId(),
+                    key -> new ArrayList<>()).add(
+                            new PromotionProductMappingResponse.PromotionProductDetailResponse(
+                                    pp.getId(),
+                                    pp.getPromotion().getId(),
+                                    pp.getPromotion().getName(),
+                                    pp.getPromotion().getPromotionCampaignType(),
+                                    pp.getMaxQuantity(),
+                                    pp.getDiscountValue(),
+                                    pp.getPromotion().getStartDate(),
+                                    pp.getPromotion().getExpireDate()));
+        }
+
+        return productIds.stream()
+                .map(productId -> new PromotionProductMappingResponse(
+                        productId,
+                        grouped.getOrDefault(productId, List.of())))
+                .toList();
     }
 }

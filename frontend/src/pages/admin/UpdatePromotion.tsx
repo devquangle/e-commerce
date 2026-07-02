@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import UpdatePromotionHeader from "@/modules/admin/promotion/components/UpdatePromotionHeader";
 import PromotionForm from "@/modules/admin/promotion/components/PromotionForm";
 import PromotionProductSelector from "@/modules/admin/promotion/components/PromotionProductSelector";
-import type { PromotionRequest, PromotionProducts } from "@/modules/admin/promotion/types/promotion.type";
+import type { PromotionRequest, PromotionProductResponse } from "@/modules/admin/promotion/types/promotion.type";
 import { useGetPromotionDetail, useUpdatePromotion } from "@/modules/admin/promotion/hooks/usePromotion";
 import Loading from "@/components/common/Loading";
 
@@ -16,7 +16,7 @@ export default function UpdatePromotion() {
   const updateMutation = useUpdatePromotion();
 
   const [selectedProductIds, setSelectedProductIds] = useState<number[]>([]);
-  const [promotionProductsData, setPromotionProductsData] = useState<PromotionProducts[]>([]);
+  const [promotionProductsData, setPromotionProductsData] = useState<PromotionProductResponse[]>([]);
   const [promoDates, setPromoDates] = useState<{ startDate: string; endDate: string }>({ startDate: "", endDate: "" });
 
   // Đồng bộ sản phẩm từ DB sang local state khi tải xong
@@ -27,7 +27,7 @@ export default function UpdatePromotion() {
     }
   }, [promotion]);
 
-  const handleProductsDataChange = useCallback((products: PromotionProducts[]) => {
+  const handleProductsDataChange = useCallback((products: PromotionProductResponse[]) => {
     setPromotionProductsData(products);
   }, []);
 

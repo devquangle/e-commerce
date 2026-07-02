@@ -1,5 +1,7 @@
 package com.dev.backend.controller;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.dev.backend.dto.promotion.PromotionProductMappingResponse;
 import com.dev.backend.dto.promotion.PromotionDetailResponse;
 import com.dev.backend.dto.promotion.PromotionFilter;
 import com.dev.backend.dto.promotion.PromotionRequest;
@@ -18,16 +21,19 @@ import com.dev.backend.dto.promotion.PromotionResponse;
 import com.dev.backend.response.PageResponse;
 import com.dev.backend.response.ResponseData;
 import com.dev.backend.response.ResponseUtil;
+import com.dev.backend.service.PromotionProductService;
 import com.dev.backend.service.PromotionService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1")
 public class PromotionController {
     private final PromotionService promotionService;
+    private final PromotionProductService promotionProductService;
 
     @GetMapping("/admin/promotions/search")
     public ResponseEntity<ResponseData<PageResponse<PromotionResponse>>> search(
@@ -59,6 +65,13 @@ public class PromotionController {
     public ResponseEntity<ResponseData<Void>> delete(@PathVariable Integer id) {
         promotionService.delete(id);
         return ResponseUtil.success("Xoá chương trình khuyến mãi thành công.", null);
+    }
+
+    @GetMapping("/admin/promotions/by-products")
+    public ResponseEntity<ResponseData<List<PromotionProductMappingResponse>>> promotionProduct(
+            @RequestParam List<Integer> productIds) {
+        List<PromotionProductMappingResponse> promotionMappingResponses= promotionProductService.promotionMappingResponses(productIds);
+        return ResponseUtil.success("Xoá chương trình khuyến mãi thành công.", promotionMappingResponses);
     }
 
 }

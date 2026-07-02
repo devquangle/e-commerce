@@ -3,17 +3,17 @@ import { useNavigate } from "react-router-dom";
 import CreatePromotionHeader from "@/modules/admin/promotion/components/CreatePromotionHeader";
 import PromotionForm from "@/modules/admin/promotion/components/PromotionForm";
 import PromotionProductSelector from "@/modules/admin/promotion/components/PromotionProductSelector";
-import type { PromotionRequest, PromotionProducts } from "@/modules/admin/promotion/types/promotion.type";
+import type { PromotionRequest, PromotionProductResponse } from "@/modules/admin/promotion/types/promotion.type";
 import { useCreatePromotion } from "@/modules/admin/promotion/hooks/usePromotion";
 
 export default function CreatePromotion() {
   const navigate = useNavigate();
   const [selectedProductIds, setSelectedProductIds] = useState<number[]>([]);
-  const [promotionProductsData, setPromotionProductsData] = useState<PromotionProducts[]>([]);
+  const [promotionProductsData, setPromotionProductsData] = useState<PromotionProductResponse[]>([]);
   const [promoDates, setPromoDates] = useState<{ startDate: string; endDate: string }>({ startDate: "", endDate: "" });
   const createMutation = useCreatePromotion();
 
-  const handleProductsDataChange = useCallback((products: PromotionProducts[]) => {
+  const handleProductsDataChange = useCallback((products: PromotionProductResponse[]) => {
     setPromotionProductsData(products);
   }, []);
 

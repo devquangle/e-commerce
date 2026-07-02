@@ -1,6 +1,5 @@
 import { BaseStatus } from "@/types/status";
 
-
 export type PromotionCampaignType =
   | "FLASH_SALE"
   | "PRODUCT_DISCOUNT"
@@ -34,8 +33,8 @@ export interface PromotionProductResponse {
   localQty: number;
 }
 
-export interface PromotionDetailResponse{
-  id:number;
+export interface PromotionDetailResponse {
+  id: number;
   name: string;
   startDate: string;
   endDate: string;
@@ -43,3 +42,4 @@ export interface PromotionDetailResponse{
   promotionCampaignType: PromotionCampaignType;
   promotionProducts: PromotionProductResponse[] | [];
 }
+

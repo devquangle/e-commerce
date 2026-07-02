@@ -29,6 +29,8 @@ import { useFilterProduct } from "@/modules/admin/product/hooks/useProduct";
 import useProductFilter from "@/modules/admin/product/hooks/useProductFilter";
 import { useQueries } from "@tanstack/react-query";
 import ProductService from "@/modules/admin/product/services/product.service";
+import { useGetPromotionProducts } from "../hooks/usePromotionProduct";
+import type { PromotionProductDetailResponse } from "../types/promotion.product.type";
 import useDebounce from "@/hooks/useDebounce";
 import { registerLocale, getName } from "@cospired/i18n-iso-languages";
 import viLocale from "@cospired/i18n-iso-languages/langs/vi.json";
@@ -225,6 +227,22 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
     }));
   }, [prependedItems, serverItems]);
 
+  const productIdsForQuery = useMemo(() => {
+    return productsList.map((p) => p.id);
+  }, [productsList]);
+
+  const { data: promotionsMappingList } = useGetPromotionProducts(productIdsForQuery);
+
+  const promotionsMap = useMemo(() => {
+    const map = new Map<number, PromotionProductDetailResponse[]>();
+    if (promotionsMappingList) {
+      promotionsMappingList.forEach((item) => {
+        map.set(item.productId, item.promotions || []);
+      });
+    }
+    return map;
+  }, [promotionsMappingList]);
+
   const totalPages = productPagination?.totalPages || 1;
   const totalItems = productPagination?.totalItems || 0;
 
@@ -385,6 +403,7 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
                   promoStartDate={promoStartDate}
                   promoEndDate={promoEndDate}
                   currentPromotionId={currentPromotionId}
+                  promotions={promotionsMap.get(product.id) || []}
                 />
               ))
             )}
@@ -420,6 +439,7 @@ interface ProductRowProps {
   promoStartDate?: string;
   promoEndDate?: string;
   currentPromotionId?: number;
+  promotions: PromotionProductDetailResponse[];
 }
 
 const isOverlapping = (
@@ -447,6 +467,7 @@ const ProductRow: React.FC<ProductRowProps> = ({
   promoStartDate,
   promoEndDate,
   currentPromotionId,
+  promotions,
 }) => {
   const [localDiscount, setLocalDiscount] = useState<string>(
     initialDiscount.toString(),
@@ -541,14 +562,14 @@ const ProductRow: React.FC<ProductRowProps> = ({
   const isSellAtLoss = finalPrice < product.importPrice;
 
   const hasOverlap = useMemo(() => {
-    if (!promoStartDate || !promoEndDate || !product.promotions) return false;
-    return product.promotions.some((promo) => {
-      if (currentPromotionId && promo.id === currentPromotionId) {
+    if (!promoStartDate || !promoEndDate || !promotions) return false;
+    return promotions.some((promo) => {
+      if (currentPromotionId && promo.promotionId === currentPromotionId) {
         return false;
       }
-      return isOverlapping(promoStartDate, promoEndDate, promo.startDate, promo.endDate);
+      return isOverlapping(promoStartDate, promoEndDate, promo.startDate, promo.expireDate);
     });
-  }, [product.promotions, promoStartDate, promoEndDate, currentPromotionId]);
+  }, [promotions, promoStartDate, promoEndDate, currentPromotionId]);
 
   const tdClass = (extra: string = "") => {
     const base = "py-5 px-4 align-middle transition-all duration-200";
@@ -773,8 +794,8 @@ const ProductRow: React.FC<ProductRowProps> = ({
               <span>Trùng lịch chương trình khác!</span>
             </div>
           )}
-          {product.promotions && product.promotions.length > 0 ? (
-            product.promotions.map((promo, idx) => (
+          {promotions && promotions.length > 0 ? (
+            promotions.map((promo, idx) => (
               <div key={idx} className="flex flex-col gap-0.5 border-b border-slate-100/60 last:border-0 pb-1.5 last:pb-0">
                 <div className="flex items-center gap-1 text-xs text-slate-800 font-semibold line-clamp-1" title={promo.name}>
                   <Tag size={10} className="text-indigo-500 shrink-0" />
@@ -782,14 +803,14 @@ const ProductRow: React.FC<ProductRowProps> = ({
                 </div>
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-slate-500 font-medium">
                   <span className="bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded-md text-[9px] font-bold">
-                    {campaignTypeLabels[promo.campaignType as PromotionCampaignType] || promo.campaignType}
+                    {campaignTypeLabels[promo.promotionCampaignType as PromotionCampaignType] || promo.promotionCampaignType}
                   </span>
                   <span className="bg-rose-50 text-rose-700 px-1.5 py-0.5 rounded-md text-[9px] font-bold">
-                    -{promo.discountPercentage}%
+                    -{promo.discountValue}%
                   </span>
                 </div>
                 <div className="text-[9px] text-slate-400 font-medium mt-0.5">
-                  {promo.startDate} đến {promo.endDate}
+                  {promo.startDate} đến {promo.expireDate}
                 </div>
               </div>
             ))

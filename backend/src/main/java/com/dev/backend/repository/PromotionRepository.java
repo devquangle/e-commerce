@@ -1,6 +1,7 @@
 package com.dev.backend.repository;
 
 import java.time.LocalDate;
+
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -40,4 +41,6 @@ public interface PromotionRepository extends JpaRepository<Promotion, Integer> {
       WHERE p.id = :id
       """)
   Optional<Promotion> findByIdWithPromotionProducts(@Param("id") Integer id);
+
+
 }

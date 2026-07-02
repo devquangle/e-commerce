@@ -1,7 +1,9 @@
 package com.dev.backend.dto.promotion;
 
+import java.time.LocalDate;
 import java.util.List;
 
+import com.dev.backend.constant.PromotionCampaignType;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,22 +14,22 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProductPromotionMappingResponse {
+public class PromotionProductMappingResponse {
     private Integer productId;
-    private List<PromotionDetail> promotions;
-    
+    private List<PromotionProductDetailResponse> promotions;
+
     @Getter
     @Setter
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class PromotionDetail {
-
+    public static class PromotionProductDetailResponse {
         private Integer promotionProductId;
+        private Integer promotionId;
         private String name;
-        private String campaignType;
+        private PromotionCampaignType promotionCampaignType;
         private Integer maxQuantity;
         private Integer discountValue;
-        private String startDate;
-        private String endDate;
+        private LocalDate startDate;
+        private LocalDate expireDate;
     }
 }

@@ -87,7 +87,8 @@ public class PromotionServiceImpl implements PromotionService {
                 for (PromotionProductRequest ppReq : request.getPromotionProducts()) {
                         Integer productId = ppReq.getProductId();
                         Product product = productRepository.findById(productId)
-                                .orElseThrow(() -> new NotFoundException("Không tìm thấy sản phẩm với ID: " + productId));
+                                        .orElseThrow(() -> new NotFoundException(
+                                                        "Không tìm thấy sản phẩm với ID: " + productId));
 
                         if (product.getPromotionProducts() != null) {
                                 for (PromotionProduct pp : product.getPromotionProducts()) {
@@ -104,16 +105,15 @@ public class PromotionServiceImpl implements PromotionService {
                                         LocalDate otherStart = otherPromo.getStartDate();
                                         LocalDate otherEnd = otherPromo.getExpireDate();
 
-                                        // Kiểm tra trùng lặp: !(reqEnd.isBefore(otherStart) || reqStart.isAfter(otherEnd))
+                                        // Kiểm tra trùng lặp: !(reqEnd.isBefore(otherStart) ||
+                                        // reqStart.isAfter(otherEnd))
                                         if (!(reqEnd.isBefore(otherStart) || reqStart.isAfter(otherEnd))) {
                                                 throw new BadRequestException(
-                                                        String.format("Sản phẩm '%s' đang tham gia chương trình '%s' (%s đến %s). Thời gian chương trình mới không được trùng lặp!",
-                                                                product.getName(),
-                                                                otherPromo.getName(),
-                                                                otherStart.toString(),
-                                                                otherEnd.toString()
-                                                        )
-                                                );
+                                                                String.format("Sản phẩm '%s' đang tham gia chương trình '%s' (%s đến %s). Thời gian chương trình mới không được trùng lặp!",
+                                                                                product.getName(),
+                                                                                otherPromo.getName(),
+                                                                                otherStart.toString(),
+                                                                                otherEnd.toString()));
                                         }
                                 }
                         }
@@ -199,37 +199,31 @@ public class PromotionServiceImpl implements PromotionService {
                                 result.getTotalPages());
         }
 
+      
+
         @Override
         public void insertData() {
 
                 if (promotionRepository.count() > 0) {
                         return;
                 }
-
                 List<Promotion> promotions = new ArrayList<>();
-
                 for (int i = 1; i <= 20; i++) {
                         Promotion promotion = new Promotion();
-
                         promotion.setName("Chương trình khuyến mãi " + i);
                         promotion.setCreatedAt(LocalDate.now().minusDays(i));
-
                         promotion.setStartDate(LocalDate.now().plusDays(i));
                         promotion.setExpireDate(LocalDate.now().plusDays(i + 10));
-
                         promotion.setPromotionCampaignType(
                                         i % 2 == 0
                                                         ? PromotionCampaignType.FLASH_SALE
                                                         : PromotionCampaignType.PRODUCT_DISCOUNT);
-
                         promotion.setStatus(
                                         i % 3 == 0
                                                         ? BaseStatus.INACTIVE
                                                         : BaseStatus.ACTIVE);
-
                         promotions.add(promotion);
                 }
-
                 promotionRepository.saveAll(promotions);
         }
 }
