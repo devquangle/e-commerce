@@ -226,10 +226,24 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
     return missingProducts;
   }, [selectedProductsDetails, selectedIds, serverItems, debouncedKeyword]);
 
-  // Kết hợp danh sách sản phẩm: Sản phẩm chọn từ trang khác lên đầu, sản phẩm trang hiện tại ở sau
+  const initialProductIds = useMemo(() => {
+    if (!initialProducts) return new Set<number>();
+    return new Set<number>(initialProducts.map((p) => p.productId));
+  }, [initialProducts]);
+
+  // Kết hợp danh sách sản phẩm: Sản phẩm ban đầu có sẵn luôn lên đầu, các sản phẩm khác ở sau
   const productsList: ProductResponse[] = useMemo(() => {
-    return [...prependedItems, ...serverItems];
-  }, [prependedItems, serverItems]);
+    const combined = [...prependedItems, ...serverItems];
+    const uniqueMap = new Map<number, ProductResponse>();
+    combined.forEach((p) => uniqueMap.set(p.id, p));
+    const uniqueList = Array.from(uniqueMap.values());
+
+    return uniqueList.sort((a, b) => {
+      const aInitial = initialProductIds.has(a.id) ? 1 : 0;
+      const bInitial = initialProductIds.has(b.id) ? 1 : 0;
+      return bInitial - aInitial;
+    });
+  }, [prependedItems, serverItems, initialProductIds]);
 
   const productIdsHash = productsList.map((p) => p.id).join(",");
 

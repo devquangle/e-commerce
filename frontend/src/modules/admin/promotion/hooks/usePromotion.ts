@@ -2,8 +2,8 @@ import type { Pagination } from "@/types/pagination";
 import type { PromotionFilter } from "../types/promotion.search.type";
 import type {
   PromotionRequest,
-  PromotionResponse,
   PromotionDetailResponse,
+  PromotionWithProductCountResponse,
 } from "../types/promotion.type";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import PromotionService from "../services/promotion.service";
@@ -11,7 +11,7 @@ import { showErrorToast, showSuccessToast } from "@/utils/toastUtil";
 import axios from "axios";
 
 export const useSearchPromotion = (options?: PromotionFilter) => {
-  return useQuery<Pagination<PromotionResponse>>({
+  return useQuery<Pagination<PromotionWithProductCountResponse>>({
     queryKey: ["promotion-search", options],
     queryFn: () => PromotionService.search(options),
   });

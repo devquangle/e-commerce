@@ -42,3 +42,13 @@ export interface PromotionDetailResponse {
   promotionCampaignType: PromotionCampaignType;
   promotionProducts: PromotionProductResponse[] | [];
 }
+
+export interface PromotionWithProductCountResponse {
+  id: number;
+  name: string;
+  startDate: string;
+  endDate: string;
+  status: BaseStatus;
+  promotionCampaignType: PromotionCampaignType;
+  productCount: number;
+}

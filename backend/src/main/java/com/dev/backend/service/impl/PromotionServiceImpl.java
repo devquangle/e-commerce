@@ -16,6 +16,7 @@ import com.dev.backend.dto.promotion.PromotionDetailResponse;
 import com.dev.backend.dto.promotion.PromotionFilter;
 import com.dev.backend.dto.promotion.PromotionRequest;
 import com.dev.backend.dto.promotion.PromotionResponse;
+import com.dev.backend.dto.promotion.PromotionWithProductCountResponse;
 import com.dev.backend.entity.Promotion;
 import com.dev.backend.exception.NotFoundException;
 import com.dev.backend.mapper.PromotionMapper;
@@ -156,19 +157,20 @@ public class PromotionServiceImpl implements PromotionService {
         }
 
         @Override
-        public PageResponse<PromotionResponse> search(PromotionFilter filter) {
+        public PageResponse<PromotionWithProductCountResponse> search(PromotionFilter filter) {
+
                 int page = (filter.getPage() == null || filter.getPage() < 1)
                                 ? 0
                                 : filter.getPage() - 1;
 
-                int size = filter.getSize() != null
-                                ? filter.getSize()
-                                : 10;
+                int size = filter.getSize() != null ? filter.getSize() : 10;
+
                 FilterValidator.validateDateRange(
                                 filter.getStartDate(),
                                 filter.getEndDate(),
                                 "Ngày bắt đầu",
                                 "Ngày kết thúc");
+
                 String keyword = FilterValidator.normalizeKeyword(filter.getKeyword());
 
                 BaseStatus status = FilterValidator.parseEnum(
@@ -186,10 +188,13 @@ public class PromotionServiceImpl implements PromotionService {
                                 size,
                                 Sort.by(Sort.Direction.DESC, "id"));
 
-                Page<PromotionResponse> result = promotionRepository
-                                .searchPromotions(keyword, filter.getStartDate(), filter.getEndDate(), campaignType,
-                                                status, pageable)
-                                .map(promotionMapper::toDTO);
+                Page<PromotionWithProductCountResponse> result = promotionRepository.searchPromotions(
+                                keyword,
+                                filter.getStartDate(),
+                                filter.getEndDate(),
+                                campaignType,
+                                status,
+                                pageable);
 
                 return new PageResponse<>(
                                 result.getContent(),
@@ -198,8 +203,6 @@ public class PromotionServiceImpl implements PromotionService {
                                 result.getTotalElements(),
                                 result.getTotalPages());
         }
-
-      
 
         @Override
         public void insertData() {

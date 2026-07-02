@@ -1,18 +1,19 @@
 import React from "react";
 import { Calendar, Edit, Trash2, Tag } from "lucide-react";
-import { campaignTypeLabels, type PromotionResponse } from "../types/promotion.type";
+import {
+  campaignTypeLabels,
+  type PromotionWithProductCountResponse,
+} from "../types/promotion.type";
 import { BaseStatus, getBaseStatusLabel } from "@/types/status";
 import { formatToMMDDYYYY } from "@/utils/formatDate.utils";
 
 interface PromotionTableProps {
-  promotions: PromotionResponse[];
-  onEdit: (promo: PromotionResponse) => void;
+  promotions: PromotionWithProductCountResponse[];
+  onEdit: (promo: PromotionWithProductCountResponse) => void;
   onDelete: (id: number) => void;
   page: number;
   pageSize: number;
 }
-
-
 
 const statusClass = (status: BaseStatus) => {
   switch (status) {
@@ -49,6 +50,9 @@ const PromotionTable: React.FC<PromotionTableProps> = ({
               Thời gian (mm/dd/yyyy)
             </th>
             <th className="py-3.5 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50">
+              Sản phẩm tham gia
+            </th>
+            <th className="py-3.5 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50">
               Trạng thái
             </th>
             <th className="py-3.5 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50 text-right last:rounded-r-lg">
@@ -74,23 +78,30 @@ const PromotionTable: React.FC<PromotionTableProps> = ({
                 </td>
                 <td className="py-4 px-4">
                   <div className="flex flex-col gap-1.5">
-                    <span className="font-bold text-slate-900">{promo.name}</span>
+                    <span className="font-bold text-slate-900">
+                      {promo.name}
+                    </span>
                     <span className="inline-flex items-center gap-1 self-start px-2 py-0.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-semibold">
                       <Tag size={12} className="text-slate-500" />
-                      {campaignTypeLabels[promo.promotionCampaignType] || promo.promotionCampaignType}
+                      {campaignTypeLabels[promo.promotionCampaignType] ||
+                        promo.promotionCampaignType}
                     </span>
                   </div>
                 </td>
                 <td className="py-4 px-4 text-slate-500">
                   <span className="inline-flex items-center gap-1.5 text-xs">
                     <Calendar size={14} className="text-slate-400" />
-                    {formatToMMDDYYYY(promo.startDate)} - {formatToMMDDYYYY(promo.endDate)}
+                    {formatToMMDDYYYY(promo.startDate)} -{" "}
+                    {formatToMMDDYYYY(promo.endDate)}
                   </span>
+                </td>
+                <td className="py-4 px-4 text-slate-500">
+                  {promo.productCount}
                 </td>
                 <td className="py-4 px-4">
                   <span
                     className={`px-2.5 py-1 text-xs rounded-full ${statusClass(
-                      promo.status
+                      promo.status,
                     )}`}
                   >
                     {getBaseStatusLabel(promo.status)}

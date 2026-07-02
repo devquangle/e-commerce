@@ -18,6 +18,7 @@ import com.dev.backend.dto.promotion.PromotionDetailResponse;
 import com.dev.backend.dto.promotion.PromotionFilter;
 import com.dev.backend.dto.promotion.PromotionRequest;
 import com.dev.backend.dto.promotion.PromotionResponse;
+import com.dev.backend.dto.promotion.PromotionWithProductCountResponse;
 import com.dev.backend.response.PageResponse;
 import com.dev.backend.response.ResponseData;
 import com.dev.backend.response.ResponseUtil;
@@ -36,9 +37,9 @@ public class PromotionController {
     private final PromotionProductService promotionProductService;
 
     @GetMapping("/admin/promotions/search")
-    public ResponseEntity<ResponseData<PageResponse<PromotionResponse>>> search(
+    public ResponseEntity<ResponseData<PageResponse<PromotionWithProductCountResponse>>> search(
             @ModelAttribute PromotionFilter request) {
-        PageResponse<PromotionResponse> response = promotionService.search(request);
+        PageResponse<PromotionWithProductCountResponse> response = promotionService.search(request);
         return ResponseUtil.success("Lọc sản phẩm thành công", response);
     }
 

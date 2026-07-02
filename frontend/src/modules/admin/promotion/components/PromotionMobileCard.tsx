@@ -1,12 +1,12 @@
 import React from "react";
 import { Calendar, Edit, Trash2, Tag } from "lucide-react";
-import { campaignTypeLabels, type PromotionResponse } from "../types/promotion.type";
+import { campaignTypeLabels, type PromotionWithProductCountResponse } from "../types/promotion.type";
 import { BaseStatus, getBaseStatusLabel } from "@/types/status";
 import { formatToMMDDYYYY } from "@/utils/formatDate.utils";
 
 interface PromotionMobileCardProps {
-  promotions: PromotionResponse[];
-  onEdit: (promo: PromotionResponse) => void;
+  promotions: PromotionWithProductCountResponse[];
+  onEdit: (promo: PromotionWithProductCountResponse) => void;
   onDelete: (id: number) => void;
 }
 
@@ -72,6 +72,10 @@ const PromotionMobileCard: React.FC<PromotionMobileCardProps> = ({
                   <Calendar size={13} className="text-slate-400" />
                   {formatToMMDDYYYY(promo.startDate)} - {formatToMMDDYYYY(promo.endDate)}
                 </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500 font-medium">Sản phẩm tham gia:</span>
+                <span className="text-slate-700 font-semibold">{promo.productCount}</span>
               </div>
             </div>
 

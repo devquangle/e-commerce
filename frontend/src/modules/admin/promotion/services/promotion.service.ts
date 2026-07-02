@@ -6,11 +6,12 @@ import type {
   PromotionDetailResponse,
   PromotionRequest,
   PromotionResponse,
+  PromotionWithProductCountResponse,
 } from "../types/promotion.type";
 
 const PromotionService = {
   async search(options?: PromotionFilter) {
-    const res = await apiAuth.get<ApiResponse<Pagination<PromotionResponse>>>(
+    const res = await apiAuth.get<ApiResponse<Pagination<PromotionWithProductCountResponse>>>(
       "/api/v1/admin/promotions/search",
       { params: options },
     );

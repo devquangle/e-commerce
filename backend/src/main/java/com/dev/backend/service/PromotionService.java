@@ -5,6 +5,7 @@ import com.dev.backend.dto.promotion.PromotionDetailResponse;
 import com.dev.backend.dto.promotion.PromotionFilter;
 import com.dev.backend.dto.promotion.PromotionRequest;
 import com.dev.backend.dto.promotion.PromotionResponse;
+import com.dev.backend.dto.promotion.PromotionWithProductCountResponse;
 import com.dev.backend.entity.Promotion;
 import com.dev.backend.response.PageResponse;
 
@@ -23,7 +24,7 @@ public interface PromotionService {
 
     PromotionResponse updatePromotion(Integer id, PromotionRequest promotionRequest);
 
-    PageResponse<PromotionResponse> search(PromotionFilter filter);
+    PageResponse<PromotionWithProductCountResponse> search(PromotionFilter filter);
 
     PromotionDetailResponse edit(Integer id);
 
