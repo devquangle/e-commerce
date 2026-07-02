@@ -1,6 +1,5 @@
 package com.dev.backend.service;
 
-import java.util.List;
 
 import com.dev.backend.dto.promotion.PromotionDetailResponse;
 import com.dev.backend.dto.promotion.PromotionFilter;
