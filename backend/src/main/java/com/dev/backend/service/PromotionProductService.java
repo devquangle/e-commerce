@@ -15,4 +15,6 @@ public interface PromotionProductService {
     void updatePromotionProducts(Promotion promotion, List<PromotionProductRequest> newProducts);
 
     List<PromotionProductMappingResponse> promotionMappingResponses(List<Integer> productIds);
+
+    Integer findDiscountValueByProductId(Integer productId);
 }

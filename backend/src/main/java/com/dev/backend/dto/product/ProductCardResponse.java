@@ -17,14 +17,17 @@ public class ProductCardResponse {
     private Integer id;
     private String slug;
     private String name;
+
+    private Integer price;
+    private Integer discountValue;
+
     private Integer soldCount;
     private Double rating;
     private Integer reviewCount;
-    private Integer price;
 
     private String urlImage;
   
     private LocalDateTime createdAt;
-    private ProductBadge badge;
-    private PromotionResponse promotion;
+
+
 }

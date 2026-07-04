@@ -1,6 +1,5 @@
 package com.dev.backend.dto.productdetail;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import com.dev.backend.dto.author.ProductAuthorsResponse;
@@ -24,10 +23,11 @@ public class ProductInfo {
     private String slug;
     private String isbn;
     private Integer discountValue;
+    private Integer originalPrice;
     private Integer price;
     private Integer quantity;
     private Integer weight;
-    private LocalDate publishYear;
+    private String publishYear;
     private Integer pages;
     private String language;
     private String description;

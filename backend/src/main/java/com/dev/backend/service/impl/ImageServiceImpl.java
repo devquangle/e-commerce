@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.dev.backend.dto.image.ImageResponse;
+import com.dev.backend.dto.image.ProductImageResponse;
 import com.dev.backend.entity.Image;
 import com.dev.backend.entity.Product;
 import com.dev.backend.mapper.ImageMapper;
@@ -38,7 +39,7 @@ public class ImageServiceImpl implements ImageService {
     @Transactional // Đảm bảo tính toàn vẹn: Hoặc thành công hết, hoặc rollback hết nếu lỗi
     public void saveProductImages(Product product, List<ImageResponse> imageResponses) {
         // 1. Lấy tất cả ảnh hiện tại đang lưu dưới DB của Product này
-        List<Image> existingImages = imageRepository.findByProductId(product.getId());
+        List<Image> existingImages = imageRepository.findImagesByProductId(product.getId());
 
         // Nếu danh sách mới trống -> Người dùng đã xóa sạch ảnh của sản phẩm này trên
         // UI
@@ -105,5 +106,14 @@ public class ImageServiceImpl implements ImageService {
         if (!toSave.isEmpty()) {
             imageRepository.saveAll(toSave); // Tự động INSERT bản ghi mới và UPDATE bản ghi cũ có sự thay đổi
         }
+    }
+
+    @Override
+    public List<ProductImageResponse> findImagesByProductId(Integer productId) {
+        List<Image> images = imageRepository.findImagesByProductId(productId);
+
+        return images.stream()
+                .map(imageMapper::toProductImages)
+                .toList();
     }
 }

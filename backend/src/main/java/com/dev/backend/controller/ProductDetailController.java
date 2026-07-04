@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.dev.backend.entity.Product;
+import com.dev.backend.dto.productdetail.ProductInfo;
 import com.dev.backend.response.ResponseData;
 import com.dev.backend.response.ResponseUtil;
 import com.dev.backend.service.ProductService;
@@ -20,9 +20,9 @@ public class ProductDetailController {
     private final ProductService productService;
 
     @GetMapping("/products")
-    public ResponseEntity<ResponseData<Product>> getProductDetail(@RequestParam String slug) {
-        Product item = productService.findBySlug(slug);
-        return ResponseUtil.success("Lọc sản phẩm thành công", item);
+    public ResponseEntity<ResponseData<ProductInfo>> getProductDetail(@RequestParam String slug) {
+        ProductInfo item = productService.productInfo(slug);
+        return ResponseUtil.success("Lấy sản phẩm thành công", item);
     }
 
 }

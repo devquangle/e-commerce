@@ -16,7 +16,7 @@ export default function Products() {
     handlePageChange,
     handlePageSizeChange,
     resetFilters,
-  } = useProductFilter({ size: 12 });
+  } = useProductFilter({ size: 20, page: 1 });
 
   const { data, isLoading, error } = useProductSearch(filters);
 
@@ -114,7 +114,7 @@ export default function Products() {
                 totalPages={totalPages}
                 onPageChange={handlePageChange}
                 totalItems={totalItems}
-                pageSize={filters.size || 12}
+                pageSize={filters.size || 20}
                 onPageSizeChange={handlePageSizeChange}
                 className="border-none justify-center"
               />

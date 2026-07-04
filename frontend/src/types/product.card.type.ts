@@ -4,11 +4,7 @@ export type PromotionCampaignType =
   | "SEASONAL"
   | null;
 
-export type ProductBadge =
-  | "FLASH_SALE"
-  | "BEST_SELLER"
-  | "NEW"
-  | null;
+export type ProductBadge = "FLASH_SALE" | "BEST_SELLER" | "NEW" | null;
 
 export const PRODUCT_BADGES: Record<
   Exclude<ProductBadge, null>,
@@ -45,7 +41,7 @@ export const PROMOTION_CAMPAIGNS: Record<
 };
 
 export const getProductBadge = (
-  badge: ProductBadge
+  badge: ProductBadge,
 ): { label: string } | null => {
   if (!badge) {
     return null;
@@ -55,7 +51,7 @@ export const getProductBadge = (
 };
 
 export const getPromotionCampaign = (
-  type: PromotionCampaignType
+  type: PromotionCampaignType,
 ): { label: string } | null => {
   if (!type) {
     return null;
@@ -64,14 +60,12 @@ export const getPromotionCampaign = (
   return PROMOTION_CAMPAIGNS[type];
 };
 
-export const getProductBadgeLabel = (
-  badge: ProductBadge
-): string => {
+export const getProductBadgeLabel = (badge: ProductBadge): string => {
   return getProductBadge(badge)?.label ?? "";
 };
 
 export const getPromotionCampaignLabel = (
-  type: PromotionCampaignType
+  type: PromotionCampaignType,
 ): string => {
   return getPromotionCampaign(type)?.label ?? "";
 };
@@ -79,19 +73,13 @@ export interface ProductCard {
   id: number;
   slug: string; //url
   name: string;
+  price: number;
+  discountValue?: number; // %
   soldCount: number; // đã bán
   rating: number; // 0 → 5
   reviewCount: number; // số lượt đánh giá
-  price: number;
   createdAt?: string;
-  badge?: ProductBadge;
   urlImage: string;
-  promotion?: PromotionResponse;
-  bage?: string;
-  promosionValue?: number;
 }
 
-export interface PromotionResponse {
-  value: number;
-  type: PromotionCampaignType;
-}
+

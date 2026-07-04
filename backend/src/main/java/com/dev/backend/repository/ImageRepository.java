@@ -8,5 +8,6 @@ import com.dev.backend.entity.Image;
 
 public interface ImageRepository extends JpaRepository<Image, Integer> {
     
-    List<Image> findByProductId(Integer productId);
+    List<Image> findImagesByProductId(Integer productId);
+
 }

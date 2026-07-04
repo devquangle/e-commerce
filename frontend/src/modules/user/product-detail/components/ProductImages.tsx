@@ -13,8 +13,8 @@ export default function ProductImages({ product }: ProductImagesProps) {
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperType | null>(null);
 
   // Use coverImages from product if available, else use mockImages
-  const images = product.coverImages?.length 
-    ? product.coverImages.map(img => img.url) 
+  const images = product.coverImages?.length
+    ? product.coverImages.map((img) => img.url)
     : [];
 
   const productName = product.name || "Product Image";
@@ -24,11 +24,12 @@ export default function ProductImages({ product }: ProductImagesProps) {
   return (
     <div className="lg:col-span-6 xl:col-span-4 flex flex-col gap-3">
       {/* Main Swiper */}
-      <div className="rounded-2xl overflow-hidden bg-slate-50 relative">
+      <div className="overflow-hidden bg-slate-50 relative">
         <Swiper
           modules={[Thumbs, FreeMode, Navigation, Pagination]}
           thumbs={{
-            swiper: thumbsSwiper && !thumbsSwiper.destroyed ? thumbsSwiper : null,
+            swiper:
+              thumbsSwiper && !thumbsSwiper.destroyed ? thumbsSwiper : null,
           }}
           loop={true}
           navigation={{
@@ -36,14 +37,14 @@ export default function ProductImages({ product }: ProductImagesProps) {
             prevEl: ".product-main-prev",
           }}
           pagination={{ clickable: true }}
-          className="aspect-[4/5] relative group pb-8" // padding bottom for pagination dots
+          className="aspect-4/5 relative group pb-8" // padding bottom for pagination dots
         >
           {images.map((img, idx) => (
             <SwiperSlide key={idx} className="bg-slate-50">
               <img
                 src={img}
                 alt={`${productName} - Ảnh ${idx + 1}`}
-                className="w-full h-full object-contain p-4"
+                className="w-full h-full object-cover"
               />
             </SwiperSlide>
           ))}
@@ -57,38 +58,43 @@ export default function ProductImages({ product }: ProductImagesProps) {
           </button>
         </Swiper>
 
-      
-        <style dangerouslySetInnerHTML={{__html: `
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
           .swiper-pagination-bullet { width: 8px; height: 8px; background: #cbd5e1; opacity: 1; transition: all 0.3s ease; }
           .swiper-pagination-bullet-active { background: #4f46e5; width: 24px; border-radius: 4px; }
           .swiper-pagination { bottom: 20px !important; }
-        `}} />
+        `,
+          }}
+        />
       </div>
 
       {/* Thumbs Swiper (grid 4 columns) */}
-      <div className="hidden md:block p-2">
-        <Swiper
-          modules={[Thumbs, FreeMode]}
-          onSwiper={setThumbsSwiper}
-          slidesPerView={4}
-          spaceBetween={12}
-          freeMode={true}
-          watchSlidesProgress={true}
-          className="product-thumbs py-1! px-0.5!"
-        >
-          {images.map((img, idx) => (
-            <SwiperSlide key={idx} className="cursor-pointer">
-              <div className="aspect-square rounded-xl overflow-hidden border border-slate-200 transition-all [.swiper-slide-thumb-active_&]:border-blue-600 [.swiper-slide-thumb-active_&]:ring-2 [.swiper-slide-thumb-active_&]:ring-blue-600 [.swiper-slide-thumb-active_&]:ring-offset-2 bg-white flex items-center justify-center p-1">
-                <img
-                  src={img}
-                  alt={`Thumbnail ${idx + 1}`}
-                  className="w-full h-full object-contain"
-                />
-              </div>
-            </SwiperSlide>
-          ))}
-        </Swiper>
-      </div>
+      {images.length > 1 && (
+        <div className="hidden md:block p-2">
+          <Swiper
+            modules={[Thumbs, FreeMode]}
+            onSwiper={setThumbsSwiper}
+            slidesPerView={4}
+            spaceBetween={12}
+            freeMode={true}
+            watchSlidesProgress={true}
+            className="product-thumbs py-1! px-0.5!"
+          >
+            {images.map((img, idx) => (
+              <SwiperSlide key={idx} className="cursor-pointer">
+                <div className="aspect-square overflow-hidden border border-slate-200 transition-all [.swiper-slide-thumb-active_&]:border-blue-600 [.swiper-slide-thumb-active_&]:ring-2 [.swiper-slide-thumb-active_&]:ring-blue-600 [.swiper-slide-thumb-active_&]:ring-offset-2 bg-white flex items-center justify-center p-1">
+                  <img
+                    src={img}
+                    alt={`Thumbnail ${idx + 1}`}
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </div>
+      )}
     </div>
   );
 }

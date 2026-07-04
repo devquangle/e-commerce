@@ -185,10 +185,11 @@ public class ProductMapper {
         dto.setName(product.getName());
         dto.setSlug(product.getSlug());
         dto.setIsbn(product.getIsbn());
+        dto.setOriginalPrice(product.getOriginalPrice());
         dto.setPrice(product.getPrice());
         dto.setQuantity(product.getQuantity());
         dto.setWeight(product.getWeight());
-        dto.setPublishYear(product.getPublishYear());
+        dto.setPublishYear(product.getPublishYear().toString());
         dto.setPages(product.getPages());
         dto.setLanguage(product.getLanguage());
         dto.setDescription(product.getDescription());

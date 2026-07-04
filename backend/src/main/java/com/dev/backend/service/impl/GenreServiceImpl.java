@@ -14,7 +14,6 @@ import com.dev.backend.constant.BaseStatus;
 import com.dev.backend.dto.genre.GenreRequest;
 import com.dev.backend.dto.genre.GenreResponse;
 import com.dev.backend.dto.genre.GenreWithProductCountResponse;
-import com.dev.backend.dto.genre.ProductGenresResponse;
 import com.dev.backend.entity.Genre;
 import com.dev.backend.exception.DuplicateFieldException;
 import com.dev.backend.exception.NotFoundException;

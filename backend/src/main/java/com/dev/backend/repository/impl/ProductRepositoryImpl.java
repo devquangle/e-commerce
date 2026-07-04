@@ -7,7 +7,7 @@ import com.dev.backend.dto.product.ProductFilterRequest;
 import com.dev.backend.dto.product.PromotionResponse;
 import com.dev.backend.entity.*;
 import com.dev.backend.repository.ProductRepositoryCustom;
-import com.dev.backend.repository.specification.ProductSpecification;
+import com.dev.backend.dto.product.ProductSpecification;
 import jakarta.persistence.*;
 import jakarta.persistence.criteria.*;
 import org.springframework.data.domain.*;
@@ -58,8 +58,10 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
         // =========================
         // FILTER
         // =========================
-        Predicate predicate = ProductSpecification.buildPredicate(root, cb, request);
-        query.where(predicate);
+        Predicate predicate = ProductSpecification.filter(request).toPredicate(root, query, cb);
+        if (predicate != null) {
+            query.where(predicate);
+        }
 
         // =========================
         // EXPRESSIONS
@@ -93,8 +95,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
                 root.get("slug"),
                 root.get("name"),
                 root.get("price"),
-                root.get("createdAt"),
-                promoJoin.get("promotionCampaignType")
+                root.get("createdAt")
         );
 
         // =========================
@@ -125,8 +126,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
                 root.get("price").alias("price"),
                 imgSub.alias("urlImage"),
 
-                promoValueExpr.alias("promotionValue"),
-                promoJoin.get("promotionCampaignType").alias("promotionType")
+                promoValueExpr.alias("promotionValue")
         ));
 
         // =========================
@@ -192,15 +192,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
                     res.setUrlImage(tuple.get("urlImage", String.class));
 
                     Number promoValue = tuple.get("promotionValue", Number.class);
-                    PromotionCampaignType promoType =
-                            tuple.get("promotionType", PromotionCampaignType.class);
-
-                    if (promoValue != null || promoType != null) {
-                        PromotionResponse promo = new PromotionResponse();
-                        promo.setValue(promoValue != null ? promoValue.intValue() : null);
-                        promo.setType(promoType);
-                        res.setPromotion(promo);
-                    }
+                    res.setDiscountValue(promoValue != null ? promoValue.intValue() : 0);
 
                     return res;
                 })
@@ -213,10 +205,12 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
         Root<Product> countRoot = countQuery.from(Product.class);
 
         Predicate countPredicate =
-                ProductSpecification.buildPredicate(countRoot, cb, request);
+                ProductSpecification.filter(request).toPredicate(countRoot, countQuery, cb);
 
         countQuery.select(cb.countDistinct(countRoot.get("id")));
-        countQuery.where(countPredicate);
+        if (countPredicate != null) {
+            countQuery.where(countPredicate);
+        }
 
         Long total = entityManager.createQuery(countQuery).getSingleResult();
 

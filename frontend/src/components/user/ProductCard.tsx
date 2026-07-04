@@ -8,7 +8,7 @@ interface Props {
 }
 
 export default function ProductCard({ product }: Props) {
-  const discountValue = product.promotion?.value || 0;
+  const discountValue = product.discountValue || 0;
   const hasDiscount = discountValue > 0;
   
   const originalPrice = hasDiscount

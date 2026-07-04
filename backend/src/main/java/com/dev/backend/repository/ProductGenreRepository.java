@@ -21,13 +21,13 @@ public interface ProductGenreRepository extends JpaRepository<ProductGenre, Inte
 
     @Query("""
           SELECT new com.dev.backend.dto.genre.ProductGenresResponse(
-              pa.genre.id,
-              pa.genre.name,
-              pa.genre.slug
+              pg.genre.id,
+              pg.genre.name,
+              pg.genre.slug
           )
           FROM ProductGenre pg
           WHERE pg.product.id = :productId
-          ORDER BY pa.genre.name
+          ORDER BY pg.genre.name
       """)
   List<ProductGenresResponse> findGenresByProductId(@Param("productId") Integer productId);
 }

@@ -41,7 +41,7 @@ export default function ProductDescription({ product }: ProductDescriptionProps)
         <div 
           ref={contentRef}
           className={`
-            prose prose-sm md:prose-base max-w-none text-slate-600 leading-relaxed
+            prose prose-sm md:prose-base tiptap max-w-none text-slate-600 leading-relaxed
             prose-p:mb-4 prose-a:text-blue-600 prose-img:rounded-xl prose-img:max-w-full
             prose-img:mx-auto prose-img:block
             overflow-hidden transition-all duration-300

@@ -44,10 +44,10 @@ public class ProductSpecification {
             if (req.getGenres() != null && !req.getGenres().isEmpty()) {
 
                 Join<Product, ProductGenre> productGenreJoin =
-                        root.join("productGenres", JoinType.LEFT);
+                        root.join("productGenres", JoinType.INNER);
 
                 Join<ProductGenre, Genre> genreJoin =
-                        productGenreJoin.join("genre", JoinType.LEFT);
+                        productGenreJoin.join("genre", JoinType.INNER);
 
                 predicates.add(
                         genreJoin.get("slug").in(req.getGenres())
@@ -58,10 +58,10 @@ public class ProductSpecification {
             if (req.getAuthors() != null && !req.getAuthors().isEmpty()) {
 
                 Join<Product, ProductAuthor> productAuthorJoin =
-                        root.join("productAuthors", JoinType.LEFT);
+                        root.join("productAuthors", JoinType.INNER);
 
                 Join<ProductAuthor, Author> authorJoin =
-                        productAuthorJoin.join("author", JoinType.LEFT);
+                        productAuthorJoin.join("author", JoinType.INNER);
 
                 predicates.add(
                         authorJoin.get("slug").in(req.getAuthors())
@@ -72,7 +72,7 @@ public class ProductSpecification {
             if (StringUtils.hasText(req.getPublisher())) {
 
                 Join<Product, Publisher> publisherJoin =
-                        root.join("publisher", JoinType.LEFT);
+                        root.join("publisher", JoinType.INNER);
 
                 predicates.add(
                         cb.equal(
@@ -86,7 +86,7 @@ public class ProductSpecification {
             if (StringUtils.hasText(req.getSeries())) {
 
                 Join<Product, Series> seriesJoin =
-                        root.join("series", JoinType.LEFT);
+                        root.join("series", JoinType.INNER);
 
                 predicates.add(
                         cb.equal(

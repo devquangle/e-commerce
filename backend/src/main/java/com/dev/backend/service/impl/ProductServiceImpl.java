@@ -10,6 +10,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.dev.backend.constant.ProductBadge;
 import com.dev.backend.constant.ProductStatus;
@@ -29,9 +31,11 @@ import com.dev.backend.mapper.SeriesMapper;
 import com.dev.backend.repository.ProductRepository;
 import com.dev.backend.response.PageResponse;
 import com.dev.backend.service.ImageService;
+import com.dev.backend.service.OrderItemService;
 import com.dev.backend.service.ProductAuthorService;
 import com.dev.backend.service.ProductGenreService;
 import com.dev.backend.service.ProductService;
+import com.dev.backend.service.PromotionProductService;
 import com.dev.backend.service.PublisherService;
 import com.dev.backend.service.SeriesService;
 import com.dev.backend.util.TextUtils;
@@ -50,9 +54,14 @@ public class ProductServiceImpl implements ProductService {
     private final ProductMapper productMapper;
     private final ImageService imageService;
     private final SeriesService seriesService;
+    private final OrderItemService orderItemService;
     private final PublisherService publisherService;
     private final ProductGenreService productGenreService;
     private final ProductAuthorService productAuthorService;
+
+    @Lazy
+    @Autowired
+    private PromotionProductService promotionProductService;
 
     private final PublisherMapper publisherMapper;
     private final SeriesMapper seriesMapper;
@@ -250,9 +259,7 @@ public class ProductServiceImpl implements ProductService {
                 request,
                 pageable);
 
-        productPage.getContent().forEach(product -> {
-            product.setBadge(generateBadge(product));
-        });
+        // Removed setBadge loop as badge is no longer in ProductCardResponse
 
         return new PageResponse<>(
                 productPage.getContent(),
@@ -289,37 +296,20 @@ public class ProductServiceImpl implements ProductService {
         };
     }
 
-    public ProductBadge generateBadge(ProductCardResponse product) {
 
-        if (product.getPromotion() != null
-                && product.getPromotion().getType() == PromotionCampaignType.FLASH_SALE) {
-            return ProductBadge.FLASH_SALE;
-        }
-
-        if (product.getSoldCount() != null
-                && product.getSoldCount() >= 1000) {
-            return ProductBadge.BEST_SELLER;
-        }
-
-        if (product.getCreatedAt() != null
-                && product.getCreatedAt()
-                        .isAfter(LocalDateTime.now().minusDays(30))) {
-            return ProductBadge.NEW;
-        }
-
-        return null;
-    }
 
     @Override
     public ProductInfo productInfo(String slug) {
         Product product = findBySlug(slug);
+        Integer productId = product.getId();
         ProductInfo productInfo = productMapper.mapProductInfo(product);
-        productInfo.setDiscountValue(null);
+        productInfo.setDiscountValue(promotionProductService.findDiscountValueByProductId(productId));
         productInfo.setProductPublisher(publisherMapper.toProductPublisher(product.getPublisher()));
         productInfo.setProductSeries(seriesMapper.toProductSeries(product.getSeries()));
-        productInfo.setProductAuthors(productAuthorService.findAuthorsByProductId(product.getId()));
-        productInfo.setProductGenres(productGenreService.findGenresByProductId(product.getId()));
-        productInfo.setCoverImages(null);
+        productInfo.setProductAuthors(productAuthorService.findAuthorsByProductId(productId));
+        productInfo.setProductGenres(productGenreService.findGenresByProductId(productId));
+        productInfo.setCoverImages(imageService.findImagesByProductId(productId));
+        productInfo.setSoldCount(orderItemService.getSoldCountByProductId(productId));
         return productInfo;
     }
 }

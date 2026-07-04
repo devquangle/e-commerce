@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -103,5 +104,12 @@ public class PromotionProductServiceImpl implements PromotionProductService {
                         productId,
                         grouped.getOrDefault(productId, List.of())))
                 .toList();
+    }
+
+
+    @Override
+    public Integer findDiscountValueByProductId(Integer productId) {
+        Integer discountValue =promotionProductRepository.findDiscountValueByProductId(productId);
+        return Optional.ofNullable(discountValue).orElse(0);
     }
 }

@@ -7,6 +7,7 @@ import ProductImages from "@/modules/user/product-detail/components/ProductImage
 import ProductInfo from "@/modules/user/product-detail/components/ProductInfo";
 import ProductTable from "@/modules/user/product-detail/components/ProductTable";
 import RelatedProducts from "@/modules/user/product-detail/components/RelatedProducts";
+import useProductDetailData from "@/modules/user/product-detail/hooks/useProductDetailData";
 
 import type { ProductCard as ProductCardType } from "@/types/product.card.type";
 import type { ProductResponse } from "@/modules/user/product-detail/types/product-detail.type";
@@ -44,9 +45,8 @@ const relatedProducts: ProductCardType[] = [
     rating: 4.9,
     reviewCount: 1205,
     price: 86000,
-    bage: 'Flash Sale',
     urlImage: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&q=80&w=400',
-    promosionValue: 50,
+    discountValue: 50,
   },
   {
     id: 102,
@@ -56,9 +56,8 @@ const relatedProducts: ProductCardType[] = [
     rating: 4.8,
     reviewCount: 890,
     price: 79000,
-    bage: '',
     urlImage: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=400',
-    promosionValue: 40,
+    discountValue: 40,
   },
   {
     id: 103,
@@ -68,9 +67,8 @@ const relatedProducts: ProductCardType[] = [
     rating: 4.7,
     reviewCount: 2100,
     price: 65000,
-    bage: 'Flash Sale',
     urlImage: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=400',
-    promosionValue: 35,
+    discountValue: 35,
   },
   {
     id: 104,
@@ -80,9 +78,8 @@ const relatedProducts: ProductCardType[] = [
     rating: 4.9,
     reviewCount: 320,
     price: 95000,
-    bage: '',
     urlImage: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&q=80&w=400',
-    promosionValue: 20,
+    discountValue: 20,
   },
   {
     id: 105,
@@ -92,9 +89,8 @@ const relatedProducts: ProductCardType[] = [
     rating: 4.9,
     reviewCount: 1560,
     price: 155000,
-    bage: '',
     urlImage: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&q=80&w=400',
-    promosionValue: 25,
+    discountValue: 25,
   }
 ];
 export default function ProductDetailPage() {
@@ -176,6 +172,18 @@ export default function ProductDetailPage() {
     ]
   };
 
+  const { productInfo } = useProductDetailData(slug || "");
+  
+  // Dữ liệu API nếu có, không thì dùng mock (đảm bảo an toàn TypeScript, không truy cập .data.data)
+  const finalProduct: ProductResponse = productInfo.data || mockProductResponse;
+
+  if (productInfo.isLoading) {
+    return (
+      <Container className="max-w-7xl p-2 min-h-[60vh] flex items-center justify-center">
+        <div className="text-slate-500 font-medium text-lg animate-pulse">Đang tải thông tin sản phẩm...</div>
+      </Container>
+    );
+  }
 
   return (
     <Container className="max-w-7xl p-2">
@@ -183,9 +191,9 @@ export default function ProductDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 my-4 items-start">
         
         {/* LEFT COLUMN: Images, Policies */}
-        <div className="lg:col-span-4 lg:sticky lg:top-4 h-fit flex flex-col gap-4">
-          <div className="card-custom-v1 p-2">
-            <ProductImages product={mockProductResponse} />
+        <div className="lg:col-span-4 lg:sticky lg:top-24 h-fit flex flex-col gap-4">
+          <div className="card-custom">
+            <ProductImages product={finalProduct} />
           </div>
           
          
@@ -195,13 +203,13 @@ export default function ProductDetailPage() {
         <div className="lg:col-span-8 flex flex-col gap-4">
           <div className="card-custom">
             <ProductInfo 
-              product={mockProductResponse} 
+              product={finalProduct} 
               review={mockOverview}
             />
           </div>
 
-          <ProductTable product={mockProductResponse} />
-          <ProductDescription product={mockProductResponse} />
+          <ProductTable product={finalProduct} />
+          <ProductDescription product={finalProduct} />
         </div>
 
       </div>
