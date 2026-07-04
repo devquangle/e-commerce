@@ -16,7 +16,7 @@ export default function AdminLayout() {
   }, []);
 
   return (
-    <div className="h-screen overflow-hidden bg-slate-50 ">
+    <div className="h-screen overflow-hidden bg-slate-200 ">
       <Header />
       {/* SIDEBAR */}
       <Sidebar isOpen={sidebarOpen}

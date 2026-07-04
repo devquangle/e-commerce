@@ -6,6 +6,7 @@ import ProductToolbar from "@/modules/user/product-search/components/ProductTool
 import { useProductFilter } from "@/modules/user/product-search/hooks/useProductFilter";
 import { useProductSearch } from "@/modules/user/product-search/hooks/useProductSearch";
 import Pagination from "@/components/common/Pagination";
+import ActiveFilters from "@/modules/user/product-search/components/ActiveFilters";
 
 export default function Products() {
   const [openFilter, setOpenFilter] = useState(false);
@@ -55,6 +56,12 @@ export default function Products() {
               setOpenFilter={setOpenFilter}
               filters={filters}
               updateFilter={updateFilter}
+            />
+
+            <ActiveFilters 
+              filters={filters}
+              updateFilter={updateFilter}
+              resetFilters={resetFilters}
             />
 
             {/* PRODUCT GRID */}
