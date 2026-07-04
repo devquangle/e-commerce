@@ -47,4 +47,6 @@ public interface SeriesRepository extends JpaRepository<Series, Integer> {
 
              """)
     List<SeriesWithProductCountResponse> findActiveSeriesWithProductCount();
+
+
 }

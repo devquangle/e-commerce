@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.dev.backend.dto.genre.ProductGenresResponse;
 import com.dev.backend.entity.Genre;
 import com.dev.backend.entity.Product;
 import com.dev.backend.entity.ProductGenre;
@@ -54,5 +55,10 @@ public class ProductGenreServiceImpl implements ProductGenreService {
             productGenresToSave.add(productGenre);
         }
         productGenreRepository.saveAll(productGenresToSave);
+    }
+
+    @Override
+    public List<ProductGenresResponse> findGenresByProductId(Integer productId) {
+        return productGenreRepository.findGenresByProductId(productId);
     }
 }

@@ -1,6 +1,7 @@
 package com.dev.backend.mapper;
 
 import com.dev.backend.dto.product.*;
+import com.dev.backend.dto.productdetail.ProductInfo;
 import com.dev.backend.entity.*;
 import org.springframework.stereotype.Component;
 
@@ -38,18 +39,25 @@ public class ProductMapper {
 
         if (product.getPromotionProducts() != null) {
             dto.setPromotions(product.getPromotionProducts().stream()
-                .filter(pp -> pp.getPromotion() != null && pp.getPromotion().getStatus() != com.dev.backend.constant.BaseStatus.DELETED)
-                .map(pp -> {
-                    ProductResponse.ProductPromotionDto promoDto = new ProductResponse.ProductPromotionDto();
-                    promoDto.setId(pp.getPromotion().getId());
-                    promoDto.setName(pp.getPromotion().getName());
-                    promoDto.setCampaignType(pp.getPromotion().getPromotionCampaignType() != null ? pp.getPromotion().getPromotionCampaignType().name() : "");
-                    promoDto.setDiscountPercentage(pp.getDiscountValue());
-                    promoDto.setStartDate(pp.getPromotion().getStartDate() != null ? pp.getPromotion().getStartDate().toString() : "");
-                    promoDto.setEndDate(pp.getPromotion().getExpireDate() != null ? pp.getPromotion().getExpireDate().toString() : "");
-                    return promoDto;
-                })
-                .collect(Collectors.toList()));
+                    .filter(pp -> pp.getPromotion() != null
+                            && pp.getPromotion().getStatus() != com.dev.backend.constant.BaseStatus.DELETED)
+                    .map(pp -> {
+                        ProductResponse.ProductPromotionDto promoDto = new ProductResponse.ProductPromotionDto();
+                        promoDto.setId(pp.getPromotion().getId());
+                        promoDto.setName(pp.getPromotion().getName());
+                        promoDto.setCampaignType(pp.getPromotion().getPromotionCampaignType() != null
+                                ? pp.getPromotion().getPromotionCampaignType().name()
+                                : "");
+                        promoDto.setDiscountPercentage(pp.getDiscountValue());
+                        promoDto.setStartDate(
+                                pp.getPromotion().getStartDate() != null ? pp.getPromotion().getStartDate().toString()
+                                        : "");
+                        promoDto.setEndDate(
+                                pp.getPromotion().getExpireDate() != null ? pp.getPromotion().getExpireDate().toString()
+                                        : "");
+                        return promoDto;
+                    })
+                    .collect(Collectors.toList()));
         }
 
         return dto;
@@ -84,18 +92,25 @@ public class ProductMapper {
 
         if (product.getPromotionProducts() != null) {
             dto.setPromotions(product.getPromotionProducts().stream()
-                .filter(pp -> pp.getPromotion() != null && pp.getPromotion().getStatus() != com.dev.backend.constant.BaseStatus.DELETED)
-                .map(pp -> {
-                    ProductResponse.ProductPromotionDto promoDto = new ProductResponse.ProductPromotionDto();
-                    promoDto.setId(pp.getPromotion().getId());
-                    promoDto.setName(pp.getPromotion().getName());
-                    promoDto.setCampaignType(pp.getPromotion().getPromotionCampaignType() != null ? pp.getPromotion().getPromotionCampaignType().name() : "");
-                    promoDto.setDiscountPercentage(pp.getDiscountValue());
-                    promoDto.setStartDate(pp.getPromotion().getStartDate() != null ? pp.getPromotion().getStartDate().toString() : "");
-                    promoDto.setEndDate(pp.getPromotion().getExpireDate() != null ? pp.getPromotion().getExpireDate().toString() : "");
-                    return promoDto;
-                })
-                .collect(Collectors.toList()));
+                    .filter(pp -> pp.getPromotion() != null
+                            && pp.getPromotion().getStatus() != com.dev.backend.constant.BaseStatus.DELETED)
+                    .map(pp -> {
+                        ProductResponse.ProductPromotionDto promoDto = new ProductResponse.ProductPromotionDto();
+                        promoDto.setId(pp.getPromotion().getId());
+                        promoDto.setName(pp.getPromotion().getName());
+                        promoDto.setCampaignType(pp.getPromotion().getPromotionCampaignType() != null
+                                ? pp.getPromotion().getPromotionCampaignType().name()
+                                : "");
+                        promoDto.setDiscountPercentage(pp.getDiscountValue());
+                        promoDto.setStartDate(
+                                pp.getPromotion().getStartDate() != null ? pp.getPromotion().getStartDate().toString()
+                                        : "");
+                        promoDto.setEndDate(
+                                pp.getPromotion().getExpireDate() != null ? pp.getPromotion().getExpireDate().toString()
+                                        : "");
+                        return promoDto;
+                    })
+                    .collect(Collectors.toList()));
         }
 
         return dto;
@@ -162,5 +177,21 @@ public class ProductMapper {
                     res.setIsThumbnail(img.isThumbnail());
                     return res;
                 }).collect(Collectors.toList());
+    }
+
+    public ProductInfo mapProductInfo(Product product) {
+        ProductInfo dto = new ProductInfo();
+        dto.setId(product.getId());
+        dto.setName(product.getName());
+        dto.setSlug(product.getSlug());
+        dto.setIsbn(product.getIsbn());
+        dto.setPrice(product.getPrice());
+        dto.setQuantity(product.getQuantity());
+        dto.setWeight(product.getWeight());
+        dto.setPublishYear(product.getPublishYear());
+        dto.setPages(product.getPages());
+        dto.setLanguage(product.getLanguage());
+        dto.setDescription(product.getDescription());
+        return dto;
     }
 }

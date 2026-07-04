@@ -6,6 +6,7 @@ import com.dev.backend.dto.product.ProductDetailResponse;
 import com.dev.backend.dto.product.ProductFilterRequest;
 import com.dev.backend.dto.product.ProductRequest;
 import com.dev.backend.dto.product.ProductResponse;
+import com.dev.backend.dto.productdetail.ProductInfo;
 import com.dev.backend.entity.Product;
 import com.dev.backend.response.PageResponse;
 
@@ -35,5 +36,6 @@ public interface ProductService {
 
     PageResponse<ProductCardResponse> filterProducts(ProductFilterRequest request);
 
+    ProductInfo productInfo(String slug);
 
 }

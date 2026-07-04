@@ -9,8 +9,10 @@ export interface ProductResponse extends ProductSoldCountResponse {
   weight: number;
   publishYear: string;
   pages: number;
-  description: string;
   language?: string;
+
+  description: string;
+
   productPublisher: ProductPublisherResponse;
   productSeries: ProductSeriesResponse | null;
   productGenres: ProductGenreResponse[] | [];

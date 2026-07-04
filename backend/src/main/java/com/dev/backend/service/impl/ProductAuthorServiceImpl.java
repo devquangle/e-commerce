@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.dev.backend.dto.author.ProductAuthorsResponse;
 import com.dev.backend.entity.Author;
 import com.dev.backend.entity.Product;
 import com.dev.backend.entity.ProductAuthor;
@@ -26,6 +27,10 @@ public class ProductAuthorServiceImpl implements ProductAuthorService {
     @Override
     public ProductAuthor save(ProductAuthor productAuthor) {
         return productAuthorRepository.save(productAuthor);
+    }
+    @Override
+    public List<ProductAuthorsResponse> findAuthorsByProductId(Integer productId) {
+        return productAuthorRepository.findAuthorsByProductId(productId);
     }
 
     @Transactional

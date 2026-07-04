@@ -19,10 +19,13 @@ import com.dev.backend.dto.product.ProductDetailResponse;
 import com.dev.backend.dto.product.ProductFilterRequest;
 import com.dev.backend.dto.product.ProductRequest;
 import com.dev.backend.dto.product.ProductResponse;
+import com.dev.backend.dto.productdetail.ProductInfo;
 import com.dev.backend.entity.Product;
 import com.dev.backend.exception.NotFoundException;
 import com.dev.backend.exception.DuplicateFieldException;
 import com.dev.backend.mapper.ProductMapper;
+import com.dev.backend.mapper.PublisherMapper;
+import com.dev.backend.mapper.SeriesMapper;
 import com.dev.backend.repository.ProductRepository;
 import com.dev.backend.response.PageResponse;
 import com.dev.backend.service.ImageService;
@@ -50,6 +53,9 @@ public class ProductServiceImpl implements ProductService {
     private final PublisherService publisherService;
     private final ProductGenreService productGenreService;
     private final ProductAuthorService productAuthorService;
+
+    private final PublisherMapper publisherMapper;
+    private final SeriesMapper seriesMapper;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -191,7 +197,6 @@ public class ProductServiceImpl implements ProductService {
     private void validate(ProductRequest request, Integer id) {
         DuplicateFieldException errors = new DuplicateFieldException(new HashMap<>());
 
-    
         if (!errors.getErrors().isEmpty()) {
             throw errors;
         }
@@ -303,5 +308,18 @@ public class ProductServiceImpl implements ProductService {
         }
 
         return null;
+    }
+
+    @Override
+    public ProductInfo productInfo(String slug) {
+        Product product = findBySlug(slug);
+        ProductInfo productInfo = productMapper.mapProductInfo(product);
+        productInfo.setDiscountValue(null);
+        productInfo.setProductPublisher(publisherMapper.toProductPublisher(product.getPublisher()));
+        productInfo.setProductSeries(seriesMapper.toProductSeries(product.getSeries()));
+        productInfo.setProductAuthors(productAuthorService.findAuthorsByProductId(product.getId()));
+        productInfo.setProductGenres(productGenreService.findGenresByProductId(product.getId()));
+        productInfo.setCoverImages(null);
+        return productInfo;
     }
 }

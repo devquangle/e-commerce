@@ -1,4 +1,4 @@
-package com.dev.backend.dto.product_search;
+package com.dev.backend.dto.productsearch;
 
 import java.util.List;
 

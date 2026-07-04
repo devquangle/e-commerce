@@ -2,6 +2,7 @@ package com.dev.backend.mapper;
 
 import org.springframework.stereotype.Component;
 
+import com.dev.backend.dto.series.ProductSeriesResponse;
 import com.dev.backend.dto.series.SeriesResponse;
 import com.dev.backend.entity.Series;
 
@@ -19,4 +20,16 @@ public class SeriesMapper {
                 .description(series.getDescription())
                 .build();
     }
+
+    public ProductSeriesResponse toProductSeries(Series series) {
+        if (series == null) {
+            return null;
+        }
+        ProductSeriesResponse dto = new ProductSeriesResponse();
+        dto.setId(series.getId());
+        dto.setName(series.getName());
+        dto.setSlug(series.getSlug());
+        return dto;
+    }
+
 }

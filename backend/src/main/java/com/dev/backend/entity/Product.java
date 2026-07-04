@@ -61,9 +61,11 @@ public class Product extends BaseAuditableEntity<Integer> {
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PromotionProduct> promotionProducts = new ArrayList<>();
+
     @Fetch(FetchMode.SUBSELECT)
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductGenre> productGenres = new ArrayList<>();
+    
     @Fetch(FetchMode.SUBSELECT)
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductAuthor> productAuthors = new ArrayList<>();
