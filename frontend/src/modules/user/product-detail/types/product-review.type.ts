@@ -1,11 +1,12 @@
 export interface ProductReviewResponse {
-  rating: number;
-  reviewCount: number;
+  rating?: number;
+  reviewCount?: number;
   starDetail: StarDetail[];
+  comments: CommentResponse[];
 }
 
 export interface StarDetail {
-  star: number; // 1-5
+  start: number; // 1-5
   count: number;
 }
 
@@ -17,6 +18,8 @@ export interface CommentImage {
 export interface ReplyComment {
   id: number;
   replyComment: string;
+  avatar?: string;
+  fullName?: string;
   createdAt: string;
 }
 

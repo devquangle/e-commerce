@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { Link } from "react-router-dom";
 import type { DashboardStat } from "../types/dashboard.type";
 
 interface DashboardStatsCardsProps {
@@ -16,11 +17,8 @@ const DashboardStatsCards: React.FC<DashboardStatsCardsProps> = ({ stats }) => {
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {displayedStats.map((item) => {
           const Icon = item.icon;
-          return (
-            <article 
-              key={item.label} 
-              className="relative overflow-hidden card-custom p-4 hover:scale-[1.02] flex flex-col justify-between"
-            >
+          const CardContent = (
+            <>
               {/* Top Accent Line */}
               <div className={`absolute top-0 inset-x-0 h-1 ${item.accentClass}`} />
               
@@ -36,6 +34,27 @@ const DashboardStatsCards: React.FC<DashboardStatsCardsProps> = ({ stats }) => {
                   <p className="text-2xl font-bold tracking-tight text-slate-900">{item.value}</p>
                 </div>
               </div>
+            </>
+          );
+
+          if (item.link) {
+            return (
+              <Link
+                to={item.link}
+                key={item.label}
+                className="relative overflow-hidden card-custom p-4 hover:scale-[1.02] flex flex-col justify-between block"
+              >
+                {CardContent}
+              </Link>
+            );
+          }
+
+          return (
+            <article 
+              key={item.label} 
+              className="relative overflow-hidden card-custom p-4 hover:scale-[1.02] flex flex-col justify-between"
+            >
+              {CardContent}
             </article>
           );
         })}

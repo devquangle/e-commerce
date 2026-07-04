@@ -8,6 +8,7 @@ export type DashboardStat = {
   icon: LucideIcon;
   accentClass: string;
   iconColor: string;
+  link?: string;
 };
 
 export type RecentOrder = {

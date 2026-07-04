@@ -32,7 +32,8 @@ const stats: DashboardStat[] = [
     isPositive: true,
     icon: Banknote,
     accentClass: "bg-indigo-500",
-    iconColor: "text-indigo-600 bg-indigo-50"
+    iconColor: "text-indigo-600 bg-indigo-50",
+    link: "/admin/orders"
   },
   { 
     label: "Tổng đơn hàng", 
@@ -41,7 +42,8 @@ const stats: DashboardStat[] = [
     isPositive: true,
     icon: ShoppingBag,
     accentClass: "bg-emerald-500",
-    iconColor: "text-emerald-600 bg-emerald-50"
+    iconColor: "text-emerald-600 bg-emerald-50",
+    link: "/admin/orders"
   },
   { 
     label: "Khách hàng", 
@@ -50,7 +52,8 @@ const stats: DashboardStat[] = [
     isPositive: true,
     icon: Users,
     accentClass: "bg-amber-500",
-    iconColor: "text-amber-600 bg-amber-50"
+    iconColor: "text-amber-600 bg-amber-50",
+    link: "/admin/customers"
   },
   { 
     label: "Sản phẩm", 
@@ -59,7 +62,8 @@ const stats: DashboardStat[] = [
     isPositive: true,
     icon: Package,
     accentClass: "bg-violet-500",
-    iconColor: "text-violet-600 bg-violet-50"
+    iconColor: "text-violet-600 bg-violet-50",
+    link: "/admin/products"
   },
   { 
     label: "Thể loại", 
@@ -68,7 +72,8 @@ const stats: DashboardStat[] = [
     isPositive: true,
     icon: Shapes,
     accentClass: "bg-pink-500",
-    iconColor: "text-pink-600 bg-pink-50"
+    iconColor: "text-pink-600 bg-pink-50",
+    link: "/admin/categories"
   },
   { 
     label: "Nhà xuất bản", 
@@ -77,7 +82,8 @@ const stats: DashboardStat[] = [
     isPositive: true,
     icon: Library,
     accentClass: "bg-teal-500",
-    iconColor: "text-teal-600 bg-teal-50"
+    iconColor: "text-teal-600 bg-teal-50",
+    link: "/admin/publishers"
   },
   { 
     label: "Tác giả", 
@@ -86,7 +92,8 @@ const stats: DashboardStat[] = [
     isPositive: true,
     icon: PenTool,
     accentClass: "bg-cyan-500",
-    iconColor: "text-cyan-600 bg-cyan-50"
+    iconColor: "text-cyan-600 bg-cyan-50",
+    link: "/admin/authors"
   },
   { 
     label: "Series", 
@@ -95,7 +102,8 @@ const stats: DashboardStat[] = [
     isPositive: true,
     icon: Layers,
     accentClass: "bg-fuchsia-500",
-    iconColor: "text-fuchsia-600 bg-fuchsia-50"
+    iconColor: "text-fuchsia-600 bg-fuchsia-50",
+    link: "/admin/series"
   },
   { 
     label: "Giảm giá", 
@@ -104,7 +112,8 @@ const stats: DashboardStat[] = [
     isPositive: false,
     icon: Percent,
     accentClass: "bg-red-500",
-    iconColor: "text-red-600 bg-red-50"
+    iconColor: "text-red-600 bg-red-50",
+    link: "/admin/promotions"
   },
   { 
     label: "Voucher", 
@@ -113,7 +122,8 @@ const stats: DashboardStat[] = [
     isPositive: true,
     icon: Ticket,
     accentClass: "bg-orange-500",
-    iconColor: "text-orange-600 bg-orange-50"
+    iconColor: "text-orange-600 bg-orange-50",
+    link: "/admin/vouchers"
   },
 ];
 

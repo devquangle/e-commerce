@@ -1,22 +1,16 @@
 import React from "react";
-import { DollarSign, ShoppingBag, Percent, TrendingUp, RefreshCw } from "lucide-react";
+import { DollarSign, ShoppingBag, Percent } from "lucide-react";
 
 interface RevenueMetricsProps {
   monthlyRevenueText: string;
-  monthlyRevenueTrend: string;
   averageOrderValueText: string;
-  averageOrderValueTrend: string;
   returnRateText: string;
-  returnRateTrend: string;
 }
 
 const RevenueMetrics: React.FC<RevenueMetricsProps> = ({
   monthlyRevenueText,
-  monthlyRevenueTrend,
   averageOrderValueText,
-  averageOrderValueTrend,
   returnRateText,
-  returnRateTrend,
 }) => {
   return (
     <div className="grid gap-4 md:grid-cols-3">
@@ -31,12 +25,7 @@ const RevenueMetrics: React.FC<RevenueMetricsProps> = ({
         </div>
         <div className="mt-4 flex items-baseline justify-between">
           <p className="text-2xl font-bold tracking-tight text-slate-900">{monthlyRevenueText}</p>
-          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">
-            <TrendingUp size={12} />
-            {monthlyRevenueTrend}
-          </span>
         </div>
-        <p className="mt-2 text-xs text-slate-400">so với tháng trước</p>
       </article>
 
       {/* GIÁ TRỊ ĐƠN TRUNG BÌNH */}
@@ -50,12 +39,7 @@ const RevenueMetrics: React.FC<RevenueMetricsProps> = ({
         </div>
         <div className="mt-4 flex items-baseline justify-between">
           <p className="text-2xl font-bold tracking-tight text-slate-900">{averageOrderValueText}</p>
-          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">
-            <TrendingUp size={12} />
-            {averageOrderValueTrend}
-          </span>
         </div>
-        <p className="mt-2 text-xs text-slate-400">so với tháng trước</p>
       </article>
 
       {/* TỶ LỆ HOÀN ĐƠN */}
@@ -69,12 +53,7 @@ const RevenueMetrics: React.FC<RevenueMetricsProps> = ({
         </div>
         <div className="mt-4 flex items-baseline justify-between">
           <p className="text-2xl font-bold tracking-tight text-slate-900">{returnRateText}</p>
-          <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2 py-0.5 text-xs font-semibold text-rose-700">
-            <RefreshCw size={12} className="animate-spin-slow" />
-            {returnRateTrend}
-          </span>
         </div>
-        <p className="mt-2 text-xs text-slate-400">so với tháng trước</p>
       </article>
     </div>
   );

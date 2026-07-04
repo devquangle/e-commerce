@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import type { ProductResponse } from "../types/product.detail.type";
+import type { ProductResponse } from "../types/product-detail.type";
 import { registerLocale, getName } from "@cospired/i18n-iso-languages";
 import viLocale from "@cospired/i18n-iso-languages/langs/vi.json";
 
@@ -13,18 +13,6 @@ const getLanguageName = (code?: string) => {
   return name.charAt(0).toUpperCase() + name.slice(1);
 };
 
-const toSlug = (str?: string) => {
-  if (!str) return "";
-  return str
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "") // remove accents
-    .replace(/[đĐ]/g, "d")
-    .replace(/([^a-z0-9\s-]|_)+/g, "") // remove special characters
-    .trim()
-    .replace(/\s+/g, "-") // replace spaces with -
-    .replace(/-+/g, "-"); // remove duplicate -
-};
 
 interface ProductTableProps {
   product: Partial<ProductResponse>;
@@ -50,7 +38,7 @@ export default function ProductTable({ product }: ProductTableProps) {
         <div className="flex flex-wrap gap-1.5">
           {product.productAuthors.map((author, idx) => (
             <span key={author.id}>
-              <Link to={`/products?authors=${toSlug(author.name)}`} className="text-blue-600 hover:underline">
+              <Link to={`/products?authors=${author.slug}`} className="text-blue-600 hover:underline">
                 {author.name}
               </Link>
               {idx < product.productAuthors!.length - 1 && <span className="text-slate-400">, </span>}
@@ -70,7 +58,7 @@ export default function ProductTable({ product }: ProductTableProps) {
         <div className="flex flex-wrap gap-1.5 font-semibold text-blue-600">
           {product.productGenres.map((genre, idx) => (
             <span key={genre.id}>
-              <Link to={`/products?genres=${toSlug(genre.name)}`} className="hover:underline">
+              <Link to={`/products?genres=${genre.slug}`} className="hover:underline">
                 {genre.name}
               </Link>
               {idx < product.productGenres!.length - 1 && <span className="text-slate-400 font-normal">, </span>}
@@ -82,26 +70,26 @@ export default function ProductTable({ product }: ProductTableProps) {
   }
 
   // Nhà xuất bản
-  if (product.publisherName) {
+  if (product.productPublisher) {
     fields.push({
       key: "publisher",
       label: "Nhà xuất bản",
       value: (
-        <Link to={`/products?publisher=${toSlug(product.publisherName)}`} className="text-blue-600 hover:underline">
-          {product.publisherName}
+        <Link to={`/products?publisher=${product.productPublisher.slug}`} className="text-blue-600 hover:underline">
+          {product.productPublisher.name}
         </Link>
       )
     });
   }
 
   // Series
-  if (product.seriesName) {
+  if (product.productSeries) {
     fields.push({
       key: "series",
       label: "Series",
       value: (
-        <Link to={`/products?series=${toSlug(product.seriesName)}`} className="text-blue-600 hover:underline">
-          {product.seriesName}
+        <Link to={`/products?series=${product.productSeries.slug}`} className="text-blue-600 hover:underline">
+          {product.productSeries.name}
         </Link>
       )
     });
@@ -143,7 +131,7 @@ export default function ProductTable({ product }: ProductTableProps) {
     });
   }
 
-  const limit = product.seriesName ? 4 : 3;
+  const limit = product.productSeries ? 4 : 3;
   const visibleFields = isExpanded ? fields : fields.slice(0, limit);
   const hasMore = fields.length > limit;
 

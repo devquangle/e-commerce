@@ -1,23 +1,36 @@
 import { useState } from "react";
 import { Star } from "lucide-react";
-import type { ProductReviewResponse, CommentResponse } from "../types/product.detail.review.type";
+import type { ProductReviewResponse } from "../types/product-review.type";
 
 interface ProductReviewsProps {
-  overview: ProductReviewResponse;
-  comments: CommentResponse[];
+  data: ProductReviewResponse;
 }
 
-export default function ProductReviews({ overview, comments }: ProductReviewsProps) {
+export default function ProductReviews({ data }: ProductReviewsProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [filterRating, setFilterRating] = useState<number | null>(null);
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const initialCommentsCount = 2; 
   
   const filteredComments = filterRating 
-    ? comments.filter(c => c.star === filterRating)
-    : comments;
+    ? (data.comments || []).filter(c => c.star === filterRating)
+    : [...(data.comments || [])];
 
-  const visibleComments = isExpanded ? filteredComments : filteredComments.slice(0, initialCommentsCount);
-  const showButton = filteredComments.length > initialCommentsCount;
+  const sortedComments = filteredComments.sort((a, b) => {
+    const dateA = Date.parse(a.createdAt);
+    const dateB = Date.parse(b.createdAt);
+    
+    // Sort by valid date if possible
+    if (!isNaN(dateA) && !isNaN(dateB)) {
+      return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+    }
+    
+    // Fallback for mock strings ("2 ngày trước") using ID
+    return sortOrder === 'newest' ? b.id - a.id : a.id - b.id;
+  });
+
+  const visibleComments = isExpanded ? sortedComments : sortedComments.slice(0, initialCommentsCount);
+  const showButton = sortedComments.length > initialCommentsCount;
 
   return (
     <div className="card-custom mb-8">
@@ -26,27 +39,27 @@ export default function ProductReviews({ overview, comments }: ProductReviewsPro
       <div className="flex flex-col md:flex-row items-center gap-8 mb-10 p-6 bg-slate-50 rounded-2xl border border-slate-100">
         <div className="text-center">
           <div className="text-5xl font-black text-blue-600 mb-2">
-            {overview.rating}
+            {data.rating}
           </div>
           <div className="flex text-amber-400 mb-1 justify-center">
             {[...Array(5)].map((_, i) => (
               <Star
                 key={i}
-                className={i < Math.floor(overview.rating) ? "fill-current" : "text-slate-200"}
+                className={i < Math.floor(data.rating || 0) ? "fill-current" : "text-slate-200"}
                 size={20}
               />
             ))}
           </div>
           <div className="text-sm text-slate-500">
-            {overview.reviewCount} đánh giá
+            {data.reviewCount} đánh giá
           </div>
         </div>
         
         <div className="flex-1 w-full space-y-2">
           {[5, 4, 3, 2, 1].map((star) => {
-            const detail = overview.starDetail.find(d => d.star === star);
+            const detail = data.starDetail.find(d => d.start === star);
             const count = detail ? detail.count : 0;
-            const percentage = overview.reviewCount > 0 ? (count / overview.reviewCount) * 100 : 0;
+            const percentage = (data.reviewCount && data.reviewCount > 0) ? (count / data.reviewCount) * 100 : 0;
             
             return (
               <div key={star} className="flex items-center gap-3">
@@ -83,23 +96,56 @@ export default function ProductReviews({ overview, comments }: ProductReviewsPro
         >
           Tất cả
         </button>
-        {[5, 4, 3, 2, 1].map(star => (
+
+        {/* Sort Buttons */}
+        <div className="flex items-center gap-2 border-l border-slate-200 pl-3 ml-1 mr-1">
           <button
-            key={star}
             onClick={() => {
-              setFilterRating(star);
+              setSortOrder('newest');
               setIsExpanded(false);
             }}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-colors border ${
-              filterRating === star 
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${
+              sortOrder === 'newest'
                 ? "bg-blue-50 border-blue-200 text-blue-600" 
                 : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
             }`}
           >
-            <span>{star}</span>
-            <Star size={14} className={filterRating === star ? "fill-blue-600 text-blue-600" : "fill-slate-400 text-slate-400"} />
+            Mới nhất
           </button>
-        ))}
+          <button
+            onClick={() => {
+              setSortOrder('oldest');
+              setIsExpanded(false);
+            }}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${
+              sortOrder === 'oldest'
+                ? "bg-blue-50 border-blue-200 text-blue-600" 
+                : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+            }`}
+          >
+            Cũ nhất
+          </button>
+        </div>
+
+        <div className="border-l border-slate-200 pl-3 ml-1 flex flex-wrap gap-2">
+          {[5, 4, 3, 2, 1].map(star => (
+            <button
+              key={star}
+              onClick={() => {
+                setFilterRating(star);
+                setIsExpanded(false);
+              }}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-colors border ${
+                filterRating === star 
+                  ? "bg-blue-50 border-blue-200 text-blue-600" 
+                  : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+              }`}
+            >
+              <span>{star}</span>
+              <Star size={14} className={filterRating === star ? "fill-blue-600 text-blue-600" : "fill-slate-400 text-slate-400"} />
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="space-y-6">
@@ -117,7 +163,7 @@ export default function ProductReviews({ overview, comments }: ProductReviewsPro
             <p className="text-slate-600">{comment.comment}</p>
           </div>
         ))}
-        {filteredComments.length === 0 && (
+        {sortedComments.length === 0 && (
           <p className="text-center text-slate-500 py-4">Chưa có đánh giá nào.</p>
         )}
       </div>
@@ -128,7 +174,7 @@ export default function ProductReviews({ overview, comments }: ProductReviewsPro
             onClick={() => setIsExpanded(!isExpanded)}
             className="px-8 py-2.5 text-blue-600 border border-blue-200 rounded-full font-semibold hover:bg-blue-50 transition-colors shadow-sm"
           >
-            {isExpanded ? 'Thu gọn' : `Xem thêm ${filteredComments.length - initialCommentsCount} đánh giá`}
+            {isExpanded ? 'Thu gọn' : `Xem thêm ${sortedComments.length - initialCommentsCount} đánh giá`}
           </button>
         </div>
       )}

@@ -3,20 +3,19 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Thumbs, FreeMode, Navigation, Pagination } from "swiper/modules";
 import type { Swiper as SwiperType } from "swiper";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import type { ProductResponse } from "../types/product.detail.type";
+import type { ProductResponse } from "../types/product-detail.type";
 
 interface ProductImagesProps {
   product: Partial<ProductResponse>;
-  mockImages?: string[];
 }
 
-export default function ProductImages({ product, mockImages }: ProductImagesProps) {
+export default function ProductImages({ product }: ProductImagesProps) {
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperType | null>(null);
 
   // Use coverImages from product if available, else use mockImages
   const images = product.coverImages?.length 
     ? product.coverImages.map(img => img.url) 
-    : mockImages || [];
+    : [];
 
   const productName = product.name || "Product Image";
 
@@ -58,7 +57,7 @@ export default function ProductImages({ product, mockImages }: ProductImagesProp
           </button>
         </Swiper>
 
-        {/* Căn chỉnh lại dấu chấm của Swiper bằng CSS ẩn bên trong */}
+      
         <style dangerouslySetInnerHTML={{__html: `
           .swiper-pagination-bullet { width: 8px; height: 8px; background: #cbd5e1; opacity: 1; transition: all 0.3s ease; }
           .swiper-pagination-bullet-active { background: #4f46e5; width: 24px; border-radius: 4px; }
@@ -67,7 +66,7 @@ export default function ProductImages({ product, mockImages }: ProductImagesProp
       </div>
 
       {/* Thumbs Swiper (grid 4 columns) */}
-      <div className="hidden md:block">
+      <div className="hidden md:block p-2">
         <Swiper
           modules={[Thumbs, FreeMode]}
           onSwiper={setThumbsSwiper}
@@ -75,7 +74,7 @@ export default function ProductImages({ product, mockImages }: ProductImagesProp
           spaceBetween={12}
           freeMode={true}
           watchSlidesProgress={true}
-          className="product-thumbs !py-1 !px-[2px]"
+          className="product-thumbs py-1! px-0.5!"
         >
           {images.map((img, idx) => (
             <SwiperSlide key={idx} className="cursor-pointer">

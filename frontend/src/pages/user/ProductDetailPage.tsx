@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import Container from "@/components/common/Container";
 import ProductDescription from "@/modules/user/product-detail/components/ProductDescription";
 import ProductReviews from "@/modules/user/product-detail/components/ProductReviews";
@@ -7,6 +9,8 @@ import ProductTable from "@/modules/user/product-detail/components/ProductTable"
 import RelatedProducts from "@/modules/user/product-detail/components/RelatedProducts";
 
 import type { ProductCard as ProductCardType } from "@/types/product.card.type";
+import type { ProductResponse } from "@/modules/user/product-detail/types/product-detail.type";
+import type { ProductReviewResponse } from "@/modules/user/product-detail/types/product-review.type";
 
 const mockProduct = {
   id: 1,
@@ -94,68 +98,84 @@ const relatedProducts: ProductCardType[] = [
   }
 ];
 export default function ProductDetailPage() {
+  const [searchParams] = useSearchParams();
+  const slug = searchParams.get("slug");
+
+  // Scroll to top when slug changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [slug]);
+
   // Mock data for the new components based on mockProduct
-  const mockProductResponse = {
+  const mockProductResponse: ProductResponse = {
+    id: mockProduct.id,
+    slug: slug || "marketing-can-ban",
     name: mockProduct.title,
     price: mockProduct.price,
-    originalPrice: mockProduct.originalPrice,
+    discountValue: 26,
     description: mockProduct.description,
     productAuthors: [
-      { id: 1, name: "Philip Kotler" },
-      { id: 2, name: "Gary Armstrong" }
+      { id: 1, name: "Philip Kotler", slug: "philip-kotler" },
+      { id: 2, name: "Gary Armstrong", slug: "gary-armstrong" }
     ],
     productGenres: [
-      { id: 1, name: "Kinh tế" },
-      { id: 2, name: "Marketing" },
-      { id: 3, name: "Giáo trình" }
+      { id: 1, name: "Kinh tế", slug: "kinh-te" },
+      { id: 2, name: "Marketing", slug: "marketing" },
+      { id: 3, name: "Giáo trình", slug: "giao-trinh" }
     ],
-    publisherName: "Nhà Xuất Bản Trẻ",
-    seriesName: "Kinh điển về Kinh doanh",
+    productPublisher: { id: 1, name: "Nhà Xuất Bản Trẻ", slug: "nha-xuat-ban-tre" },
+    productSeries: { id: 1, name: "Kinh điển về Kinh doanh", slug: "kinh-dien-ve-kinh-doanh" },
     isbn: "978-604-1-12345-6",
     pages: 720,
     publishYear: "2024",
     weight: 450,
+    quantity: 100,
     language: "vi",
+    coverImages: mockProduct.images.map((url, idx) => ({
+      url,
+      isThumbnail: idx === 0
+    })),
+    soldCount: 2560,
   };
 
-  const mockOverview = {
+  const mockOverview: ProductReviewResponse = {
     rating: mockProduct.rating,
     reviewCount: mockProduct.reviewCount,
     starDetail: [
-      { star: 5, count: 250 },
-      { star: 4, count: 50 },
-      { star: 3, count: 10 },
-      { star: 2, count: 5 },
-      { star: 1, count: 5 },
+      { start: 5, count: 250 },
+      { start: 4, count: 50 },
+      { start: 3, count: 10 },
+      { start: 2, count: 5 },
+      { start: 1, count: 5 },
+    ],
+    comments: [
+      {
+        id: 1,
+        fullName: "Nguyễn Văn A",
+        star: 5,
+        comment: "Sách rất hay, giao hàng nhanh chóng. Bọc sách cẩn thận không bị móp méo. Rất đáng tiền!",
+        createdAt: "2 ngày trước",
+        images: []
+      },
+      {
+        id: 2,
+        fullName: "Trần Thị B",
+        star: 5,
+        comment: "Nội dung bổ ích, phù hợp cho người mới bắt đầu tìm hiểu. Đã mua ủng hộ lần 2.",
+        createdAt: "1 tuần trước",
+        images: []
+      },
+      {
+        id: 3,
+        fullName: "Lê Văn C",
+        star: 4,
+        comment: "Sách giao hơi chậm nhưng chất lượng sách tốt.",
+        createdAt: "2 tuần trước",
+        images: []
+      }
     ]
   };
 
-  const mockComments = [
-    {
-      id: 1,
-      fullName: "Nguyễn Văn A",
-      star: 5,
-      comment: "Sách rất hay, giao hàng nhanh chóng. Bọc sách cẩn thận không bị móp méo. Rất đáng tiền!",
-      createdAt: "2 ngày trước",
-      images: []
-    },
-    {
-      id: 2,
-      fullName: "Trần Thị B",
-      star: 5,
-      comment: "Nội dung bổ ích, phù hợp cho người mới bắt đầu tìm hiểu. Đã mua ủng hộ lần 2.",
-      createdAt: "1 tuần trước",
-      images: []
-    },
-    {
-      id: 3,
-      fullName: "Lê Văn C",
-      star: 4,
-      comment: "Sách giao hơi chậm nhưng chất lượng sách tốt.",
-      createdAt: "2 tuần trước",
-      images: []
-    }
-  ];
 
   return (
     <Container className="max-w-7xl p-2">
@@ -164,8 +184,8 @@ export default function ProductDetailPage() {
         
         {/* LEFT COLUMN: Images, Policies */}
         <div className="lg:col-span-4 lg:sticky lg:top-4 h-fit flex flex-col gap-4">
-          <div className="card-custom ">
-            <ProductImages product={mockProductResponse} mockImages={mockProduct.images} />
+          <div className="card-custom-v1 p-2">
+            <ProductImages product={mockProductResponse} />
           </div>
           
          
@@ -173,12 +193,10 @@ export default function ProductDetailPage() {
 
         {/* RIGHT COLUMN: Info, Specs Table, Description */}
         <div className="lg:col-span-8 flex flex-col gap-4">
-          <div className="card-custom ">
+          <div className="card-custom">
             <ProductInfo 
               product={mockProductResponse} 
-              rating={mockProduct.rating} 
-              reviewCount={mockProduct.reviewCount} 
-              soldCount={mockProduct.soldCount}
+              review={mockOverview}
             />
           </div>
 
@@ -189,7 +207,7 @@ export default function ProductDetailPage() {
       </div>
 
       {/* FULL WIDTH BOTTOM SECTIONS */}
-      <ProductReviews overview={mockOverview} comments={mockComments} />
+      <ProductReviews data={mockOverview} />
       <RelatedProducts relatedProducts={relatedProducts} />
     </Container>
   );

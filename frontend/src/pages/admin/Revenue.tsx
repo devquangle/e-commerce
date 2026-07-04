@@ -3,25 +3,51 @@ import { Download } from "lucide-react";
 import type { MonthlyRevenue } from "@/modules/admin/revenue/types/revenue.type";
 import RevenueMetrics from "@/modules/admin/revenue/components/RevenueMetrics";
 import RevenueChart from "@/modules/admin/revenue/components/RevenueChart";
-import RevenueBreakdown from "@/modules/admin/revenue/components/RevenueBreakdown";
+
 import RevenueTransactions from "@/modules/admin/revenue/components/RevenueTransactions";
 import AdminFilterTabs from "@/components/admin/AdminFilterTabs";
 import type { ViewTab } from "@/components/admin/AdminFilterTabs";
 
-const monthlyRevenue: MonthlyRevenue[] = [
-  { month: "Tháng 1", revenue: 220, growth: "+6%", isGrowth: true },
-  { month: "Tháng 2", revenue: 245, growth: "+11%", isGrowth: true },
-  { month: "Tháng 3", revenue: 278, growth: "+13%", isGrowth: true },
-  { month: "Tháng 4", revenue: 260, growth: "-6%", isGrowth: false },
-  { month: "Tháng 5", revenue: 302, growth: "+16%", isGrowth: true },
-  { month: "Tháng 6", revenue: 335, growth: "+11%", isGrowth: true },
-];
-
+import { useMemo } from "react";
 export default function Revenue() {
   const [activeTab, setActiveTab] = useState<ViewTab>("chart");
   const [dateRange, setDateRange] = useState("30days");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+
+  const monthlyRevenue = useMemo<MonthlyRevenue[]>(() => {
+    switch (dateRange) {
+      case "today":
+        return [
+          { month: "00:00", revenue: 20, growth: "+0%", isGrowth: true },
+          { month: "04:00", revenue: 15, growth: "-5%", isGrowth: false },
+          { month: "08:00", revenue: 45, growth: "+30%", isGrowth: true },
+          { month: "12:00", revenue: 80, growth: "+40%", isGrowth: true },
+          { month: "16:00", revenue: 65, growth: "-15%", isGrowth: false },
+          { month: "20:00", revenue: 110, growth: "+50%", isGrowth: true },
+        ];
+      case "7days":
+        return [
+          { month: "T2", revenue: 120, growth: "+5%", isGrowth: true },
+          { month: "T3", revenue: 145, growth: "+12%", isGrowth: true },
+          { month: "T4", revenue: 130, growth: "-10%", isGrowth: false },
+          { month: "T5", revenue: 160, growth: "+20%", isGrowth: true },
+          { month: "T6", revenue: 202, growth: "+25%", isGrowth: true },
+          { month: "T7", revenue: 235, growth: "+15%", isGrowth: true },
+          { month: "CN", revenue: 280, growth: "+18%", isGrowth: true },
+        ];
+      case "30days":
+      default:
+        return [
+          { month: "Tháng 1", revenue: 220, growth: "+6%", isGrowth: true },
+          { month: "Tháng 2", revenue: 245, growth: "+11%", isGrowth: true },
+          { month: "Tháng 3", revenue: 278, growth: "+13%", isGrowth: true },
+          { month: "Tháng 4", revenue: 260, growth: "-6%", isGrowth: false },
+          { month: "Tháng 5", revenue: 302, growth: "+16%", isGrowth: true },
+          { month: "Tháng 6", revenue: 335, growth: "+11%", isGrowth: true },
+        ];
+    }
+  }, [dateRange]);
 
   return (
     <section className="flex-1 flex flex-col gap-4">
@@ -60,11 +86,8 @@ export default function Revenue() {
       {/* METRIC CARDS */}
       <RevenueMetrics
         monthlyRevenueText="335.000.000đ"
-        monthlyRevenueTrend="+11%"
         averageOrderValueText="215.000đ"
-        averageOrderValueTrend="+4.2%"
         returnRateText="1.6%"
-        returnRateTrend="-0.3%"
       />
 
       {/* TAB CONTENT */}
@@ -73,21 +96,15 @@ export default function Revenue() {
           {/* BIỂU ĐỒ: Chart + Breakdown */}
           <RevenueChart monthlyRevenue={monthlyRevenue} />
 
-          <div className="grid gap-4 lg:grid-cols-3">
-            <RevenueBreakdown />
-            <div className="lg:col-span-2">
-              <RevenueTransactions />
-            </div>
+          <div className="grid gap-4">
+            <RevenueTransactions />
           </div>
         </>
       ) : (
         <>
           {/* BẢNG: Transactions table + Breakdown */}
-          <div className="grid gap-4 lg:grid-cols-3">
-            <div className="lg:col-span-2">
-              <RevenueTransactions />
-            </div>
-            <RevenueBreakdown />
+          <div className="grid gap-4">
+            <RevenueTransactions />
           </div>
 
           <RevenueChart monthlyRevenue={monthlyRevenue} />

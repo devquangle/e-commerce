@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import type { ProductResponse } from "../types/product.detail.type";
+import type { ProductResponse } from "../types/product-detail.type";
 
 interface ProductDescriptionProps {
   product: Partial<ProductResponse>;
