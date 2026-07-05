@@ -3,26 +3,21 @@ import Container from "@/components/common/Container";
 import {
   CheckoutEmptyState,
   CheckoutMobileBar,
-  CheckoutPageHeader,
 } from "@/components/user/CheckoutUI";
 import {
   type CartItemUI,
   type CouponOption,
-  type PaymentMethodType,
   MOCK_CART_ITEMS,
-  getLineTotal,
 } from "@/modules/user/cart/types/cart.type";
-import {
-  showSuccessToast,
-  showWarningToast,
-} from "@/utils/toastUtil";
-import { CreditCard, Package } from "lucide-react";
+import { showSuccessToast, showWarningToast } from "@/utils/toastUtil";
+import { Package } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { getSelectedAddressId, type CouponForm } from "@/types/checkout.type";
 import CartCheckoutSidebar from "@/components/user/CartCheckoutSidebar";
 import CartItemCard from "@/modules/user/cart/components/CartItemCard";
+import type { PaymentMethodType } from "@/modules/user/payment/types/payment-method.type";
 
 interface CheckoutState {
   checkedItems?: CartItemUI[];
@@ -41,8 +36,6 @@ function getInitialItems(state: CheckoutState): CartItemUI[] {
   }));
 }
 
-const primaryButtonClass =
-  "w-full rounded-2xl bg-red-600 py-4 text-base font-bold text-white shadow-lg shadow-red-600/20 transition hover:bg-red-700 hover:shadow-lg hover:shadow-red-600/30 active:scale-[0.98]";
 
 const mobilePrimaryButtonClass =
   "rounded-2xl bg-red-600 px-6 py-3.5 text-base font-bold text-white shadow-lg active:scale-95 transition hover:bg-red-700";
@@ -52,17 +45,27 @@ export default function PaymentPage() {
   const checkoutState = (location.state as CheckoutState) ?? {};
 
   const [items, setItems] = useState<CartItemUI[]>(() =>
-    getInitialItems(checkoutState)
+    getInitialItems(checkoutState),
   );
   const [selectedAddressId, setSelectedAddressId] = useState(
-    () => checkoutState.selectedAddressId ?? getSelectedAddressId()
+    () => checkoutState.selectedAddressId ?? getSelectedAddressId(),
   );
   const [appliedCoupon, setAppliedCoupon] = useState<CouponOption | null>(
-    checkoutState.appliedCoupon ?? null
+    checkoutState.appliedCoupon ?? null,
   );
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodType>(
-    checkoutState.paymentMethod ?? "ewallet"
+    checkoutState.paymentMethod ?? "cod",
   );
+
+  const updateQuantity = (cartItemId: number, delta: number) => {
+    setItems((prev) =>
+      prev.map((i) =>
+        i.cartItemId === cartItemId
+          ? { ...i, quantity: Math.max(1, i.quantity + delta) }
+          : i
+      )
+    );
+  };
 
   const {
     register,
@@ -81,18 +84,43 @@ export default function PaymentPage() {
 
   const selectedCount = useMemo(
     () => items.reduce((sum, i) => sum + i.quantity, 0),
-    [items]
+    [items],
   );
 
   const subtotal = useMemo(
-    () => items.reduce((sum, i) => sum + getLineTotal(i), 0),
-    [items]
+    () =>
+      items.reduce((sum, i) => {
+        const originalPrice =
+          i.product.discountValue > 0
+            ? i.product.price / (1 - i.product.discountValue / 100)
+            : i.product.price;
+        return sum + originalPrice * i.quantity;
+      }, 0),
+    [items],
   );
 
-  const discount = appliedCoupon
-    ? Math.round(subtotal * (appliedCoupon.discountPercent / 100))
+  const productDiscount = useMemo(
+    () =>
+      items.reduce((sum, i) => {
+        const originalPrice =
+          i.product.discountValue > 0
+            ? i.product.price / (1 - i.product.discountValue / 100)
+            : i.product.price;
+        return sum + (originalPrice - i.product.price) * i.quantity;
+      }, 0),
+    [items],
+  );
+
+  const voucherDiscount = appliedCoupon
+    ? Math.round(
+        (subtotal - productDiscount) * (appliedCoupon.discountPercent / 100),
+      )
     : 0;
-  const total = subtotal - discount;
+
+  // Giả lập phí vận chuyển: 30.000đ khi có địa chỉ
+  const shippingFee = selectedAddressId ? 30000 : 0;
+
+  const total = subtotal - productDiscount - voucherDiscount + shippingFee;
 
   const handleCouponSelect = (coupon: CouponOption) => {
     if (appliedCoupon) {
@@ -126,35 +154,12 @@ export default function PaymentPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white pb-32 lg:pb-10">
-      <Container className="max-w-7xl p-2 px-4 md:px-6 lg:px-8 py-8 md:py-10 lg:py-12">
-        <div className="mb-10 lg:mb-12">
-          <CheckoutPageHeader
-            icon={CreditCard}
-            title="Xác nhận đơn hàng"
-            subtitle={`${selectedCount} sản phẩm · Kiểm tra và thanh toán`}
-            iconClassName="bg-red-600 shadow-red-600/20"
-          />
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
+    <>
+      <Container className="max-w-7xl p-2  my-4">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           <section className="lg:col-span-8">
-            <div className="rounded-3xl border border-slate-200/60 bg-white p-6 lg:p-8 shadow-lg space-y-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-slate-900">
-                  Sản phẩm của bạn
-                </h2>
-                <span className="text-sm font-semibold text-slate-600 bg-slate-100 px-4 py-2 rounded-lg">
-                  {items.length} mục
-                </span>
-              </div>
-
-              <Link
-                to="/cart"
-                className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 font-medium transition"
-              >
-                ← Chỉnh sửa giỏ hàng
-              </Link>
+            <div className="card-custom space-y-6">
+              <h2 className="heading-2 text-slate-900">Xác nhận đơn hàng</h2>
 
               <div className="space-y-4">
                 {items.map((item) => (
@@ -162,7 +167,7 @@ export default function PaymentPage() {
                     key={item.cartItemId}
                     item={item}
                     onToggle={() => {}}
-                    onUpdateQuantity={() => {}}
+                    onUpdateQuantity={(delta) => updateQuantity(item.cartItemId, delta)}
                     showRemove={false}
                     readonly
                   />
@@ -174,7 +179,9 @@ export default function PaymentPage() {
           <CartCheckoutSidebar
             selectedCount={selectedCount}
             subtotal={subtotal}
-            discount={discount}
+            discount={productDiscount}
+            voucherDiscount={voucherDiscount}
+            shippingFee={shippingFee}
             total={total}
             hasSelected={items.length > 0}
             selectedAddressId={selectedAddressId}
@@ -187,11 +194,6 @@ export default function PaymentPage() {
             errors={errors}
             couponInput={couponInput}
             backLink={{ to: "/cart", label: "← Quay lại giỏ hàng" }}
-            primaryAction={
-              <button type="button" className={primaryButtonClass}>
-                Xác nhận đặt hàng
-              </button>
-            }
             isCheckoutPage
           />
         </div>
@@ -200,13 +202,13 @@ export default function PaymentPage() {
       <CheckoutMobileBar
         subtitle="Tổng thanh toán"
         total={total}
-        discount={discount}
+        discount={productDiscount + voucherDiscount}
         action={
           <button type="button" className={mobilePrimaryButtonClass}>
             Thanh toán
           </button>
         }
       />
-    </div>
+    </>
   );
 }

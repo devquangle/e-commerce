@@ -1,6 +1,6 @@
-import type { PaymentMethodType } from "@/modules/user/cart/types/cart.type";
 import { Banknote, Landmark } from "lucide-react";
 import type { ReactNode } from "react";
+import type { PaymentMethodType } from "../types/payment-method.type";
 
 export function PaymentMethodOptions({
   value,
@@ -15,18 +15,6 @@ export function PaymentMethodOptions({
     icon: ReactNode;
     badges: ReactNode;
   }[] = [
-
-    {
-      id: "vnpay",
-      label: "Thanh toán online",
-      icon: <Landmark size={18} />,
-      badges: (
-        <PaymentBrandBadge
-            label="ATM"
-            className="bg-slate-100 text-slate-700"
-          />
-      ),
-    },
     {
       id: "cod" as PaymentMethodType,
       label: "Thanh toán khi nhận hàng",
@@ -35,6 +23,17 @@ export function PaymentMethodOptions({
         <PaymentBrandBadge
           label="COD"
           className="bg-emerald-100 text-emerald-700"
+        />
+      ),
+    },
+    {
+      id: "vnpay",
+      label: "Thanh toán online",
+      icon: <Landmark size={18} />,
+      badges: (
+        <PaymentBrandBadge
+          label="ATM"
+          className="bg-slate-100 text-slate-700"
         />
       ),
     },

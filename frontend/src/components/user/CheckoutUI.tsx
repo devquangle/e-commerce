@@ -21,7 +21,7 @@ export function CheckoutPageHeader({
       </div>
 
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 leading-tight">
+        <h1 className="heading-1 text-slate-900 leading-tight">
           {title}
         </h1>
       </div>
@@ -46,9 +46,9 @@ export function CheckoutEmptyState({
         <Icon size={24} className="text-slate-400 bg-indigo-500" />
       </div>
 
-      <h2 className="text-xl font-bold text-slate-900">{title}</h2>
+      <h2 className="heading-2 text-slate-900">{title}</h2>
 
-      <p className="mt-2 max-w-sm text-sm text-slate-600">{description}</p>
+      <p className="mt-2 max-w-sm body-text text-slate-600">{description}</p>
 
       <Link
         to={action.to}
@@ -76,7 +76,7 @@ export function CheckoutMobileBar({
     <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white p-3 lg:hidden">
       <div className="mx-auto flex max-w-7xl p-2 items-center justify-between gap-3">
         <div className="min-w-0">
-          <p className="truncate text-xs font-medium text-slate-600">
+          <p className="truncate caption-text font-medium">
             {subtitle}
           </p>
 

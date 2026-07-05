@@ -33,5 +33,5 @@ public class ProductDetailResponse {
     private List<Integer> genreIds;
 
     private List<ProductImageResponse> coverImages;
-    private List<ProductResponse.ProductPromotionDto> promotions;
+  
 }

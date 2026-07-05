@@ -14,19 +14,16 @@ export function VoucherApply({
   onOpenModal,
 }: VoucherApplyProps) {
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-3">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100">
-          <Tag size={18} className="text-amber-600" />
-        </div>
-        <h2 className="text-lg font-bold text-slate-900">Mã giảm giá</h2>
-      </div>
+    <div className="card-custom space-y-4">
+      <h2 className="text-base font-bold text-slate-900">Mã giảm giá</h2>
 
       {appliedCoupon ? (
         <div className="flex items-center justify-between rounded-2xl border border-green-200/60 bg-green-50/30 p-4">
           <div>
             <p className="font-bold text-green-900">{appliedCoupon.code}</p>
-            <p className="text-xs text-green-700 mt-1">{appliedCoupon.description}</p>
+            <p className="text-xs text-green-700 mt-1">
+              {appliedCoupon.description}
+            </p>
           </div>
           <button
             type="button"
@@ -45,7 +42,10 @@ export function VoucherApply({
           <span className="text-sm font-semibold text-slate-700 group-hover:text-slate-900">
             🏷️ Có {MOCK_COUPONS.length} voucher có thể sử dụng
           </span>
-          <ChevronRight size={18} className="text-slate-400 group-hover:text-slate-600" />
+          <ChevronRight
+            size={18}
+            className="text-slate-400 group-hover:text-slate-600"
+          />
         </button>
       )}
     </div>

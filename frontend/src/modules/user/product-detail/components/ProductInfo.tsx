@@ -25,12 +25,12 @@ export default function ProductInfo({ product, review }: ProductInfoProps) {
     <div className="flex flex-col gap-4">
       <div>
         {/* Title */}
-        <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 leading-tight mb-3 tracking-tight">
+        <h1 className="heading-1 text-slate-900 leading-tight mb-3 tracking-tight">
           {product.name}
         </h1>
 
         {/* Rating & Sold Info */}
-        <div className="flex items-center flex-wrap gap-3 text-sm text-slate-500 mt-3 mb-6">
+        <div className="flex items-center flex-wrap gap-3 caption-text mt-3 mb-6">
           <div className="flex items-center gap-1.5 font-medium">
             <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
             <span className="text-slate-700">{review.rating?.toFixed(1)}</span>

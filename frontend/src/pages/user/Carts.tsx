@@ -34,11 +34,16 @@ export default function Carts() {
     [selectedItems],
   );
 
-  // 1. ✨ TẠM TÍNH = Tính dựa trên giá gốc (originalPrice) chưa giảm của sản phẩm
+  // 1. ✨ TẠM TÍNH = Tính dựa trên giá gốc chưa giảm của sản phẩm
   const subtotal = useMemo(
     () =>
       selectedItems.reduce(
-        (sum, i) => sum + i.product.originalPrice * i.quantity,
+        (sum, i) => {
+          const originalPrice = i.product.discountValue > 0 
+            ? i.product.price / (1 - i.product.discountValue / 100) 
+            : i.product.price;
+          return sum + originalPrice * i.quantity;
+        },
         0,
       ),
     [selectedItems],
@@ -48,8 +53,12 @@ export default function Carts() {
   const productDiscount = useMemo(
     () =>
       selectedItems.reduce(
-        (sum, i) =>
-          sum + (i.product.originalPrice - i.product.price) * i.quantity,
+        (sum, i) => {
+          const originalPrice = i.product.discountValue > 0 
+            ? i.product.price / (1 - i.product.discountValue / 100) 
+            : i.product.price;
+          return sum + (originalPrice - i.product.price) * i.quantity;
+        },
         0,
       ),
     [selectedItems],

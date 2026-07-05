@@ -1,5 +1,4 @@
 import type { CheckoutAddress } from "@/types/checkout.type";
-import { MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 
 interface ShippingAddressProps {
@@ -8,39 +7,41 @@ interface ShippingAddressProps {
 
 export function ShippingAddress({ selectedAddress }: ShippingAddressProps) {
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-3">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-100">
-          <MapPin size={18} className="text-red-600" />
-        </div>
-        <h2 className="text-lg font-bold text-slate-900">Địa chỉ giao hàng</h2>
+    <div className="card-custom space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-base font-bold text-slate-900">Giao tới</h2>
+        <Link
+          to="/address-payment"
+          className="text-sm font-medium text-blue-600 hover:text-blue-700 transition"
+        >
+          Thay đổi
+        </Link>
       </div>
 
       {selectedAddress && (
-        <div className="rounded-2xl border border-red-200/60 bg-red-50/30 p-5">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="font-bold text-slate-900">{selectedAddress.fullName}</p>
-              <p className="text-sm text-slate-600 mt-1">{selectedAddress.phone}</p>
-              <p className="text-sm text-slate-600 mt-2 leading-relaxed">
-                {selectedAddress.streetFull}
-              </p>
-            </div>
-            {selectedAddress.default && (
-              <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg bg-red-600 text-white whitespace-nowrap ml-3">
-                Mặc định
+        <div className="flex items-start gap-3">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center flex-wrap gap-2 mb-1">
+              <span className="font-bold text-slate-900">
+                {selectedAddress.fullName}
               </span>
-            )}
+              <span className="w-px h-3.5 bg-slate-300"></span>
+              <span className="font-semibold text-slate-700">
+                {selectedAddress.phone}
+              </span>
+              {selectedAddress.default && (
+                <span className="inline-flex ml-auto items-center px-1.5 py-0.5 rounded-[4px] text-[10px] font-bold bg-red-50 text-red-600 border border-red-100">
+                  Mặc định
+                </span>
+              )}
+            </div>
+            
+            <div className="text-sm text-slate-500 leading-relaxed mt-0.5">
+              <span>{selectedAddress.streetFull}</span>
+            </div>
           </div>
         </div>
       )}
-
-      <Link
-        to="/address-payment"
-        className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200/60 bg-slate-50/50 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-100/50 hover:border-slate-300 transition"
-      >
-        Thay đổi
-      </Link>
     </div>
   );
 }

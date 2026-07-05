@@ -90,29 +90,7 @@ public class ProductMapper {
         dto.setGenreIds(mapGenresToIds(product.getProductGenres()));
         dto.setCoverImages(coverImageResponses(product.getImages()));
 
-        if (product.getPromotionProducts() != null) {
-            dto.setPromotions(product.getPromotionProducts().stream()
-                    .filter(pp -> pp.getPromotion() != null
-                            && pp.getPromotion().getStatus() != com.dev.backend.constant.BaseStatus.DELETED)
-                    .map(pp -> {
-                        ProductResponse.ProductPromotionDto promoDto = new ProductResponse.ProductPromotionDto();
-                        promoDto.setId(pp.getPromotion().getId());
-                        promoDto.setName(pp.getPromotion().getName());
-                        promoDto.setCampaignType(pp.getPromotion().getPromotionCampaignType() != null
-                                ? pp.getPromotion().getPromotionCampaignType().name()
-                                : "");
-                        promoDto.setDiscountPercentage(pp.getDiscountValue());
-                        promoDto.setStartDate(
-                                pp.getPromotion().getStartDate() != null ? pp.getPromotion().getStartDate().toString()
-                                        : "");
-                        promoDto.setEndDate(
-                                pp.getPromotion().getExpireDate() != null ? pp.getPromotion().getExpireDate().toString()
-                                        : "");
-                        return promoDto;
-                    })
-                    .collect(Collectors.toList()));
-        }
-
+       
         return dto;
     }
 

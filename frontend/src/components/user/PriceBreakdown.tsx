@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
-import { ChevronRight } from "lucide-react";
+import { useState, type ReactNode } from "react";
+import { ChevronRight, ChevronDown, ChevronUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import { formatMoney } from './../../utils/number.utils';
 
@@ -8,6 +8,7 @@ interface PriceBreakdownProps {
   subtotal: number;
   discount: number;       // Giảm giá trực tiếp trên sản phẩm
   voucherDiscount?: number; // Giảm giá theo Voucher
+  shippingFee?: number;   // Phí vận chuyển
   total: number;
   hasSelected: boolean;
   primaryAction?: ReactNode;
@@ -21,6 +22,7 @@ export function PriceBreakdown({
   subtotal,
   discount,
   voucherDiscount = 0,
+  shippingFee = 0,
   total,
   hasSelected,
   primaryAction,
@@ -28,8 +30,9 @@ export function PriceBreakdown({
   isCheckout = false,
   onClick,
 }: PriceBreakdownProps) {
-  
-  const buttonText = isCheckout ? `Đặt mua (${selectedCount})` : "Tiến hành thanh toán";
+  const [showDiscountDetails, setShowDiscountDetails] = useState(false);
+  const buttonText = isCheckout ? "Xác nhận đặt hàng" : "Tiến hành thanh toán";
+  const totalDiscount = discount + voucherDiscount;
 
   return (
     /* 🌟 ĐPÉD TẠI ĐÂY: Sử dụng class card-custom và giảm space-y xuống space-y-4 cho nhỏ gọn */
@@ -54,30 +57,63 @@ export function PriceBreakdown({
             </span>
           </div>
 
-          {discount > 0 && (
-            <div className="flex justify-between items-center">
-              <span className="text-slate-500">Giảm giá sản phẩm</span>
-              <span className="font-semibold text-green-600 tabular-nums">
-                -{formatMoney(discount)}
-              </span>
-            </div>
-          )}
+          {totalDiscount > 0 && (
+            <div className="space-y-1">
+              <button 
+                type="button"
+                onClick={() => setShowDiscountDetails(!showDiscountDetails)}
+                className="flex w-full justify-between items-center group cursor-pointer"
+              >
+                <div className="flex items-center gap-1.5">
+                  <span className="text-slate-500 group-hover:text-slate-700 transition">Giảm giá</span>
+                  {showDiscountDetails ? <ChevronUp size={14} className="text-slate-400" /> : <ChevronDown size={14} className="text-slate-400" />}
+                </div>
+                <span className="font-semibold text-green-600 tabular-nums">
+                  -{formatMoney(totalDiscount)}
+                </span>
+              </button>
 
-          {isCheckout && voucherDiscount > 0 && (
-            <div className="flex justify-between items-center">
-              <span className="text-slate-500">Mã giảm giá (Voucher)</span>
-              <span className="font-semibold text-green-600 tabular-nums">
-                -{formatMoney(voucherDiscount)}
-              </span>
+              <div 
+                className={`grid transition-all duration-300 ease-in-out ${
+                  showDiscountDetails ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                }`}
+              >
+                <div className="overflow-hidden">
+                  <div className="flex flex-col gap-2 pl-3 border-l-[1.5px] border-slate-100 ml-1 py-1">
+                    {discount > 0 && (
+                      <div className="flex justify-between items-center text-[13px]">
+                        <span className="text-slate-400">Sản phẩm</span>
+                        <span className="font-medium text-green-600 tabular-nums">
+                          -{formatMoney(discount)}
+                        </span>
+                      </div>
+                    )}
+                    {isCheckout && voucherDiscount > 0 && (
+                      <div className="flex justify-between items-center text-[13px]">
+                        <span className="text-slate-400">Voucher</span>
+                        <span className="font-medium text-green-600 tabular-nums">
+                          -{formatMoney(voucherDiscount)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
           {isCheckout && (
             <div className="flex justify-between items-center">
               <span className="text-slate-500">Phí vận chuyển</span>
-              <span className="font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded text-[11px]">
-                Miễn phí
-              </span>
+              {shippingFee > 0 ? (
+                <span className="font-medium text-slate-900 tabular-nums">
+                  {formatMoney(shippingFee)}
+                </span>
+              ) : (
+                <span className="font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded text-[11px]">
+                  Miễn phí
+                </span>
+              )}
             </div>
           )}
         </div>
@@ -101,17 +137,15 @@ export function PriceBreakdown({
             <button
               type="button"
               onClick={onClick}
-              /* 🌟 ĐPÉD: Hạ py-3.5 xuống py-2.5, text-base xuống text-sm, rounded-xl xuống rounded-lg cho đồng bộ */
               className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-red-600 py-2.5 text-sm font-bold text-white shadow-md shadow-red-600/10 transition duration-200 hover:bg-red-700 active:scale-[0.99]"
             >
               {buttonText}
-              <ChevronRight size={16} />
+              {!isCheckout && <ChevronRight size={16} />}
             </button>
           ) : (
             <button
               type="button"
               disabled
-              /* 🌟 ĐPÉD: Đồng bộ tương tự nút bên trên */
               className="w-full rounded-lg bg-slate-100 py-2.5 text-sm font-bold text-slate-400 cursor-not-allowed transition duration-200"
             >
               Chọn sản phẩm để đặt mua
