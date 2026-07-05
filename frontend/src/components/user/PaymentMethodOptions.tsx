@@ -1,4 +1,4 @@
-import type { PaymentMethodType } from "@/types/cart.type";
+import type { PaymentMethodType } from "@/modules/user/cart/types/cart.type";
 import { Banknote, Landmark } from "lucide-react";
 import type { ReactNode } from "react";
 

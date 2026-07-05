@@ -1,6 +1,6 @@
 import { X, Check } from "lucide-react";
-import type { CouponOption } from "@/types/cart.type";
-import { MOCK_COUPONS } from "@/types/cart.type";
+import type { CouponOption } from "@/modules/user/cart/types/cart.type";
+import { MOCK_COUPONS } from "@/modules/user/cart/types/cart.type";
 
 interface VoucherModalProps {
   isOpen: boolean;

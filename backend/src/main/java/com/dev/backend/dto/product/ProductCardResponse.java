@@ -2,7 +2,6 @@ package com.dev.backend.dto.product;
 
 import java.time.LocalDateTime;
 
-import com.dev.backend.constant.ProductBadge;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

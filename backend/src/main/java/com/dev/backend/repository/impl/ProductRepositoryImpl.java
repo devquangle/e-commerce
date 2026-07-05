@@ -1,10 +1,8 @@
 package com.dev.backend.repository.impl;
 
 import com.dev.backend.constant.BaseStatus;
-import com.dev.backend.constant.PromotionCampaignType;
 import com.dev.backend.dto.product.ProductCardResponse;
 import com.dev.backend.dto.product.ProductFilterRequest;
-import com.dev.backend.dto.product.PromotionResponse;
 import com.dev.backend.entity.*;
 import com.dev.backend.repository.ProductRepositoryCustom;
 import com.dev.backend.dto.product.ProductSpecification;

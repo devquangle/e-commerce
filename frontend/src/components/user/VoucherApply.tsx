@@ -1,6 +1,6 @@
 import { Tag, X, ChevronRight } from "lucide-react";
-import type { CouponOption } from "@/types/cart.type";
-import { MOCK_COUPONS } from "@/types/cart.type";
+import type { CouponOption } from "@/modules/user/cart/types/cart.type";
+import { MOCK_COUPONS } from "@/modules/user/cart/types/cart.type";
 
 interface VoucherApplyProps {
   appliedCoupon: CouponOption | null;

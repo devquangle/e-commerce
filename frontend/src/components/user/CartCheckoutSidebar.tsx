@@ -3,7 +3,7 @@ import { CreditCard } from "lucide-react";
 import type { ReactNode } from "react";
 import type { UseFormRegister, FieldErrors } from "react-hook-form";
 
-import type { CouponOption, PaymentMethodType } from "@/types/cart.type";
+import type { CouponOption, PaymentMethodType } from "@/modules/user/cart/types/cart.type";
 
 import VoucherModal from "./VoucherModal";
 import { PaymentMethodOptions } from "./PaymentMethodOptions";

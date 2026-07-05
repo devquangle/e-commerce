@@ -3,37 +3,54 @@ export interface CartResponse {
   quantity: number;
   items: ProductResponse[] | [];
 }
-
-export interface ProductResponse {
+export interface ProductResponse  {
   id: number;
   name: string;
   slug: string;
   isbn: string;
-  originalPrice: number;
-  price: number;
+  discountValue: number; //%
+  price: number; //giá bán
   quantity: number;
   weight: number;
   publishYear: string;
   pages: number;
+  language?: string;
 
-  publisherName: string;
-  seriesName: string;
-
-  urlImageDefault: string;
   description: string;
+
+  productPublisher: ProductPublisherResponse;
+  productSeries: ProductSeriesResponse | null;
   productGenres: ProductGenreResponse[] | [];
   productAuthors: ProductAuthorResponse[] | [];
+  coverImages: ProductImageResponse[] | [];
 }
 
 export interface ProductGenreResponse {
   id: number;
   name: string;
+  slug: string;
 }
-
 export interface ProductAuthorResponse {
   id: number;
   name: string;
+  slug: string;
 }
+export interface ProductSeriesResponse {
+  id: number;
+  name: string;
+  slug: string;
+}
+export interface ProductPublisherResponse {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+export interface ProductImageResponse {
+  url: string;
+  isThumbnail: boolean;
+}
+
 
 /** UI state cho trang giỏ hàng / thanh toán */
 export interface CartItemUI {
@@ -67,18 +84,18 @@ export const MOCK_CART_ITEMS: CartItemUI[] = [
       name: "Đắc Nhân Tâm",
       slug: "dac-nhan-tam",
       isbn: "978-604-1",
-      originalPrice: 200000,
+      discountValue: 25,
       price: 150000,
       quantity: 100,
       weight: 300,
       publishYear: "2020",
       pages: 320,
-      publisherName: "NXB Trẻ",
-      seriesName: "Bìa mềm",
-      urlImageDefault: "https://picsum.photos/seed/book1/200/280",
       description: "",
+      productPublisher: { id: 1, name: "NXB Trẻ", slug: "nxb-tre" },
+      productSeries: { id: 1, name: "Bìa mềm", slug: "bia-mem" },
       productGenres: [],
-      productAuthors: [{ id: 1, name: "Dale Carnegie" }],
+      productAuthors: [{ id: 1, name: "Dale Carnegie", slug: "dale-carnegie" }],
+      coverImages: [{ url: "https://picsum.photos/seed/book1/200/280", isThumbnail: true }],
     },
   },
   {
@@ -90,18 +107,18 @@ export const MOCK_CART_ITEMS: CartItemUI[] = [
       name: "Tư Duy Nhanh Và Chậm",
       slug: "tu-duy-nhanh-va-cham",
       isbn: "978-604-2",
-      originalPrice: 420000,
+      discountValue: 16.67,
       price: 350000,
       quantity: 50,
       weight: 450,
       publishYear: "2019",
       pages: 512,
-      publisherName: "Alphabooks",
-      seriesName: "Bìa cứng",
-      urlImageDefault: "https://picsum.photos/seed/book2/200/280",
       description: "",
+      productPublisher: { id: 2, name: "Alphabooks", slug: "alphabooks" },
+      productSeries: { id: 2, name: "Bìa cứng", slug: "bia-cung" },
       productGenres: [],
-      productAuthors: [{ id: 2, name: "Daniel Kahneman" }],
+      productAuthors: [{ id: 2, name: "Daniel Kahneman", slug: "daniel-kahneman" }],
+      coverImages: [{ url: "https://picsum.photos/seed/book2/200/280", isThumbnail: true }],
     },
   },
   {
@@ -113,18 +130,18 @@ export const MOCK_CART_ITEMS: CartItemUI[] = [
       name: "Sapiens: Lược Sử Loài Người",
       slug: "sapiens",
       isbn: "978-604-3",
-      originalPrice: 320000,
+      discountValue: 12.5,
       price: 280000,
       quantity: 80,
       weight: 380,
       publishYear: "2021",
       pages: 544,
-      publisherName: "NXB Trẻ",
-      seriesName: "Bìa mềm",
-      urlImageDefault: "https://picsum.photos/seed/book3/200/280",
       description: "",
+      productPublisher: { id: 1, name: "NXB Trẻ", slug: "nxb-tre" },
+      productSeries: { id: 1, name: "Bìa mềm", slug: "bia-mem" },
       productGenres: [],
-      productAuthors: [{ id: 3, name: "Yuval Noah Harari" }],
+      productAuthors: [{ id: 3, name: "Yuval Noah Harari", slug: "yuval-noah-harari" }],
+      coverImages: [{ url: "https://picsum.photos/seed/book3/200/280", isThumbnail: true }],
     },
   },
   {
@@ -136,18 +153,18 @@ export const MOCK_CART_ITEMS: CartItemUI[] = [
       name: "Sapiens: Lược Sử Loài Người",
       slug: "sapiens",
       isbn: "978-604-3",
-      originalPrice: 320000,
+      discountValue: 12.5,
       price: 280000,
       quantity: 80,
       weight: 380,
       publishYear: "2021",
       pages: 544,
-      publisherName: "NXB Trẻ",
-      seriesName: "Bìa mềm",
-      urlImageDefault: "https://picsum.photos/seed/book3/200/280",
       description: "",
+      productPublisher: { id: 1, name: "NXB Trẻ", slug: "nxb-tre" },
+      productSeries: { id: 1, name: "Bìa mềm", slug: "bia-mem" },
       productGenres: [],
-      productAuthors: [{ id: 3, name: "Yuval Noah Harari" }],
+      productAuthors: [{ id: 3, name: "Yuval Noah Harari", slug: "yuval-noah-harari" }],
+      coverImages: [{ url: "https://picsum.photos/seed/book3/200/280", isThumbnail: true }],
     },
   },
   {
@@ -159,18 +176,18 @@ export const MOCK_CART_ITEMS: CartItemUI[] = [
       name: "Sapiens: Lược Sử Loài Người",
       slug: "sapiens",
       isbn: "978-604-3",
-      originalPrice: 320000,
+      discountValue: 12.5,
       price: 280000,
       quantity: 80,
       weight: 380,
       publishYear: "2021",
       pages: 544,
-      publisherName: "NXB Trẻ",
-      seriesName: "Bìa mềm",
-      urlImageDefault: "https://picsum.photos/seed/book3/200/280",
       description: "",
+      productPublisher: { id: 1, name: "NXB Trẻ", slug: "nxb-tre" },
+      productSeries: { id: 1, name: "Bìa mềm", slug: "bia-mem" },
       productGenres: [],
-      productAuthors: [{ id: 3, name: "Yuval Noah Harari" }],
+      productAuthors: [{ id: 3, name: "Yuval Noah Harari", slug: "yuval-noah-harari" }],
+      coverImages: [{ url: "https://picsum.photos/seed/book3/200/280", isThumbnail: true }],
     },
   },
 ];

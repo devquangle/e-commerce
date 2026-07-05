@@ -1,24 +1,21 @@
 import Container from "@/components/common/Container";
 import Modal from "@/components/common/Modal";
-import CartItemCard from "@/components/user/CartItemCard";
 
 import {
-  CartItemsToolbar,
   CheckoutEmptyState,
-  CheckoutMobileBar,
-  CheckoutPageHeader,
 } from "@/components/user/CheckoutUI";
 import { ShoppingCart } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import {  useNavigate } from "react-router-dom";
 import {
   type CartItemUI,
-  type PaymentMethodType,
   MOCK_CART_ITEMS,
-} from "@/types/cart.type";
+} from "@/modules/user/cart/types/cart.type";
 
 import { showErrorToast, showSuccessToast } from "@/utils/toastUtil";
 import { PriceBreakdown } from "@/components/user/PriceBreakdown";
+import { CartItemsToolbar } from "@/modules/user/cart/components/CartItemsToolbar";
+import CartItemCard from "@/modules/user/cart/components/CartItemCard";
 
 export default function Carts() {
   const navigate = useNavigate();
@@ -119,10 +116,6 @@ export default function Carts() {
       className={`bg-slate-50/50 ${items.length > 0 ? "pb-24 lg:pb-0" : ""}`}
     >
       <Container className="max-w-7xl p-2  my-4">
-        <div className="my-4">
-          <CheckoutPageHeader icon={ShoppingCart} title="Giỏ hàng của bạn" />
-        </div>
-
         {items.length === 0 ? (
           <CheckoutEmptyState
             icon={ShoppingCart}
@@ -170,8 +163,6 @@ export default function Carts() {
           </div>
         )}
       </Container>
-
-
 
       <Modal
         isOpen={isDeleteModalOpen}

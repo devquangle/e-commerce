@@ -3,7 +3,7 @@ import {
   type CartItemUI,
   getAuthorNames,
   getLineTotal,
-} from "@/types/cart.type";
+} from "@/modules/user/cart/types/cart.type";
 import { formatMoney } from "@/utils/number.utils";
 
 type CartItemCardProps = {
@@ -25,12 +25,14 @@ export default function CartItemCard({
 }: CartItemCardProps) {
   const { product } = item;
   const author = getAuthorNames(product);
-  const format = `${product.publisherName} · ${product.seriesName}`;
-  const hasDiscount = product.originalPrice > product.price;
+  const format = [product.productPublisher?.name, product.productSeries?.name].filter(Boolean).join(" · ");
+  const originalPrice = product.discountValue > 0 ? product.price / (1 - product.discountValue / 100) : product.price;
+  const hasDiscount = product.discountValue > 0;
+  const imageUrl = product.coverImages?.find(img => img.isThumbnail)?.url || product.coverImages?.[0]?.url || "";
 
   return (
     <div
-      className={`group card-custom transition-all duration-200
+      className={`group card-custom-v1 py-2 transition-all duration-200
         shadow-[0_4px_12px_rgba(0,0,0,0.03)]
         hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)]
         overflow-hidden
@@ -60,7 +62,7 @@ export default function CartItemCard({
         <div className="flex items-center gap-4 min-w-0 pl-2">
           <div className="relative shrink-0 overflow-hidden rounded-xl border border-slate-200/80 bg-slate-50 shadow-sm">
             <img
-              src={product.urlImageDefault}
+              src={imageUrl}
               alt={product.name}
               className="h-[100px] w-[72px] object-cover transition-transform duration-300 group-hover:scale-105"
             />
@@ -80,7 +82,7 @@ export default function CartItemCard({
         <div className="text-right pr-2">
           {hasDiscount && (
             <p className="text-xs text-slate-400 line-through tabular-nums">
-              {formatMoney(product.originalPrice)}
+              {formatMoney(originalPrice)}
             </p>
           )}
           <p className="text-sm text-slate-900 font-bold tabular-nums mt-0.5">
@@ -155,7 +157,7 @@ export default function CartItemCard({
 
         <div className="flex items-center gap-4 min-w-0">
           <img
-            src={product.urlImageDefault}
+            src={imageUrl}
             alt={product.name}
             className="h-24 w-16 shrink-0 rounded-xl object-cover border border-slate-200/60"
           />
@@ -194,10 +196,10 @@ export default function CartItemCard({
           </div>
         )}
 
-        <div className="text-right min-w-[7.5rem]">
+        <div className="text-right min-w-30">
           {hasDiscount && (
             <p className="text-xs text-slate-400 line-through">
-              {formatMoney(product.originalPrice)}
+              {formatMoney(originalPrice)}
             </p>
           )}
           <p className="text-xs font-medium text-slate-500">
@@ -233,7 +235,7 @@ export default function CartItemCard({
           {readonly && <span className="mt-1 h-5 w-5 shrink-0" />}
 
           <img
-            src={product.urlImageDefault}
+            src={imageUrl}
             alt={product.name}
             className="h-20 w-14 shrink-0 rounded-lg object-cover border border-slate-200/60"
           />
@@ -250,7 +252,7 @@ export default function CartItemCard({
               </span>
               {hasDiscount && (
                 <span className="text-[10px] text-slate-400 line-through">
-                  {formatMoney(product.originalPrice)}
+                  {formatMoney(originalPrice)}
                 </span>
               )}
             </div>

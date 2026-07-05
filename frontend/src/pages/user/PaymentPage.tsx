@@ -1,5 +1,4 @@
 import Container from "@/components/common/Container";
-import CartItemCard from "@/components/user/CartItemCard";
 
 import {
   CheckoutEmptyState,
@@ -12,7 +11,7 @@ import {
   type PaymentMethodType,
   MOCK_CART_ITEMS,
   getLineTotal,
-} from "@/types/cart.type";
+} from "@/modules/user/cart/types/cart.type";
 import {
   showSuccessToast,
   showWarningToast,
@@ -23,6 +22,7 @@ import { useLocation, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { getSelectedAddressId, type CouponForm } from "@/types/checkout.type";
 import CartCheckoutSidebar from "@/components/user/CartCheckoutSidebar";
+import CartItemCard from "@/modules/user/cart/components/CartItemCard";
 
 interface CheckoutState {
   checkedItems?: CartItemUI[];
@@ -118,7 +118,7 @@ export default function PaymentPage() {
             icon={Package}
             title="Không có sản phẩm để thanh toán"
             description="Giỏ hàng trống hoặc bạn chưa chọn sản phẩm nào. Hãy quay lại giỏ hàng để tiếp tục."
-            action={{ to: "/carts", label: "Quay lại giỏ hàng" }}
+            action={{ to: "/cart", label: "Quay lại giỏ hàng" }}
           />
         </Container>
       </div>
@@ -150,7 +150,7 @@ export default function PaymentPage() {
               </div>
 
               <Link
-                to="/carts"
+                to="/cart"
                 className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 font-medium transition"
               >
                 ← Chỉnh sửa giỏ hàng
@@ -186,7 +186,7 @@ export default function PaymentPage() {
             register={register}
             errors={errors}
             couponInput={couponInput}
-            backLink={{ to: "/carts", label: "← Quay lại giỏ hàng" }}
+            backLink={{ to: "/cart", label: "← Quay lại giỏ hàng" }}
             primaryAction={
               <button type="button" className={primaryButtonClass}>
                 Xác nhận đặt hàng
