@@ -17,6 +17,7 @@ import DeleteCartItemsModal from "@/modules/user/cart/components/DeleteCartItems
 import DeleteCartItemModal from "@/modules/user/cart/components/DeleteCartItemModal";
 import { useCartData } from "@/modules/user/cart/hooks/useCart";
 import { CheckoutEmptyState } from "@/modules/user/cart/components/CheckoutEmptyState";
+import Loading from "@/components/common/Loading";
 
 export default function Carts() {
   const navigate = useNavigate();
@@ -25,10 +26,7 @@ export default function Carts() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<CartItemUI | null>(null);
 
-  const {
-    data: cartData,
-    isPending: isCartPending,
-  } = useCartData();
+  const { data: cartData, isPending: isCartPending } = useCartData();
 
   console.log("Carts.tsx re-rendered, cartData:", cartData);
 
@@ -51,7 +49,6 @@ export default function Carts() {
       setItems([]);
     }
   }
-
 
   const allChecked = items.length > 0 && items.every((i) => i.checked);
   const someChecked = items.some((i) => i.checked) && !allChecked;
@@ -144,12 +141,17 @@ export default function Carts() {
     navigate("/payment", { state: checkoutState });
   };
 
+  console.log("🚀 ~ file: Carts.tsx:174 ~ Carts ~ cartData:", cartData);
+  console.log("🚀 ~ file: Carts.tsx:174 ~ Carts ~ items:", items);
 
-console.log("🚀 ~ file: Carts.tsx:174 ~ Carts ~ cartData:", cartData);
-console.log("🚀 ~ file: Carts.tsx:174 ~ Carts ~ items:", items);
+  if (isCartPending) {
+    return <Loading />;
+  }
 
   return (
-    <Container className={`max-w-7xl mx-auto my-6 ${items.length > 0 ? "pb-24 lg:pb-0" : ""}`}>
+    <Container
+      className={`max-w-7xl mx-auto my-6 ${items.length > 0 ? "pb-24 lg:pb-0" : ""}`}
+    >
       {items.length === 0 ? (
         <CheckoutEmptyState
           icon={ShoppingCart}
