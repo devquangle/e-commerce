@@ -1,10 +1,10 @@
 export interface CartResponse {
   cartItemId: number;
   quantity: number;
-  items: ProductResponse[] | [];
+  productCartItemResponse: ProductResponse;
 }
 export interface ProductResponse  {
-  id: number;
+  productId: number;
   name: string;
   slug: string;
   isbn: string;
@@ -16,13 +16,12 @@ export interface ProductResponse  {
   pages: number;
   language?: string;
 
-  description: string;
 
   productPublisher: ProductPublisherResponse;
   productSeries: ProductSeriesResponse | null;
   productGenres: ProductGenreResponse[] | [];
   productAuthors: ProductAuthorResponse[] | [];
-  coverImages: ProductImageResponse[] | [];
+  urlImage: string;
 }
 
 export interface ProductGenreResponse {
@@ -46,10 +45,7 @@ export interface ProductPublisherResponse {
   slug: string;
 }
 
-export interface ProductImageResponse {
-  url: string;
-  isThumbnail: boolean;
-}
+
 
 
 /** UI state cho trang giỏ hàng / thanh toán */
@@ -66,10 +62,19 @@ export interface CouponOption {
   discountPercent: number;
 }
 
-
+export interface CartCountResponse {
+  count: number;
+}
 
 export const getAuthorNames = (product: ProductResponse): string =>
   product.productAuthors?.map((a) => a.name).join(", ") || "Không rõ tác giả";
+
+export const mapCartResponseToUI = (c: CartResponse): CartItemUI => ({
+  cartItemId: c.cartItemId,
+  quantity: c.quantity,
+  checked: true,
+  product: c.productCartItemResponse,
+});
 
 export const getLineTotal = (item: CartItemUI): number =>
   item.product.price * item.quantity;

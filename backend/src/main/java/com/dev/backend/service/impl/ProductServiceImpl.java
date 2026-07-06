@@ -1,6 +1,6 @@
 package com.dev.backend.service.impl;
 
-import java.time.LocalDateTime;
+
 import java.util.List;
 import java.util.HashMap;
 
@@ -13,10 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.dev.backend.constant.ProductBadge;
 import com.dev.backend.constant.ProductStatus;
-import com.dev.backend.constant.PromotionCampaignType;
 import com.dev.backend.dto.product.ProductCardResponse;
+import com.dev.backend.dto.product.ProductCartItemResponse;
 import com.dev.backend.dto.product.ProductDetailResponse;
 import com.dev.backend.dto.product.ProductFilterRequest;
 import com.dev.backend.dto.product.ProductRequest;
@@ -296,8 +295,6 @@ public class ProductServiceImpl implements ProductService {
         };
     }
 
-
-
     @Override
     public ProductInfo productInfo(String slug) {
         Product product = findBySlug(slug);
@@ -311,5 +308,25 @@ public class ProductServiceImpl implements ProductService {
         productInfo.setCoverImages(imageService.findImagesByProductId(productId));
         productInfo.setSoldCount(orderItemService.getSoldCountByProductId(productId));
         return productInfo;
+    }
+
+    @Override
+    public Product findWithDetailsById(Integer id) {
+        return productRepository.findWithDetailsById(id).orElseThrow(
+                () -> new NotFoundException("Không tìm thấy sản phẩm với slug: " + id));
+        
+    }
+
+    @Override
+    public ProductCartItemResponse productCartItemResponse(Integer productId) {
+        Product product = findWithDetailsById(productId);
+        ProductCartItemResponse dto = productMapper.mapProductCartItemResponse(product);
+        dto.setDiscountValue(promotionProductService.findDiscountValueByProductId(productId));
+        dto.setProductPublisher(publisherMapper.toProductPublisher(product.getPublisher()));
+        dto.setProductSeries(seriesMapper.toProductSeries(product.getSeries()));
+        dto.setProductAuthors(productAuthorService.findAuthorsByProductId(productId));
+        dto.setProductGenres(productGenreService.findGenresByProductId(productId));
+        dto.setUrlImage(imageService.getUrlImageIsThumbnailByProductId(productId));
+        return dto;
     }
 }

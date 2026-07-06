@@ -29,37 +29,6 @@ export function CheckoutPageHeader({
   );
 }
 
-export function CheckoutEmptyState({
-  icon: Icon,
-  title,
-  description,
-  action,
-}: {
-  icon: LucideIcon;
-  title: string;
-  description: string;
-  action: { to: string; label: string };
-}) {
-  return (
-    <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white py-16 px-6 text-center shadow-sm">
-      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-500">
-        <Icon size={24} className="text-slate-400 bg-indigo-500" />
-      </div>
-
-      <h2 className="heading-2 text-slate-900">{title}</h2>
-
-      <p className="mt-2 max-w-sm body-text text-slate-600">{description}</p>
-
-      <Link
-        to={action.to}
-        className="mt-6 inline-flex items-center gap-2 rounded-xl bg-indigo-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-red-700"
-      >
-        {action.label}
-        <ChevronRight size={16} />
-      </Link>
-    </div>
-  );
-}
 
 export function CheckoutMobileBar({
   subtitle,

@@ -44,7 +44,7 @@ public enum Permission {
     ADMIN(Module.SYSTEM, "Quản trị viên"),
 
     // Customer
-    CUSTOMER(Module.USER, "Khách hàng");
+    CUSTOMER(Module.CUSTOMER, "Khách hàng");
 
     private final Module module;
     private final String description;

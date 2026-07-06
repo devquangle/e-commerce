@@ -16,13 +16,15 @@ export function CartItemsToolbar({
   return (
     <div
       className="
-        hidden lg:grid
+        grid
+        grid-cols-[40px_1fr_40px]
         lg:grid-cols-[40px_1fr_120px_140px_120px_40px]
         items-center
         border-b
         border-slate-100
         bg-slate-50/50
         rounded-t-xl
+        py-2 lg:py-0
       "
     >
       {/* Cột 1: Checkbox */}
@@ -48,17 +50,17 @@ export function CartItemsToolbar({
       </label>
 
       {/* Cột 3: Price */}
-      <div className="text-right text-xs font-bold uppercase text-slate-500 pr-2">
+      <div className="hidden lg:block text-right text-xs font-bold uppercase text-slate-500 pr-2">
         Đơn giá
       </div>
 
       {/* Cột 4: Quantity */}
-      <div className="text-center text-xs font-bold uppercase text-slate-500">
+      <div className="hidden lg:block text-center text-xs font-bold uppercase text-slate-500">
         Số lượng
       </div>
 
       {/* Cột 5: Total */}
-      <div className="text-right text-xs font-bold uppercase text-slate-500 pr-2">
+      <div className="hidden lg:block text-right text-xs font-bold uppercase text-slate-500 pr-2">
         Thành tiền
       </div>
 

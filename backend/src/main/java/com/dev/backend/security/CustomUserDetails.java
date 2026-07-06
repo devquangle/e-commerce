@@ -40,9 +40,7 @@ public class CustomUserDetails implements UserDetails {
             }
 
             if (code != null && !code.trim().isEmpty()) {
-                if (role.getName() != null) {
-                    roles.add(role.getName());
-                }
+                roles.add(code);
                 
                 permissions.add(code);
                 authorities.add(new SimpleGrantedAuthority(code));

@@ -8,6 +8,7 @@ import Logo from "./Logo";
 import MobileDrawer from './MobileDrawer';
 import { useAuth } from "@/context/useAuth";
 import Modal from "../common/Modal";
+import { useCartCount } from "@/modules/user/cart/hooks/useCart";
 
 type MenuAccount = {
   id: number,
@@ -27,6 +28,7 @@ export default function Header() {
   const [openAccount, setOpenAccount] = useState(false);
   const [open, setOpen] = useState(false);
   const { isInitialized, userInfo, logout } = useAuth();
+  const { data: cartCount } = useCartCount();
   const userMenu: MenuAccount[] = [
     { id: 1, label: "Thông tin cá nhân", path: "/account/profile" },
     { id: 2, label: "Đơn hàng", path: "/account/orders" },
@@ -58,10 +60,13 @@ export default function Header() {
                 </svg>
               </Link>
               {/* icon cart */}
-              <Link to={"/cart"} className="hidden lg:flex justify-center items-center gap-2 text-indigo-500 hover:text-indigo-600 transition-colors">
+              <Link to={"/cart"} className="hidden lg:flex relative justify-center items-center gap-2 text-indigo-500 hover:text-indigo-600 transition-colors">
                 <svg className="w-8 h-8" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 24 24">
                   <path fillRule="evenodd" d="M4 4a1 1 0 0 1 1-1h1.5a1 1 0 0 1 .979.796L7.939 6H19a1 1 0 0 1 .979 1.204l-1.25 6a1 1 0 0 1-.979.796H9.605l.208 1H17a3 3 0 1 1-2.83 2h-2.34a3 3 0 1 1-4.009-1.76L5.686 5H5a1 1 0 0 1-1-1Z" clipRule="evenodd" />
                 </svg>
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] h-[20px] flex items-center justify-center">
+                  {cartCount?.count || 0}
+                </span>
               </Link>
               {/* icon menu */}
               <div
@@ -78,7 +83,7 @@ export default function Header() {
                     className=" h-8 w-8 rounded-full"
                   />
 
-                  <span className="max-w-sx truncate block">
+                  <span className="max-w-sx truncate hidden lg:block">
                     {user_code()}
                   </span>
                 </button>

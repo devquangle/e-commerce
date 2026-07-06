@@ -1,29 +1,57 @@
 import Container from "@/components/common/Container";
-import Modal from "@/components/common/Modal";
 
-import {
-  CheckoutEmptyState,
-} from "@/components/user/CheckoutUI";
 import { ShoppingCart } from "lucide-react";
 import { useMemo, useState } from "react";
-import {  useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
+  mapCartResponseToUI,
   type CartItemUI,
-  MOCK_CART_ITEMS,
+  type CartResponse,
 } from "@/modules/user/cart/types/cart.type";
 
 import { showErrorToast, showSuccessToast } from "@/utils/toastUtil";
 import { PriceBreakdown } from "@/components/user/PriceBreakdown";
 import { CartItemsToolbar } from "@/modules/user/cart/components/CartItemsToolbar";
 import CartItemCard from "@/modules/user/cart/components/CartItemCard";
+import DeleteCartItemsModal from "@/modules/user/cart/components/DeleteCartItemsModal";
+import DeleteCartItemModal from "@/modules/user/cart/components/DeleteCartItemModal";
+import { useCartData } from "@/modules/user/cart/hooks/useCart";
+import { CheckoutEmptyState } from "@/modules/user/cart/components/CheckoutEmptyState";
 
 export default function Carts() {
   const navigate = useNavigate();
 
-  const [items, setItems] = useState<CartItemUI[]>(() =>
-    MOCK_CART_ITEMS.map((i) => ({ ...i })),
-  );
+  const [items, setItems] = useState<CartItemUI[]>([]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<CartItemUI | null>(null);
+
+  const {
+    data: cartData,
+    isPending: isCartPending,
+  } = useCartData();
+
+  console.log("Carts.tsx re-rendered, cartData:", cartData);
+
+  const [prevCartData, setPrevCartData] = useState<
+    CartResponse | CartResponse[] | undefined
+  >(cartData);
+
+  if (cartData !== prevCartData) {
+    setPrevCartData(cartData);
+    if (cartData) {
+      const fetchedItems: CartResponse[] = Array.isArray(cartData)
+        ? cartData
+        : [cartData];
+      const newItems = fetchedItems
+        .map(mapCartResponseToUI)
+        .filter((item) => item.product != null);
+      console.log("Setting items to:", newItems);
+      setItems(newItems);
+    } else {
+      setItems([]);
+    }
+  }
+
 
   const allChecked = items.length > 0 && items.every((i) => i.checked);
   const someChecked = items.some((i) => i.checked) && !allChecked;
@@ -37,30 +65,26 @@ export default function Carts() {
   // 1. ✨ TẠM TÍNH = Tính dựa trên giá gốc chưa giảm của sản phẩm
   const subtotal = useMemo(
     () =>
-      selectedItems.reduce(
-        (sum, i) => {
-          const originalPrice = i.product.discountValue > 0 
-            ? i.product.price / (1 - i.product.discountValue / 100) 
+      selectedItems.reduce((sum, i) => {
+        const originalPrice =
+          i.product.discountValue > 0
+            ? i.product.price / (1 - i.product.discountValue / 100)
             : i.product.price;
-          return sum + originalPrice * i.quantity;
-        },
-        0,
-      ),
+        return sum + originalPrice * i.quantity;
+      }, 0),
     [selectedItems],
   );
 
   // 2. ✨ GIẢM GIÁ SẢN PHẨM = Tổng chênh lệch giữa (Giá gốc - Giá bán hiện tại)
   const productDiscount = useMemo(
     () =>
-      selectedItems.reduce(
-        (sum, i) => {
-          const originalPrice = i.product.discountValue > 0 
-            ? i.product.price / (1 - i.product.discountValue / 100) 
+      selectedItems.reduce((sum, i) => {
+        const originalPrice =
+          i.product.discountValue > 0
+            ? i.product.price / (1 - i.product.discountValue / 100)
             : i.product.price;
-          return sum + (originalPrice - i.product.price) * i.quantity;
-        },
-        0,
-      ),
+        return sum + (originalPrice - i.product.price) * i.quantity;
+      }, 0),
     [selectedItems],
   );
 
@@ -120,72 +144,75 @@ export default function Carts() {
     navigate("/payment", { state: checkoutState });
   };
 
-  return (
-    <div
-      className={`bg-slate-50/50 ${items.length > 0 ? "pb-24 lg:pb-0" : ""}`}
-    >
-      <Container className="max-w-7xl p-2  my-4">
-        {items.length === 0 ? (
-          <CheckoutEmptyState
-            icon={ShoppingCart}
-            title="Giỏ hàng trống"
-            description="Hãy khám phá và thêm sách yêu thích vào giỏ hàng"
-            action={{ to: "/products", label: "Mua sắm ngay" }}
-          />
-        ) : (
-          <div className="flex flex-col lg:flex-row gap-4 items-start w-full">
-            <div className="card-custom flex-1 space-y-4 w-full">
-              <CartItemsToolbar
-                allChecked={allChecked}
-                someChecked={someChecked}
-                itemCount={items.length}
-                onToggleAll={toggleAll}
-                onDeleteSelected={handleDeleteSelectedClick}
-              />
 
-              <div className="my-3 space-y-3">
-                {items.map((item) => (
-                  <CartItemCard
-                    key={item.cartItemId}
-                    item={item}
-                    onToggle={() => toggleItem(item.cartItemId)}
-                    onUpdateQuantity={(delta) =>
-                      updateQuantity(item.cartItemId, delta)
-                    }
-                    onRemove={() => removeItem(item.cartItemId)}
-                  />
-                ))}
-              </div>
-            </div>
-            <div className="w-full lg:w-[350px] lg:shrink-0 lg:sticky lg:top-24">
-              <PriceBreakdown
-                selectedCount={selectedCount}
-                subtotal={subtotal}
-                discount={productDiscount}
-                total={total}
-                hasSelected={hasSelected}
-                isCheckout={false}
-                onClick={handleProceedToCheckout}
-                backLink={{ to: "/products", label: "Tiếp tục mua sắm" }}
-              />
+console.log("🚀 ~ file: Carts.tsx:174 ~ Carts ~ cartData:", cartData);
+console.log("🚀 ~ file: Carts.tsx:174 ~ Carts ~ items:", items);
+
+  return (
+    <Container className={`max-w-7xl mx-auto my-6 ${items.length > 0 ? "pb-24 lg:pb-0" : ""}`}>
+      {items.length === 0 ? (
+        <CheckoutEmptyState
+          icon={ShoppingCart}
+          title="Giỏ hàng trống"
+          description="Hãy khám phá và thêm sách yêu thích vào giỏ hàng"
+          action={{ to: "/products", label: "Mua sắm ngay" }}
+        />
+      ) : (
+        <div className="flex flex-col lg:flex-row gap-4 items-start w-full">
+          <div className="card-custom flex-1 space-y-4 w-full">
+            <CartItemsToolbar
+              allChecked={allChecked}
+              someChecked={someChecked}
+              itemCount={items.length}
+              onToggleAll={toggleAll}
+              onDeleteSelected={handleDeleteSelectedClick}
+            />
+
+            <div className="my-3 space-y-3">
+              {items.map((item) => (
+                <CartItemCard
+                  key={item.cartItemId}
+                  item={item}
+                  onToggle={() => toggleItem(item.cartItemId)}
+                  onUpdateQuantity={(delta) =>
+                    updateQuantity(item.cartItemId, delta)
+                  }
+                  onRemove={() => setItemToDelete(item)}
+                />
+              ))}
             </div>
           </div>
-        )}
-      </Container>
-
-      <Modal
+          <div className="w-full lg:w-[350px] lg:shrink-0 lg:sticky lg:top-24">
+            <PriceBreakdown
+              selectedCount={selectedCount}
+              subtotal={subtotal}
+              discount={productDiscount}
+              total={total}
+              hasSelected={hasSelected}
+              isCheckout={false}
+              onClick={handleProceedToCheckout}
+              backLink={{ to: "/products", label: "Tiếp tục mua sắm" }}
+            />
+          </div>
+        </div>
+      )}
+      <DeleteCartItemsModal
         isOpen={isDeleteModalOpen}
+        itemCount={selectedItems.length}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={confirmDeleteSelected}
-        title="Xác nhận xóa sản phẩm"
-        cancelText="Hủy"
-        confirmText="Xóa"
-      >
-        <p className="text-sm text-slate-600">
-          Bạn có chắc muốn xóa <strong>{selectedItems.length} sản phẩm</strong>{" "}
-          đã chọn khỏi giỏ hàng?
-        </p>
-      </Modal>
-    </div>
+      />
+      <DeleteCartItemModal
+        isOpen={itemToDelete !== null}
+        productName={itemToDelete?.product.name || ""}
+        onClose={() => setItemToDelete(null)}
+        onConfirm={() => {
+          if (itemToDelete) {
+            removeItem(itemToDelete.cartItemId);
+            setItemToDelete(null);
+          }
+        }}
+      />
+    </Container>
   );
 }

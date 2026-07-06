@@ -8,5 +8,5 @@ public enum Module {
     PROMOTION,
     GENRE,
     SYSTEM,
-    USER
+    CUSTOMER
 }

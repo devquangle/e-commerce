@@ -16,4 +16,6 @@ public interface ImageService {
 
 
     List<ProductImageResponse> findImagesByProductId(Integer productId);
+
+    String getUrlImageIsThumbnailByProductId(Integer productId);
 }

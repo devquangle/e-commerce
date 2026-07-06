@@ -14,6 +14,16 @@ type CartItemCardProps = {
   showRemove?: boolean;
   readonly?: boolean;
 };
+import viLocale from "@cospired/i18n-iso-languages/langs/vi.json";
+import { getName, registerLocale } from "@cospired/i18n-iso-languages";
+registerLocale(viLocale);
+
+const getLanguageName = (code?: string) => {
+  if (!code) return "";
+  const name = getName(code, "vi");
+  if (!name) return code;
+  return name.charAt(0).toUpperCase() + name.slice(1);
+};
 
 export default function CartItemCard({
   item,
@@ -28,7 +38,7 @@ export default function CartItemCard({
 
   const originalPrice = product.discountValue > 0 ? product.price / (1 - product.discountValue / 100) : product.price;
   const hasDiscount = product.discountValue > 0;
-  const imageUrl = product.coverImages?.find(img => img.isThumbnail)?.url || product.coverImages?.[0]?.url || "";
+  const imageUrl = product.urlImage;  
 
   return (
     <div
@@ -119,7 +129,7 @@ export default function CartItemCard({
                     {product.language && (
                       <div className="flex items-center gap-1">
                         <Languages size={10} className="text-slate-300" />
-                        <span>{product.language}</span>
+                        <span>{getLanguageName(product.language)}</span>
                       </div>
                     )}
                   </div>
@@ -130,7 +140,7 @@ export default function CartItemCard({
               <button 
                 type="button" 
                 onClick={(e) => { e.preventDefault(); setShowDetails(!showDetails); }}
-                className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-blue-600 transition"
+                className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-blue-600 transition cursor-pointer"
               >
                 {showDetails ? "Thu gọn" : "Xem thêm chi tiết"}
                 {showDetails ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
@@ -188,7 +198,7 @@ export default function CartItemCard({
               <button
                 type="button"
                 onClick={onRemove}
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 transition lg:opacity-0 group-hover:opacity-100"
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50  hover:text-red-500 transition lg:opacity-0 group-hover:opacity-100 cursor-pointer"
                 aria-label="Xóa sản phẩm"
               >
                 <Trash2 size={16} />
@@ -329,7 +339,7 @@ export default function CartItemCard({
               <button
                 type="button"
                 onClick={onRemove}
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 transition"
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 transition cursor-pointer"
               >
                 <Trash2 size={16} />
               </button>
@@ -442,7 +452,7 @@ export default function CartItemCard({
             <button
               type="button"
               onClick={onRemove}
-              className="shrink-0 flex h-7 w-7 items-center justify-center rounded-lg text-slate-400"
+              className="shrink-0 flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 cursor-pointer "
             >
               <Trash2 size={14} />
             </button>

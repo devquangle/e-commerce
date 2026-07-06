@@ -3,13 +3,25 @@ package com.dev.backend.mapper;
 import com.dev.backend.dto.product.*;
 import com.dev.backend.dto.productdetail.ProductInfo;
 import com.dev.backend.entity.*;
+import com.dev.backend.service.ImageService;
+import com.dev.backend.service.OrderItemService;
+import com.dev.backend.service.ProductAuthorService;
+import com.dev.backend.service.ProductGenreService;
+import com.dev.backend.service.PromotionProductService;
+import com.dev.backend.service.PublisherService;
+import com.dev.backend.service.SeriesService;
+
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class ProductMapper {
+
 
     public ProductResponse toDTO(Product product) {
         if (product == null)
@@ -90,7 +102,6 @@ public class ProductMapper {
         dto.setGenreIds(mapGenresToIds(product.getProductGenres()));
         dto.setCoverImages(coverImageResponses(product.getImages()));
 
-       
         return dto;
     }
 
@@ -171,6 +182,24 @@ public class ProductMapper {
         dto.setPages(product.getPages());
         dto.setLanguage(product.getLanguage());
         dto.setDescription(product.getDescription());
+
         return dto;
     }
+
+    public ProductCartItemResponse mapProductCartItemResponse(Product product) {
+        ProductCartItemResponse dto = new ProductCartItemResponse();
+        dto.setProductId(product.getId());
+        dto.setName(product.getName());
+        dto.setSlug(product.getSlug());
+        dto.setIsbn(product.getIsbn());
+        dto.setPrice(product.getPrice());
+        dto.setQuantity(product.getQuantity());
+        dto.setWeight(product.getWeight());
+        dto.setPublishYear(product.getPublishYear().toString());
+        dto.setPages(product.getPages());
+        dto.setLanguage(product.getLanguage());
+        return dto;
+    }
+
+    
 }

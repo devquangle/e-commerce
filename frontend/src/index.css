@@ -43,7 +43,7 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 @utility card-custom {
-  @apply bg-white rounded-xl border border-slate-100 p-6 shadow-sm;
+  @apply bg-white rounded-xl border border-slate-100 p-2 sm:p-4 lg:p-6 shadow-sm;
 }
 @utility card-custom-v1 {
   @apply bg-white rounded-lg border border-slate-100 shadow-sm;

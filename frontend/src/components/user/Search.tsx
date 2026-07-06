@@ -335,7 +335,7 @@ export default function Search() {
       </div>
 
       <button
-        className="flex lg:hidden h-9 w-9 shrink-0 rounded-full border items-center justify-center cursor-pointer hover:bg-slate-100"
+        className="hidden h-9 w-9 shrink-0 rounded-full border items-center justify-center cursor-pointer hover:bg-slate-100"
         aria-label="Tìm kiếm"
       >
         <SearchIcon size={18} className="text-slate-700" />

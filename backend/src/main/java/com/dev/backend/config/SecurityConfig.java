@@ -98,6 +98,7 @@ public class SecurityConfig {
                                 .authorizeHttpRequests(req -> req
                                                 .requestMatchers(PUBLIC_URLS).permitAll()
                                                 .requestMatchers(HttpMethod.GET, PUBLIC_GET_URLS).permitAll()
+                                                .requestMatchers("/api/v1/cart/**").hasRole("CUSTOMER")
                                                 .anyRequest().authenticated())
 
                                 .exceptionHandling(ex -> ex

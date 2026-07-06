@@ -17,9 +17,9 @@ import type { ProductResponse } from "../types/product.type";
 import type { BaseStatus } from "@/types/status";
 
 import { registerLocale, getName } from "@cospired/i18n-iso-languages";
-import viLocale from "@cospired/i18n-iso-languages/langs/vi.json";
-import { formatMoney } from "@/utils/number.utils";
 
+import { formatMoney } from "@/utils/number.utils";
+import viLocale from "@cospired/i18n-iso-languages/langs/vi.json";
 registerLocale(viLocale);
 
 const getLanguageName = (code?: string) => {

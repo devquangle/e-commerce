@@ -2,6 +2,7 @@ package com.dev.backend.service;
 
 import java.util.List;
 import com.dev.backend.dto.product.ProductCardResponse;
+import com.dev.backend.dto.product.ProductCartItemResponse;
 import com.dev.backend.dto.product.ProductDetailResponse;
 import com.dev.backend.dto.product.ProductFilterRequest;
 import com.dev.backend.dto.product.ProductRequest;
@@ -38,4 +39,8 @@ public interface ProductService {
 
     ProductInfo productInfo(String slug);
 
+    ProductCartItemResponse productCartItemResponse(Integer productId);
+
+
+    Product findWithDetailsById(Integer id);
 }

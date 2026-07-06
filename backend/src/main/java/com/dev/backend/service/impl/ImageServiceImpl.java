@@ -116,4 +116,10 @@ public class ImageServiceImpl implements ImageService {
                 .map(imageMapper::toProductImages)
                 .toList();
     }
+
+    @Override
+    public String getUrlImageIsThumbnailByProductId(Integer productId) {
+        String thumbnail = imageRepository.findUrlImageIsThumbnailByProductId(productId).orElse(null);
+        return thumbnail;
+    }
 }

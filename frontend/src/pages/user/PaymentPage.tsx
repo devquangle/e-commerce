@@ -1,7 +1,6 @@
 import Container from "@/components/common/Container";
 
 import {
-  CheckoutEmptyState,
   CheckoutMobileBar,
 } from "@/components/user/CheckoutUI";
 import {
@@ -12,12 +11,13 @@ import {
 import { showSuccessToast, showWarningToast } from "@/utils/toastUtil";
 import { Package } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { useLocation, Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { getSelectedAddressId, type CouponForm } from "@/types/checkout.type";
 import CartCheckoutSidebar from "@/components/user/CartCheckoutSidebar";
 import CartItemCard from "@/modules/user/cart/components/CartItemCard";
 import type { PaymentMethodType } from "@/modules/user/payment/types/payment-method.type";
+import { CheckoutEmptyState } from "@/modules/user/cart/components/CheckoutEmptyState";
 
 interface CheckoutState {
   checkedItems?: CartItemUI[];
