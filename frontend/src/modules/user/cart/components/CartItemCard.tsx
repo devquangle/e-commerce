@@ -170,7 +170,7 @@ export default function CartItemCard({
             <button
               type="button"
               onClick={() => onUpdateQuantity(-1)}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-slate-500 hover:bg-white hover:text-slate-900 transition active:scale-95"
+              className="flex h-7 w-7 items-center justify-center rounded-md text-slate-500 hover:bg-white hover:text-slate-900 transition active:scale-95 cursor-pointer"
             >
               <Minus size={14} />
             </button>
@@ -180,7 +180,7 @@ export default function CartItemCard({
             <button
               type="button"
               onClick={() => onUpdateQuantity(1)}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-slate-500 hover:bg-white hover:text-slate-900 transition active:scale-95"
+              className="flex h-7 w-7 items-center justify-center rounded-md text-slate-500 hover:bg-white hover:text-slate-900 transition active:scale-95 cursor-pointer"
             >
               <Plus size={14} />
             </button>
@@ -308,7 +308,7 @@ export default function CartItemCard({
           <button
             type="button"
             onClick={() => onUpdateQuantity(-1)}
-            className="flex h-8 w-8 items-center justify-center text-slate-600 hover:bg-white transition"
+            className="flex h-8 w-8 items-center justify-center text-slate-600 hover:bg-white transition cursor-pointer"
           >
             <Minus size={14} />
           </button>
@@ -318,7 +318,7 @@ export default function CartItemCard({
           <button
             type="button"
             onClick={() => onUpdateQuantity(1)}
-            className="flex h-8 w-8 items-center justify-center text-slate-600 hover:bg-white transition"
+            className="flex h-8 w-8 items-center justify-center text-slate-600 hover:bg-white transition cursor-pointer"
           >
             <Plus size={14} />
           </button>
@@ -470,7 +470,7 @@ export default function CartItemCard({
             <button
               type="button"
               onClick={() => onUpdateQuantity(-1)}
-              className="flex h-7 w-7 items-center justify-center text-slate-600"
+              className="flex h-7 w-7 items-center justify-center text-slate-600 cursor-pointer"
             >
               <Minus size={12} />
             </button>
@@ -480,7 +480,7 @@ export default function CartItemCard({
             <button
               type="button"
               onClick={() => onUpdateQuantity(1)}
-              className="flex h-7 w-7 items-center justify-center text-slate-600"
+              className="flex h-7 w-7 items-center justify-center text-slate-600 cursor-pointer"
             >
               <Plus size={12} />
             </button>

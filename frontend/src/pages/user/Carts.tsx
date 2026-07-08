@@ -15,7 +15,7 @@ import DeleteCartItemsModal from "@/modules/user/cart/components/DeleteCartItems
 import DeleteCartItemModal from "@/modules/user/cart/components/DeleteCartItemModal";
 import {
   useCartData,
-  useUpdateCartQuantity,
+  useSaveCartItem,
   useToggleCartItem,
   useToggleAllCartItems,
   useRemoveCartItem,
@@ -32,7 +32,7 @@ export default function Carts() {
 
   const { data: cartData, isPending: isCartPending } = useCartData();
   
-  const updateQuantityMutation = useUpdateCartQuantity();
+  const saveItemMutation = useSaveCartItem();
   const toggleItemMutation = useToggleCartItem();
   const toggleAllMutation = useToggleAllCartItems();
   const removeItemMutation = useRemoveCartItem();
@@ -90,10 +90,10 @@ export default function Carts() {
     toggleItemMutation.mutate({ cartItemId, checked: !currentChecked });
   };
 
-  const updateQuantity = (cartItemId: number, currentQuantity: number, delta: number) => {
+  const updateQuantity = (productId: number, currentQuantity: number, delta: number) => {
     const newQuantity = Math.max(1, currentQuantity + delta);
     if (newQuantity !== currentQuantity) {
-      updateQuantityMutation.mutate({ cartItemId, quantity: newQuantity });
+      saveItemMutation.mutate({ productId, quantity: newQuantity });
     }
   };
 
@@ -168,7 +168,7 @@ export default function Carts() {
                   item={item}
                   onToggle={() => toggleItem(item.cartItemId, item.checked)}
                   onUpdateQuantity={(delta) =>
-                    updateQuantity(item.cartItemId, item.quantity, delta)
+                    updateQuantity(item.product.productId, item.quantity, delta)
                   }
                   onRemove={() => setItemToDelete(item)}
                 />

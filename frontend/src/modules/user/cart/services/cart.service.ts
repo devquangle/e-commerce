@@ -4,32 +4,39 @@ import type { CartCountResponse, CartResponse } from "../types/cart.type";
 
 const CartService = {
   async getCartItems() {
-    const res =
-      await apiAuth.get<ApiResponse<CartResponse>>("/api/v1/cart");
+    const res = await apiAuth.get<ApiResponse<CartResponse>>("/api/v1/cart");
     if (!res.data.success || !res.data.data) {
       throw new Error(res.data.message || "Fetch cart items failed");
     }
     console.log(res.data.data);
     return res.data.data;
   },
+  async saveCartItem(productId: number, quantity: number) {
+    const res = await apiAuth.post<ApiResponse<void>>("/api/v1/cart", {
+      productId,
+      quantity,
+    });
+    return res.data;
+  },
   async updateQuantity(cartItemId: number, quantity: number) {
-    const res = await apiAuth.put<ApiResponse<any>>(`/api/v1/cart/update/${cartItemId}`, { quantity });
+    const res = await apiAuth.put<ApiResponse<any>>(
+      `/api/v1/cart/update/${cartItemId}`,
+      { quantity },
+    );
     return res.data;
   },
-  async toggleItem(cartItemId: number, checked: boolean) {
-    const res = await apiAuth.put<ApiResponse<any>>(`/api/v1/cart/toggle/${cartItemId}`, { checked });
-    return res.data;
-  },
-  async toggleAll(checked: boolean) {
-    const res = await apiAuth.put<ApiResponse<any>>(`/api/v1/cart/toggle-all`, { checked });
-    return res.data;
-  },
+
   async removeCartItem(cartItemId: number) {
-    const res = await apiAuth.delete<ApiResponse<any>>(`/api/v1/cart/${cartItemId}`);
+    const res = await apiAuth.delete<ApiResponse<any>>(
+      `/api/v1/cart/${cartItemId}`,
+    );
     return res.data;
   },
   async removeCartItems(cartItemIds: number[]) {
-    const res = await apiAuth.post<ApiResponse<any>>(`/api/v1/cart/remove-multiple`, { cartItemIds });
+    const res = await apiAuth.post<ApiResponse<any>>(
+      `/api/v1/cart/remove-multiple`,
+      { cartItemIds },
+    );
     return res.data;
   },
   async countCartItems() {

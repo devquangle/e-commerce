@@ -2,6 +2,7 @@ package com.dev.backend.mapper;
 
 import org.springframework.stereotype.Component;
 
+import com.dev.backend.dto.cart.CartItemResponse;
 import com.dev.backend.dto.cart.CartResponse;
 import com.dev.backend.entity.CartItem;
 
@@ -19,6 +20,17 @@ public class CartMapper {
         response.setCartItemId(cartItem.getId());
         response.setQuantity(cartItem.getQuantity());
         response.setChecked(false);
+        return response;
+    }
+    public CartItemResponse toCartItemDTO(CartItem cartItem) {
+        if (cartItem == null) {
+            return null;
+        }
+        CartItemResponse response = new CartItemResponse();
+        response.setCartItemId(cartItem.getId());
+        response.setQuantity(cartItem.getQuantity());
+        response.setProductId(cartItem.getProduct().getId());
+        response.setChecked(true);
         return response;
     }
 }
