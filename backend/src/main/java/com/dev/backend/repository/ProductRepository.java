@@ -30,14 +30,14 @@ public interface ProductRepository extends JpaRepository<Product, Integer>, Prod
                         "promotionProducts"
 
         })
-        Optional<Product> findBySlug(String slug);
+        Optional<Product> findBySlug(@Param("slug") String slug);
 
-        Optional<Product> findByName(String name);
+        Optional<Product> findByName(@Param("name") String name);
 
         @EntityGraph(attributePaths = {
                         "publisher",
                         "series",
                         "promotionProducts",
         })
-        Optional<Product> findWithDetailsById(Integer id);
+        Optional<Product> findWithDetailsById(@Param("id") Integer id);
 }

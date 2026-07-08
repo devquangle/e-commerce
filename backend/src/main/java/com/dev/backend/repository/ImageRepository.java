@@ -5,12 +5,13 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.dev.backend.entity.Image;
 
 public interface ImageRepository extends JpaRepository<Image, Integer> {
 
-    List<Image> findImagesByProductId(Integer productId);
+    List<Image> findImagesByProductId(@Param("productId") Integer productId);
 
     @Query("""
                 SELECT i.urlImage
@@ -18,5 +19,5 @@ public interface ImageRepository extends JpaRepository<Image, Integer> {
                 WHERE i.product.id = :productId
                   AND i.isThumbnail = true
             """)
-    Optional<String> findUrlImageIsThumbnailByProductId(Integer productId);
+    Optional<String> findUrlImageIsThumbnailByProductId(@Param("productId") Integer productId);
 }

@@ -1,7 +1,6 @@
 package com.dev.backend.dto.cart;
 
 import com.dev.backend.dto.product.ProductCartItemResponse;
-import com.dev.backend.dto.productdetail.ProductInfo;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

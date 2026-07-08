@@ -12,15 +12,15 @@ import com.dev.backend.entity.Address;
 
 public interface AddressRepository extends JpaRepository<Address, Integer> {
 
-    Optional<Address> findByUserIdAndIsDefaultIsTrue(Integer userId);
+    Optional<Address> findByUserIdAndIsDefaultIsTrue(@Param("id") Integer userId);
 
     @Query("SELECT a FROM Address a WHERE a.id = :id AND a.user.id = :userId")
-    Optional<Address> findByIdAndUserId(Integer id, Integer userId);
+    Optional<Address> findByIdAndUserId(@Param("id") Integer id,@Param("userId") Integer userId);
 
-    int countByUserId(Integer userId);
+    int countByUserId(@Param("userId") Integer userId);
 
     @Query("SELECT a FROM Address a WHERE a.user.id = :userId ORDER BY a.id DESC ")
-    List<Address> findByUserId(Integer userId);
+    List<Address> findByUserId(@Param("userId") Integer userId);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""

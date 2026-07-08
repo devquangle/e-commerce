@@ -15,7 +15,7 @@ public interface PromotionProductRepository extends JpaRepository<PromotionProdu
     @Modifying
     @Transactional
     @Query("DELETE FROM PromotionProduct p WHERE p.promotion.id = :promotionId")
-    void deleteByPromotionId(Integer promotionId);
+    void deleteByPromotionId(@Param("promotionId") Integer promotionId);
 
     @Query("""
                 SELECT pp
@@ -24,7 +24,7 @@ public interface PromotionProductRepository extends JpaRepository<PromotionProdu
                 WHERE pp.product.id IN :productIds
                   AND p.status = com.dev.backend.constant.BaseStatus.ACTIVE
             """)
-    List<PromotionProduct> findPromotionByProductIds(List<Integer> productIds);
+    List<PromotionProduct> findPromotionByProductIds(@Param("productIds") List<Integer> productIds);
 
     @Query("""
                 SELECT pp.discountValue
