@@ -12,10 +12,26 @@ const CartService = {
     console.log(res.data.data);
     return res.data.data;
   },
-  //   async addToCart(productId: string, quantity: number) {},
-  //   async updateCartItem(cartItemId: string, quantity: number) {},
-  //   async removeCartItem(cartItemId: string) {},
-  //   async removeCartItems(cartItemIds: number[]) {},
+  async updateQuantity(cartItemId: number, quantity: number) {
+    const res = await apiAuth.put<ApiResponse<any>>(`/api/v1/cart/update/${cartItemId}`, { quantity });
+    return res.data;
+  },
+  async toggleItem(cartItemId: number, checked: boolean) {
+    const res = await apiAuth.put<ApiResponse<any>>(`/api/v1/cart/toggle/${cartItemId}`, { checked });
+    return res.data;
+  },
+  async toggleAll(checked: boolean) {
+    const res = await apiAuth.put<ApiResponse<any>>(`/api/v1/cart/toggle-all`, { checked });
+    return res.data;
+  },
+  async removeCartItem(cartItemId: number) {
+    const res = await apiAuth.delete<ApiResponse<any>>(`/api/v1/cart/${cartItemId}`);
+    return res.data;
+  },
+  async removeCartItems(cartItemIds: number[]) {
+    const res = await apiAuth.post<ApiResponse<any>>(`/api/v1/cart/remove-multiple`, { cartItemIds });
+    return res.data;
+  },
   async countCartItems() {
     const res =
       await apiAuth.get<ApiResponse<CartCountResponse>>("/api/v1/cart/count");

@@ -28,21 +28,21 @@ public class CartItemServiceImpl implements CartItemService {
 
     private final CartMapper cartMapper;
 
-  @Override
-public List<CartResponse> getCartByUserId(CustomUserDetails userDetails) {
-    Integer userId = userDetails.getUser().getId();
+    @Override
+    public List<CartResponse> getCartByUserId(CustomUserDetails userDetails) {
+        Integer userId = userDetails.getUser().getId();
 
-    return cartItemRepository.findCartByUserId(userId)
-            .stream()
-            .map(cartItem -> {
-                CartResponse response = cartMapper.toDTO(cartItem);
-                response.setProductCartItemResponse(
-                        productService.productCartItemResponse(cartItem.getProduct().getId())
-                );
-                return response;
-            })
-            .toList();
-}
+        return cartItemRepository.findCartByUserId(userId)
+                .stream()
+                .map(cartItem -> {
+                    CartResponse response = cartMapper.toDTO(cartItem);
+                    response.setProduct(
+                            productService.productCartItemResponse(cartItem.getProduct().getId()));
+                    return response;
+                })
+                .toList();
+    }
+
     @Override
     public CartCountResponse getCountCartByUserId(CustomUserDetails userDetails) {
         Integer userId = userService.userIsLogin(userDetails).getId();

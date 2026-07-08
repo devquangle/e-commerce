@@ -14,5 +14,6 @@ import lombok.Setter;
 public class CartResponse {
     private Integer cartItemId;
     private Integer quantity;
-    private ProductCartItemResponse productCartItemResponse;
+    private ProductCartItemResponse product;
+    private boolean checked;
 }

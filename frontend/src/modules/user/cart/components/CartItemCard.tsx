@@ -1,13 +1,14 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Minus, Plus, Trash2, Building2, BookOpen, Tag, Calendar, FileText, Weight, Languages, ChevronDown, ChevronUp } from "lucide-react";
 import {
-  type CartItemUI,
   getLineTotal,
+  type CartResponse,
 } from "@/modules/user/cart/types/cart.type";
 import { formatMoney } from "@/utils/number.utils";
 
 type CartItemCardProps = {
-  item: CartItemUI;
+  item: CartResponse;
   onToggle: () => void;
   onUpdateQuantity: (delta: number) => void;
   onRemove?: () => void;
@@ -72,13 +73,15 @@ export default function CartItemCard({
             <img
               src={imageUrl}
               alt={product.name}
-              className="h-[100px] w-[72px] object-cover transition-transform duration-300 group-hover:scale-105"
+              className="h-[100px] w-[72px] object-cover"
             />
           </div>
           <div className="min-w-0 flex flex-col gap-2">
-            <h3 className="font-bold text-slate-900 line-clamp-2 text-sm md:text-base leading-snug hover:text-blue-600 transition cursor-pointer">
-              {product.name}
-            </h3>
+            <Link to={`/product?slug=${product.slug}`}>
+              <h3 className="font-bold text-slate-900 line-clamp-2 text-sm md:text-base leading-snug hover:text-blue-600 transition cursor-pointer">
+                {product.name}
+              </h3>
+            </Link>
             <div 
               className={`grid transition-all duration-300 ease-in-out ${
                 showDetails ? "grid-rows-[1fr] opacity-100 mt-1.5" : "grid-rows-[0fr] opacity-0"
@@ -226,9 +229,11 @@ export default function CartItemCard({
             className="h-24 w-16 shrink-0 rounded-xl object-cover border border-slate-200/60"
           />
           <div className="min-w-0 flex flex-col gap-2">
-            <h3 className="font-bold text-slate-900 line-clamp-2 text-sm md:text-base leading-snug hover:text-blue-600 transition cursor-pointer">
-              {product.name}
-            </h3>
+            <Link to={`/product/${product.slug}`}>
+              <h3 className="font-bold text-slate-900 line-clamp-2 text-sm md:text-base leading-snug hover:text-blue-600 transition cursor-pointer">
+                {product.name}
+              </h3>
+            </Link>
             <div 
               className={`grid transition-all duration-300 ease-in-out ${
                 showDetails ? "grid-rows-[1fr] opacity-100 mt-1.5" : "grid-rows-[0fr] opacity-0"
@@ -366,9 +371,11 @@ export default function CartItemCard({
             className="h-20 w-14 shrink-0 rounded-lg object-cover border border-slate-200/60"
           />
           <div className="flex-1 min-w-0 flex flex-col">
-            <h3 className="font-bold text-slate-900 line-clamp-2 text-xs hover:text-blue-600 transition">
-              {product.name}
-            </h3>
+            <Link to={`/product/${product.slug}`}>
+              <h3 className="font-bold text-slate-900 line-clamp-2 text-xs hover:text-blue-600 transition cursor-pointer">
+                {product.name}
+              </h3>
+            </Link>
             
             <div 
               className={`grid transition-all duration-300 ease-in-out ${

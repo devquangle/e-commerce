@@ -18,6 +18,7 @@ public class CartMapper {
         CartResponse response = new CartResponse();
         response.setCartItemId(cartItem.getId());
         response.setQuantity(cartItem.getQuantity());
+        response.setChecked(false);
         return response;
     }
 }

@@ -4,8 +4,6 @@ import { ShoppingCart } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  mapCartResponseToUI,
-  type CartItemUI,
   type CartResponse,
 } from "@/modules/user/cart/types/cart.type";
 
@@ -15,40 +13,36 @@ import { CartItemsToolbar } from "@/modules/user/cart/components/CartItemsToolba
 import CartItemCard from "@/modules/user/cart/components/CartItemCard";
 import DeleteCartItemsModal from "@/modules/user/cart/components/DeleteCartItemsModal";
 import DeleteCartItemModal from "@/modules/user/cart/components/DeleteCartItemModal";
-import { useCartData } from "@/modules/user/cart/hooks/useCart";
+import {
+  useCartData,
+  useUpdateCartQuantity,
+  useToggleCartItem,
+  useToggleAllCartItems,
+  useRemoveCartItem,
+  useRemoveCartItems,
+} from "@/modules/user/cart/hooks/useCart";
 import { CheckoutEmptyState } from "@/modules/user/cart/components/CheckoutEmptyState";
 import Loading from "@/components/common/Loading";
 
 export default function Carts() {
   const navigate = useNavigate();
 
-  const [items, setItems] = useState<CartItemUI[]>([]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState<CartItemUI | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<CartResponse | null>(null);
 
   const { data: cartData, isPending: isCartPending } = useCartData();
+  
+  const updateQuantityMutation = useUpdateCartQuantity();
+  const toggleItemMutation = useToggleCartItem();
+  const toggleAllMutation = useToggleAllCartItems();
+  const removeItemMutation = useRemoveCartItem();
+  const removeItemsMutation = useRemoveCartItems();
 
-  console.log("Carts.tsx re-rendered, cartData:", cartData);
-
-  const [prevCartData, setPrevCartData] = useState<
-    CartResponse | CartResponse[] | undefined
-  >(cartData);
-
-  if (cartData !== prevCartData) {
-    setPrevCartData(cartData);
-    if (cartData) {
-      const fetchedItems: CartResponse[] = Array.isArray(cartData)
-        ? cartData
-        : [cartData];
-      const newItems = fetchedItems
-        .map(mapCartResponseToUI)
-        .filter((item) => item.product != null);
-      console.log("Setting items to:", newItems);
-      setItems(newItems);
-    } else {
-      setItems([]);
-    }
-  }
+  const items = useMemo(() => {
+    if (!cartData) return [];
+    const fetchedItems = Array.isArray(cartData) ? cartData : [cartData];
+    return fetchedItems.filter((item) => item.product != null);
+  }, [cartData]);
 
   const allChecked = items.length > 0 && items.every((i) => i.checked);
   const someChecked = items.some((i) => i.checked) && !allChecked;
@@ -89,30 +83,26 @@ export default function Carts() {
   const total = subtotal - productDiscount;
 
   const toggleAll = () => {
-    setItems((prev) => prev.map((i) => ({ ...i, checked: !allChecked })));
+    toggleAllMutation.mutate(!allChecked);
   };
 
-  const toggleItem = (cartItemId: number) => {
-    setItems((prev) =>
-      prev.map((i) =>
-        i.cartItemId === cartItemId ? { ...i, checked: !i.checked } : i,
-      ),
-    );
+  const toggleItem = (cartItemId: number, currentChecked: boolean) => {
+    toggleItemMutation.mutate({ cartItemId, checked: !currentChecked });
   };
 
-  const updateQuantity = (cartItemId: number, delta: number) => {
-    setItems((prev) =>
-      prev.map((i) =>
-        i.cartItemId === cartItemId
-          ? { ...i, quantity: Math.max(1, i.quantity + delta) }
-          : i,
-      ),
-    );
+  const updateQuantity = (cartItemId: number, currentQuantity: number, delta: number) => {
+    const newQuantity = Math.max(1, currentQuantity + delta);
+    if (newQuantity !== currentQuantity) {
+      updateQuantityMutation.mutate({ cartItemId, quantity: newQuantity });
+    }
   };
 
   const removeItem = (cartItemId: number) => {
-    setItems((prev) => prev.filter((i) => i.cartItemId !== cartItemId));
-    showSuccessToast("Đã xóa sản phẩm khỏi giỏ hàng");
+    removeItemMutation.mutate(cartItemId, {
+      onSuccess: () => {
+        showSuccessToast("Đã xóa sản phẩm khỏi giỏ hàng");
+      }
+    });
   };
 
   const handleDeleteSelectedClick = () => {
@@ -124,9 +114,13 @@ export default function Carts() {
   };
 
   const confirmDeleteSelected = () => {
-    setItems((prev) => prev.filter((i) => !i.checked));
-    setIsDeleteModalOpen(false);
-    showSuccessToast("Đã xóa các sản phẩm đã chọn");
+    const ids = selectedItems.map((i) => i.cartItemId);
+    removeItemsMutation.mutate(ids, {
+      onSuccess: () => {
+        setIsDeleteModalOpen(false);
+        showSuccessToast("Đã xóa các sản phẩm đã chọn");
+      }
+    });
   };
 
   const checkoutState = {
@@ -140,9 +134,6 @@ export default function Carts() {
     if (!hasSelected) return;
     navigate("/payment", { state: checkoutState });
   };
-
-  console.log("🚀 ~ file: Carts.tsx:174 ~ Carts ~ cartData:", cartData);
-  console.log("🚀 ~ file: Carts.tsx:174 ~ Carts ~ items:", items);
 
   if (isCartPending) {
     return <Loading />;
@@ -175,9 +166,9 @@ export default function Carts() {
                 <CartItemCard
                   key={item.cartItemId}
                   item={item}
-                  onToggle={() => toggleItem(item.cartItemId)}
+                  onToggle={() => toggleItem(item.cartItemId, item.checked)}
                   onUpdateQuantity={(delta) =>
-                    updateQuantity(item.cartItemId, delta)
+                    updateQuantity(item.cartItemId, item.quantity, delta)
                   }
                   onRemove={() => setItemToDelete(item)}
                 />

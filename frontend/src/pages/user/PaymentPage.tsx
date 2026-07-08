@@ -4,7 +4,7 @@ import {
   CheckoutMobileBar,
 } from "@/components/user/CheckoutUI";
 import {
-  type CartItemUI,
+  type CartResponse,
   type CouponOption,
   MOCK_CART_ITEMS,
 } from "@/modules/user/cart/types/cart.type";
@@ -20,13 +20,13 @@ import type { PaymentMethodType } from "@/modules/user/payment/types/payment-met
 import { CheckoutEmptyState } from "@/modules/user/cart/components/CheckoutEmptyState";
 
 interface CheckoutState {
-  checkedItems?: CartItemUI[];
+  checkedItems?: CartResponse[];
   appliedCoupon?: CouponOption | null;
   paymentMethod?: PaymentMethodType;
   selectedAddressId?: number;
 }
 
-function getInitialItems(state: CheckoutState): CartItemUI[] {
+function getInitialItems(state: CheckoutState): CartResponse[] {
   if (state.checkedItems?.length) {
     return state.checkedItems.map((i) => ({ ...i, checked: true }));
   }
@@ -44,7 +44,7 @@ export default function PaymentPage() {
   const location = useLocation();
   const checkoutState = (location.state as CheckoutState) ?? {};
 
-  const [items, setItems] = useState<CartItemUI[]>(() =>
+  const [items, setItems] = useState<CartResponse[]>(() =>
     getInitialItems(checkoutState),
   );
   const [selectedAddressId, setSelectedAddressId] = useState(
