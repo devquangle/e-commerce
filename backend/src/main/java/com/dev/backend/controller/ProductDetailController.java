@@ -20,7 +20,7 @@ public class ProductDetailController {
     private final ProductService productService;
 
     @GetMapping("/products")
-    public ResponseEntity<ResponseData<ProductInfo>> getProductDetail(@RequestParam String slug) {
+    public ResponseEntity<ResponseData<ProductInfo>> getProductDetail(@RequestParam("slug") String slug) {
         ProductInfo item = productService.productInfo(slug);
         return ResponseUtil.success("Lấy sản phẩm thành công", item);
     }

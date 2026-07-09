@@ -18,6 +18,7 @@ import CartCheckoutSidebar from "@/components/user/CartCheckoutSidebar";
 import CartItemCard from "@/modules/user/cart/components/CartItemCard";
 import type { PaymentMethodType } from "@/modules/user/payment/types/payment-method.type";
 import { CheckoutEmptyState } from "@/modules/user/cart/components/CheckoutEmptyState";
+import { useUpdateQuantity } from "@/modules/user/cart/hooks/useCart";
 
 interface CheckoutState {
   checkedItems?: CartResponse[];
@@ -57,14 +58,23 @@ export default function PaymentPage() {
     checkoutState.paymentMethod ?? "cod",
   );
 
+  const updateQuantityMutation = useUpdateQuantity();
+
   const updateQuantity = (cartItemId: number, delta: number) => {
-    setItems((prev) =>
-      prev.map((i) =>
-        i.cartItemId === cartItemId
-          ? { ...i, quantity: Math.max(1, i.quantity + delta) }
-          : i
-      )
-    );
+    const item = items.find((i) => i.cartItemId === cartItemId);
+    if (!item) return;
+    
+    const newQuantity = Math.max(1, item.quantity + delta);
+    if (newQuantity !== item.quantity) {
+      // Cập nhật giao diện cục bộ
+      setItems((prev) =>
+        prev.map((i) =>
+          i.cartItemId === cartItemId ? { ...i, quantity: newQuantity } : i
+        )
+      );
+      // Gọi API cập nhật lên server
+      updateQuantityMutation.mutate({ cartItemId, quantity: newQuantity });
+    }
   };
 
   const {

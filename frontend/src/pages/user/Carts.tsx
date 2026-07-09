@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { type CartResponse } from "@/modules/user/cart/types/cart.type";
 
-import { showErrorToast, showSuccessToast } from "@/utils/toastUtil";
+import {  showInfoToast, showSuccessToast } from "@/utils/toastUtil";
 import { PriceBreakdown } from "@/components/user/PriceBreakdown";
 import { CartItemsToolbar } from "@/modules/user/cart/components/CartItemsToolbar";
 import CartItemCard from "@/modules/user/cart/components/CartItemCard";
@@ -109,7 +109,7 @@ export default function Carts() {
 
   const handleDeleteSelectedClick = () => {
     if (selectedItems.length === 0) {
-      showErrorToast("Vui lòng chọn ít nhất một sản phẩm để xóa");
+      showInfoToast("Vui lòng chọn ít nhất một sản phẩm để xóa");
       return;
     }
     setIsDeleteModalOpen(true);

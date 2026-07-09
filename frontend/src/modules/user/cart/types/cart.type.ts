@@ -12,6 +12,13 @@ export interface CartItemResponse {
   productId: number;
 }
 
+
+export interface CartItemRequest {
+  quantity: number;
+  productId: number;
+}
+
+
 export interface ProductResponse {
   productId: number;
   name: string;

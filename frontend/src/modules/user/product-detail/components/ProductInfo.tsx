@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Star, Minus, Plus, ShoppingCart, Heart } from "lucide-react";
 import type { ProductResponse } from "../types/product-detail.type";
 import type { ProductReviewResponse } from "../types/product-review.type";
+import { useAddToCart } from "@/modules/user/cart/hooks/useCart";
+import { showSuccessToast, showErrorToast } from "@/utils/toastUtil";
 
 interface ProductInfoProps {
   product: Partial<ProductResponse>;
@@ -10,9 +12,30 @@ interface ProductInfoProps {
 
 export default function ProductInfo({ product, review }: ProductInfoProps) {
   const [quantity, setQuantity] = useState(1);
+  const addToCartMutation = useAddToCart();
 
   const handleDecrease = () => setQuantity((prev) => Math.max(1, prev - 1));
   const handleIncrease = () => setQuantity((prev) => prev + 1);
+
+  const handleAddToCart = () => {
+    const productId = (product as any).id || (product as any).productId;
+    if (!productId) {
+      showErrorToast("Không tìm thấy mã sản phẩm");
+      return;
+    }
+
+    addToCartMutation.mutate(
+      { productId, quantity },
+      {
+        onSuccess: () => {
+          showSuccessToast("Đã thêm sản phẩm vào giỏ hàng");
+        },
+        onError: (error: any) => {
+          showErrorToast(error.message || "Thêm vào giỏ hàng thất bại");
+        },
+      }
+    );
+  };
 
   const price = product.price || 0;
   const discountPercent = product.discountValue || 0;
@@ -100,9 +123,13 @@ export default function ProductInfo({ product, review }: ProductInfoProps) {
 
         {/* Action Buttons Row */}
         <div className="flex gap-4 w-full items-center">
-          <button className="cursor-pointer h-12 flex-1 bg-red-50 hover:bg-red-100 text-red-600 text-sm font-semibold rounded-xl transition-all flex items-center justify-center gap-2 border border-red-100">
+          <button 
+            onClick={handleAddToCart}
+            disabled={addToCartMutation.isPending}
+            className={`cursor-pointer h-12 flex-1 bg-red-50 hover:bg-red-100 text-red-600 text-sm font-semibold rounded-xl transition-all flex items-center justify-center gap-2 border border-red-100 ${addToCartMutation.isPending ? 'opacity-70' : ''}`}
+          >
             <ShoppingCart size={18} strokeWidth={2} />
-            <span>Thêm vào giỏ</span>
+            <span>{addToCartMutation.isPending ? "Đang thêm..." : "Thêm vào giỏ"}</span>
           </button>
           
           <button className="cursor-pointer h-12 flex-1 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-xl transition-all shadow-sm">

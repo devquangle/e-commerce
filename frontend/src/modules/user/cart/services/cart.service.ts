@@ -2,6 +2,7 @@ import { apiAuth } from "@/configs/axios";
 import type { ApiResponse } from "@/types/api-response";
 import type {
   CartCountResponse,
+  CartItemRequest,
   CartItemResponse,
   CartResponse,
 } from "../types/cart.type";
@@ -15,14 +16,12 @@ const CartService = {
     console.log(res.data.data);
     return res.data.data;
   },
-  async addToCart(productId: number, quantity: number) {
+  async addToCart(data: CartItemRequest) {
     const res = await apiAuth.post<ApiResponse<CartItemResponse>>(
       "/api/v1/cart",
-      {
-        productId,
-        quantity,
-      },
+      data,
     );
+
     if (!res.data.success || !res.data.data) {
       throw new Error(res.data.message || "Add to cart failed");
     }

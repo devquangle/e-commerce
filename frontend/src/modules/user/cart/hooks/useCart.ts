@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import CartService from "../services/cart.service";
 import { useAuth } from "@/context/useAuth";
-import type { CartCountResponse, CartResponse } from "../types/cart.type";
+import type { CartCountResponse, CartResponse, CartItemRequest } from "../types/cart.type";
 
 export const useCartCount = () => {
   const { isInitialized, userInfo } = useAuth();
@@ -13,26 +13,28 @@ export const useCartCount = () => {
 };
 
 export const useCartData = () => {
+  const queryClient = useQueryClient();
   const { isInitialized, userInfo } = useAuth();
   return useQuery<CartResponse[]>({
     queryKey: ["cart", userInfo?.code],
-    queryFn: () => CartService.getCartItems(),
-    enabled: isInitialized && !!userInfo,
-    structuralSharing: (oldData, newData) => {
-      const oldCart = oldData as CartResponse[] | undefined;
-      const newCart = newData as CartResponse[];
-
-      if (!oldCart) return newCart;
-
+    queryFn: async () => {
+      const data = await CartService.getCartItems();
+      
+      const currentCache = queryClient.getQueryData<CartResponse[]>([
+        "cart", 
+        userInfo?.code
+      ]);
+      
       const checkedMap = new Map(
-        oldCart.map((item) => [item.cartItemId, item.checked]),
+        currentCache?.map((item) => [item.cartItemId, item.checked]) || []
       );
 
-      return newCart.map((item) => ({
+      return data.map((item) => ({
         ...item,
-        checked: checkedMap.get(item.cartItemId) ?? item.checked,
+        checked: checkedMap.get(item.cartItemId) ?? false,
       }));
     },
+    enabled: isInitialized && !!userInfo,
   });
 };
 
@@ -126,13 +128,7 @@ export const useAddToCart = () => {
   const queryClient = useQueryClient();
   const { userInfo } = useAuth();
   return useMutation({
-    mutationFn: ({
-      productId,
-      quantity,
-    }: {
-      productId: number;
-      quantity: number;
-    }) => CartService.addToCart(productId, quantity),
+    mutationFn: (data: CartItemRequest) => CartService.addToCart(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cart", userInfo?.code] });
       queryClient.invalidateQueries({

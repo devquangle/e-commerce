@@ -3,13 +3,7 @@ package com.dev.backend.mapper;
 import com.dev.backend.dto.product.*;
 import com.dev.backend.dto.productdetail.ProductInfo;
 import com.dev.backend.entity.*;
-import com.dev.backend.service.ImageService;
-import com.dev.backend.service.OrderItemService;
-import com.dev.backend.service.ProductAuthorService;
-import com.dev.backend.service.ProductGenreService;
-import com.dev.backend.service.PromotionProductService;
-import com.dev.backend.service.PublisherService;
-import com.dev.backend.service.SeriesService;
+
 
 import lombok.RequiredArgsConstructor;
 
