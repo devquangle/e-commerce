@@ -62,3 +62,8 @@ app:
   google:
     books:
       api-key: ${GOOGLE_BOOK_API_KEY}
+  ghn:
+    token: ${GHN_TOKEN}
+    shop-id: ${GHN_SHOP_ID}
+    master-data-url: ${GHN_MASTER_DATA_URL}
+    shipping-fee-url: ${GHN_SHIPPING_FEE_URL}    

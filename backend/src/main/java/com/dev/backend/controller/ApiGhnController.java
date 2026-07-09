@@ -42,5 +42,6 @@ public class ApiGhnController {
         List<WardDTO> wardDTOs = ghnService.getWards(districtBean.getDistrictId());
         return ResponseUtil.success("Lấy danh sách phường xã thành công", wardDTOs);
     }
+    
 
 }

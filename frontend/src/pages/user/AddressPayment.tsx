@@ -14,8 +14,7 @@ import Loading from "@/components/common/Loading";
 import { MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-
-const STORAGE_KEY = "payment_selected_address_id";
+import { PAYMENT_ADDRESS_STORAGE_KEY } from "@/types/checkout.type";
 
 export default function AddressPayment() {
   const navigate = useNavigate();
@@ -31,14 +30,9 @@ export default function AddressPayment() {
   const [selectedAddress, setSelectedAddress] =
     useState<AddressResponse | null>(null);
 
-  const savedId = Number(localStorage.getItem(STORAGE_KEY));
-  const initialId =
-    addresses.find((a) => a.id === savedId)?.id ??
-    addresses.find((a) => a.default)?.id ??
-    addresses[0]?.id;
 
   const handleSelect = (id: number) => {
-    localStorage.setItem(STORAGE_KEY, String(id));
+    localStorage.setItem(PAYMENT_ADDRESS_STORAGE_KEY, String(id));
     navigate("/payment");
   };
 
@@ -91,7 +85,7 @@ export default function AddressPayment() {
 
   return (
     <>
-      <Container className="max-w-7xl px-4 md:px-6 py-6 md:py-10">
+      <Container className="max-w-7xl p-2 my-6">
         <div className="flex items-center gap-2 mb-6">
           <MapPin size={24} className="text-blue-600" />
           <h1 className="text-xl font-bold text-slate-800">
@@ -174,4 +168,3 @@ export default function AddressPayment() {
   );
 }
 
-export { STORAGE_KEY as PAYMENT_ADDRESS_STORAGE_KEY };
