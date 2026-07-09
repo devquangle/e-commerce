@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dev.backend.dto.cart.CartCountResponse;
+import com.dev.backend.dto.cart.CartItemQuantity;
 import com.dev.backend.dto.cart.CartItemRequest;
 import com.dev.backend.dto.cart.CartItemResponse;
 import com.dev.backend.dto.cart.CartResponse;
@@ -19,7 +20,9 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
@@ -37,10 +40,19 @@ public class CartController {
     }
 
     @PostMapping
-    public ResponseEntity<ResponseData<Void>> addToCart(@RequestBody CartItemRequest cartItemRequest,
+    public ResponseEntity<ResponseData<CartItemResponse>> addToCart(@RequestBody CartItemRequest cartItemRequest,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        cartItemService.addToCart(cartItemRequest, userDetails.getId());
-        return ResponseUtil.success("Lấy danh sách sản phẩm trong giỏ hàng thành công", null);
+        CartItemResponse data = cartItemService.addToCart(cartItemRequest, userDetails.getId());
+        return ResponseUtil.success("Lấy danh sách sản phẩm trong giỏ hàng thành công", data);
+    }
+
+    @PutMapping
+    public ResponseEntity<ResponseData<CartItemResponse>> updaQuantity(@PathVariable("cartItemId") Integer cartItemId,
+            @RequestBody CartItemQuantity cartItemQuantity, @RequestBody CartItemRequest cartItemRequest,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        CartItemResponse data = cartItemService.updateQuantity(cartItemId, cartItemQuantity.getQuantity(),
+                userDetails.getId());
+        return ResponseUtil.success("Lấy danh sách sản phẩm trong giỏ hàng thành công", data);
     }
 
     @GetMapping("/count")
