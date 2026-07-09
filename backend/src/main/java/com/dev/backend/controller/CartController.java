@@ -32,14 +32,14 @@ public class CartController {
     @GetMapping
     public ResponseEntity<ResponseData<List<CartResponse>>> getCart(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        List<CartResponse> items = cartItemService.getCartByUserId(userDetails);
+        List<CartResponse> items = cartItemService.getCartByUserId(userDetails.getId());
         return ResponseUtil.success("Lấy danh sách sản phẩm trong giỏ hàng thành công", items);
     }
 
     @PostMapping
-    public ResponseEntity<ResponseData<Void>> saveCartItem(@RequestBody CartItemRequest cartItemRequest,
+    public ResponseEntity<ResponseData<Void>> addToCart(@RequestBody CartItemRequest cartItemRequest,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        cartItemService.saveCartItem(cartItemRequest, userDetails);
+        cartItemService.addToCart(cartItemRequest, userDetails.getId());
         return ResponseUtil.success("Lấy danh sách sản phẩm trong giỏ hàng thành công", null);
     }
 
@@ -47,7 +47,7 @@ public class CartController {
     public ResponseEntity<ResponseData<CartCountResponse>> getCartCount(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        CartCountResponse count = cartItemService.getCountCartByUserId(userDetails);
+        CartCountResponse count = cartItemService.getCountCartByUserId(userDetails.getId());
         return ResponseUtil.success("Lấy số lượng sản phẩm trong giỏ hàng thành công", count);
     }
 

@@ -3,9 +3,7 @@ import Container from "@/components/common/Container";
 import { ShoppingCart } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  type CartResponse,
-} from "@/modules/user/cart/types/cart.type";
+import { type CartResponse } from "@/modules/user/cart/types/cart.type";
 
 import { showErrorToast, showSuccessToast } from "@/utils/toastUtil";
 import { PriceBreakdown } from "@/components/user/PriceBreakdown";
@@ -15,11 +13,11 @@ import DeleteCartItemsModal from "@/modules/user/cart/components/DeleteCartItems
 import DeleteCartItemModal from "@/modules/user/cart/components/DeleteCartItemModal";
 import {
   useCartData,
-  useSaveCartItem,
   useToggleCartItem,
   useToggleAllCartItems,
   useRemoveCartItem,
   useRemoveCartItems,
+  useUpdateQuantity,
 } from "@/modules/user/cart/hooks/useCart";
 import { CheckoutEmptyState } from "@/modules/user/cart/components/CheckoutEmptyState";
 import Loading from "@/components/common/Loading";
@@ -31,8 +29,8 @@ export default function Carts() {
   const [itemToDelete, setItemToDelete] = useState<CartResponse | null>(null);
 
   const { data: cartData, isPending: isCartPending } = useCartData();
-  
-  const saveItemMutation = useSaveCartItem();
+
+  const updateQuantityMutation = useUpdateQuantity();
   const toggleItemMutation = useToggleCartItem();
   const toggleAllMutation = useToggleAllCartItems();
   const removeItemMutation = useRemoveCartItem();
@@ -90,10 +88,14 @@ export default function Carts() {
     toggleItemMutation.mutate({ cartItemId, checked: !currentChecked });
   };
 
-  const updateQuantity = (productId: number, currentQuantity: number, delta: number) => {
+  const updateQuantity = (
+    cartItemId: number,
+    currentQuantity: number,
+    delta: number,
+  ) => {
     const newQuantity = Math.max(1, currentQuantity + delta);
     if (newQuantity !== currentQuantity) {
-      saveItemMutation.mutate({ productId, quantity: newQuantity });
+      updateQuantityMutation.mutate({ cartItemId, quantity: newQuantity });
     }
   };
 
@@ -101,7 +103,7 @@ export default function Carts() {
     removeItemMutation.mutate(cartItemId, {
       onSuccess: () => {
         showSuccessToast("Đã xóa sản phẩm khỏi giỏ hàng");
-      }
+      },
     });
   };
 
@@ -119,7 +121,7 @@ export default function Carts() {
       onSuccess: () => {
         setIsDeleteModalOpen(false);
         showSuccessToast("Đã xóa các sản phẩm đã chọn");
-      }
+      },
     });
   };
 
@@ -168,7 +170,7 @@ export default function Carts() {
                   item={item}
                   onToggle={() => toggleItem(item.cartItemId, item.checked)}
                   onUpdateQuantity={(delta) =>
-                    updateQuantity(item.product.productId, item.quantity, delta)
+                    updateQuantity(item.cartItemId, item.quantity, delta)
                   }
                   onRemove={() => setItemToDelete(item)}
                 />

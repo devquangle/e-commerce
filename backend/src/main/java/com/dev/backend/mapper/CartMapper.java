@@ -22,6 +22,7 @@ public class CartMapper {
         response.setChecked(false);
         return response;
     }
+
     public CartItemResponse toCartItemDTO(CartItem cartItem) {
         if (cartItem == null) {
             return null;
@@ -30,7 +31,6 @@ public class CartMapper {
         response.setCartItemId(cartItem.getId());
         response.setQuantity(cartItem.getQuantity());
         response.setProductId(cartItem.getProduct().getId());
-        response.setChecked(true);
         return response;
     }
 }

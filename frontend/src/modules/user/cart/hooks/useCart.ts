@@ -16,21 +16,22 @@ export const useCartData = () => {
   const { isInitialized, userInfo } = useAuth();
   return useQuery<CartResponse[]>({
     queryKey: ["cart", userInfo?.code],
-    queryFn: CartService.getCartItems as any,
+    queryFn: () => CartService.getCartItems(),
     enabled: isInitialized && !!userInfo,
     structuralSharing: (oldData, newData) => {
-      if (!oldData) return newData as CartResponse[];
-      const oldArray = oldData as CartResponse[];
-      const newArray = newData as CartResponse[];
-      return newArray.map((newItem) => {
-        const oldItem = oldArray.find(
-          (o) => o.cartItemId === newItem.cartItemId
-        );
-        return {
-          ...newItem,
-          checked: oldItem !== undefined ? oldItem.checked : newItem.checked,
-        };
-      });
+      const oldCart = oldData as CartResponse[] | undefined;
+      const newCart = newData as CartResponse[];
+
+      if (!oldCart) return newCart;
+
+      const checkedMap = new Map(
+        oldCart.map((item) => [item.cartItemId, item.checked]),
+      );
+
+      return newCart.map((item) => ({
+        ...item,
+        checked: checkedMap.get(item.cartItemId) ?? item.checked,
+      }));
     },
   });
 };
@@ -121,7 +122,7 @@ export const useRemoveCartItems = () => {
   });
 };
 
-export const useSaveCartItem = () => {
+export const useAddToCart = () => {
   const queryClient = useQueryClient();
   const { userInfo } = useAuth();
   return useMutation({
@@ -131,12 +132,54 @@ export const useSaveCartItem = () => {
     }: {
       productId: number;
       quantity: number;
-    }) => CartService.saveCartItem(productId, quantity),
+    }) => CartService.addToCart(productId, quantity),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cart", userInfo?.code] });
       queryClient.invalidateQueries({
         queryKey: ["cartCount", userInfo?.code],
       });
+    },
+  });
+};
+
+export const useUpdateQuantity = () => {
+  const queryClient = useQueryClient();
+  const { userInfo } = useAuth();
+  return useMutation({
+    mutationFn: ({
+      cartItemId,
+      quantity,
+    }: {
+      cartItemId: number;
+      quantity: number;
+    }) => CartService.updateQuantity(cartItemId, quantity),
+    onMutate: async ({ cartItemId, quantity }) => {
+      await queryClient.cancelQueries({ queryKey: ["cart", userInfo?.code] });
+      const previousCart = queryClient.getQueryData<CartResponse[]>([
+        "cart",
+        userInfo?.code,
+      ]);
+
+      if (previousCart) {
+        queryClient.setQueryData<CartResponse[]>(
+          ["cart", userInfo?.code],
+          (old) => {
+            return old?.map((item) =>
+              item.cartItemId === cartItemId ? { ...item, quantity } : item,
+            );
+          },
+        );
+      }
+
+      return { previousCart };
+    },
+    onError: (err, newQuantity, context) => {
+      if (context?.previousCart) {
+        queryClient.setQueryData(["cart", userInfo?.code], context.previousCart);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["cart", userInfo?.code] });
     },
   });
 };

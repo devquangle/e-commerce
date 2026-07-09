@@ -7,14 +7,17 @@ import com.dev.backend.dto.cart.CartItemRequest;
 import com.dev.backend.dto.cart.CartItemResponse;
 import com.dev.backend.dto.cart.CartResponse;
 import com.dev.backend.entity.CartItem;
-import com.dev.backend.security.CustomUserDetails;
 
 public interface CartItemService {
-    List<CartResponse> getCartByUserId(CustomUserDetails userDetails);
+    List<CartResponse> getCartByUserId(Integer userId);
 
-    CartCountResponse getCountCartByUserId(CustomUserDetails userDetails);
+    CartCountResponse getCountCartByUserId(Integer userId);
 
-    void saveCartItem(CartItemRequest cartItemRequest, CustomUserDetails userDetails);
+    CartItem findByUserIdAndProductId(Integer userId, Integer productId);
 
-    CartItem findCartItem( Integer userId,Integer productId);
+    CartItem findByIdAndUserId(Integer cartItemId, Integer userId);
+
+    CartItemResponse addToCart(CartItemRequest cartItemRequest, Integer userId);
+
+    CartItemResponse updateQuantity(Integer cartItemId, Integer quantity, Integer userId);
 }

@@ -19,6 +19,10 @@ public class CustomUserDetails implements UserDetails {
     @Getter
     private final Set<String> permissions;
 
+    public Integer getId() {
+        return user.getId();
+    }
+
     public CustomUserDetails(User user) {
         this.user = user;
 
@@ -29,9 +33,9 @@ public class CustomUserDetails implements UserDetails {
         if (user.getRoles() == null)
             return;
 
-
         for (Role role : user.getRoles()) {
-            if (role == null) continue;
+            if (role == null)
+                continue;
 
             String code = role.getCode();
             // Fallback for old database records that haven't been wiped
@@ -41,7 +45,7 @@ public class CustomUserDetails implements UserDetails {
 
             if (code != null && !code.trim().isEmpty()) {
                 roles.add(code);
-                
+
                 permissions.add(code);
                 authorities.add(new SimpleGrantedAuthority(code));
             }
@@ -53,7 +57,7 @@ public class CustomUserDetails implements UserDetails {
         this.roles = new HashSet<>(roles);
         this.permissions = new HashSet<>(permissions);
         this.authorities = new HashSet<>();
-        
+
         for (String role : roles) {
             authorities.add(new SimpleGrantedAuthority("ROLE_" + role));
         }

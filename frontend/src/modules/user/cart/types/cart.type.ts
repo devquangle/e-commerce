@@ -4,6 +4,14 @@ export interface CartResponse {
   product: ProductResponse;
   checked: boolean;
 }
+
+
+export interface CartItemResponse {
+  cartItemId: number;
+  quantity: number;
+  productId: number;
+}
+
 export interface ProductResponse {
   productId: number;
   name: string;
