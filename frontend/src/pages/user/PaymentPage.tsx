@@ -16,6 +16,8 @@ import CartItemCard from "@/modules/user/cart/components/CartItemCard";
 import type { PaymentMethodType } from "@/modules/user/payment/types/payment-method.type";
 import { CheckoutEmptyState } from "@/modules/user/cart/components/CheckoutEmptyState";
 import { useUpdateQuantity, useCartData } from "@/modules/user/cart/hooks/useCart";
+import { useAddresses } from "@/modules/user/address/hooks/useAddress";
+import { useShippingFee } from "@/modules/user/payment/hooks/useGhn";
 import Loading from "@/components/common/Loading";
 
 const mobilePrimaryButtonClass =
@@ -98,8 +100,28 @@ export default function PaymentPage() {
       )
     : 0;
 
-  // Giả lập phí vận chuyển: 30.000đ khi có địa chỉ
-  const shippingFee = selectedAddressId ? 30000 : 0;
+  const { data: addresses = [] } = useAddresses();
+  const selectedAddress = useMemo(
+    () => addresses.find((a) => a.id === selectedAddressId) ?? null,
+    [addresses, selectedAddressId]
+  );
+
+  const totalWeight = useMemo(
+    () => items.reduce((sum, i) => sum + (i.product.weight || 0) * i.quantity, 0),
+    [items]
+  );
+
+  const { data: fetchedShippingFee } = useShippingFee(
+    selectedAddress && selectedAddress.districtId && selectedAddress.wardCode
+      ? {
+          toDistrictId: selectedAddress.districtId,
+          toWardCode: selectedAddress.wardCode,
+          weight: totalWeight,
+        }
+      : null
+  );
+
+  const shippingFee = fetchedShippingFee || 0;
 
   const total = subtotal - productDiscount - voucherDiscount + shippingFee;
 

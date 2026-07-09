@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.dev.backend.dto.ghn.CalculateFeeRequest;
@@ -27,8 +28,10 @@ import com.dev.backend.dto.ghn.WardDTO;
 import com.dev.backend.service.GHNService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 @Service
+@Log4j2
 @RequiredArgsConstructor
 public class GHNServiceImpl implements GHNService {
     @Value("${ghn.token}")
@@ -37,7 +40,7 @@ public class GHNServiceImpl implements GHNService {
     @Value("${ghn.shop-id}")
     private String shopId;
 
-    @Value("${ghn.url}")
+    @Value("${ghn.master-data-url}")
     private String url;
 
     @Value("${ghn.shipping-fee-url}")
@@ -49,6 +52,8 @@ public class GHNServiceImpl implements GHNService {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Token", token);
         headers.set("ShopId", shopId);
+        log.info("Token: {}", token);
+        log.info("ShopId: {}", shopId);
         headers.setContentType(MediaType.APPLICATION_JSON);
         return headers;
     }
@@ -176,7 +181,11 @@ public class GHNServiceImpl implements GHNService {
             body.put("to_district_id", request.getToDistrictId());
             body.put("to_ward_code", request.getToWardCode());
             body.put("weight", Math.round(request.getWeight()));
+            log.info("toDistrictId: {}", request.getToDistrictId());
+            log.info("toWardCode: {}", request.getToWardCode());
+            log.info("weight: {}", Math.round(request.getWeight()));
 
+            log.info("shippingFeeUrl: {}", shippingFeeUrl);
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers());
 
             ResponseEntity<GHNCalculateFeeResponse<TotalFeeResponse>> response = restTemplate.exchange(
@@ -193,10 +202,11 @@ public class GHNServiceImpl implements GHNService {
                 return response.getBody().getData().getTotal();
             }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+        } catch (HttpClientErrorException e) {
+    log.error("Status: {}", e.getStatusCode());
+    log.error("Response: {}", e.getResponseBodyAsString());
+    throw e;
+}
         return 30000;
     }
 

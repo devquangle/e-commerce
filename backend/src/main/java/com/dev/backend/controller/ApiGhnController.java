@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dev.backend.bean.DistrictBean;
 import com.dev.backend.bean.ProvinceBean;
+import com.dev.backend.dto.ghn.CalculateFeeRequest;
 import com.dev.backend.dto.ghn.DistrictDTO;
 import com.dev.backend.dto.ghn.ProvinceDTO;
 import com.dev.backend.dto.ghn.WardDTO;
@@ -42,6 +43,12 @@ public class ApiGhnController {
         List<WardDTO> wardDTOs = ghnService.getWards(districtBean.getDistrictId());
         return ResponseUtil.success("Lấy danh sách phường xã thành công", wardDTOs);
     }
-    
+
+    @PostMapping("/public/ghn/shipping-fee")
+    public ResponseEntity<ResponseData<Integer>> getCalculateFee(
+            @RequestBody CalculateFeeRequest calculateFeeRequest) {
+        Integer fee = ghnService.calculateFee(calculateFeeRequest);
+        return ResponseUtil.success("Tính phí vận chuyển thành công", fee);
+    }
 
 }
