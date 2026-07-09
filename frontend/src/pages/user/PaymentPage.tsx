@@ -9,7 +9,7 @@ import {
 import { showSuccessToast, showWarningToast } from "@/utils/toastUtil";
 import { Package } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { getSelectedAddressId, type CouponForm } from "@/types/checkout.type";
 import CartCheckoutSidebar from "@/components/user/CartCheckoutSidebar";
 import CartItemCard from "@/modules/user/cart/components/CartItemCard";
@@ -53,13 +53,13 @@ export default function PaymentPage() {
   const {
     register,
     setValue,
-    watch,
+    control,
     formState: { errors },
   } = useForm<CouponForm>({
     defaultValues: { couponCode: "" },
   });
 
-  const couponInput = watch("couponCode");
+  const couponInput = useWatch({ control, name: "couponCode" });
 
   useEffect(() => {
     setSelectedAddressId(getSelectedAddressId());

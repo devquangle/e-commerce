@@ -35,8 +35,7 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    @Enumerated(EnumType.STRING)
-    private OrderStatus orderStatus;
+
 
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
@@ -63,6 +62,8 @@ public class Order {
     private OrderStatus status;
     @Column(nullable = false)
     private String street;
+
+    private String noted;
 
     private String cancel;
 

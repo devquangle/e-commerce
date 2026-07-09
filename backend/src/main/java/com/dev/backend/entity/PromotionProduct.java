@@ -30,6 +30,8 @@ public class PromotionProduct {
 
     private Integer soldQuantity;
     
+    private Integer reservedQuantity;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "promotion_id")
     private Promotion promotion;
