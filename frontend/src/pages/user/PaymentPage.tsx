@@ -1,21 +1,20 @@
 import Container from "@/components/common/Container";
 
-import {
-  CheckoutMobileBar,
-} from "@/components/user/CheckoutUI";
-import {
-  type CouponOption,
-} from "@/modules/user/cart/types/cart.type";
+import { CheckoutMobileBar } from "@/components/user/CheckoutUI";
+import { type CouponOption } from "@/modules/user/cart/types/cart.type";
 import { showSuccessToast, showWarningToast } from "@/utils/toastUtil";
 import { Package } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { getSelectedAddressId, type CouponForm } from "@/types/checkout.type";
 import CartCheckoutSidebar from "@/components/user/CartCheckoutSidebar";
 import CartItemCard from "@/modules/user/cart/components/CartItemCard";
 import type { PaymentMethodType } from "@/modules/user/payment/types/payment-method.type";
 import { CheckoutEmptyState } from "@/modules/user/cart/components/CheckoutEmptyState";
-import { useUpdateQuantity, useCartData } from "@/modules/user/cart/hooks/useCart";
+import {
+  useUpdateQuantity,
+  useCartData,
+} from "@/modules/user/cart/hooks/useCart";
 import { useAddresses } from "@/modules/user/address/hooks/useAddress";
 import { useShippingFee } from "@/modules/user/payment/hooks/useGhn";
 import Loading from "@/components/common/Loading";
@@ -32,9 +31,7 @@ export default function PaymentPage() {
     return fetchedItems.filter((item) => item.product != null && item.checked);
   }, [cartData]);
 
-  const [selectedAddressId, setSelectedAddressId] = useState(
-    () => getSelectedAddressId(),
-  );
+  const [selectedAddressId] = useState(() => getSelectedAddressId());
   const [appliedCoupon, setAppliedCoupon] = useState<CouponOption | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodType>("cod");
 
@@ -43,7 +40,7 @@ export default function PaymentPage() {
   const updateQuantity = (cartItemId: number, delta: number) => {
     const item = items.find((i) => i.cartItemId === cartItemId);
     if (!item) return;
-    
+
     const newQuantity = Math.max(1, item.quantity + delta);
     if (newQuantity !== item.quantity) {
       updateQuantityMutation.mutate({ cartItemId, quantity: newQuantity });
@@ -60,10 +57,6 @@ export default function PaymentPage() {
   });
 
   const couponInput = useWatch({ control, name: "couponCode" });
-
-  useEffect(() => {
-    setSelectedAddressId(getSelectedAddressId());
-  }, []);
 
   const selectedCount = useMemo(
     () => items.reduce((sum, i) => sum + i.quantity, 0),
@@ -103,12 +96,13 @@ export default function PaymentPage() {
   const { data: addresses = [] } = useAddresses();
   const selectedAddress = useMemo(
     () => addresses.find((a) => a.id === selectedAddressId) ?? null,
-    [addresses, selectedAddressId]
+    [addresses, selectedAddressId],
   );
 
   const totalWeight = useMemo(
-    () => items.reduce((sum, i) => sum + (i.product.weight || 0) * i.quantity, 0),
-    [items]
+    () =>
+      items.reduce((sum, i) => sum + (i.product.weight || 0) * i.quantity, 0),
+    [items],
   );
 
   const { data: fetchedShippingFee } = useShippingFee(
@@ -118,7 +112,7 @@ export default function PaymentPage() {
           toWardCode: selectedAddress.wardCode,
           weight: totalWeight,
         }
-      : null
+      : null,
   );
 
   const shippingFee = fetchedShippingFee || 0;
@@ -175,7 +169,9 @@ export default function PaymentPage() {
                       key={item.cartItemId}
                       item={item}
                       onToggle={() => {}}
-                      onUpdateQuantity={(delta) => updateQuantity(item.cartItemId, delta)}
+                      onUpdateQuantity={(delta) =>
+                        updateQuantity(item.cartItemId, delta)
+                      }
                       showRemove={false}
                       readonly
                     />
@@ -183,10 +179,12 @@ export default function PaymentPage() {
                 </div>
 
                 <div className="pt-5 mt-2 border-t border-slate-100">
-                  <h3 className="text-sm font-bold text-slate-800 mb-2">Ghi chú đơn hàng</h3>
+                  <h3 className="text-sm font-bold text-slate-800 mb-2">
+                    Ghi chú đơn hàng
+                  </h3>
                   <textarea
                     placeholder="Nhập lời nhắn cho người bán (tùy chọn)..."
-                    className="w-full rounded-xl border border-slate-200 p-3 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition resize-none min-h-[80px]"
+                    className="w-full rounded-xl border border-slate-200 p-3 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition resize-none min-h-20"
                   />
                   <p className="text-xs text-slate-400 mt-1.5 flex items-center gap-1.5">
                     <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-400"></span>
