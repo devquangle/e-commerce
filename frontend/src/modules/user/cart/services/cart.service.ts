@@ -42,13 +42,13 @@ const CartService = {
   },
 
   async removeCartItem(cartItemId: number) {
-    const res = await apiAuth.delete<ApiResponse<any>>(
+    const res = await apiAuth.delete<ApiResponse<void>>(
       `/api/v1/cart/${cartItemId}`,
     );
     return res.data;
   },
   async removeCartItems(cartItemIds: number[]) {
-    const res = await apiAuth.post<ApiResponse<any>>(
+    const res = await apiAuth.post<ApiResponse<void>>(
       `/api/v1/cart/remove-multiple`,
       { cartItemIds },
     );

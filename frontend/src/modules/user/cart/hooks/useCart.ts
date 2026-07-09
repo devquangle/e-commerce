@@ -100,7 +100,30 @@ export const useRemoveCartItem = () => {
   const { userInfo } = useAuth();
   return useMutation({
     mutationFn: (cartItemId: number) => CartService.removeCartItem(cartItemId),
-    onSuccess: () => {
+    onMutate: async (cartItemId) => {
+      await queryClient.cancelQueries({ queryKey: ["cart", userInfo?.code] });
+      const previousCart = queryClient.getQueryData<CartResponse[]>([
+        "cart",
+        userInfo?.code,
+      ]);
+
+      if (previousCart) {
+        queryClient.setQueryData<CartResponse[]>(
+          ["cart", userInfo?.code],
+          (old) => {
+            return old?.filter((item) => item.cartItemId !== cartItemId);
+          },
+        );
+      }
+
+      return { previousCart };
+    },
+    onError: (err, cartItemId, context) => {
+      if (context?.previousCart) {
+        queryClient.setQueryData(["cart", userInfo?.code], context.previousCart);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["cart", userInfo?.code] });
       queryClient.invalidateQueries({
         queryKey: ["cartCount", userInfo?.code],
@@ -115,7 +138,30 @@ export const useRemoveCartItems = () => {
   return useMutation({
     mutationFn: (cartItemIds: number[]) =>
       CartService.removeCartItems(cartItemIds),
-    onSuccess: () => {
+    onMutate: async (cartItemIds) => {
+      await queryClient.cancelQueries({ queryKey: ["cart", userInfo?.code] });
+      const previousCart = queryClient.getQueryData<CartResponse[]>([
+        "cart",
+        userInfo?.code,
+      ]);
+
+      if (previousCart) {
+        queryClient.setQueryData<CartResponse[]>(
+          ["cart", userInfo?.code],
+          (old) => {
+            return old?.filter((item) => !cartItemIds.includes(item.cartItemId));
+          },
+        );
+      }
+
+      return { previousCart };
+    },
+    onError: (err, cartItemIds, context) => {
+      if (context?.previousCart) {
+        queryClient.setQueryData(["cart", userInfo?.code], context.previousCart);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["cart", userInfo?.code] });
       queryClient.invalidateQueries({
         queryKey: ["cartCount", userInfo?.code],

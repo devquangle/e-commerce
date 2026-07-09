@@ -8,6 +8,7 @@ import com.dev.backend.dto.cart.CartCountResponse;
 import com.dev.backend.dto.cart.CartItemRequest;
 import com.dev.backend.dto.cart.CartItemResponse;
 import com.dev.backend.dto.cart.CartResponse;
+import com.dev.backend.dto.cart.DeleteCartItemsRequest;
 import com.dev.backend.entity.CartItem;
 import com.dev.backend.exception.NotFoundException;
 import com.dev.backend.mapper.CartMapper;
@@ -79,6 +80,17 @@ public class CartItemServiceImpl implements CartItemService {
         CartItem cartItem = findByIdAndUserId(cartItemId, userId);
         cartItem.setQuantity(quantity);
         return cartMapper.toCartItemDTO(cartItemRepository.save(cartItem));
+    }
+
+    @Override
+    public void deleteCartItem(Integer cartItemId, Integer userId) {
+       CartItem cartItem= findByIdAndUserId(cartItemId, userId);
+       cartItemRepository.delete(cartItem);
+    }
+
+    @Override
+    public void deleteCartItems(DeleteCartItemsRequest cartItemsRequest, Integer userId) {
+        cartItemRepository.deleteCartItemsByIds(userId, cartItemsRequest.getCartItemIds());       
     }
 
 }

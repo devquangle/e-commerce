@@ -6,6 +6,7 @@ import com.dev.backend.dto.cart.CartCountResponse;
 import com.dev.backend.dto.cart.CartItemRequest;
 import com.dev.backend.dto.cart.CartItemResponse;
 import com.dev.backend.dto.cart.CartResponse;
+import com.dev.backend.dto.cart.DeleteCartItemsRequest;
 import com.dev.backend.entity.CartItem;
 
 public interface CartItemService {
@@ -20,4 +21,8 @@ public interface CartItemService {
     CartItemResponse addToCart(CartItemRequest cartItemRequest, Integer userId);
 
     CartItemResponse updateQuantity(Integer cartItemId, Integer quantity, Integer userId);
+
+    void deleteCartItem(Integer cartItemId, Integer userId);
+
+    void deleteCartItems(DeleteCartItemsRequest cartItemsRequest, Integer userId);
 }
