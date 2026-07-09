@@ -36,8 +36,8 @@ export function PriceBreakdown({
 
   return (
     /* 🌟 ĐPÉD TẠI ĐÂY: Sử dụng class card-custom và giảm space-y xuống space-y-4 cho nhỏ gọn */
-    <div className="card-custom h-full flex flex-col justify-between space-y-4 ">
-      <div className="space-y-4 p-2">
+    <div className="card-custom h-full flex flex-col justify-between space-y-3">
+      <div className="space-y-3 p-1.5">
         {/* Thu nhỏ title từ text-lg xuống text-base */}
         <h2 className="text-base font-bold text-slate-900">Tóm tắt đơn hàng</h2>
 
@@ -131,7 +131,7 @@ export function PriceBreakdown({
         </div>
       </div>
 
-      <div className="space-y-3 pt-4 mt-auto">
+      <div className="space-y-3 pt-3 mt-auto">
         {primaryAction ?? (
           hasSelected ? (
             <button

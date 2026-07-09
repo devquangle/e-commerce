@@ -181,6 +181,18 @@ export default function PaymentPage() {
                     />
                   ))}
                 </div>
+
+                <div className="pt-5 mt-2 border-t border-slate-100">
+                  <h3 className="text-sm font-bold text-slate-800 mb-2">Ghi chú đơn hàng</h3>
+                  <textarea
+                    placeholder="Nhập lời nhắn cho người bán (tùy chọn)..."
+                    className="w-full rounded-xl border border-slate-200 p-3 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition resize-none min-h-[80px]"
+                  />
+                  <p className="text-xs text-slate-400 mt-1.5 flex items-center gap-1.5">
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                    Thông tin ghi chú sẽ được in trên hóa đơn giao hàng.
+                  </p>
+                </div>
               </div>
             )}
           </section>

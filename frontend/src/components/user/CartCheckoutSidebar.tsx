@@ -66,13 +66,14 @@ export default function CartCheckoutSidebar({
 
   return (
     <>
-      <div className="lg:col-span-5 xl:col-span-4 lg:sticky lg:top-24 lg:self-start mb-4 space-y-4">
+      <div className="lg:col-span-5 xl:col-span-4 lg:sticky lg:top-24 lg:self-start mb-4 space-y-3">
         {/* 1. Địa chỉ giao hàng */}
         <ShippingAddress selectedAddress={selectedAddress} />
 
         {/* 2. Áp dụng mã giảm giá */}
         <VoucherApply
           appliedCoupon={appliedCoupon}
+          voucherDiscount={voucherDiscount}
           onRemoveCoupon={onRemoveCoupon}
           onOpenModal={() => setVoucherModalOpen(true)}
         />

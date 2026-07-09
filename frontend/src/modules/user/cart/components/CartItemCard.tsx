@@ -82,6 +82,16 @@ export default function CartItemCard({
                 {product.name}
               </h3>
             </Link>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              {product.quantity > 0 ? (
+                <span className="text-[10px] font-semibold text-green-600 bg-green-50 border border-green-200 px-1.5 py-0.5 rounded-sm">Còn hàng</span>
+              ) : (
+                <span className="text-[10px] font-semibold text-red-600 bg-red-50 border border-red-200 px-1.5 py-0.5 rounded-sm">Hết hàng</span>
+              )}
+              <span className="text-[10px] font-semibold text-blue-600 bg-blue-50 border border-blue-200 px-1.5 py-0.5 rounded-sm flex items-center gap-1">
+                ⚡ Giao nhanh
+              </span>
+            </div>
             <div 
               className={`grid transition-all duration-300 ease-in-out ${
                 showDetails ? "grid-rows-[1fr] opacity-100 mt-1.5" : "grid-rows-[0fr] opacity-0"
@@ -376,6 +386,16 @@ export default function CartItemCard({
                 {product.name}
               </h3>
             </Link>
+            <div className="flex items-center gap-1.5 mt-1">
+              {product.quantity > 0 ? (
+                <span className="text-[9px] font-semibold text-green-600 bg-green-50 border border-green-200 px-1.5 py-0.5 rounded-sm">Còn hàng</span>
+              ) : (
+                <span className="text-[9px] font-semibold text-red-600 bg-red-50 border border-red-200 px-1.5 py-0.5 rounded-sm">Hết hàng</span>
+              )}
+              <span className="text-[9px] font-semibold text-blue-600 bg-blue-50 border border-blue-200 px-1.5 py-0.5 rounded-sm flex items-center gap-1">
+                ⚡ Giao nhanh
+              </span>
+            </div>
             
             <div 
               className={`grid transition-all duration-300 ease-in-out ${
