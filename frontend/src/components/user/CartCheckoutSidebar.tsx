@@ -1,25 +1,22 @@
 import { useState } from "react";
-import { CreditCard } from "lucide-react";
 import type { ReactNode } from "react";
 import type { UseFormRegister, FieldErrors } from "react-hook-form";
 
 import type {
   CouponOption,
-  PaymentMethodType,
 } from "@/modules/user/cart/types/cart.type";
 
 import VoucherModal from "./VoucherModal";
-import { PaymentMethodOptions } from "../../modules/user/payment/components/PaymentMethodOptions";
-
 // Import các sub-component sạch sẽ
 import { ShippingAddress } from "./ShippingAddress";
 import { VoucherApply } from "./VoucherApply";
 import { PriceBreakdown } from "./PriceBreakdown";
 import {
-  MOCK_CHECKOUT_ADDRESSES,
   type CouponForm,
 } from "@/types/checkout.type";
 import PaymentMethod from "@/modules/user/payment/components/PaymentMethod";
+import { useAddresses } from "@/modules/user/address/hooks/useAddress";
+import type { PaymentMethodType } from "@/modules/user/payment/types/payment-method.type";
 
 type CartCheckoutSidebarProps = {
   selectedCount: number;
@@ -62,9 +59,10 @@ export default function CartCheckoutSidebar({
   isCheckoutPage,
 }: CartCheckoutSidebarProps) {
   const [voucherModalOpen, setVoucherModalOpen] = useState(false);
-  const selectedAddress = MOCK_CHECKOUT_ADDRESSES.find(
+  const { data: addresses = [] } = useAddresses();
+  const selectedAddress = addresses.find(
     (a) => a.id === selectedAddressId,
-  );
+  ) ?? null;
 
   return (
     <>

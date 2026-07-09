@@ -3,6 +3,19 @@ import CartService from "../services/cart.service";
 import { useAuth } from "@/context/useAuth";
 import type { CartCountResponse, CartResponse, CartItemRequest } from "../types/cart.type";
 
+const getPersistedCheckedState = (userId: string): Record<number, boolean> => {
+  try {
+    const data = sessionStorage.getItem(`cart_checked_${userId}`);
+    return data ? JSON.parse(data) : {};
+  } catch {
+    return {};
+  }
+};
+
+const persistCheckedState = (userId: string, data: Record<number, boolean>) => {
+  sessionStorage.setItem(`cart_checked_${userId}`, JSON.stringify(data));
+};
+
 export const useCartCount = () => {
   const { isInitialized, userInfo } = useAuth();
   return useQuery<CartCountResponse>({
@@ -19,20 +32,28 @@ export const useCartData = () => {
     queryKey: ["cart", userInfo?.code],
     queryFn: async () => {
       const data = await CartService.getCartItems();
+      const userId = userInfo?.code || "guest";
       
       const currentCache = queryClient.getQueryData<CartResponse[]>([
         "cart", 
         userInfo?.code
       ]);
       
+      const persisted = getPersistedCheckedState(userId);
       const checkedMap = new Map(
         currentCache?.map((item) => [item.cartItemId, item.checked]) || []
       );
 
-      return data.map((item) => ({
-        ...item,
-        checked: checkedMap.get(item.cartItemId) ?? false,
-      }));
+      return data.map((item) => {
+        const isChecked = checkedMap.has(item.cartItemId) 
+          ? checkedMap.get(item.cartItemId) 
+          : (persisted[item.cartItemId] ?? false);
+          
+        return {
+          ...item,
+          checked: isChecked,
+        };
+      });
     },
     enabled: isInitialized && !!userInfo,
   });
@@ -66,13 +87,20 @@ export const useToggleCartItem = () => {
       cartItemId: number;
       checked: boolean;
     }) => {
+      const userId = userInfo?.code || "guest";
       queryClient.setQueryData<CartResponse[]>(
         ["cart", userInfo?.code],
         (oldData) => {
           if (!oldData) return oldData;
-          return oldData.map((item) =>
+          const newData = oldData.map((item) =>
             item.cartItemId === cartItemId ? { ...item, checked } : item,
           );
+          
+          const persisted = getPersistedCheckedState(userId);
+          persisted[cartItemId] = checked;
+          persistCheckedState(userId, persisted);
+          
+          return newData;
         },
       );
     },
@@ -84,11 +112,20 @@ export const useToggleAllCartItems = () => {
   const { userInfo } = useAuth();
   return useMutation({
     mutationFn: async (checked: boolean) => {
+      const userId = userInfo?.code || "guest";
       queryClient.setQueryData<CartResponse[]>(
         ["cart", userInfo?.code],
         (oldData) => {
           if (!oldData) return oldData;
-          return oldData.map((item) => ({ ...item, checked }));
+          const newData = oldData.map((item) => ({ ...item, checked }));
+          
+          const persisted = getPersistedCheckedState(userId);
+          newData.forEach((item) => {
+            persisted[item.cartItemId] = checked;
+          });
+          persistCheckedState(userId, persisted);
+          
+          return newData;
         },
       );
     },

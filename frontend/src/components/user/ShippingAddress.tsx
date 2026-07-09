@@ -1,14 +1,15 @@
-import type { CheckoutAddress } from "@/types/checkout.type";
+
+import type { AddressResponse } from "@/modules/user/address/types/address";
 import { Link } from "react-router-dom";
 
 interface ShippingAddressProps {
-  selectedAddress: CheckoutAddress | undefined;
+  selectedAddress: AddressResponse | null;
 }
 
 export function ShippingAddress({ selectedAddress }: ShippingAddressProps) {
   return (
     <div className="card-custom space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-2">
         <h2 className="text-base font-bold text-slate-900">Giao tới</h2>
         <Link
           to="/address-payment"
@@ -30,7 +31,7 @@ export function ShippingAddress({ selectedAddress }: ShippingAddressProps) {
                 {selectedAddress.phone}
               </span>
               {selectedAddress.default && (
-                <span className="inline-flex ml-auto items-center px-1.5 py-0.5 rounded-[4px] text-[10px] font-bold bg-red-50 text-red-600 border border-red-100">
+                <span className="inline-flex ml-auto items-center px-1.5 py-0.5 rounded-lg text-[10px] font-bold bg-red-50 text-red-600 border border-red-100">
                   Mặc định
                 </span>
               )}

@@ -4,59 +4,37 @@ import {
   CheckoutMobileBar,
 } from "@/components/user/CheckoutUI";
 import {
-  type CartResponse,
   type CouponOption,
-  MOCK_CART_ITEMS,
 } from "@/modules/user/cart/types/cart.type";
 import { showSuccessToast, showWarningToast } from "@/utils/toastUtil";
 import { Package } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { getSelectedAddressId, type CouponForm } from "@/types/checkout.type";
 import CartCheckoutSidebar from "@/components/user/CartCheckoutSidebar";
 import CartItemCard from "@/modules/user/cart/components/CartItemCard";
 import type { PaymentMethodType } from "@/modules/user/payment/types/payment-method.type";
 import { CheckoutEmptyState } from "@/modules/user/cart/components/CheckoutEmptyState";
-import { useUpdateQuantity } from "@/modules/user/cart/hooks/useCart";
-
-interface CheckoutState {
-  checkedItems?: CartResponse[];
-  appliedCoupon?: CouponOption | null;
-  paymentMethod?: PaymentMethodType;
-  selectedAddressId?: number;
-}
-
-function getInitialItems(state: CheckoutState): CartResponse[] {
-  if (state.checkedItems?.length) {
-    return state.checkedItems.map((i) => ({ ...i, checked: true }));
-  }
-  return MOCK_CART_ITEMS.filter((i) => i.checked).map((i) => ({
-    ...i,
-    checked: true,
-  }));
-}
-
+import { useUpdateQuantity, useCartData } from "@/modules/user/cart/hooks/useCart";
+import Loading from "@/components/common/Loading";
 
 const mobilePrimaryButtonClass =
   "rounded-2xl bg-red-600 px-6 py-3.5 text-base font-bold text-white shadow-lg active:scale-95 transition hover:bg-red-700";
 
 export default function PaymentPage() {
-  const location = useLocation();
-  const checkoutState = (location.state as CheckoutState) ?? {};
+  const { data: cartData, isPending: isCartPending } = useCartData();
 
-  const [items, setItems] = useState<CartResponse[]>(() =>
-    getInitialItems(checkoutState),
-  );
+  const items = useMemo(() => {
+    if (!cartData) return [];
+    const fetchedItems = Array.isArray(cartData) ? cartData : [cartData];
+    return fetchedItems.filter((item) => item.product != null && item.checked);
+  }, [cartData]);
+
   const [selectedAddressId, setSelectedAddressId] = useState(
-    () => checkoutState.selectedAddressId ?? getSelectedAddressId(),
+    () => getSelectedAddressId(),
   );
-  const [appliedCoupon, setAppliedCoupon] = useState<CouponOption | null>(
-    checkoutState.appliedCoupon ?? null,
-  );
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodType>(
-    checkoutState.paymentMethod ?? "cod",
-  );
+  const [appliedCoupon, setAppliedCoupon] = useState<CouponOption | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodType>("cod");
 
   const updateQuantityMutation = useUpdateQuantity();
 
@@ -66,13 +44,6 @@ export default function PaymentPage() {
     
     const newQuantity = Math.max(1, item.quantity + delta);
     if (newQuantity !== item.quantity) {
-      // Cập nhật giao diện cục bộ
-      setItems((prev) =>
-        prev.map((i) =>
-          i.cartItemId === cartItemId ? { ...i, quantity: newQuantity } : i
-        )
-      );
-      // Gọi API cập nhật lên server
       updateQuantityMutation.mutate({ cartItemId, quantity: newQuantity });
     }
   };
@@ -83,14 +54,14 @@ export default function PaymentPage() {
     watch,
     formState: { errors },
   } = useForm<CouponForm>({
-    defaultValues: { couponCode: appliedCoupon?.code ?? "" },
+    defaultValues: { couponCode: "" },
   });
 
   const couponInput = watch("couponCode");
 
   useEffect(() => {
     setSelectedAddressId(getSelectedAddressId());
-  }, [location.key]);
+  }, []);
 
   const selectedCount = useMemo(
     () => items.reduce((sum, i) => sum + i.quantity, 0),
@@ -148,7 +119,7 @@ export default function PaymentPage() {
     showSuccessToast("Đã gỡ mã giảm giá");
   };
 
-  if (items.length === 0) {
+  if (items.length === 0 && !isCartPending) {
     return (
       <div className="min-h-screen bg-white">
         <Container className="max-w-7xl p-2 px-4 md:px-6 lg:px-8 py-8 md:py-10 lg:py-12">
@@ -168,22 +139,28 @@ export default function PaymentPage() {
       <Container className="max-w-7xl p-2  my-4">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           <section className="lg:col-span-8">
-            <div className="card-custom space-y-6">
-              <h2 className="heading-2 text-slate-900">Xác nhận đơn hàng</h2>
-
-              <div className="space-y-4">
-                {items.map((item) => (
-                  <CartItemCard
-                    key={item.cartItemId}
-                    item={item}
-                    onToggle={() => {}}
-                    onUpdateQuantity={(delta) => updateQuantity(item.cartItemId, delta)}
-                    showRemove={false}
-                    readonly
-                  />
-                ))}
+            {isCartPending ? (
+              <div className="card-custom min-h-[300px] flex items-center justify-center">
+                <Loading />
               </div>
-            </div>
+            ) : (
+              <div className="card-custom space-y-6">
+                <h2 className="heading-2 text-slate-900">Xác nhận đơn hàng</h2>
+
+                <div className="space-y-4">
+                  {items.map((item) => (
+                    <CartItemCard
+                      key={item.cartItemId}
+                      item={item}
+                      onToggle={() => {}}
+                      onUpdateQuantity={(delta) => updateQuantity(item.cartItemId, delta)}
+                      showRemove={false}
+                      readonly
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
           </section>
 
           <CartCheckoutSidebar
@@ -209,16 +186,18 @@ export default function PaymentPage() {
         </div>
       </Container>
 
-      <CheckoutMobileBar
-        subtitle="Tổng thanh toán"
-        total={total}
-        discount={productDiscount + voucherDiscount}
-        action={
-          <button type="button" className={mobilePrimaryButtonClass}>
-            Thanh toán
-          </button>
-        }
-      />
+      {!isCartPending && (
+        <CheckoutMobileBar
+          subtitle="Tổng thanh toán"
+          total={total}
+          discount={productDiscount + voucherDiscount}
+          action={
+            <button type="button" className={mobilePrimaryButtonClass}>
+              Thanh toán
+            </button>
+          }
+        />
+      )}
     </>
   );
 }

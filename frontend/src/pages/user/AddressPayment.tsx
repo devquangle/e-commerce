@@ -31,14 +31,14 @@ export default function AddressPayment() {
   const [selectedAddress, setSelectedAddress] =
     useState<AddressResponse | null>(null);
 
-  const savedId = Number(sessionStorage.getItem(STORAGE_KEY));
+  const savedId = Number(localStorage.getItem(STORAGE_KEY));
   const initialId =
     addresses.find((a) => a.id === savedId)?.id ??
     addresses.find((a) => a.default)?.id ??
     addresses[0]?.id;
 
   const handleSelect = (id: number) => {
-    sessionStorage.setItem(STORAGE_KEY, String(id));
+    localStorage.setItem(STORAGE_KEY, String(id));
     navigate("/payment");
   };
 

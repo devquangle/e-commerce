@@ -125,16 +125,12 @@ export default function Carts() {
     });
   };
 
-  const checkoutState = {
-    checkedItems: selectedItems,
-    productDiscount,
-  };
 
   const hasSelected = selectedCount > 0;
 
   const handleProceedToCheckout = () => {
     if (!hasSelected) return;
-    navigate("/payment", { state: checkoutState });
+    navigate("/payment");
   };
 
   if (isCartPending) {
