@@ -100,6 +100,8 @@ export default function AddressPayment() {
             key={addr.id}
             item={addr}
             onEdit={handleEdit}
+            onDelete={handleDelete}
+            onSetDefault={handleSetDefault}
             isPayment={true}
             onSelect={handleSelect}
           />
@@ -124,14 +126,14 @@ export default function AddressPayment() {
       )}
 
       {action === 'add' && (
-        <div className="mt-8 border-t pt-8">
+        <div className="card-custom mt-8 border-t">
           <h2 className="text-lg font-semibold mb-4">Thêm địa chỉ giao hàng mới</h2>
           <FormAddAddress onSuccess={() => setAction('list')} onCancel={() => setAction('list')} />
         </div>
       )}
 
       {action === 'edit' && editingId && (
-        <div className="mt-8 border-t pt-8">
+        <div className="card-custom mt-8 border-t">
           <h2 className="text-lg font-semibold mb-4">Cập nhật địa chỉ</h2>
           <FormUpdateAddress addressId={editingId} onSuccess={() => setAction('list')} onCancel={() => setAction('list')} />
         </div>
