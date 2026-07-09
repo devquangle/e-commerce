@@ -15,8 +15,13 @@ import { Controller, useForm, useWatch } from "react-hook-form";
 import { NavLink } from "react-router-dom";
 import { useCreateAddress } from "@/modules/user/address/hooks/useAddress";
 
-export default function FormAddAddress() {
-    const createMutation = useCreateAddress();
+interface FormAddAddressProps {
+    onSuccess?: () => void;
+    onCancel?: () => void;
+}
+
+export default function FormAddAddress({ onSuccess, onCancel }: FormAddAddressProps = {}) {
+    const { mutateAsync, isPending } = useCreateAddress();
 
     const { data: provinces = [] } = useProvinces();
 
@@ -41,11 +46,16 @@ export default function FormAddAddress() {
     const { data: districts = [] } = useDistricts(provinceId);
     const { data: wards = [] } = useWards(districtId);
 
-    const onSubmit = (data: AddressRequest) => {
-        createMutation.mutate(data);
+    const onSubmit = async (data: AddressRequest) => {
+        try {
+            await mutateAsync(data);
+            if (onSuccess) onSuccess();
+        } catch (error) {
+            console.error(error);
+        }
     };
 
-    if (createMutation.isPending) return <Loading />;
+    if (isPending) return <Loading />;
 
     return (
         <div className="space-y-4">
@@ -177,12 +187,22 @@ export default function FormAddAddress() {
 
             {/* ACTION */}
             <div className="flex gap-3">
-                <NavLink
-                    to="/account/address"
-                    className="px-4 py-2 bg-gray-200 rounded"
-                >
-                    Quay lại
-                </NavLink>
+                {onCancel ? (
+                    <button
+                        type="button"
+                        onClick={onCancel}
+                        className="px-4 py-2 bg-gray-200 rounded"
+                    >
+                        Hủy bỏ
+                    </button>
+                ) : (
+                    <NavLink
+                        to="/account/address"
+                        className="px-4 py-2 bg-gray-200 rounded"
+                    >
+                        Quay lại
+                    </NavLink>
+                )}
 
                 <button
                     type="button"

@@ -3,14 +3,18 @@ import type { AddressResponse } from "@/modules/user/address/types/address";
 type AddressCardProps = {
   item: AddressResponse;
   onEdit: (id: number) => void;
-  onDelete: (id: number) => void;
-  onSetDefault: (id: number) => void;
+  onDelete?: (id: number) => void;
+  onSetDefault?: (id: number) => void;
+  isPayment?: boolean;
+  onSelect?: (id: number) => void;
 };
 export default function AddressCard({
   item,
   onEdit,
   onDelete,
   onSetDefault,
+  isPayment,
+  onSelect
 }: AddressCardProps) {
   return (
     <div
@@ -25,14 +29,23 @@ export default function AddressCard({
         <p className="text-gray-600">{item?.streetFull}</p>
       </div>
 
-      <div className="flex items-center gap-2 mt-3">
+      <div className="flex items-center flex-wrap gap-2 mt-3">
+        {isPayment && onSelect && (
+          <button
+            onClick={() => onSelect(item.id!)}
+            className="px-2 py-1 text-xs bg-[#00a1ff] text-white rounded hover:bg-[#008cde] cursor-pointer"
+          >
+            Giao đến địa chỉ này
+          </button>
+        )}
+        
         {item.default ? (
           <span className="px-2 py-1 text-xs text-white bg-blue-500 rounded">
             Mặc định
           </span>
         ) : (
           <button
-            onClick={() => onSetDefault(item.id!)}
+            onClick={() => onSetDefault?.(item.id!)}
             className="px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300 cursor-pointer"
           >
             Đặt mặc định
@@ -47,7 +60,7 @@ export default function AddressCard({
         </button>
         {!item.default && (
           <button
-            onClick={() => onDelete(item.id!)}
+            onClick={() => onDelete?.(item.id!)}
             className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 cursor-pointer"
           >
             Xóa

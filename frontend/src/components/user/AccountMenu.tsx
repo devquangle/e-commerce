@@ -48,7 +48,7 @@ export default function AccountMenu({
                 {menus.map((item) => (
                     <li
                         key={item.path}
-                        className="rounded-lg px-1 lg:px-3 hover:bg-gray-100 m-0 flex-shrink-0"
+                        className="rounded-lg px-1 lg:px-3 hover:bg-gray-100 m-0 shrink-0"
                     >
                         <NavLink
                             to={item.path}
