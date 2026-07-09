@@ -85,7 +85,7 @@ export default function FormUpdateAddress({ addressId: propAddressId, onSuccess,
         }
     };
 
-    if ((isFetchingAddress && !address) || isPending) return <Loading />;
+    if ((isFetchingAddress && !address) || isPending) return <Loading inline className="py-16" />;
 
 
     return (

@@ -1,5 +1,4 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 import { showSuccessToast, showErrorToast } from "@/utils/toastUtil";
@@ -18,7 +17,6 @@ export const useAddresses = () => {
 /* ================= CREATE ================= */
 export const useCreateAddress = () => {
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
 
   return useMutation({
     mutationFn: AddressService.createAddress,
@@ -31,8 +29,6 @@ export const useCreateAddress = () => {
       );
 
       showSuccessToast("Thêm địa chỉ thành công");
-
-      navigate("/account/address");
 
       // (OPTIONAL) sync server background
       setTimeout(() => {
@@ -79,7 +75,6 @@ export const useDeleteAddress = () => {
 /* ================= UPDATE ================== */
 export const useUpdateAddress = () => {
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
 
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: AddressRequest }) =>
@@ -95,8 +90,6 @@ export const useUpdateAddress = () => {
       );
 
       showSuccessToast("Cập nhật địa chỉ thành công");
-
-      navigate("/account/address");
 
       // optional sync
       setTimeout(() => {
