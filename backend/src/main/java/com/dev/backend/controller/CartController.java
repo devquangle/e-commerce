@@ -46,9 +46,9 @@ public class CartController {
         return ResponseUtil.success("Lấy danh sách sản phẩm trong giỏ hàng thành công", data);
     }
 
-    @PutMapping
+    @PutMapping("/{cartItemId}")
     public ResponseEntity<ResponseData<CartItemResponse>> updaQuantity(@PathVariable("cartItemId") Integer cartItemId,
-            @RequestBody CartItemQuantity cartItemQuantity, @RequestBody CartItemRequest cartItemRequest,
+            @RequestBody CartItemQuantity cartItemQuantity, 
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         CartItemResponse data = cartItemService.updateQuantity(cartItemId, cartItemQuantity.getQuantity(),
                 userDetails.getId());
