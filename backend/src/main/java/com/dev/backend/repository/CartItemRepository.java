@@ -75,13 +75,13 @@ public interface CartItemRepository extends JpaRepository<CartItem, Integer> {
       @Param("userId") Integer userId,
       @Param("cartItemIds") List<Integer> cartItemIds);
 
-  // Xóa toàn bộ cart
-  @Transactional
-  @Modifying
-  @Query("""
-          DELETE
-          FROM CartItem c
-          WHERE c.user.id = :userId
-      """)
-  void deleteCartByUserId(@Param("userId") Integer userId);
+  // // Xóa toàn bộ cart
+  // @Transactional
+  // @Modifying
+  // @Query("""
+  //         DELETE
+  //         FROM CartItem c
+  //         WHERE c.user.id = :userId
+  //     """)
+  // void deleteCartByUserId(@Param("userId") Integer userId);
 }

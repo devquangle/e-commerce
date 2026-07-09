@@ -7,13 +7,13 @@ import {
     useProvinces,
     useDistricts,
     useWards
-} from "@/hooks/useAddressGHN";
+} from "@/modules/user/address/hooks/useAddressGHN";
 
-import type { AddressRequest } from "@/types/address";
+import type { AddressRequest } from "@/modules/user/address/types/address";
 
 import { Controller, useForm, useWatch } from "react-hook-form";
 import {  NavLink } from "react-router-dom";
-import { useCreateAddress } from "@/hooks/useAddress";
+import { useCreateAddress } from "@/modules/user/address/hooks/useAddress";
 
 export default function CreateAddress() {
     const createMutation = useCreateAddress();

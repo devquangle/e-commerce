@@ -2,15 +2,15 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-import addressService from "@/services/addressService";
 import { showSuccessToast, showErrorToast } from "@/utils/toastUtil";
-import type { AddressRequest, AddressResponse } from "@/types/address";
+import type { AddressRequest, AddressResponse } from "@/modules/user/address/types/address";
+import AddressService from "@/modules/user/address/services/address.service";
 
 /* ================= FETCH ================= */
 export const useAddresses = () => {
   return useQuery<AddressResponse[]>({
     queryKey: ["addresses"],
-    queryFn: addressService.getAddresses,
+    queryFn: AddressService.getAddresses,
     staleTime: 1000 * 30,
   });
 };
@@ -21,7 +21,7 @@ export const useCreateAddress = () => {
   const navigate = useNavigate();
 
   return useMutation({
-    mutationFn: addressService.createAddress,
+    mutationFn: AddressService.createAddress,
 
     onSuccess: (newAddress: AddressResponse) => {
       // ⚡ UI update NGAY LẬP TỨC
@@ -54,7 +54,7 @@ export const useDeleteAddress = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: number) => addressService.deleteAddress(id),
+    mutationFn: (id: number) => AddressService.deleteAddress(id),
 
     onSuccess: (_: void, id: number) => {
       // ⚡ remove ngay khỏi UI
@@ -83,7 +83,7 @@ export const useUpdateAddress = () => {
 
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: AddressRequest }) =>
-      addressService.updateAddress(id, data),
+      AddressService.updateAddress(id, data),
 
     onSuccess: (updatedAddress: AddressResponse) => {
       queryClient.setQueryData<AddressResponse[]>(
@@ -119,7 +119,7 @@ export const useUpdateAddress = () => {
 export const useAddressDetail = (addressId?: number) => {
   return useQuery({
     queryKey: ["address", addressId],
-    queryFn: () => addressService.getAddressById(addressId!),
+    queryFn: () => AddressService.getAddressById(addressId!),
     enabled: !!addressId,
   });
 };
@@ -128,7 +128,7 @@ export const useSetDefaultAddress = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: number) => addressService.setDefaultAddress(id),
+    mutationFn: (id: number) => AddressService.setDefaultAddress(id),
 
     onSuccess: (_: void, id: number) => {
       // ⚡ remove ngay khỏi UI

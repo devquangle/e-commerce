@@ -1,8 +1,8 @@
 import { apiAuth } from "@/configs/axios";
-import type { AddressRequest, AddressResponse } from "@/types/address";
+import type { AddressRequest, AddressResponse } from "@/modules/user/address/types/address";
 import type { ApiResponse } from "@/types/api-response";
 
-const addressService = {
+const AddressService = {
   async getAddresses() {
     const res =
       await apiAuth.get<ApiResponse<AddressResponse[]>>("/auth/addresses");
@@ -60,4 +60,4 @@ const addressService = {
   },
 };
 
-export default addressService;
+export default AddressService;

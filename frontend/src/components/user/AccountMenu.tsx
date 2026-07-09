@@ -29,15 +29,8 @@ export default function AccountMenu({
 
     const { userInfo } = useAuth();
 
-
-
-
-
-
     return (
-        <nav className="space-y-2 my-2">
-
-
+        <nav className={`card-custom-v1 space-y-2 h-full ${className}`}>
             {variant === 'sidebar' && (
                 <div className="hidden lg:flex items-center gap-3 p-4 border-b">
                     <img
@@ -51,23 +44,20 @@ export default function AccountMenu({
                 </div>
             )}
 
-
-            <ul className={`space-y-1 whitespace-nowrap ${className}`}>
+            <ul className="flex overflow-x-auto lg:flex-col lg:overflow-visible gap-2 lg:gap-0 lg:space-y-1 whitespace-nowrap p-2 scrollbar-hide">
                 {menus.map((item) => (
                     <li
                         key={item.path}
-                        className="rounded-lg px-1 lg:px-3 hover:bg-gray-100 m-0"
+                        className="rounded-lg px-1 lg:px-3 hover:bg-gray-100 m-0 flex-shrink-0"
                     >
                         <NavLink
                             to={item.path}
                             end={item.path === '/account/profile'}
                             className={({ isActive }) =>
-                                `
-        flex justify-between items-center gap-3 w-full p-1 lg:p-3 text-sm  hover:text-blue-500
-            ${isActive
+                                `flex justify-between items-center gap-3 w-full p-2 lg:p-3 text-sm hover:text-blue-500 ${isActive
                                     ? 'text-blue-500 font-medium'
-                                    : 'text-gray-600'}
-            `
+                                    : 'text-gray-600'
+                                }`
                             }
                         >
                             {item.label}

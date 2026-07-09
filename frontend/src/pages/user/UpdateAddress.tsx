@@ -2,7 +2,7 @@ import InputField from "@/components/common/InputField";
 import Loading from "@/components/common/Loading";
 import SelectBox from "@/components/common/SelectedBox";
 import TextAreaField from "@/components/common/TextAreaField";
-import type { AddressRequest } from "@/types/address";
+import type { AddressRequest } from "@/modules/user/address/types/address";
 import { showErrorToast, } from "@/utils/toastUtil";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -12,8 +12,8 @@ import {
     useProvinces,
     useDistricts,
     useWards
-} from "@/hooks/useAddressGHN";
-import { useAddressDetail, useUpdateAddress } from "@/hooks/useAddress";
+} from "@/modules/user/address/hooks/useAddressGHN";
+import { useAddressDetail, useUpdateAddress } from "@/modules/user/address/hooks/useAddress";
 export default function UpdateAddress() {
     const {
         control,

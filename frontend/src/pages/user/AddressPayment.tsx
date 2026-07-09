@@ -1,5 +1,5 @@
 import Container from "@/components/common/Container";
-import type { AddressResponse } from "@/types/address";
+import type { AddressResponse } from "@/modules/user/address/types/address";
 import { MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 

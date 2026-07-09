@@ -33,7 +33,7 @@ public class AddressController {
     }
 
     @GetMapping("/auth/addresses/{addressId}")
-    public ResponseEntity<ResponseData<AddressDTO>> getAddresses(@PathVariable Integer addressId,
+    public ResponseEntity<ResponseData<AddressDTO>> getAddresses(@PathVariable("addressId") Integer addressId,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         AddressDTO addresses = addressService.getAddressDTOByIdAndUserId(addressId, userDetails);
 
@@ -48,21 +48,21 @@ public class AddressController {
     }
 
     @PutMapping("/auth/addresses/{addressId}")
-    public ResponseEntity<ResponseData<AddressDTO>> updateAddress(@PathVariable Integer addressId,
+    public ResponseEntity<ResponseData<AddressDTO>> updateAddress(@PathVariable("addressId") Integer addressId,
             @RequestBody AddressBean addressBean, @AuthenticationPrincipal CustomUserDetails userDetails) {
         AddressDTO addressDTO = addressService.updateAddress(addressId, addressBean, userDetails);
         return ResponseUtil.success("Cập nhật địa chỉ thành công", addressDTO);
     }
 
     @DeleteMapping("/auth/addresses/{addressId}")
-    public ResponseEntity<ResponseData<Object>> deleteAddress(@PathVariable Integer addressId,
+    public ResponseEntity<ResponseData<Object>> deleteAddress(@PathVariable("addressId") Integer addressId,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         addressService.deleteAddress(addressId, userDetails);
         return ResponseUtil.success("Xóa địa chỉ thành công", null);
     }
 
     @PutMapping("/auth/addresses/{addressId}/default")
-    public ResponseEntity<ResponseData<Object>> defaultAddress(@PathVariable Integer addressId,
+    public ResponseEntity<ResponseData<Object>> defaultAddress(@PathVariable("addressId") Integer addressId,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         addressService.defaultAddress(addressId, userDetails);
         return ResponseUtil.success("Cập nhật địa chỉ thành công", null);
