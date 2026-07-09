@@ -126,14 +126,14 @@ export default function AddressPayment() {
       )}
 
       {action === 'add' && (
-        <div className="card-custom mt-8 border-t">
+        <div className="card-custom mt-8 border-t animate-fade-in-down">
           <h2 className="text-lg font-semibold mb-4">Thêm địa chỉ giao hàng mới</h2>
           <FormAddAddress onSuccess={() => setAction('list')} onCancel={() => setAction('list')} />
         </div>
       )}
 
       {action === 'edit' && editingId && (
-        <div className="card-custom mt-8 border-t">
+        <div className="card-custom mt-8 border-t animate-fade-in-down">
           <h2 className="text-lg font-semibold mb-4">Cập nhật địa chỉ</h2>
           <FormUpdateAddress addressId={editingId} onSuccess={() => setAction('list')} onCancel={() => setAction('list')} />
         </div>
