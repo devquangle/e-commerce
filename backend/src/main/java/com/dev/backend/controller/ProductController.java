@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dev.backend.dto.product.ProductCardResponse;
@@ -17,6 +16,7 @@ import com.dev.backend.dto.product.ProductDetailResponse;
 import com.dev.backend.dto.product.ProductFilterRequest;
 import com.dev.backend.dto.product.ProductRequest;
 import com.dev.backend.dto.product.ProductResponse;
+import com.dev.backend.dto.product.ProductSearchRequest;
 import com.dev.backend.response.PageResponse;
 import com.dev.backend.response.ResponseData;
 import com.dev.backend.response.ResponseUtil;
@@ -32,11 +32,8 @@ public class ProductController {
 
     @GetMapping("/admin/products/filter")
     public ResponseEntity<ResponseData<PageResponse<ProductResponse>>> filter(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) String status) {
-        PageResponse<ProductResponse> response = productService.pages(page - 1, size, keyword, status);
+          @ModelAttribute ProductSearchRequest request) {
+        PageResponse<ProductResponse> response = productService.search(request);
         return ResponseUtil.success("Lấy danh sách sản phẩm thành công", response);
     }
 

@@ -4,8 +4,8 @@ import type {
   ProductRequest,
   ProductResponse,
   ProductDetailResponse,
+  ProductSearchRequest,
 } from "../types/product.type";
-import type { options } from "@/types/options.type";
 import type { Pagination } from "@/types/pagination";
 
 const ProductService = {
@@ -41,7 +41,7 @@ const ProductService = {
     return res.data.data;
   },
 
-  async filterProduct(options?: options) {
+  async filterProduct(options?: ProductSearchRequest) {
     const res = await apiAuth.get<ApiResponse<Pagination<ProductResponse>>>(
       "/api/v1/admin/products/filter",
       { params: options },

@@ -20,6 +20,7 @@ import com.dev.backend.dto.product.ProductDetailResponse;
 import com.dev.backend.dto.product.ProductFilterRequest;
 import com.dev.backend.dto.product.ProductRequest;
 import com.dev.backend.dto.product.ProductResponse;
+import com.dev.backend.dto.product.ProductSearchRequest;
 import com.dev.backend.dto.productdetail.ProductInfo;
 import com.dev.backend.entity.Product;
 import com.dev.backend.exception.NotFoundException;
@@ -212,18 +213,15 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
-    public PageResponse<ProductResponse> pages(int page, int size, String keyword, String status) {
-        Pageable pageable = PageRequest.of(
-                page,
-                size,
-                Sort.by(Sort.Direction.DESC, "id"));
+    public PageResponse<ProductResponse> search(ProductSearchRequest request) {
+        int page = (request.getPage() == null || request.getPage() < 1) ? 0 : request.getPage() - 1;
+        int size = (request.getSize() == null || request.getSize() < 1) ? 10 : request.getSize();
 
-        ProductStatus baseStatus = (status == null || status.isBlank())
-                ? null
-                : ProductStatus.valueOf(status);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
 
-        Page<Product> productPage = productRepository
-                .filterProducts(keyword == null ? "" : keyword, baseStatus, pageable);
+        ProductStatus baseStatus = ProductStatus.from(request.getStatus());
+        String keyword = (request.getKeyword() == null) ? "" : request.getKeyword().trim();
+        Page<Product> productPage = productRepository.filterProducts(keyword, baseStatus, pageable);
 
         List<ProductResponse> items = productPage.getContent().stream().map(productMapper::toDTO).toList();
 

@@ -69,3 +69,11 @@ export interface ImageProductRequest {
   url?: string | null;
   isThumbnail: boolean;
 }
+
+
+export interface ProductSearchRequest {
+  keyword?: string;
+  status?: string;
+  page?: number;
+  size?: number;
+}

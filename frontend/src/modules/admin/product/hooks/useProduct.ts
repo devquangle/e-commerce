@@ -1,13 +1,12 @@
-import type { ProductRequest, ProductResponse, ProductDetailResponse } from "../types/product.type";
+import type { ProductRequest, ProductResponse, ProductDetailResponse, ProductSearchRequest } from "../types/product.type";
 import type { Pagination } from "@/types/pagination";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { showErrorToast, showSuccessToast } from "@/utils/toastUtil";
 import axios from "axios";
-import type { options } from "@/types/options.type";
 import ProductService from "../services/product.service";
 
 
-export const useFilterProduct = (options?: options) => {
+export const useFilterProduct = (options?: ProductSearchRequest) => {
   return useQuery<Pagination<ProductResponse>>({
     queryKey: ["products-filter", options],
     queryFn: () => ProductService.filterProduct(options),

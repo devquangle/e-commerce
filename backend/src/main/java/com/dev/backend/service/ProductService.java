@@ -7,6 +7,7 @@ import com.dev.backend.dto.product.ProductDetailResponse;
 import com.dev.backend.dto.product.ProductFilterRequest;
 import com.dev.backend.dto.product.ProductRequest;
 import com.dev.backend.dto.product.ProductResponse;
+import com.dev.backend.dto.product.ProductSearchRequest;
 import com.dev.backend.dto.productdetail.ProductInfo;
 import com.dev.backend.entity.Product;
 import com.dev.backend.response.PageResponse;
@@ -21,7 +22,7 @@ public interface ProductService {
 
     Product findBySlug(String slug);
 
-    PageResponse<ProductResponse> pages(int page, int size, String keyword, String status);
+    PageResponse<ProductResponse> search(ProductSearchRequest request);
 
     Product save(Product product);
 
