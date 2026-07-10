@@ -32,6 +32,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "orders")
 public class Order {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -57,9 +58,11 @@ public class Order {
 
     @Column(nullable = false)
     private String wardCode;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OrderStatus status;
+    
     @Column(nullable = false)
     private String street;
 
