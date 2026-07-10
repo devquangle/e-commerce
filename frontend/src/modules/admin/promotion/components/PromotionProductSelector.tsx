@@ -19,6 +19,8 @@ import {
   Languages,
   SearchX,
   Loader2,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import Pagination from "@/components/common/Pagination";
 import type {
@@ -165,9 +167,25 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
 
 
 
+  const initialProductIds = useMemo(() => {
+    if (!initialProducts) return [];
+    return initialProducts.map((p) => p.productId);
+  }, [initialProducts]);
+
   const productsList: ProductResponse[] = useMemo(() => {
+    if (page === 1) {
+      const initialIdsSet = new Set(initialProductIds);
+      // Sắp xếp các sản phẩm của trang 1: đưa các sản phẩm đã chọn lên đầu
+      return [...serverItems].sort((a, b) => {
+        const aIsInitial = initialIdsSet.has(a.id) ? 1 : 0;
+        const bIsInitial = initialIdsSet.has(b.id) ? 1 : 0;
+        return bIsInitial - aIsInitial;
+      });
+    }
+
+    // Các trang khác giữ nguyên thứ tự gốc của serverItems
     return serverItems;
-  }, [serverItems]);
+  }, [serverItems, initialProductIds, page]);
 
   const productIdsHash = productsList.map((p) => p.id).join(",");
 
@@ -482,6 +500,7 @@ const ProductRow: React.FC<ProductRowProps> = ({
     initialDiscount.toString(),
   );
   const [localQty, setLocalQty] = useState<string>(initialPromoQty.toString());
+  const [showDetails, setShowDetails] = useState(false);
 
   const debouncedDiscountStr = useDebounce(localDiscount, 300);
   const debouncedQtyStr = useDebounce(localQty, 300);
@@ -634,17 +653,19 @@ const ProductRow: React.FC<ProductRowProps> = ({
 
       {/* THÔNG TIN SẢN PHẨM */}
       <td className={tdClass()}>
-        <div className="flex gap-3.5 items-stretch">
+        <div className="flex gap-3.5 items-center">
           {/* Ảnh bìa */}
-          <div className="shrink-0 mt-0.5">
+          <div className="shrink-0">
             {product.urlImageDefault ? (
-              <img
-                src={product.urlImageDefault}
-                alt={product.name}
-                className="w-[72px] h-[104px] rounded-lg object-cover border border-slate-200 shadow-xs group-hover:shadow-md transition-shadow"
-              />
+              <div className="relative shrink-0 overflow-hidden rounded-xl border border-slate-200/80 bg-slate-50 shadow-sm group-hover:shadow-md transition-shadow">
+                <img
+                  src={product.urlImageDefault}
+                  alt={product.name}
+                  className="w-[72px] h-[104px] object-cover"
+                />
+              </div>
             ) : (
-              <div className="w-[72px] h-[104px] rounded-lg border border-dashed border-slate-200 bg-slate-50 flex items-center justify-center">
+              <div className="relative shrink-0 overflow-hidden w-[72px] h-[104px] rounded-xl border border-dashed border-slate-200/80 bg-slate-50 shadow-sm group-hover:shadow-md transition-shadow flex items-center justify-center">
                 <BookOpen size={20} className="text-slate-300" />
               </div>
             )}
@@ -662,62 +683,87 @@ const ProductRow: React.FC<ProductRowProps> = ({
               </p>
             </div>
 
-            {/* NXB + Series */}
-            {(product.publisherName || product.seriesName) && (
-              <div className="flex flex-wrap gap-1.5">
-                {product.publisherName && (
-                  <span className="inline-flex items-center gap-1 bg-teal-50 text-teal-700 border border-teal-100/80 px-2 py-0.5 rounded-md text-[10px] font-semibold">
-                    <Building2 size={10} />
-                    <span>{product.publisherName}</span>
-                  </span>
-                )}
-                {product.seriesName && (
-                  <span className="inline-flex items-center gap-1 bg-violet-50 text-violet-700 border border-violet-100/80 px-2 py-0.5 rounded-md text-[10px] font-semibold">
-                    <Layers size={10} />
-                    <span>{product.seriesName}</span>
-                  </span>
-                )}
-              </div>
-            )}
+            <div 
+              className={`grid transition-all duration-300 ease-in-out ${
+                showDetails ? "grid-rows-[1fr] opacity-100 mt-1" : "grid-rows-[0fr] opacity-0"
+              }`}
+            >
+              <div className="overflow-hidden">
+                <div className="flex flex-col gap-1.5 pb-1">
+                  {/* NXB + Series */}
+                  {(product.publisherName || product.seriesName) && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {product.publisherName && (
+                        <span className="inline-flex items-center gap-1 bg-teal-50 text-teal-700 border border-teal-100/80 px-2 py-0.5 rounded-md text-[10px] font-semibold">
+                          <Building2 size={10} />
+                          <span>{product.publisherName}</span>
+                        </span>
+                      )}
+                      {product.seriesName && (
+                        <span className="inline-flex items-center gap-1 bg-violet-50 text-violet-700 border border-violet-100/80 px-2 py-0.5 rounded-md text-[10px] font-semibold">
+                          <Layers size={10} />
+                          <span>{product.seriesName}</span>
+                        </span>
+                      )}
+                    </div>
+                  )}
 
-            {/* Tác giả + Thể loại */}
-            <div className="flex flex-wrap gap-1.5">
-              <ExpandableAuthors authors={product.authorsName} limit={3} />
-              <ExpandableGenres genres={product.genresName} limit={3} />
+                  {/* Tác giả + Thể loại */}
+                  <div className="flex flex-wrap gap-1.5">
+                    <ExpandableAuthors authors={product.authorsName} limit={3} />
+                    <ExpandableGenres genres={product.genresName} limit={3} />
+                  </div>
+
+                  {/* Thông số phụ */}
+                  {(product.publishYear ||
+                    product.pages > 0 ||
+                    product.weight > 0 ||
+                    product.language) && (
+                    <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-slate-400 font-medium">
+                      {product.publishYear && (
+                        <span className="flex items-center gap-1">
+                          <Calendar size={10} />
+                          {product.publishYear}
+                        </span>
+                      )}
+                      {product.pages > 0 && (
+                        <span className="flex items-center gap-1">
+                          <FileText size={10} />
+                          {product.pages} trang
+                        </span>
+                      )}
+                      {product.weight > 0 && (
+                        <span className="flex items-center gap-1">
+                          <Weight size={10} />
+                          {product.weight}g
+                        </span>
+                      )}
+                      {product.language && (
+                        <span className="flex items-center gap-1">
+                          <Languages size={10} />
+                          {getLanguageName(product.language)}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
 
-            {/* Thông số phụ */}
-            {(product.publishYear ||
-              product.pages > 0 ||
-              product.weight > 0 ||
-              product.language) && (
-              <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-slate-400 font-medium">
-                {product.publishYear && (
-                  <span className="flex items-center gap-1">
-                    <Calendar size={10} />
-                    {product.publishYear}
-                  </span>
-                )}
-                {product.pages > 0 && (
-                  <span className="flex items-center gap-1">
-                    <FileText size={10} />
-                    {product.pages} trang
-                  </span>
-                )}
-                {product.weight > 0 && (
-                  <span className="flex items-center gap-1">
-                    <Weight size={10} />
-                    {product.weight}g
-                  </span>
-                )}
-                {product.language && (
-                  <span className="flex items-center gap-1">
-                    <Languages size={10} />
-                    {getLanguageName(product.language)}
-                  </span>
-                )}
-              </div>
-            )}
+            <div className="flex items-center mt-0.5">
+              <button 
+                type="button" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setShowDetails(!showDetails);
+                }}
+                className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 hover:text-blue-600 transition cursor-pointer"
+              >
+                {showDetails ? "Thu gọn" : "Xem thêm chi tiết"}
+                {showDetails ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+              </button>
+            </div>
           </div>
         </div>
       </td>
@@ -836,6 +882,7 @@ const ProductRow: React.FC<ProductRowProps> = ({
           promotions={promotions}
           hasOverlap={hasOverlap}
           isSelected={isSelected}
+          currentPromotionId={currentPromotionId}
         />
       </td>
     </tr>
@@ -847,16 +894,47 @@ interface ExpandablePromotionsProps {
   promotions: PromotionProductDetailResponse[];
   hasOverlap: boolean;
   isSelected: boolean;
+  currentPromotionId?: number;
 }
 
 const ExpandablePromotions: React.FC<ExpandablePromotionsProps> = ({
   promotions,
   hasOverlap,
   isSelected,
+  currentPromotionId,
 }) => {
   const [expanded, setExpanded] = useState(false);
 
-  if (!promotions || promotions.length === 0) {
+  const sortedPromotions = useMemo(() => {
+    if (!promotions) return [];
+    
+    const now = new Date().getTime();
+    const isActive = (promo: PromotionProductDetailResponse) => {
+      const start = new Date(promo.startDate).getTime();
+      const end = new Date(promo.expireDate).getTime();
+      return now >= start && now <= end;
+    };
+
+    return [...promotions].sort((a, b) => {
+      // 1. Đang sửa (current) lên trên cùng
+      if (currentPromotionId) {
+        if (a.promotionId === currentPromotionId) return -1;
+        if (b.promotionId === currentPromotionId) return 1;
+      }
+      
+      // 2. Đang hoạt động lên tiếp theo
+      const aActive = isActive(a);
+      const bActive = isActive(b);
+      
+      if (aActive && !bActive) return -1;
+      if (!aActive && bActive) return 1;
+      
+      // 3. Cùng trạng thái thì sắp xếp theo ngày bắt đầu (sớm nhất lên trước)
+      return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
+    });
+  }, [promotions, currentPromotionId]);
+
+  if (!sortedPromotions || sortedPromotions.length === 0) {
     return (
       <span className="text-xs text-slate-400 italic">
         Chưa tham gia chương trình nào
@@ -864,8 +942,8 @@ const ExpandablePromotions: React.FC<ExpandablePromotionsProps> = ({
     );
   }
 
-  const visiblePromotions = expanded ? promotions : promotions.slice(0, 1);
-  const hasMore = promotions.length > 1;
+  const visiblePromotions = expanded ? sortedPromotions : sortedPromotions.slice(0, 1);
+  const hasMore = sortedPromotions.length > 1;
 
   return (
     <div className="flex flex-col gap-1.5 justify-center min-h-11 max-w-[280px]">

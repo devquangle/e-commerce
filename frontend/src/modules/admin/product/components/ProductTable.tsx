@@ -10,6 +10,8 @@ import {
   Building2,
   Layers,
   Languages,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import ProductStatusBadge from "./ProductStatusBadge";
 import ProductActionButtons from "./ProductActionButtons";
@@ -35,6 +37,13 @@ type Props = {
 };
 
 export default function ProductTable({ products, onDelete }: Props) {
+  const [showDetailsMap, setShowDetailsMap] = useState<Record<number, boolean>>({});
+
+  const toggleDetails = (id: number, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowDetailsMap(prev => ({ ...prev, [id]: !prev[id] }));
+  };
 
   return (
     <div className="hidden md:block overflow-x-auto">
@@ -79,17 +88,19 @@ export default function ProductTable({ products, onDelete }: Props) {
 
                 {/* ── THÔNG TIN SẢN PHẨM CHUNG ── */}
                 <td className="py-3 px-4 align-middle">
-                  <div className="flex gap-3 items-stretch">
+                  <div className="flex gap-3 items-center">
                     {/* Ảnh bìa — kích thước cố định */}
-                    <div className="shrink-0 mt-0.5">
+                    <div className="shrink-0">
                       {product.urlImageDefault ? (
-                        <img
-                          src={product.urlImageDefault}
-                          alt={product.name}
-                          className="w-[72px] h-[104px] rounded object-cover border border-slate-200 shadow-sm group-hover:shadow-md transition-shadow"
-                        />
+                        <div className="relative shrink-0 overflow-hidden rounded-xl border border-slate-200/80 bg-slate-50 shadow-sm group-hover:shadow-md transition-shadow">
+                          <img
+                            src={product.urlImageDefault}
+                            alt={product.name}
+                            className="w-[72px] h-[104px] object-cover"
+                          />
+                        </div>
                       ) : (
-                        <div className="w-[72px] h-[104px] rounded border border-dashed border-slate-200 bg-slate-50 flex items-center justify-center">
+                        <div className="relative shrink-0 overflow-hidden w-[72px] h-[104px] rounded-xl border border-dashed border-slate-200/80 bg-slate-50 flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
                           <BookOpen size={20} className="text-slate-300" />
                         </div>
                       )}
@@ -108,68 +119,87 @@ export default function ProductTable({ products, onDelete }: Props) {
                        
                       </div>
 
-                      {/* NXB + Series */}
-                      {(product.publisherName || product.seriesName) && (
-                        <div className="flex flex-wrap gap-1">
-                          {product.publisherName && (
-                            <span className="inline-flex items-center gap-1 bg-teal-50 text-teal-700 border border-teal-100 px-1.5 py-0.5 rounded text-[10px] font-medium">
-                              <Building2 size={10} />
-                              <span>{product.publisherName}</span>
-                            </span>
-                          )}
-                          {product.seriesName && (
-                            <span className="inline-flex items-center gap-1 bg-violet-50 text-violet-700 border border-violet-100 px-1.5 py-0.5 rounded text-[10px] font-medium">
-                              <Layers size={10} />
-                              <span>{product.seriesName}</span>
-                            </span>
-                          )}
-                        </div>
-                      )}
+                      <div 
+                        className={`grid transition-all duration-300 ease-in-out ${
+                          showDetailsMap[product.id] ? "grid-rows-[1fr] opacity-100 mt-1" : "grid-rows-[0fr] opacity-0"
+                        }`}
+                      >
+                        <div className="overflow-hidden">
+                          <div className="flex flex-col gap-1.5 pb-1">
+                            {/* NXB + Series */}
+                            {(product.publisherName || product.seriesName) && (
+                              <div className="flex flex-wrap gap-1">
+                                {product.publisherName && (
+                                  <span className="inline-flex items-center gap-1 bg-teal-50 text-teal-700 border border-teal-100 px-1.5 py-0.5 rounded text-[10px] font-medium">
+                                    <Building2 size={10} />
+                                    <span>{product.publisherName}</span>
+                                  </span>
+                                )}
+                                {product.seriesName && (
+                                  <span className="inline-flex items-center gap-1 bg-violet-50 text-violet-700 border border-violet-100 px-1.5 py-0.5 rounded text-[10px] font-medium">
+                                    <Layers size={10} />
+                                    <span>{product.seriesName}</span>
+                                  </span>
+                                )}
+                              </div>
+                            )}
 
-                      {/* Tác giả + Thể loại */}
-                      <div className="flex flex-wrap gap-1">
-                        <ExpandableAuthors
-                          authors={product.authorsName}
-                          limit={3}
-                        />
-                        <ExpandableGenres
-                          genres={product.genresName}
-                          limit={3}
-                        />
+                            {/* Tác giả + Thể loại */}
+                            <div className="flex flex-wrap gap-1">
+                              <ExpandableAuthors
+                                authors={product.authorsName}
+                              />
+                              <ExpandableGenres
+                                genres={product.genresName}
+                              />
+                            </div>
+
+                            {/* ➌ Năm XB · Số trang · Trọng lượng · Ngôn ngữ */}
+                            {(product.publishYear ||
+                              product.pages > 0 ||
+                              product.weight > 0 ||
+                              product.language) && (
+                              <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-slate-400">
+                                {product.publishYear && (
+                                  <span className="flex items-center gap-1">
+                                    <Calendar size={10} />
+                                    {product.publishYear}
+                                  </span>
+                                )}
+                                {product.pages > 0 && (
+                                  <span className="flex items-center gap-1">
+                                    <FileText size={10} />
+                                    {product.pages} trang
+                                  </span>
+                                )}
+                                {product.weight > 0 && (
+                                  <span className="flex items-center gap-1">
+                                    <Weight size={10} />
+                                    {product.weight}g
+                                  </span>
+                                )}
+                                {product.language && (
+                                  <span className="flex items-center gap-1">
+                                    <Languages size={10} />
+                                    {getLanguageName(product.language)}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
                       </div>
-
-                      {/* ➌ Năm XB · Số trang · Trọng lượng · Ngôn ngữ */}
-                      {(product.publishYear ||
-                        product.pages > 0 ||
-                        product.weight > 0 ||
-                        product.language) && (
-                        <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-slate-400">
-                          {product.publishYear && (
-                            <span className="flex items-center gap-1">
-                              <Calendar size={10} />
-                              {product.publishYear}
-                            </span>
-                          )}
-                          {product.pages > 0 && (
-                            <span className="flex items-center gap-1">
-                              <FileText size={10} />
-                              {product.pages} trang
-                            </span>
-                          )}
-                          {product.weight > 0 && (
-                            <span className="flex items-center gap-1">
-                              <Weight size={10} />
-                              {product.weight}g
-                            </span>
-                          )}
-                          {product.language && (
-                            <span className="flex items-center gap-1">
-                              <Languages size={10} />
-                              {getLanguageName(product.language)}
-                            </span>
-                          )}
-                        </div>
-                      )}
+                      
+                      <div className="flex items-center mt-0.5">
+                        <button 
+                          type="button" 
+                          onClick={(e) => toggleDetails(product.id, e)}
+                          className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 hover:text-blue-600 transition cursor-pointer"
+                        >
+                          {showDetailsMap[product.id] ? "Thu gọn" : "Xem thêm chi tiết"}
+                          {showDetailsMap[product.id] ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </td>
@@ -267,25 +297,18 @@ export default function ProductTable({ products, onDelete }: Props) {
 // ─── COMPONENT HIỂN THỊ CHIPS TÁC GIẢ ────────────────────────
 export const ExpandableAuthors = ({
   authors,
-  limit,
 }: {
   authors: string[];
-  limit: number;
 }) => {
-  const [expanded, setExpanded] = useState(false);
-
   if (!authors || authors.length === 0) {
     return (
       <span className="text-[10px] text-slate-400 italic">Chưa có tác giả</span>
     );
   }
 
-  const visible = expanded ? authors : authors.slice(0, limit);
-  const hasMore = authors.length > limit;
-
   return (
     <div className="flex flex-wrap gap-1 items-center">
-      {visible.map((name, index) => (
+      {authors.map((name, index) => (
         <span
           key={`a-${index}`}
           className="inline-flex items-center gap-1 bg-indigo-50 text-indigo-600 border border-indigo-100 px-1.5 py-0.5 rounded text-[10px]"
@@ -296,28 +319,6 @@ export const ExpandableAuthors = ({
           </span>
         </span>
       ))}
-      {hasMore && !expanded && (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setExpanded(true);
-          }}
-          className="inline-flex items-center bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border border-indigo-100 px-1.5 py-0.5 rounded text-[10px] cursor-pointer transition-colors font-medium"
-        >
-          +{authors.length - limit} nữa
-        </button>
-      )}
-      {hasMore && expanded && (
-        <button
-          type="button"
-          onClick={(e) => { e.preventDefault(); e.stopPropagation(); setExpanded(false); }}
-          className="inline-flex items-center text-indigo-600 hover:underline px-1 py-0.5 rounded text-[10px] cursor-pointer font-medium"
-        >
-          Thu gọn
-        </button>
-      )}
     </div>
   );
 };
@@ -325,21 +326,14 @@ export const ExpandableAuthors = ({
 // ─── COMPONENT HIỂN THỊ CHIPS THỂ LOẠI ───────────────────────
 export const ExpandableGenres = ({
   genres,
-  limit,
 }: {
   genres: string[];
-  limit: number;
 }) => {
-  const [expanded, setExpanded] = useState(false);
-
   if (!genres || genres.length === 0) return null;
-
-  const visible = expanded ? genres : genres.slice(0, limit);
-  const hasMore = genres.length > limit;
 
   return (
     <div className="flex flex-wrap gap-1 items-center">
-      {visible.map((name, index) => (
+      {genres.map((name, index) => (
         <span
           key={`g-${index}`}
           className="inline-flex items-center gap-1 bg-slate-50 text-slate-500 border border-slate-200 px-1.5 py-0.5 rounded text-[10px]"
@@ -350,28 +344,6 @@ export const ExpandableGenres = ({
           </span>
         </span>
       ))}
-      {hasMore && !expanded && (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setExpanded(true);
-          }}
-          className="inline-flex items-center bg-slate-50 text-slate-500 hover:bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded text-[10px] cursor-pointer transition-colors font-medium"
-        >
-          +{genres.length - limit} nữa
-        </button>
-      )}
-      {hasMore && expanded && (
-        <button
-          type="button"
-          onClick={(e) => { e.preventDefault(); e.stopPropagation(); setExpanded(false); }}
-          className="inline-flex items-center text-slate-500 hover:underline px-1 py-0.5 rounded text-[10px] cursor-pointer font-medium"
-        >
-          Thu gọn
-        </button>
-      )}
     </div>
   );
 };
