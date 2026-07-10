@@ -24,7 +24,7 @@ public class ApiGoogleBookController {
     private final GoogleBookService bookService;
 
     @GetMapping("/google-books")
-    public ResponseEntity<ResponseData<List<GoogleBookResponse>>> search(@RequestParam String query) {
+    public ResponseEntity<ResponseData<List<GoogleBookResponse>>> search(@RequestParam("query") String query) {
         List<GoogleBookResponse> response = bookService.searchBooks(query);
         return ResponseUtil.success("Lấy dữ liệu thành công", response);
     }

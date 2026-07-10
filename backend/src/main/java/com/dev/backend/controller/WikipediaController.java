@@ -29,20 +29,20 @@ public class WikipediaController {
     private final GeminiService geminiService;
 
     @GetMapping("/wikipedia")
-    public ResponseEntity<ResponseData<WikipediaResponse>> search(@RequestParam String name) {
+    public ResponseEntity<ResponseData<WikipediaResponse>> search(@RequestParam("name") String name) {
         WikipediaResponse response = wikipediaService.fetchApiInforAuthor(name);
         return ResponseUtil.success("Lấy dữ liệu thành công", response);
     }
 
     @GetMapping("/book-images")
-    public ResponseEntity<ResponseData<UrlImageResponse>> getUrlImages(@RequestParam String name) {
+    public ResponseEntity<ResponseData<UrlImageResponse>> getUrlImages(@RequestParam("name") String name) {
         UrlImageResponse images = searchApiService.getTop5ImageLinks(name);
         return ResponseUtil.success("Lấy dữ liệu thành công", images);
     }
 
     @GetMapping("/book-meta")
-    public ResponseEntity<ResponseData<BookMeta>> getBookMeta(@RequestParam String name,
-            @RequestParam List<String> authors) {
+    public ResponseEntity<ResponseData<BookMeta>> getBookMeta(@RequestParam("name") String name,
+            @RequestParam("authors") List<String> authors) {
         BookMeta bookMeta = geminiService.generateBookMeta(name, authors);
         return ResponseUtil.success("Lấy dữ liệu thành công", bookMeta);
     }
