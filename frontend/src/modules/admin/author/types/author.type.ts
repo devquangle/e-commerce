@@ -24,6 +24,13 @@ export interface AuthorWithProductCountResponse {
   name: string;
   slug: string;
   urlImage: string;
-   description: string;
+  description: string;
   bookCount: number | 0;
+}
+
+export interface AuthorFilterRequest {
+  keyword?: string;
+  status?: BaseStatus;
+  page?: number;
+  size?: number;
 }

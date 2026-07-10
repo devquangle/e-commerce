@@ -1,9 +1,8 @@
 import { apiAuth } from "@/configs/axios";
 import type { ApiResponse } from "@/types/api-response";
 
-import type { options } from "@/types/options.type";
 import type { Pagination } from "@/types/pagination";
-import type { AuthorRequest, AuthorResponse, AuthorWithProductCountResponse } from "../types/author.type";
+import type { AuthorRequest, AuthorResponse, AuthorWithProductCountResponse, AuthorFilterRequest } from "../types/author.type";
 
 const AuthorService = {
   async fetchAuthor() {
@@ -35,7 +34,7 @@ const AuthorService = {
     return res.data.data;
   },
 
-  async filterAuthor(options?: options) {
+  async filterAuthor(options?: AuthorFilterRequest) {
     const res = await apiAuth.get<ApiResponse<Pagination<AuthorResponse>>>(
       "/api/v1/admin/authors/filter",
       { params: options },

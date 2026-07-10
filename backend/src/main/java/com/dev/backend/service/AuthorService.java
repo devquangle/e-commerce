@@ -2,6 +2,7 @@ package com.dev.backend.service;
 
 import java.util.List;
 
+import com.dev.backend.dto.author.AuthorFilterRequest;
 import com.dev.backend.dto.author.AuthorRequest;
 import com.dev.backend.dto.author.AuthorResponse;
 import com.dev.backend.dto.author.AuthorWithProductCountResponse;
@@ -31,7 +32,7 @@ public interface AuthorService {
 
     void delete(Integer id);
 
-    PageResponse<AuthorResponse> pages(int page, int size, String keyword, String status);
+    PageResponse<AuthorResponse> search(AuthorFilterRequest request);
 
     List<AuthorWithProductCountResponse> findActiveAuthorsWithProductCount();
 }

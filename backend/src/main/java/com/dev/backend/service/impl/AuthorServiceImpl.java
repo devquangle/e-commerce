@@ -11,6 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.dev.backend.constant.BaseStatus;
+import com.dev.backend.dto.author.AuthorFilterRequest;
 import com.dev.backend.dto.author.AuthorRequest;
 import com.dev.backend.dto.author.AuthorResponse;
 import com.dev.backend.dto.author.AuthorWithProductCountResponse;
@@ -89,18 +90,15 @@ public class AuthorServiceImpl implements AuthorService {
     }
 
     @Override
-    public PageResponse<AuthorResponse> pages(int page, int size, String keyword, String status) {
-        Pageable pageable = PageRequest.of(
-                page,
-                size,
-                Sort.by(Sort.Direction.DESC, "id"));
+    public PageResponse<AuthorResponse> search(AuthorFilterRequest request) {
+        int page = (request.getPage() == null || request.getPage() < 1) ? 0 : request.getPage() - 1;
+        int size = (request.getSize() == null || request.getSize() < 1) ? 10 : request.getSize();
 
-        BaseStatus baseStatus = (status == null || status.isBlank())
-                ? null
-                : BaseStatus.valueOf(status);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
 
-        Page<Author> authorPage = authorRepository
-                .findByNameContainingIgnoreCase(keyword == null ? "" : keyword, baseStatus, pageable);
+        BaseStatus baseStatus = BaseStatus.from(request.getStatus());
+        String keyword = (request.getKeyword() == null) ? "" : request.getKeyword().trim();
+        Page<Author> authorPage = authorRepository.findByNameContainingIgnoreCase(keyword, baseStatus, pageable);
 
         List<AuthorResponse> items = authorPage.getContent().stream().map(authorMapper::toDTO).toList();
 
