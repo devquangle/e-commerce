@@ -51,7 +51,7 @@ public class PublisherController {
     }
 
     @PutMapping("/admin/publishers/{id}")
-    public ResponseEntity<ResponseData<PublisherResponse>> update(@PathVariable Integer id,
+    public ResponseEntity<ResponseData<PublisherResponse>> update(@PathVariable("id") Integer id,
             @RequestBody PublisherRequest publisherRequest) {
         PublisherResponse response = publisherService.update(id, publisherRequest);
         return ResponseUtil.success("Cập nhật nhà xuất bản  thành công.", response);
