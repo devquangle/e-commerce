@@ -5,16 +5,17 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.dev.backend.dto.genre.GenreFilterRequest;
 import com.dev.backend.dto.genre.GenreRequest;
 import com.dev.backend.dto.genre.GenreResponse;
 import com.dev.backend.dto.genre.GenreWithProductCountResponse;
@@ -62,12 +63,9 @@ public class GenreController {
 
     @GetMapping("/admin/genres/filter")
     public ResponseEntity<ResponseData<PageResponse<GenreResponse>>> pageGenre(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) String status) {
-        PageResponse<GenreResponse> pageGenre = genreService.pageGenre(page - 1, size, keyword, status);
-        return ResponseUtil.success("Load thể loại thành công", pageGenre);
+           @ModelAttribute GenreFilterRequest request) {
+        PageResponse<GenreResponse> items = genreService.search(request);
+        return ResponseUtil.success("Load thể loại thành công", items);
 
     }
 

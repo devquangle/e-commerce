@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.dev.backend.dto.genre.GenreFilterRequest;
 import com.dev.backend.dto.genre.GenreRequest;
 import com.dev.backend.dto.genre.GenreResponse;
 import com.dev.backend.dto.genre.GenreWithProductCountResponse;
@@ -29,7 +30,7 @@ public interface GenreService {
 
     GenreResponse updateGenre(Integer id, GenreRequest genreRequest);
 
-    PageResponse<GenreResponse> pageGenre(int page, int size, String keyword, String status);
+    PageResponse<GenreResponse> search(GenreFilterRequest request);
 
     boolean existsByName(String name);
 

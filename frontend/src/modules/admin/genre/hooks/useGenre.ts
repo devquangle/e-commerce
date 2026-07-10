@@ -6,8 +6,7 @@ import { showErrorToast, showSuccessToast } from "@/utils/toastUtil";
 import axios from "axios";
 
 import GenreService from "../services/genre.service";
-import type { GenreRequest, GenreResponse, GenreWithProductCountResponse } from "../types/genre.type";
-import type { options } from "@/types/options.type";
+import type { GenreFilterRequest, GenreRequest, GenreResponse, GenreWithProductCountResponse } from "../types/genre.type";
 
 export const useGenre = () => {
   return useQuery<GenreWithProductCountResponse[]>({
@@ -15,7 +14,7 @@ export const useGenre = () => {
     queryFn: GenreService.fetchGenre,
   });
 };
-export const useFilterGenre = (options?: options) => {
+export const useFilterGenre = (options?: GenreFilterRequest) => {
   return useQuery<Pagination<GenreResponse>>({
     queryKey: ["genres-filter", options],
     queryFn: () => GenreService.filterGenre(options),

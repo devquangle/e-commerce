@@ -20,3 +20,10 @@ export interface GenreWithProductCountResponse {
   urlImage: string;
   bookCount: number | 0;
 }
+
+export interface GenreFilterRequest {
+  keyword?: string;
+  status?: BaseStatus;
+  page?: number;
+  size?: number;
+}

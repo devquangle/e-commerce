@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.dev.backend.constant.BaseStatus;
+import com.dev.backend.dto.genre.GenreFilterRequest;
 import com.dev.backend.dto.genre.GenreRequest;
 import com.dev.backend.dto.genre.GenreResponse;
 import com.dev.backend.dto.genre.GenreWithProductCountResponse;
@@ -182,21 +183,15 @@ public class GenreServiceImpl implements GenreService {
         }
 
         @Override
-        public PageResponse<GenreResponse> pageGenre(
-                        int page,
-                        int size,
-                        String keyword,
-                        String status) {
-                Pageable pageable = PageRequest.of(
-                                page,
-                                size,
-                                Sort.by(Sort.Direction.DESC, "id"));
+        public PageResponse<GenreResponse> search(
+                        GenreFilterRequest request) {
+                int page = (request.getPage() == null || request.getPage() < 1) ? 0 : request.getPage() - 1;
+                int size = (request.getSize() == null || request.getSize() < 1) ? 10 : request.getSize();
 
-                BaseStatus baseStatus = null;
+                Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
 
-                if (status != null && !status.isBlank()) {
-                        baseStatus = BaseStatus.valueOf(status);
-                }
+                BaseStatus baseStatus = BaseStatus.from(request.getStatus());
+                String keyword = (request.getKeyword() == null) ? "" : request.getKeyword().trim();
 
                 Page<Genre> genrePage = genreRepository.filterGenres(
                                 keyword,
@@ -225,5 +220,5 @@ public class GenreServiceImpl implements GenreService {
         public List<Genre> saveAll(List<Genre> list) {
                 return genreRepository.saveAll(list);
         }
-       
+
 }

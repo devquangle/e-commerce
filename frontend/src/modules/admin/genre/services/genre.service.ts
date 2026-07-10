@@ -1,9 +1,8 @@
 import { apiAuth } from "@/configs/axios";
 import type { ApiResponse } from "@/types/api-response";
 
-import type { options } from "@/types/options.type";
 import type { Pagination } from "@/types/pagination";
-import type { GenreRequest, GenreResponse, GenreWithProductCountResponse } from "../types/genre.type";
+import type { GenreFilterRequest, GenreRequest, GenreResponse, GenreWithProductCountResponse } from "../types/genre.type";
 
 const GenreService = {
   async fetchGenre() {
@@ -35,7 +34,7 @@ const GenreService = {
     return res.data.data;
   },
 
-  async filterGenre(options?: options) {
+  async filterGenre(options?: GenreFilterRequest) {
     const res = await apiAuth.get<ApiResponse<Pagination<GenreResponse>>>(
       "/api/v1/admin/genres/filter",
       { params: options },
