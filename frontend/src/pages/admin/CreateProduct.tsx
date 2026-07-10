@@ -377,9 +377,8 @@ export default function CreateProduct() {
     );
 
   return (
-    <form
+    <div
       id="create-product-form"
-      onSubmit={handleSubmit(onSubmit)}
       className="grid grid-cols-1 xl:grid-cols-12 gap-4 items-stretch"
     >
       {/* Loading overlay khi đang gọi AI + SearchAPI hoặc đang lưu */}
@@ -433,7 +432,8 @@ export default function CreateProduct() {
             <RotateCcw size={18} /> Đặt lại
           </Button>
           <Button
-            type="submit"
+            type="button"
+            onClick={handleSubmit(onSubmit)}
             color="primary"
             className="w-full sm:w-auto cursor-pointer"
             disabled={isCreating || isSaving}
@@ -1207,6 +1207,6 @@ export default function CreateProduct() {
           </div>
         </div>
       )}
-    </form>
+    </div>
   );
 }
