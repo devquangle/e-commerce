@@ -22,13 +22,10 @@ import {
 } from "lucide-react";
 import Pagination from "@/components/common/Pagination";
 import type {
-  ProductDetailResponse,
   ProductResponse,
 } from "@/modules/admin/product/types/product.type";
 import { useFilterProduct } from "@/modules/admin/product/hooks/useProduct";
 import useProductFilter from "@/modules/admin/product/hooks/useProductFilter";
-import { useQueries } from "@tanstack/react-query";
-import ProductService from "@/modules/admin/product/services/product.service";
 import { useGetPromotionProducts } from "../hooks/usePromotionProduct";
 import type { PromotionProductDetailResponse, ProductWithPromotions } from "../types/promotion.product.type";
 import useDebounce from "@/hooks/useDebounce";
@@ -87,60 +84,27 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
   // SỬ DỤNG HOOK USEFILTERPRODUCT ĐỂ LẤY DỮ LIỆU SẢN PHẨM PHÂN TRANG TỪ SERVER
   const { data: productPagination, isLoading: isFilterLoading } =
     useFilterProduct({
-      keyword: debouncedKeyword || undefined,
+      keyword: debouncedKeyword || "",
       page,
       size: size || 10,
       status: "ACTIVE"
     });
 
-  // Lấy chi tiết các sản phẩm được chọn bằng useQueries (không dùng useProduct)
-  const selectedProductQueries = useQueries({
-    queries: selectedIds.map((id) => ({
-      queryKey: ["product", id],
-      queryFn: () => ProductService.getById(id),
-      enabled: !!id,
-    })),
+  // Lấy các sản phẩm phân trang từ Server (chuyển lên trên để dùng cho cache)
+  const serverItems = useMemo(() => {
+    return productPagination?.items || [];
+  }, [productPagination]);
+
+  // Caching các sản phẩm đã xuất hiện để không phải gọi lại getById
+  const productCache = useRef<Record<number, ProductResponse>>({});
+
+  // Cập nhật cache ngay trong render để đảm bảo luôn lấy được data mới nhất cho selectedProductsDetails
+  serverItems.forEach((p) => {
+    productCache.current[p.id] = p;
   });
 
-  const selectedQueriesHash = selectedProductQueries
-    .map((q) => `${q.data?.id || ""}-${q.data?.name || ""}-${q.isLoading}`)
-    .join("|");
 
-  const selectedProductsDetails = useMemo(() => {
-    return selectedProductQueries
-      .map((q) => q.data)
-      .filter((data): data is ProductDetailResponse => !!data)
-      .map((d): ProductResponse => {
-        const thumbnail =
-          d.coverImages?.find((img) => img.isThumbnail)?.url || "";
-        return {
-          id: d.id,
-          name: d.name,
-          slug: d.slug,
-          originalPrice: d.originalPrice,
-          price: d.price,
-          quantity: d.quantity,
-          weight: d.weight,
-          publishYear: d.publishYear,
-          pages: d.pages,
-          language: d.language,
-          status: d.status,
-          genresName: [],
-          authorsName: [],
-          publisherName: "",
-          seriesName: "",
-          urlImageDefault: thumbnail || (d.coverImages?.[0]?.url ?? ""),
-        };
-      });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedQueriesHash]);
-
-  const isDetailsLoading = useMemo(() => {
-    return selectedProductQueries.some((q) => q.isLoading);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedQueriesHash]);
-
-  const isLoading = isFilterLoading || isDetailsLoading;
+  const isLoading = isFilterLoading;
 
   const [discountsMap, setDiscountsMap] = useState<Record<number, number>>(
     () => {
@@ -199,51 +163,11 @@ const PromotionProductSelector: React.FC<PromotionProductSelectorProps> = ({
   }, [selectedIds, discountsMap, promoQuantities, onProductsDataChange]);
 
 
-  // Lấy các sản phẩm phân trang từ Server
-  const serverItems = useMemo(() => {
-    return productPagination?.items || [];
-  }, [productPagination]);
 
-  // Tìm các sản phẩm được chọn nhưng không có trên trang hiện tại để chèn lên đầu
-  const prependedItems = useMemo(() => {
-    if (selectedIds.length === 0) return [];
 
-    const serverItemIds = new Set(serverItems.map((item) => item.id));
-    const missingIds = selectedIds.filter((id) => !serverItemIds.has(id));
-
-    let missingProducts = selectedProductsDetails.filter((p) =>
-      missingIds.includes(p.id),
-    );
-
-    // Lọc theo từ khóa tìm kiếm nếu có
-    if (debouncedKeyword) {
-      const kw = debouncedKeyword.toLowerCase();
-      missingProducts = missingProducts.filter((p) =>
-        p.name.toLowerCase().includes(kw),
-      );
-    }
-
-    return missingProducts;
-  }, [selectedProductsDetails, selectedIds, serverItems, debouncedKeyword]);
-
-  const initialProductIds = useMemo(() => {
-    if (!initialProducts) return new Set<number>();
-    return new Set<number>(initialProducts.map((p) => p.productId));
-  }, [initialProducts]);
-
-  // Kết hợp danh sách sản phẩm: Sản phẩm ban đầu có sẵn luôn lên đầu, các sản phẩm khác ở sau
   const productsList: ProductResponse[] = useMemo(() => {
-    const combined = [...prependedItems, ...serverItems];
-    const uniqueMap = new Map<number, ProductResponse>();
-    combined.forEach((p) => uniqueMap.set(p.id, p));
-    const uniqueList = Array.from(uniqueMap.values());
-
-    return uniqueList.sort((a, b) => {
-      const aInitial = initialProductIds.has(a.id) ? 1 : 0;
-      const bInitial = initialProductIds.has(b.id) ? 1 : 0;
-      return bInitial - aInitial;
-    });
-  }, [prependedItems, serverItems, initialProductIds]);
+    return serverItems;
+  }, [serverItems]);
 
   const productIdsHash = productsList.map((p) => p.id).join(",");
 

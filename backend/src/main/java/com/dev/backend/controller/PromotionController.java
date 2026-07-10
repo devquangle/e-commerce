@@ -50,27 +50,27 @@ public class PromotionController {
     }
 
     @GetMapping("/admin/promotions/{id}")
-    public ResponseEntity<ResponseData<PromotionDetailResponse>> edit(@PathVariable Integer id) {
+    public ResponseEntity<ResponseData<PromotionDetailResponse>> edit(@PathVariable("id") Integer id) {
         PromotionDetailResponse response = promotionService.edit(id);
         return ResponseUtil.success("Lấy thông tin chương trình khuyến mãi thành công.", response);
     }
 
     @PutMapping("/admin/promotions/{id}")
-    public ResponseEntity<ResponseData<PromotionResponse>> update(@PathVariable Integer id,
+    public ResponseEntity<ResponseData<PromotionResponse>> update(@PathVariable("id")  Integer id,
             @Valid @RequestBody PromotionRequest promotionRequest) {
         PromotionResponse response = promotionService.updatePromotion(id, promotionRequest);
         return ResponseUtil.success("Cập nhật chương trình khuyến mãi thành công.", response);
     }
 
     @DeleteMapping("/admin/promotions/{id}")
-    public ResponseEntity<ResponseData<Void>> delete(@PathVariable Integer id) {
+    public ResponseEntity<ResponseData<Void>> delete(@PathVariable("id")  Integer id) {
         promotionService.delete(id);
         return ResponseUtil.success("Xoá chương trình khuyến mãi thành công.", null);
     }
 
     @GetMapping("/admin/promotions/by-products")
     public ResponseEntity<ResponseData<List<PromotionProductMappingResponse>>> promotionProduct(
-            @RequestParam List<Integer> productIds) {
+            @RequestParam("productIds") List<Integer> productIds) {
         List<PromotionProductMappingResponse> promotionMappingResponses= promotionProductService.promotionMappingResponses(productIds);
         return ResponseUtil.success("Xoá chương trình khuyến mãi thành công.", promotionMappingResponses);
     }
