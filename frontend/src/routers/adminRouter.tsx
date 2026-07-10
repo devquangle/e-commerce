@@ -1,5 +1,5 @@
 import Dashboard from "@/pages/admin/Dashboard";
-import Genre from "@/pages/admin/Genre";
+import Genre from "@/pages/admin/GenrePage";
 import Order from "@/pages/admin/Order";
 import OrderItem from "@/pages/admin/Order-item";
 import Product from "@/pages/admin/ProductPage";

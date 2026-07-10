@@ -49,14 +49,14 @@ public class GenreController {
 
     @PutMapping("/admin/genres/{id}")
     public ResponseEntity<ResponseData<GenreResponse>> put_genre(
-            @PathVariable Integer id,
+            @PathVariable("id") Integer id,
             @RequestBody GenreRequest genreRequest) {
         GenreResponse updateGenre = genreService.updateGenre(id, genreRequest);
         return ResponseUtil.success("Cập nhật thể loại thành công", updateGenre);
     }
 
     @DeleteMapping("/admin/genres/{id}")
-    public ResponseEntity<ResponseData<Void>> delete_genre(@PathVariable Integer id) {
+    public ResponseEntity<ResponseData<Void>> delete_genre(@PathVariable("id")  Integer id) {
         genreService.delete(id);
         return ResponseUtil.success("Xóa thể loại thành công", null);
     }

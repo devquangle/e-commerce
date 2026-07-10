@@ -14,7 +14,12 @@ import { BaseStatus, getBaseStatusLabel } from "@/types/status";
 import { mapServerErrors } from "@/utils/mapServerErrors";
 import PublisherTable from "@/modules/admin/publisher/components/PublisherTable";
 import PublisherMobileCard from "@/modules/admin/publisher/components/PublisherMobileCard";
-import { useCreatePublisher, useDeletePublisher, useFilterPublisher, useUpdatePublisher } from "@/modules/admin/publisher/hooks/usePublisher";
+import {
+  useCreatePublisher,
+  useDeletePublisher,
+  useFilterPublisher,
+  useUpdatePublisher,
+} from "@/modules/admin/publisher/hooks/usePublisher";
 import usePublisherFilter from "@/modules/admin/publisher/hooks/usePublisherFilter";
 
 const initPublisher: PublisherRequest = {
@@ -210,19 +215,19 @@ export default function PublisherPage() {
             onEdit={handleOpenSaveModal}
             onDelete={handleOpenDelete}
           />
-        </div>
 
-        <Pagination
-          currentPage={page}
-          totalPages={publishers?.totalPages || 1}
-          onPageChange={(p) => setPage(p)}
-          totalItems={publishers?.totalItems || 0}
-          pageSize={size}
-          onPageSizeChange={(s) => {
-            setSize(s);
-            setPage(1);
-          }}
-        />
+          <Pagination
+            currentPage={page}
+            totalPages={publishers?.totalPages || 1}
+            onPageChange={(p) => setPage(p)}
+            totalItems={publishers?.totalItems || 0}
+            pageSize={size}
+            onPageSizeChange={(s) => {
+              setSize(s);
+              setPage(1);
+            }}
+          />
+        </div>
       </div>
 
       {/* SAVE MODAL */}

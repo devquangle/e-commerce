@@ -1,12 +1,9 @@
-import { useState, useMemo, useEffect } from "react";
-import Modal from "@/components/common/Modal";
-import { useForm, useWatch } from "react-hook-form";
-import InputField from "@/components/common/InputField";
-import TextAreaField from "@/components/common/TextAreaField";
+import { useState, useMemo } from "react";
+import type { UseFormSetError } from "react-hook-form";
 import Pagination from "@/components/common/Pagination";
-import { useSearchParams } from "react-router-dom";
-import useDebounce from "@/hooks/useDebounce";
 import SelectBox from "@/components/common/SelectedBox";
+import SeriesFormModal from "@/modules/admin/series/components/SeriesFormModal";
+import SeriesDeleteModal from "@/modules/admin/series/components/SeriesDeleteModal";
 import { Library, Plus, RotateCcw, Search } from "lucide-react";
 
 import Button from "@/components/common/Button";
@@ -17,57 +14,32 @@ import { BaseStatus, getBaseStatusLabel } from "@/types/status";
 import { mapServerErrors } from "@/utils/mapServerErrors";
 import SeriesTable from "@/modules/admin/series/components/SeriesTable";
 import SeriesMobileCard from "@/modules/admin/series/components/SeriesMobileCard";
-import { useCreateSeries, useDeleteSeries, useFilterSeries, useUpdateSeries } from "@/modules/admin/series/hooks/useSeries";
-
-const initialFilterOptions = { keyword: "", status: "", page: 1, size: 10 };
-const initSeries: SeriesRequest = {
-  name: "",
-  description: "",
-  status: BaseStatus.ACTIVE,
-};
+import {
+  useCreateSeries,
+  useDeleteSeries,
+  useFilterSeries,
+  useUpdateSeries,
+} from "@/modules/admin/series/hooks/useSeries";
+import useSeriesFilter from "@/modules/admin/series/hooks/useSeriesFilter";
 
 export default function SeriesPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [keyword, setKeyword] = useState(
-    searchParams.get("keyword") ?? initialFilterOptions.keyword,
-  );
-  const [status, setStatus] = useState<BaseStatus | null>(
-    (searchParams.get("status") as BaseStatus) ?? null,
-  );
-  const [page, setPage] = useState<number>(
-    Number(searchParams.get("page")) || initialFilterOptions.page,
-  );
-  const [size, setSize] = useState<number>(
-    Number(searchParams.get("size")) || initialFilterOptions.size,
-  );
-
-  const debouncedKeyword = useDebounce(keyword, 500);
-
-  useEffect(() => {
-    const params = new URLSearchParams();
-    if (debouncedKeyword) params.set("keyword", debouncedKeyword);
-    if (status) params.set("status", status);
-    if (page !== initialFilterOptions.page) params.set("page", page.toString());
-    if (size !== initialFilterOptions.size) params.set("size", size.toString());
-    setSearchParams(params, { replace: true });
-  }, [debouncedKeyword, status, page, size, setSearchParams]);
+  const {
+    keyword,
+    status,
+    page,
+    size,
+    debouncedKeyword,
+    setPage,
+    setSize,
+    handleKeywordChange,
+    handleStatusChange,
+    handleResetFilter,
+  } = useSeriesFilter();
 
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [openSaveModal, setOpenSaveModal] = useState(false);
 
   const [selectItem, setSelectItem] = useState<SeriesResponse | null>(null);
-
-  const {
-    register,
-    handleSubmit,
-    reset,
-    setValue,
-    setError,
-    control,
-    formState: { errors },
-  } = useForm<SeriesRequest>({
-    defaultValues: initSeries,
-  });
 
   const statusOptions = useMemo(
     () => [
@@ -89,21 +61,7 @@ export default function SeriesPage() {
 
   const filterSeries = seriesData?.items || [];
 
-  // Handlers Filter
-  const handleKeywordChange = (val: string) => {
-    setKeyword(val);
-    setPage(1);
-  };
-  const handleStatusChange = (val: BaseStatus | null) => {
-    setStatus(val);
-    setPage(1);
-  };
-  const handleResetFilter = () => {
-    setKeyword("");
-    setStatus(null);
-    setPage(initialFilterOptions.page);
-    setSize(initialFilterOptions.size);
-  };
+  // Handlers Filter removed (now in useSeriesFilter)
 
   const handleOpenDelete = (item: SeriesResponse) => {
     setSelectItem(item);
@@ -118,29 +76,23 @@ export default function SeriesPage() {
   const updateMutation = useUpdateSeries();
   const deleteMutation = useDeleteSeries();
 
-  const onSubmitAdd = async (req: SeriesRequest) => {
-    if (createMutation.isPending) return;
-    try {
-      await createMutation.mutateAsync(req);
-      handleCloseSaveModal();
-    } catch (error: unknown) {
-      mapServerErrors(error, setError, showErrorToast);
-    }
-  };
-
-  const onSubmitUpdate = async (req: SeriesRequest) => {
-    if (updateMutation.isPending) return;
-    try {
-      if (!selectItem) return;
-
-      await updateMutation.mutateAsync({
-        id: selectItem.id ?? 0,
-        req,
-      });
-
-      handleCloseSaveModal();
-    } catch (error: unknown) {
-      mapServerErrors(error, setError, showErrorToast);
+  const handleSubmitModal = async (req: SeriesRequest, setError: UseFormSetError<SeriesRequest>) => {
+    if (selectItem) {
+      if (updateMutation.isPending) return;
+      try {
+        await updateMutation.mutateAsync({ id: selectItem.id ?? 0, req });
+        handleCloseSaveModal();
+      } catch (error: unknown) {
+        mapServerErrors(error, setError, showErrorToast);
+      }
+    } else {
+      if (createMutation.isPending) return;
+      try {
+        await createMutation.mutateAsync(req);
+        handleCloseSaveModal();
+      } catch (error: unknown) {
+        mapServerErrors(error, setError, showErrorToast);
+      }
     }
   };
 
@@ -151,21 +103,11 @@ export default function SeriesPage() {
   };
 
   const handleOpenSaveModal = (item: SeriesResponse | null) => {
-    if (item) {
-      setSelectItem(item);
-      reset({
-        name: item.name,
-        description: item.description || "",
-        status: item.status,
-      });
-    } else {
-      reset(initSeries);
-    }
+    setSelectItem(item);
     setOpenSaveModal(true);
   };
 
   const handleCloseSaveModal = () => {
-    reset(initSeries);
     setSelectItem(null);
     setOpenSaveModal(false);
   };
@@ -217,7 +159,7 @@ export default function SeriesPage() {
               <SelectBox<BaseStatus | null>
                 options={statusOptions}
                 value={status}
-                onChange={handleStatusChange}
+                onChange={(val) => handleStatusChange(val ?? null)}
                 searchable={false}
               />
             </div>
@@ -239,87 +181,34 @@ export default function SeriesPage() {
             onEdit={handleOpenSaveModal}
             onDelete={handleOpenDelete}
           />
-        </div>
 
-        <Pagination
-          currentPage={page}
-          totalPages={seriesData?.totalPages || 1}
-          onPageChange={(p) => setPage(p)}
-          totalItems={seriesData?.totalItems || 0}
-          pageSize={size}
-          onPageSizeChange={(s) => {
-            setSize(s);
-            setPage(1);
-          }}
-        />
+          <Pagination
+            currentPage={page}
+            totalPages={seriesData?.totalPages || 1}
+            onPageChange={(p) => setPage(p)}
+            totalItems={seriesData?.totalItems || 0}
+            pageSize={size}
+            onPageSizeChange={(s) => {
+              setSize(s);
+              setPage(1);
+            }}
+          />
+        </div>
       </div>
 
-      {/* SAVE MODAL */}
-      <Modal
+      <SeriesFormModal
         isOpen={openSaveModal}
         onClose={handleCloseSaveModal}
-        title={selectItem ? "Cập nhật Series" : "Thêm Series"}
-        onConfirm={
-          selectItem ? handleSubmit(onSubmitUpdate) : handleSubmit(onSubmitAdd)
-        }
-        confirmText={selectItem ? "Cập nhật Series" : "Thêm Series"}
-        cancelText="Hủy"
-        size="lg"
-      >
-        <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-          <InputField
-            label="Tên Series"
-            name="name"
-            type="text"
-            placeholder="Nhập tên series..."
-            register={register}
-            rules={{ required: "Tên series là bắt buộc" }}
-            error={errors?.name}
-          />
-          <SelectBox<BaseStatus>
-            label="Trạng thái"
-            options={(Object.values(BaseStatus) as BaseStatus[])
-              .filter((statusVal) => statusVal !== "DELETED")
-              .map((value) => ({
-                label: getBaseStatusLabel(value),
-                value,
-              }))}
-            value={useWatch({ control, name: "status" })}
-            onChange={(val) => setValue("status", val)}
-            searchable={false}
-          />
-          <TextAreaField
-            label="Mô tả"
-            name="description"
-            placeholder="Nhập mô tả series..."
-            rows={4}
-            register={register}
-            error={errors?.description}
-          />
-        </form>
-      </Modal>
+        selectItem={selectItem}
+        onSubmit={handleSubmitModal}
+      />
 
-      {/* DELETE MODAL */}
-      <Modal
+      <SeriesDeleteModal
         isOpen={openDeleteModal}
         onClose={handleCloseDelete}
-        title="Xóa Series"
+        series={selectItem}
         onConfirm={onSubmitDelete}
-        confirmText="Xóa Series"
-        cancelText="Hủy"
-      >
-        <div className="py-2">
-          {selectItem && (
-            <p className="text-slate-700 text-base leading-relaxed">
-              Bạn có chắc chắn muốn xóa series{" "}
-              <span className="font-bold text-slate-900">
-                "{selectItem.name}"
-              </span>
-              ?
-            </p>
-          )}
-        </div>
-      </Modal>
+      />
     </>
   );
 }

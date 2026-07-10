@@ -3,10 +3,7 @@ import Loading from "@/components/common/Loading";
 import { useState } from "react";
 import type { UseFormSetError } from "react-hook-form";
 import { mapServerErrors } from "@/utils/mapServerErrors";
-import {
-  showErrorToast,
-  showSuccessToast,
-} from "@/utils/toastUtil";
+import { showErrorToast, showSuccessToast } from "@/utils/toastUtil";
 import Pagination from "@/components/common/Pagination";
 
 import imageService from "@/services/imageService";
@@ -43,12 +40,8 @@ export default function Genre() {
     handleStatusChange,
     handleResetFilter,
   } = useGenreFilter();
-  
-  const {
-    data: genres,
-    isPending,
-    isFetching,
-  } = useFilterGenre({
+
+  const { data: genres, isPending } = useFilterGenre({
     keyword: debouncedKeyword,
     status: status || undefined,
     page,
@@ -149,8 +142,6 @@ export default function Genre() {
     setIsGeneratingAI(true);
 
     try {
-
-  
       const resp = await imageService.createImage({
         input: genreName,
       });
@@ -239,20 +230,19 @@ export default function Genre() {
             onEdit={handleOpenSaveModal}
             onDelete={handleOpenDeleteGenreModal}
           />
+          {/* PAGINATION */}
+          <Pagination
+            currentPage={page}
+            totalPages={genres?.totalPages || 1}
+            onPageChange={setPage}
+            totalItems={genres?.totalItems || 0}
+            pageSize={size}
+            onPageSizeChange={(s) => {
+              setSize(s);
+              setPage(1);
+            }}
+          />
         </div>
-
-        {/* PAGINATION */}
-        <Pagination
-          currentPage={page}
-          totalPages={genres?.totalPages || 1}
-          onPageChange={setPage}
-          totalItems={genres?.totalItems || 0}
-          pageSize={size}
-          onPageSizeChange={(s) => {
-            setSize(s);
-            setPage(1);
-          }}
-        />
       </div>
 
       {/* SAVE MODAL (ADD & UPDATE) */}
@@ -267,7 +257,7 @@ export default function Genre() {
         setAvatarUrl={setAvatarUrl}
         isPending={createMutation.isPending || updateGenre.isPending}
         isGeneratingAI={isGeneratingAI}
-      onGenerateAI={handleGenerateImageWithAI}
+        onGenerateAI={handleGenerateImageWithAI}
       />
 
       {/* DELETE MODAL */}

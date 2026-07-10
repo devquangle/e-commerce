@@ -67,7 +67,7 @@ export default function SeriesFormModal({
         <TextAreaField label="Mô tả" name="description" placeholder="Nhập mô tả..." rows={4} register={register} error={errors?.description} />
         <div className="space-y-1">
           <label className="block text-sm font-medium text-slate-700">Trạng thái</label>
-          <SelectBox<BaseStatus> options={statusOptions} value={currentStatus} onChange={(val) => setValue("status", val)} searchable={false} />
+          <SelectBox<BaseStatus> options={statusOptions} value={currentStatus} onChange={(val) => setValue("status", val as BaseStatus)} searchable={false} />
         </div>
       </form>
     </Modal>
