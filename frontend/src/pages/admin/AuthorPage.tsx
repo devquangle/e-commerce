@@ -122,11 +122,15 @@ export default function AuthorPage() {
     setSelectItem(null);
   };
 
-  const isSubmitting = createMutation.isPending || updateMutation.isPending;
+  if (createMutation.isPending || updateMutation.isPending) {
+    return <Loading />;
+  }
+  if (deleteMutation.isPending) {
+    return <Loading />;
+  }
 
   return (
     <>
-      {isSubmitting && <Loading />}
       <div className="flex-1 grid grid-cols-1 gap-4 auto-rows-max">
         {/* HEADER */}
         <AuthorHeader onCreate={() => handleOpenSaveModal(null)} />
@@ -160,19 +164,18 @@ export default function AuthorPage() {
               setOpenDeleteModal(true);
             }}
           />
+          <Pagination
+            currentPage={page}
+            totalPages={authors?.totalPages || 1}
+            onPageChange={setPage}
+            totalItems={authors?.totalItems || 0}
+            pageSize={size}
+            onPageSizeChange={(s) => {
+              setSize(s);
+              setPage(1);
+            }}
+          />
         </div>
-
-        <Pagination
-          currentPage={page}
-          totalPages={authors?.totalPages || 1}
-          onPageChange={setPage}
-          totalItems={authors?.totalItems || 0}
-          pageSize={size}
-          onPageSizeChange={(s) => {
-            setSize(s);
-            setPage(1);
-          }}
-        />
       </div>
 
       {/* SAVE MODAL COMPONENT (Đã tách và tối ưu) */}

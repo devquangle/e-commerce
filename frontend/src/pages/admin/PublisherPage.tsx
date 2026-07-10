@@ -1,10 +1,8 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import Modal from "@/components/common/Modal";
 import { useForm, useWatch } from "react-hook-form";
 import InputField from "@/components/common/InputField";
 import Pagination from "@/components/common/Pagination";
-import { useSearchParams } from "react-router-dom";
-import useDebounce from "@/hooks/useDebounce";
 import SelectBox from "@/components/common/SelectedBox";
 import { Building2, Plus, RotateCcw, Search } from "lucide-react";
 
@@ -17,8 +15,8 @@ import { mapServerErrors } from "@/utils/mapServerErrors";
 import PublisherTable from "@/modules/admin/publisher/components/PublisherTable";
 import PublisherMobileCard from "@/modules/admin/publisher/components/PublisherMobileCard";
 import { useCreatePublisher, useDeletePublisher, useFilterPublisher, useUpdatePublisher } from "@/modules/admin/publisher/hooks/usePublisher";
+import usePublisherFilter from "@/modules/admin/publisher/hooks/usePublisherFilter";
 
-const initialFilterOptions = { keyword: "", status: "", page: 1, size: 10 };
 const initPublisher: PublisherRequest = {
   name: "",
   street: "",
@@ -26,30 +24,18 @@ const initPublisher: PublisherRequest = {
 };
 
 export default function PublisherPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [keyword, setKeyword] = useState(
-    searchParams.get("keyword") ?? initialFilterOptions.keyword,
-  );
-  const [status, setStatus] = useState<BaseStatus | null>(
-    (searchParams.get("status") as BaseStatus) ?? null,
-  );
-  const [page, setPage] = useState<number>(
-    Number(searchParams.get("page")) || initialFilterOptions.page,
-  );
-  const [size, setSize] = useState<number>(
-    Number(searchParams.get("size")) || initialFilterOptions.size,
-  );
-
-  const debouncedKeyword = useDebounce(keyword, 500);
-
-  useEffect(() => {
-    const params = new URLSearchParams();
-    if (debouncedKeyword) params.set("keyword", debouncedKeyword);
-    if (status) params.set("status", status);
-    if (page !== initialFilterOptions.page) params.set("page", page.toString());
-    if (size !== initialFilterOptions.size) params.set("size", size.toString());
-    setSearchParams(params, { replace: true });
-  }, [debouncedKeyword, status, page, size, setSearchParams]);
+  const {
+    keyword,
+    status,
+    page,
+    size,
+    debouncedKeyword,
+    setPage,
+    setSize,
+    handleKeywordChange,
+    handleStatusChange,
+    handleResetFilter,
+  } = usePublisherFilter();
 
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [openSaveModal, setOpenSaveModal] = useState(false);
@@ -88,21 +74,7 @@ export default function PublisherPage() {
 
   const filterPublisher = publishers?.items || [];
 
-  // Handlers Filter
-  const handleKeywordChange = (val: string) => {
-    setKeyword(val);
-    setPage(1);
-  };
-  const handleStatusChange = (val: BaseStatus | null) => {
-    setStatus(val);
-    setPage(1);
-  };
-  const handleResetFilter = () => {
-    setKeyword("");
-    setStatus(null);
-    setPage(initialFilterOptions.page);
-    setSize(initialFilterOptions.size);
-  };
+  // Handlers Filter removed (now in usePublisherFilter)
 
   const handleOpenDelete = (item: PublisherResponse) => {
     setSelectItem(item);
@@ -216,7 +188,7 @@ export default function PublisherPage() {
               <SelectBox<BaseStatus | null>
                 options={statusOptions}
                 value={status}
-                onChange={handleStatusChange}
+                onChange={(val) => handleStatusChange(val ?? null)}
                 searchable={false}
               />
             </div>
@@ -285,7 +257,7 @@ export default function PublisherPage() {
                 value,
               }))}
             value={useWatch({ control, name: "status" })}
-            onChange={(val) => setValue("status", val)}
+            onChange={(val) => setValue("status", val as BaseStatus)}
             searchable={false}
           />
           <InputField

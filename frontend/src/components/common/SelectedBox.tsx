@@ -10,7 +10,7 @@ interface Props<T> {
   label?: string;
   options: Option<T>[];
   value?: T | null;
-  onChange: (value: T | null | undefined) => void;
+  onChange: (value: T | null ) => void;
   placeholder?: string;
   disabled?: boolean;
   searchable?: boolean;
@@ -120,7 +120,7 @@ export default function SelectBox<T>({
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                onChange(undefined);
+                onChange(null);
                 setSearch("");
               }}
               className="hover:text-red-500 transition-colors p-0.5 rounded-md hover:bg-slate-100"

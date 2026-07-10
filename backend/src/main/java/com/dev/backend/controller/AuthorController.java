@@ -51,14 +51,14 @@ public class AuthorController {
     }
 
     @PutMapping("/admin/authors/{id}")
-    public ResponseEntity<ResponseData<AuthorResponse>> update(@PathVariable Integer id,
+    public ResponseEntity<ResponseData<AuthorResponse>> update(@PathVariable("id") Integer id,
             @RequestBody AuthorRequest authorRequest) {
         AuthorResponse response = authorService.update(id, authorRequest);
         return ResponseUtil.success("Cập nhật tác giả thành công.", response);
     }
 
     @DeleteMapping("/admin/authors/{id}")
-    public ResponseEntity<ResponseData<Void>> delete(@PathVariable Integer id) {
+    public ResponseEntity<ResponseData<Void>> delete(@PathVariable("id") Integer id) {
         authorService.delete(id);
         return ResponseUtil.success("Cập nhật tác giả thành công.", null);
     }

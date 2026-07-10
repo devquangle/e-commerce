@@ -5,7 +5,10 @@ import Pagination from "@/components/common/Pagination";
 import type { ProductResponse } from "@/modules/admin/product/types/product.type";
 import ProductTable from "@/modules/admin/product/components/ProductTable";
 import ProductMobileCard from "@/modules/admin/product/components/ProductMobileCard";
-import { useDeleteProduct, useFilterProduct } from "@/modules/admin/product/hooks/useProduct";
+import {
+  useDeleteProduct,
+  useFilterProduct,
+} from "@/modules/admin/product/hooks/useProduct";
 import { BaseStatus, getBaseStatusLabel } from "@/types/status";
 import useProductFilter from "@/modules/admin/product/hooks/useProductFilter";
 import ProductHeader from "@/modules/admin/product/components/ProductHeader";
@@ -71,38 +74,40 @@ export default function Product() {
   const memoStatusOptions = useMemo(() => statusOptions, []);
 
   return (
-    <>
-      <div className="flex-1 grid grid-cols-1 gap-4 auto-rows-max">
-        {/* HEADER */}
-        <ProductHeader onCreate={() => navigate("/admin/product/add")} />
+    <div className="flex-1 grid grid-cols-1 gap-4 auto-rows-max">
+      {/* HEADER */}
+      <ProductHeader onCreate={() => navigate("/admin/product/add")} />
 
-        {/* FILTER & TABLE */}
-        <div className="card-custom">
-          <ProductFilter
-            keyword={keyword}
-            status={status}
-            statusOptions={memoStatusOptions}
-            onKeywordChange={handleKeywordChange}
-            onStatusChange={handleStatusChange}
-            onReset={handleResetFilter}
-          />
-
-          <ProductTable products={filterProducts} onDelete={handleOpenDelete} />
-          <ProductMobileCard products={filterProducts} onDelete={handleOpenDelete} />
-        </div>
-
-        {/* PAGINATION */}
-        <Pagination
-          currentPage={page}
-          totalPages={products?.totalPages || 1}
-          onPageChange={setPage}
-          totalItems={products?.totalItems || 0}
-          pageSize={size}
-          onPageSizeChange={(s) => {
-            setSize(s);
-            setPage(1);
-          }}
+      {/* FILTER & TABLE */}
+      <div className="card-custom">
+        <ProductFilter
+          keyword={keyword}
+          status={status}
+          statusOptions={memoStatusOptions}
+          onKeywordChange={handleKeywordChange}
+          onStatusChange={handleStatusChange}
+          onReset={handleResetFilter}
         />
+
+        <ProductTable products={filterProducts} onDelete={handleOpenDelete} />
+        <ProductMobileCard
+          products={filterProducts}
+          onDelete={handleOpenDelete}
+        />
+        {/* PAGINATION */}
+        {products && products.totalItems > 0 && (
+          <Pagination
+            currentPage={page}
+            totalPages={products?.totalPages || 1}
+            onPageChange={setPage}
+            totalItems={products?.totalItems || 0}
+            pageSize={size}
+            onPageSizeChange={(s) => {
+              setSize(s);
+              setPage(1);
+            }}
+          />
+        )}
       </div>
 
       {/* DELETE MODAL */}
@@ -112,7 +117,6 @@ export default function Product() {
         onClose={handleCloseDelete}
         onConfirm={onSubmitDelete}
       />
-    </>
+    </div>
   );
 }
-
