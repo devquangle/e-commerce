@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.dev.backend.dto.publisher.PublisherFilterRequest;
 import com.dev.backend.dto.publisher.PublisherRequest;
 import com.dev.backend.dto.publisher.PublisherResponse;
 import com.dev.backend.dto.publisher.PublisherWithProductCountResponse;
@@ -37,11 +39,8 @@ public class PublisherController {
 
     @GetMapping("/admin/publishers/filter")
     public ResponseEntity<ResponseData<PageResponse<PublisherResponse>>> filter(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) String status) {
-        PageResponse<PublisherResponse> response = publisherService.pages(page - 1, size, keyword, status);
+            @ModelAttribute PublisherFilterRequest request) {
+        PageResponse<PublisherResponse> response = publisherService.search(request);
         return ResponseUtil.success("Lấy danh sách nhà xuất bản thành công", response);
     }
 

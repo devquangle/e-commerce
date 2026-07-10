@@ -1,7 +1,6 @@
 import { apiAuth } from "@/configs/axios";
 import type { ApiResponse } from "@/types/api-response";
-import type { PublisherRequest, PublisherResponse, PublisherWithProductCountResponse  } from "../types/publisher.type";
-import type { options } from "@/types/options.type";
+import type { PublisherFilterRequest, PublisherRequest, PublisherResponse, PublisherWithProductCountResponse  } from "../types/publisher.type";
 import type { Pagination } from "@/types/pagination";
 
 const PublisherService = {
@@ -34,7 +33,7 @@ const PublisherService = {
     return res.data.data;
   },
 
-  async filterPublisher(options?: options) {
+  async filterPublisher(options?: PublisherFilterRequest ) {
     const res = await apiAuth.get<ApiResponse<Pagination<PublisherResponse>>>(
       "/api/v1/admin/publishers/filter",
       { params: options },

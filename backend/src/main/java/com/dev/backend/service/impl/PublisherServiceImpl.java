@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.dev.backend.constant.BaseStatus;
+import com.dev.backend.dto.publisher.PublisherFilterRequest;
 import com.dev.backend.dto.publisher.PublisherRequest;
 import com.dev.backend.dto.publisher.PublisherResponse;
 import com.dev.backend.dto.publisher.PublisherWithProductCountResponse;
@@ -33,8 +34,6 @@ import lombok.extern.slf4j.Slf4j;
 public class PublisherServiceImpl implements PublisherService {
     private final PublisherRepository publisherRepository;
     private final PublisherMapper publisherMapper;
-
-
 
     @Override
     public List<PublisherResponse> findAll() {
@@ -124,18 +123,18 @@ public class PublisherServiceImpl implements PublisherService {
     }
 
     @Override
-    public PageResponse<PublisherResponse> pages(int page, int size, String keyword, String status) {
-        Pageable pageable = PageRequest.of(
-                page,
-                size,
-                Sort.by(Sort.Direction.DESC, "id"));
+    public PageResponse<PublisherResponse> search(PublisherFilterRequest request) {
 
-        BaseStatus baseStatus = (status == null || status.isBlank())
-                ? null
-                : BaseStatus.valueOf(status);
+        int page = (request.getPage() == null || request.getPage() < 1) ? 0 : request.getPage() - 1;
+        int size = (request.getSize() == null || request.getSize() < 1) ? 10 : request.getSize();
 
-        Page<Publisher> publisherPage = publisherRepository
-                .findByNameContainingIgnoreCase(keyword == null ? "" : keyword, baseStatus, pageable);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+
+        BaseStatus baseStatus = BaseStatus.from(request.getStatus());
+        String keyword = (request.getKeyword() == null) ? "" : request.getKeyword().trim();
+
+        Page<Publisher> publisherPage = publisherRepository.findByNameContainingIgnoreCase(keyword, baseStatus,
+                pageable);
 
         List<PublisherResponse> items = publisherPage.getContent().stream().map(publisherMapper::toDTO).toList();
 

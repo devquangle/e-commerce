@@ -1,19 +1,18 @@
 
-import type { PublisherRequest, PublisherResponse } from "../types/publisher.type";
+import type { PublisherFilterRequest, PublisherRequest, PublisherResponse, PublisherWithProductCountResponse } from "../types/publisher.type";
 import type { Pagination } from "@/types/pagination";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { showErrorToast, showSuccessToast } from "@/utils/toastUtil";
 import axios from "axios";
-import type { options } from "@/types/options.type";
 import PublisherService from "../services/publisher.service";
 
 export const usePublisher = () => {
-  return useQuery<PublisherResponse[]>({
+  return useQuery<PublisherWithProductCountResponse[]>({
     queryKey: ["publishers"],
     queryFn: PublisherService.fetchPublisher,
   });
 };
-export const useFilterPublisher = (options?: options) => {
+export const useFilterPublisher = (options?: PublisherFilterRequest) => {
   return useQuery<Pagination<PublisherResponse>>({
     queryKey: ["publishers-filter", options],
     queryFn: () => PublisherService.filterPublisher(options),

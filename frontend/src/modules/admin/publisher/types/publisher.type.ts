@@ -21,3 +21,11 @@ export interface PublisherWithProductCountResponse {
   slug: string;
   bookCount: number | 0;
 }
+
+
+export interface PublisherFilterRequest {
+  keyword?: string;
+  status?: BaseStatus;
+  page?: number;
+  size?: number;
+}

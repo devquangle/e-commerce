@@ -2,6 +2,7 @@ package com.dev.backend.service;
 
 import java.util.List;
 
+import com.dev.backend.dto.publisher.PublisherFilterRequest;
 import com.dev.backend.dto.publisher.PublisherRequest;
 import com.dev.backend.dto.publisher.PublisherResponse;
 import com.dev.backend.dto.publisher.PublisherWithProductCountResponse;
@@ -29,7 +30,7 @@ public interface PublisherService {
 
     void delete(Integer id);
 
-    PageResponse<PublisherResponse> pages(int page, int size, String keyword, String status);
+    PageResponse<PublisherResponse> search(PublisherFilterRequest request);
 
     List<PublisherWithProductCountResponse> findActivePublishersWithProductCount();
 
