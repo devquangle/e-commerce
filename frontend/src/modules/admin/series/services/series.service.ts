@@ -1,7 +1,6 @@
 import { apiAuth } from "@/configs/axios";
 import type { ApiResponse } from "@/types/api-response";
-import type { SeriesRequest, SeriesResponse, SeriesWithProductCountResponse  } from "../types/series.type";
-import type { options } from "@/types/options.type";
+import type { SeriesFilterRequest, SeriesRequest, SeriesResponse, SeriesWithProductCountResponse  } from "../types/series.type";
 import type { Pagination } from "@/types/pagination";
 
 const SeriesService = {
@@ -34,7 +33,7 @@ const SeriesService = {
     return res.data.data;
   },
 
-  async filterSeries(options?: options) {
+  async filterSeries(options?: SeriesFilterRequest) {
     const res = await apiAuth.get<ApiResponse<Pagination<SeriesResponse>>>(
       "/api/v1/admin/series/filter",
       { params: options },

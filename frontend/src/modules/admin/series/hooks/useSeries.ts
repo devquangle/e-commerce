@@ -1,19 +1,18 @@
 
-import type { SeriesRequest, SeriesResponse } from "../types/series.type";
+import type { SeriesFilterRequest, SeriesRequest, SeriesResponse, SeriesWithProductCountResponse } from "../types/series.type";
 import type { Pagination } from "@/types/pagination";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { showErrorToast, showSuccessToast } from "@/utils/toastUtil";
 import axios from "axios";
-import type { options } from "@/types/options.type";
 import SeriesService from "../services/series.service";
 
 export const useSeries = () => {
-  return useQuery<SeriesResponse[]>({
+  return useQuery<SeriesWithProductCountResponse[]>({
     queryKey: ["series"],
     queryFn: SeriesService.fetchSeries,
   });
 };
-export const useFilterSeries = (options?: options) => {
+export const useFilterSeries = (options?: SeriesFilterRequest) => {
   return useQuery<Pagination<SeriesResponse>>({
     queryKey: ["series-filter", options],
     queryFn: () => SeriesService.filterSeries(options),

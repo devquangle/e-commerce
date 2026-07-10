@@ -21,3 +21,10 @@ export interface SeriesWithProductCountResponse {
   slug: string;
   bookCount: number | 0;
 }
+
+export interface SeriesFilterRequest {
+  keyword?: string;
+  status?: BaseStatus;
+  page?: number;
+  size?: number;
+}

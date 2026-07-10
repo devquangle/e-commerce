@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.dev.backend.constant.BaseStatus;
+import com.dev.backend.dto.series.SeriesFilterRequest;
 import com.dev.backend.dto.series.SeriesRequest;
 import com.dev.backend.dto.series.SeriesResponse;
 import com.dev.backend.dto.series.SeriesWithProductCountResponse;
@@ -123,21 +124,16 @@ public class SeriesServiceImpl implements SeriesService {
     }
 
     @Override
-    public PageResponse<SeriesResponse> pages(int page, int size, String keyword, String status) {
-        Pageable pageable = PageRequest.of(
-                page,
-                size,
-                Sort.by(Sort.Direction.DESC, "id"));
+    public PageResponse<SeriesResponse> search(SeriesFilterRequest request) {
+         int page = (request.getPage() == null || request.getPage() < 1) ? 0 : request.getPage() - 1;
+        int size = (request.getSize() == null || request.getSize() < 1) ? 10 : request.getSize();
 
-        BaseStatus baseStatus = (status == null || status.isBlank())
-                ? null
-                : BaseStatus.valueOf(status);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
 
-        Page<Series> seriesPage = seriesRepository
-                .findByNameContainingIgnoreCase(keyword == null ? "" : keyword, baseStatus, pageable);
-
+        BaseStatus baseStatus = BaseStatus.from(request.getStatus());
+        String keyword = (request.getKeyword() == null) ? "" : request.getKeyword().trim();
+        Page<Series> seriesPage = seriesRepository.findByNameContainingIgnoreCase(keyword, baseStatus, pageable);
         List<SeriesResponse> items = seriesPage.getContent().stream().map(seriesMapper::toDTO).toList();
-
         return new PageResponse<>(
                 items,
                 seriesPage.getNumber(),

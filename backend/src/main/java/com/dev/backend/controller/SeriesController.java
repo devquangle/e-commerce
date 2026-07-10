@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.dev.backend.dto.series.SeriesFilterRequest;
 import com.dev.backend.dto.series.SeriesRequest;
 import com.dev.backend.dto.series.SeriesResponse;
 import com.dev.backend.dto.series.SeriesWithProductCountResponse;
@@ -37,11 +39,8 @@ public class SeriesController {
 
     @GetMapping("/admin/series/filter")
     public ResponseEntity<ResponseData<PageResponse<SeriesResponse>>> filter(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) String status) {
-        PageResponse<SeriesResponse> response = seriesService.pages(page - 1, size, keyword, status);
+        @ModelAttribute SeriesFilterRequest request) {
+        PageResponse<SeriesResponse> response = seriesService.search(request);
         return ResponseUtil.success("Lấy danh sách bộ truyện thành công", response);
     }
 

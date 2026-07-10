@@ -2,6 +2,7 @@ package com.dev.backend.service;
 
 import java.util.List;
 
+import com.dev.backend.dto.series.SeriesFilterRequest;
 import com.dev.backend.dto.series.SeriesRequest;
 import com.dev.backend.dto.series.SeriesResponse;
 import com.dev.backend.dto.series.SeriesWithProductCountResponse;
@@ -29,7 +30,7 @@ public interface SeriesService {
 
     void delete(Integer id);
 
-    PageResponse<SeriesResponse> pages(int page, int size, String keyword, String status);
+    PageResponse<SeriesResponse> search(SeriesFilterRequest request);
 
     List<SeriesWithProductCountResponse> findActiveSeriesWithProductCount();
 }
