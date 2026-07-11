@@ -1,7 +1,7 @@
 package com.dev.backend.entity;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -22,17 +22,17 @@ import lombok.Setter;
 public abstract class BaseAuditableEntity<ID extends Serializable> extends BaseEntity<ID> {
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private LocalDate createdAt;
 
     @LastModifiedDate
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    private LocalDate updatedAt;
+
     @CreatedBy
     @Column(name = "created_by", updatable = false)
     private Integer createdBy;
     @LastModifiedBy
     @Column(name = "updated_by")
     private Integer updatedBy;
-    @Column(name = "note")
-    private String note;
+
 }
