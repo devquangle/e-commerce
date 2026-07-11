@@ -1,10 +1,12 @@
 package com.dev.backend.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,9 +44,23 @@ public class VoucherController {
 
     @PostMapping
     public ResponseEntity<ResponseData<VoucherRepsonse>> add(
-           @RequestBody VoucherRequest request) {
+            @RequestBody VoucherRequest request) {
         VoucherRepsonse response = voucherService.add(request);
         return ResponseUtil.success("Tạo voucher thành công", response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ResponseData<Void>> delete(
+            @PathVariable("id") Integer id) {
+        voucherService.delete(id);
+        return ResponseUtil.success("Xoá voucher thành công", null);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ResponseData<VoucherRepsonse>> update(
+            @PathVariable("id") Integer id, @RequestBody VoucherRequest request) {
+        VoucherRepsonse response = voucherService.update(id, request);
+        return ResponseUtil.success("Xoá voucher thành công", response);
     }
 
 }

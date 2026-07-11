@@ -8,7 +8,7 @@ import { formatToMMDDYYYY } from "@/utils/formatDate.utils";
 interface VoucherTableProps {
   vouchers: VoucherResponse[];
   onEdit: (voucher: VoucherResponse) => void;
-  onDelete: (code: string) => void;
+  onDelete: (voucher: VoucherResponse) => void;
   page: number;
   pageSize: number;
 }
@@ -155,8 +155,17 @@ const VoucherTable: React.FC<VoucherTableProps> = ({
                     {formatToMMDDYYYY(voucher.startDate)} - {formatToMMDDYYYY(voucher.endDate)}
                   </span>
                 </td>
-                <td className="py-4 px-4 text-slate-700 font-medium">
-                  {voucher.usedCount}/{voucher.usageLimit} lượt
+                <td className="py-4 px-4 align-top">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-slate-700 font-medium">
+                      {voucher.usedCount}/{voucher.usageLimit} lượt
+                    </span>
+                    {voucher.usageLimitPerUser > 0 && (
+                      <span className="text-[11px] text-slate-500">
+                        (Tối đa {voucher.usageLimitPerUser} lượt/user)
+                      </span>
+                    )}
+                  </div>
                 </td>
                 <td className="py-4 px-4">
                   <span
@@ -177,7 +186,7 @@ const VoucherTable: React.FC<VoucherTableProps> = ({
                       Sửa
                     </button>
                     <button
-                      onClick={() => onDelete(voucher.code)}
+                      onClick={() => onDelete(voucher)}
                       className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 hover:border-rose-300 transition-all cursor-pointer"
                     >
                       <Trash2 size={13} />

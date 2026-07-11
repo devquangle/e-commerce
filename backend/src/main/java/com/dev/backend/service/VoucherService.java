@@ -16,6 +16,8 @@ public interface VoucherService {
 
     VoucherRepsonse update(Integer id, VoucherRequest request);
 
+    void delete(Integer id);
+
     PageResponse<VoucherRepsonse> search(VoucherFilterRequest request);
 
     void insertData();

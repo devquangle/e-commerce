@@ -20,6 +20,7 @@ public class VoucherRepsonse {
 
     private Integer usageLimit;
     private Integer usedCount;
+    private Integer usageLimitPerUser;
 
     private LocalDate startDate;
     private LocalDate endDate;

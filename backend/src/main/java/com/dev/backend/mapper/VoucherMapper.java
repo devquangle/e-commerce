@@ -23,7 +23,8 @@ public class VoucherMapper {
 
         dto.setUsageLimit(voucher.getUsageLimit());
         dto.setUsedCount(voucher.getUsedCount());
-
+        dto.setUsageLimitPerUser(voucher.getUsageLimitPerUser());
+        
         dto.setStartDate(voucher.getStartDate());
         dto.setEndDate(voucher.getEndDate());
 
@@ -40,6 +41,20 @@ public class VoucherMapper {
         voucher.setMaxDiscountValue(request.getMaxDiscountValue());
         voucher.setUsageLimitPerUser(request.getUsageLimitPerUser());
         voucher.setUsedCount(0);
+        voucher.setUsageLimit(request.getUsageLimit());
+        voucher.setStartDate(request.getStartDate());
+        voucher.setEndDate(request.getEndDate());
+        voucher.setStatus(request.getStatus());
+        return voucher;
+
+    }
+
+      public Voucher update(Voucher voucher, VoucherRequest request) {
+        voucher.setName(request.getName());
+        voucher.setDiscountValue(request.getDiscountValue());
+        voucher.setMinOrderValue(request.getMinOrderValue());
+        voucher.setMaxDiscountValue(request.getMaxDiscountValue());
+        voucher.setUsageLimitPerUser(request.getUsageLimitPerUser());
         voucher.setUsageLimit(request.getUsageLimit());
         voucher.setStartDate(request.getStartDate());
         voucher.setEndDate(request.getEndDate());

@@ -51,8 +51,15 @@ public class VoucherServiceImpl implements VoucherService {
 
     @Override
     public VoucherRepsonse update(Integer id, VoucherRequest request) {
-        // TODO Auto-generated method stub
-        return null;
+        Voucher voucher = voucherMapper.update(findById(id), request);
+        return voucherMapper.toDTO(voucherRepository.save(voucher));
+    }
+
+    @Override
+    public void delete(Integer id) {
+        Voucher voucher = findById(id);
+        voucher.setStatus(VoucherStatus.DELETED);
+        voucherRepository.save(voucher);
     }
 
     @Override

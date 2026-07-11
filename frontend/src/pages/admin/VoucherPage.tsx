@@ -1,12 +1,14 @@
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import VoucherHeader from "@/modules/admin/voucher/components/VoucherHeader";
 import VoucherFilter from "@/modules/admin/voucher/components/VoucherFilter";
 import VoucherTable from "@/modules/admin/voucher/components/VoucherTable";
 import VoucherMobileCard from "@/modules/admin/voucher/components/VoucherMobileCard";
+import VoucherDeleteModal from "@/modules/admin/voucher/components/VoucherDeleteModal";
 import Pagination from "@/components/common/Pagination";
 import type { VoucherResponse } from "@/modules/admin/voucher/types/voucher.type";
 import { VoucherStatus, getVoucherStatusLabel } from "@/modules/admin/voucher/types/voucher.status";
-import { useFilterVoucher } from "@/modules/admin/voucher/hooks/useVoucher";
+import { useFilterVoucher, useDeleteVoucher } from "@/modules/admin/voucher/hooks/useVoucher";
 import useVoucherSearch from "@/modules/admin/voucher/hooks/useVoucherSearch";
 
 export default function VoucherPage() {
@@ -41,6 +43,8 @@ export default function VoucherPage() {
   const totalPages = voucherData?.totalPages || 1;
   const totalItems = voucherData?.totalItems || 0;
 
+  const { mutate: deleteVoucher } = useDeleteVoucher();
+
   const handleCreateClick = () => {
     navigate("/admin/vouchers/add");
   };
@@ -49,9 +53,24 @@ export default function VoucherPage() {
     navigate(`/admin/vouchers/edit/${voucher.id}`);
   };
 
-  const handleDelete = (code: string) => {
-    if (window.confirm(`Bạn có chắc chắn muốn xóa voucher ${code}?`)) {
-      console.log("Not implemented: Delete API for voucher", code);
+  const [deleteModalState, setDeleteModalState] = React.useState<{ isOpen: boolean; voucher: VoucherResponse | null }>({
+    isOpen: false,
+    voucher: null,
+  });
+
+  const handleDelete = (voucher: VoucherResponse) => {
+    setDeleteModalState({ isOpen: true, voucher });
+  };
+
+  const handleConfirmDelete = () => {
+    if (deleteModalState.voucher) {
+      deleteVoucher(deleteModalState.voucher.id, {
+        onSuccess: () => {
+          setDeleteModalState({ isOpen: false, voucher: null });
+        }
+      });
+    } else {
+      setDeleteModalState({ isOpen: false, voucher: null });
     }
   };
 
@@ -106,6 +125,13 @@ export default function VoucherPage() {
           onPageSizeChange={setSize}
         />
       </div>
+
+      <VoucherDeleteModal
+        isOpen={deleteModalState.isOpen}
+        onClose={() => setDeleteModalState({ isOpen: false, voucher: null })}
+        onConfirm={handleConfirmDelete}
+        voucher={deleteModalState.voucher}
+      />
     </div>
   );
 }

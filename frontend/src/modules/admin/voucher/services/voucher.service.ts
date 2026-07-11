@@ -39,5 +39,28 @@ const VoucherService = {
 
     return res.data.data;
   },
+
+  async updateVoucher(id: number, data: VoucherRequest) {
+    const res = await apiAuth.put<ApiResponse<VoucherResponse>>(
+      `/api/v1/vouchers/${id}`,
+      data,
+    );
+
+    if (!res.data.success || !res.data.data) {
+      throw new Error(res.data.message || "Update voucher failed");
+    }
+
+    return res.data.data;
+  },
+
+  async deleteVoucher(id: number) {
+    const res = await apiAuth.delete<ApiResponse<void>>(
+      `/api/v1/vouchers/${id}`,
+    );
+    if (!res.data.success) {
+      throw new Error(res.data.message || "Delete voucher failed");
+    }
+    return res.data;
+  },
 };
 export default VoucherService;

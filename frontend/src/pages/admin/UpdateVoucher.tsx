@@ -5,7 +5,7 @@ import type { VoucherRequest } from "@/modules/admin/voucher/types/voucher.type"
 import VoucherForm from "@/modules/admin/voucher/components/VoucherForm";
 import { initialFormValues } from "@/modules/admin/voucher/constants/voucher.constant";
 import VoucherHeaderUpdate from "@/modules/admin/voucher/components/VoucherHeaderUpdate";
-import { useGetVoucherById } from "@/modules/admin/voucher/hooks/useVoucher";
+import { useGetVoucherById, useUpdateVoucher } from "@/modules/admin/voucher/hooks/useVoucher";
 
 export default function UpdateVoucher() {
   const navigate = useNavigate();
@@ -14,6 +14,7 @@ export default function UpdateVoucher() {
   const voucherId = Number(id);
 
   const { data: voucherData } = useGetVoucherById(voucherId);
+  const updateVoucherMutation = useUpdateVoucher();
 
   const form = useForm<VoucherRequest>({
     defaultValues: initialFormValues,
@@ -40,10 +41,14 @@ export default function UpdateVoucher() {
   // Mock finding initial data. Later replace with API call like useQuery hook
 
   const handleFormSubmit = (formData: VoucherRequest) => {
-    // Logic cho việc submit edit voucher (Tạm thời mockup, sau này sẽ tích hợp API)
-    console.log("Update Voucher:", formData);
-    // Quay về trang danh sách
-  
+    updateVoucherMutation.mutate(
+      { id: voucherId, data: formData },
+      {
+        onSuccess: () => {
+          navigate("/admin/vouchers");
+        },
+      }
+    );
   };
 
   const handleCancel = () => {

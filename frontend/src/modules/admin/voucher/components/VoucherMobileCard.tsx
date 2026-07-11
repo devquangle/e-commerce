@@ -8,7 +8,7 @@ import { formatToMMDDYYYY } from "@/utils/formatDate.utils";
 interface VoucherMobileCardProps {
   vouchers: VoucherResponse[];
   onEdit: (voucher: VoucherResponse) => void;
-  onDelete: (code: string) => void;
+  onDelete: (voucher: VoucherResponse) => void;
 }
 
 const statusClass = (status: BaseStatus) => {
@@ -129,11 +129,18 @@ const VoucherMobileCard: React.FC<VoucherMobileCardProps> = ({
                   {formatToMMDDYYYY(voucher.startDate)} - {formatToMMDDYYYY(voucher.endDate)}
                 </span>
               </div>
-              <div className="flex justify-between border-t border-slate-50 pt-2">
-                <span className="text-slate-500 font-medium">Lượt sử dụng:</span>
-                <span className="text-slate-800 font-bold">
-                  {voucher.usedCount}/{voucher.usageLimit} lượt
-                </span>
+              <div className="flex justify-between border-t border-slate-50 pt-2 items-start">
+                <span className="text-slate-500 font-medium mt-0.5">Lượt sử dụng:</span>
+                <div className="flex flex-col items-end gap-0.5">
+                  <span className="text-slate-800 font-bold">
+                    {voucher.usedCount}/{voucher.usageLimit} lượt
+                  </span>
+                  {voucher.usageLimitPerUser > 0 && (
+                    <span className="text-[11px] text-slate-500 font-medium">
+                      (Tối đa {voucher.usageLimitPerUser} lượt/user)
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -147,7 +154,7 @@ const VoucherMobileCard: React.FC<VoucherMobileCardProps> = ({
                 Sửa
               </button>
               <button
-                onClick={() => onDelete(voucher.code)}
+                onClick={() => onDelete(voucher)}
                 className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-rose-100 bg-rose-50/50 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 hover:border-rose-200 transition-all cursor-pointer"
               >
                 <Trash2 size={13} />
