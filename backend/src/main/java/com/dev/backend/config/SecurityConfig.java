@@ -29,8 +29,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.multipart.MultipartResolver;
-import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 
 import java.util.List;
 
@@ -44,6 +42,9 @@ public class SecurityConfig {
         private final CustomAccessDeniedHandler customAccessDeniedHandler;
         private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
         private final CustomUserDetailsService customUserDetailsService;
+
+        @org.springframework.beans.factory.annotation.Value("${app.cors.allowedOrigins:http://localhost:5173}")
+        private List<String> allowedOrigins;
 
         public static final String[] PUBLIC_URLS = {
                         "/login",
@@ -99,7 +100,7 @@ public class SecurityConfig {
                                                 .requestMatchers(PUBLIC_URLS).permitAll()
                                                 .requestMatchers(HttpMethod.GET, PUBLIC_GET_URLS).permitAll()
                                                 .requestMatchers("/api/v1/cart/**").hasRole("CUSTOMER")
-                                                .requestMatchers("/api/v1/voucher/**").hasAnyAuthority("")
+                                                .requestMatchers("/api/v1/voucher/**").hasAnyRole("SUPER_ADMIN", "ADMIN", "VOUCHER")
                                                 .anyRequest().authenticated())
 
                                 .exceptionHandling(ex -> ex
@@ -120,8 +121,7 @@ public class SecurityConfig {
 
                 CorsConfiguration config = new CorsConfiguration();
 
-                config.setAllowedOrigins(List.of(
-                                "http://localhost:5173"));
+                config.setAllowedOrigins(allowedOrigins);
 
                 config.setAllowedMethods(List.of(
                                 "GET", "POST", "PUT", "DELETE", "OPTIONS"));
@@ -150,14 +150,11 @@ public class SecurityConfig {
                 return new BCryptPasswordEncoder();
         }
 
+      
+
         @Bean
         public RestTemplate restTemplate() {
                 return new RestTemplate();
-        }
-
-        @Bean
-        public MultipartResolver multipartResolver() {
-                return new StandardServletMultipartResolver();
         }
 
         @Bean
@@ -170,18 +167,10 @@ public class SecurityConfig {
                 StringBuilder hierarchy = new StringBuilder();
                 for (Permission p : Permission.values()) {
                         if (p != Permission.SUPER_ADMIN && p != Permission.ADMIN && p != Permission.CUSTOMER) {
-                                hierarchy.append("SUPER_ADMIN > ").append(p.name()).append("\n");
-                                hierarchy.append("ADMIN > ").append(p.name()).append("\n");
+                                hierarchy.append("ROLE_SUPER_ADMIN > ").append(p.name()).append("\n");
+                                hierarchy.append("ROLE_ADMIN > ").append(p.name()).append("\n");
                         }
                 }
                 return RoleHierarchyImpl.fromHierarchy(hierarchy.toString());
-        }
-
-        @Bean
-        @SuppressWarnings("deprecation")
-        MethodSecurityExpressionHandler methodSecurityExpressionHandler(RoleHierarchy roleHierarchy) {
-                DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
-                expressionHandler.setRoleHierarchy(roleHierarchy);
-                return expressionHandler;
         }
 }
