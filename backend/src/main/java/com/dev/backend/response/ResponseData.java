@@ -1,6 +1,6 @@
 package com.dev.backend.response;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
@@ -24,6 +24,6 @@ public class ResponseData<T> {
     private String error;
     private String path;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime timestamp ;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate timestamp ;
 }

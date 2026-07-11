@@ -1,6 +1,6 @@
 package com.dev.backend.response;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +18,7 @@ public class ResponseUtil {
         response.setError(null);
         response.setPath(null);
         response.setData(data);
-        response.setTimestamp(LocalDateTime.now());
+        response.setTimestamp(LocalDate.now());
         return ResponseEntity.ok(response);
     }
 
@@ -35,7 +35,7 @@ public class ResponseUtil {
         response.setError(error);
         response.setPath(path);
         response.setData(data);
-        response.setTimestamp(LocalDateTime.now());
+        response.setTimestamp(LocalDate.now());
 
         return ResponseEntity.status(status).body(response);
     }

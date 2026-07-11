@@ -12,7 +12,7 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -175,7 +175,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
                     res.setId(tuple.get("id", Integer.class));
                     res.setSlug(tuple.get("slug", String.class));
                     res.setName(tuple.get("name", String.class));
-                    res.setCreatedAt(tuple.get("createdAt", LocalDateTime.class));
+                    res.setCreatedAt(tuple.get("createdAt", LocalDate.class));
 
                     Number sold = tuple.get("soldCount", Number.class);
                     res.setSoldCount(sold != null ? sold.intValue() : 0);

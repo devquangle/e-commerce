@@ -51,20 +51,20 @@ public class ProductController {
     }
 
     @GetMapping("/admin/products/{id}")
-    public ResponseEntity<ResponseData<ProductDetailResponse>> edit(@PathVariable Integer id) {
+    public ResponseEntity<ResponseData<ProductDetailResponse>> edit(@PathVariable("id") Integer id) {
         ProductDetailResponse response = productService.edit(id);
         return ResponseUtil.success("lấy thông tin phẩm thành công", response);
     }
 
     @PutMapping("/admin/products/{id}")
-    public ResponseEntity<ResponseData<ProductResponse>> update(@PathVariable Integer id,
+    public ResponseEntity<ResponseData<ProductResponse>> update(@PathVariable("id") Integer id,
             @RequestBody ProductRequest request) {
         ProductResponse response = productService.update(id, request);
         return ResponseUtil.success("Cập nhật sản phẩm thành công", response);
     }
 
     @DeleteMapping("/admin/products/{id}")
-    public ResponseEntity<ResponseData<Void>> delete(@PathVariable Integer id) {
+    public ResponseEntity<ResponseData<Void>> delete(@PathVariable("id") Integer id) {
         productService.delete(id);
         return ResponseUtil.success("Xoá sản phẩm thành công.", null);
     }

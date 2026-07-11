@@ -1,6 +1,6 @@
 package com.dev.backend.service.impl;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -104,7 +104,7 @@ public class UserServiceImpl implements UserService {
         user.setFailedAttempt(failedAttempt + 1);
         if (failedAttempt >= 5) {
             user.setAccountNonLocked(false);
-            user.setLockTime(LocalDateTime.now());
+            user.setLockTime(LocalDate.now());
         }
         saveUser(user);
     }

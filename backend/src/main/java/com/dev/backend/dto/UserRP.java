@@ -1,6 +1,6 @@
 package com.dev.backend.dto;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 public record UserRP(
     Integer id,
@@ -12,12 +12,12 @@ public record UserRP(
     String code,
     String street,
     String image,
-    LocalDateTime createAt,
-    LocalDateTime updateAt,
+    LocalDate createAt,
+    LocalDate updateAt,
     boolean enabled,
     boolean accountNonLocked,
     int failedAttempt,
-    LocalDateTime lockTime,
+    LocalDate lockTime,
     String roleName,
     String permissionCode
 ) {}

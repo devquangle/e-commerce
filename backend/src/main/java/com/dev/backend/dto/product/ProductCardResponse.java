@@ -1,6 +1,6 @@
 package com.dev.backend.dto.product;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 
 import lombok.AllArgsConstructor;
@@ -26,7 +26,7 @@ public class ProductCardResponse {
 
     private String urlImage;
   
-    private LocalDateTime createdAt;
+    private LocalDate createdAt;
 
 
 }

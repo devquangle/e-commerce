@@ -1,6 +1,6 @@
 package com.dev.backend.entity;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -47,14 +47,14 @@ public class User extends BaseEntity<Integer> {
     private String image;
     @CreationTimestamp
     @Column(updatable = false)
-    private LocalDateTime createdAt;
+    private LocalDate createdAt;
     @UpdateTimestamp
-    private LocalDateTime updatedAt;
+    private LocalDate updatedAt;
     @Column(nullable = false)
     private boolean enabled = false;
     private boolean accountNonLocked = true;
     private int failedAttempt = 0;
-    private LocalDateTime lockTime;
+    private LocalDate lockTime;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
