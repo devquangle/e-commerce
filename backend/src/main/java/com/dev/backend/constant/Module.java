@@ -8,6 +8,7 @@ public enum Module {
     PROMOTION,
     VOUCHER,
     GENRE,
+    SUPPORT,
     SYSTEM,
     CUSTOMER
 }

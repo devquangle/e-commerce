@@ -44,6 +44,10 @@ public enum Permission {
     GENRE_UPDATE(Module.GENRE, "Cập nhật thể loại"),
     GENRE_DELETE(Module.GENRE, "Xóa thể loại"),
 
+    // support
+    SUPPORT_READ(Module.SUPPORT, "Xem cuộc trò chuyện"),
+    SUPPORT_REPLY(Module.SUPPORT, "Trả lời khách hàng"),
+    
     // System
     SUPER_ADMIN(Module.SYSTEM, "Toàn quyền"),
     ADMIN(Module.SYSTEM, "Quản trị viên"),
