@@ -13,6 +13,7 @@ import com.dev.backend.service.RegisterService;
 import com.dev.backend.service.RoleService;
 import com.dev.backend.service.SeriesService;
 import com.dev.backend.service.UserService;
+import com.dev.backend.service.VoucherService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,6 +32,8 @@ public class LoadData implements ApplicationRunner {
 
     private final SeriesService seriesService;
     private final PromotionService promotionService;
+
+    private final VoucherService voucherService;
 
     @Override
     public void run(org.springframework.boot.ApplicationArguments args) throws Exception {
@@ -56,6 +59,8 @@ public class LoadData implements ApplicationRunner {
 
         seriesService.insertData();
         promotionService.insertData();
+
+        voucherService.insertData();
     }
 
 }

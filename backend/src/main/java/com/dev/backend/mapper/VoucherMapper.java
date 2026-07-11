@@ -1,9 +1,11 @@
 package com.dev.backend.mapper;
 
+import org.springframework.stereotype.Component;
+
 import com.dev.backend.dto.voucher.VoucherRepsonse;
 import com.dev.backend.dto.voucher.VoucherRequest;
 import com.dev.backend.entity.Voucher;
-
+@Component
 public class VoucherMapper {
     public VoucherRepsonse toDTO(Voucher voucher) {
         if (voucher == null) {
