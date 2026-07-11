@@ -1,11 +1,11 @@
 import React from "react";
 import { Calendar, Edit, Trash2 } from "lucide-react";
-import type { VoucherItem } from "../types/voucher.type";
 import { BaseStatus, getBaseStatusLabel } from "@/types/status";
+import type { VoucherResponse } from "../types/voucher.type";
 
 interface VoucherMobileCardProps {
-  vouchers: VoucherItem[];
-  onEdit: (voucher: VoucherItem) => void;
+  vouchers: VoucherResponse[];
+  onEdit: (voucher: VoucherResponse) => void;
   onDelete: (code: string) => void;
 }
 
@@ -64,7 +64,7 @@ const VoucherMobileCard: React.FC<VoucherMobileCardProps> = ({
               <div className="flex justify-between">
                 <span className="text-slate-500 font-medium">Trị giá giảm:</span>
                 <span className="text-slate-800 font-bold">
-                  {voucher.discountType === "PERCENT"
+                  {voucher.discountValue <= 100
                     ? `Giảm ${voucher.discountValue}%`
                     : `Giảm ${voucher.discountValue.toLocaleString("vi-VN")}đ`}
                 </span>
@@ -85,7 +85,7 @@ const VoucherMobileCard: React.FC<VoucherMobileCardProps> = ({
               <div className="flex justify-between border-t border-slate-50 pt-2">
                 <span className="text-slate-500 font-medium">Lượt sử dụng:</span>
                 <span className="text-slate-800 font-bold">
-                  {voucher.usedQuantity}/{voucher.quantity} lượt
+                  {voucher.usedCount}/{voucher.usageLimit} lượt
                 </span>
               </div>
             </div>

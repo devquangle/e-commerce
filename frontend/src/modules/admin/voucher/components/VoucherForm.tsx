@@ -1,283 +1,164 @@
-import React, { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { Save, ArrowLeft, Ticket, Calendar, Percent, DollarSign } from "lucide-react";
-import type { VoucherItem, VoucherRequest } from "../types/voucher.type";
-import { BaseStatus, getBaseStatusLabel } from "@/types/status";
+import React from "react";
+import { useWatch, type UseFormReturn } from "react-hook-form";
+import type { VoucherRequest } from "../types/voucher.type";
+import { VoucherStatus, getVoucherStatusLabel } from "../types/voucher.status";
+import InputField from "@/components/common/InputField";
+import SelectedBox from "@/components/common/SelectedBox";
 
-interface VoucherFormProps {
-  initialData?: VoucherItem | null;
-  onSubmit: (data: VoucherRequest) => void;
-  onCancel: () => void;
+export interface VoucherFormProps {
+  form: UseFormReturn<VoucherRequest>;
+  isEdit?: boolean;
 }
 
-const VoucherForm: React.FC<VoucherFormProps> = ({
-  initialData,
-  onSubmit,
-  onCancel,
-}) => {
-  const isEdit = !!initialData;
-
+const VoucherForm: React.FC<VoucherFormProps> = ({ form, isEdit = false }) => {
   const {
     register,
-    handleSubmit,
-    reset,
-    watch,
+    control,
     setValue,
     formState: { errors },
-  } = useForm<VoucherRequest>({
-    defaultValues: {
-      code: "",
-      name: "",
-      discountType: "FIXED",
-      discountValue: 30000,
-      minOrderValue: 200000,
-      maxDiscountValue: 50000,
-      startDate: "2026-06-01",
-      endDate: "2026-06-30",
-      quantity: 100,
-      status: BaseStatus.ACTIVE,
-      description: "",
-    },
-  });
+  } = form;
 
-  const selectedDiscountType = watch("discountType");
-
-  useEffect(() => {
-    if (initialData) {
-      reset({
-        code: initialData.code,
-        name: initialData.name,
-        discountType: initialData.discountType,
-        discountValue: initialData.discountValue,
-        minOrderValue: initialData.minOrderValue,
-        maxDiscountValue: initialData.maxDiscountValue || 0,
-        startDate: initialData.startDate,
-        endDate: initialData.endDate,
-        quantity: initialData.quantity,
-        status: initialData.status,
-        description: initialData.description || "",
-      });
-    } else {
-      reset({
-        code: "",
-        name: "",
-        discountType: "FIXED",
-        discountValue: 30000,
-        minOrderValue: 200000,
-        maxDiscountValue: 50000,
-        startDate: new Date().toISOString().split("T")[0],
-        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-          .toISOString()
-          .split("T")[0],
-        quantity: 100,
-        status: BaseStatus.ACTIVE,
-        description: "",
-      });
-    }
-  }, [initialData, reset]);
-
-  const onFormSubmit = (data: VoucherRequest) => {
-    onSubmit(data);
-  };
+  const currentStatus = useWatch({ control, name: "status" });
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm space-y-6 animate-[fade-in_0.2s_ease-out]">
-      <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
-        {/* TOP BUTTONS & SECTION TITLE */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600">
-              <Ticket size={20} />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-slate-900">
-                {isEdit ? `Hiệu chỉnh Voucher: ${initialData.code}` : "Phát hành Voucher giảm giá mới"}
-              </h2>
-              <p className="text-xs text-slate-500">Thiết lập các điều kiện giảm giá cho đơn hàng mua sắm</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={onCancel}
-              className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all cursor-pointer"
-            >
-              <ArrowLeft size={14} /> Hủy bỏ
-            </button>
-            <button
-              type="submit"
-              className="flex items-center gap-1.5 px-5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-sm transition-all active:scale-95 cursor-pointer"
-            >
-              <Save size={14} /> {isEdit ? "Cập nhật Voucher" : "Lưu Voucher"}
-            </button>
-          </div>
-        </div>
-
+    <div className="card-custom space-y-6 flex-1">
+      <div className="space-y-6">
         {/* FORM GRID */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Mã Voucher */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-700">
-              Mã Voucher <span className="text-rose-500">*</span>
-            </label>
-            <input
-              type="text"
-              disabled={isEdit}
-              placeholder="Ví dụ: HELLOSUMMER"
-              {...register("code", { required: "Vui lòng nhập mã Voucher" })}
-              className={`w-full px-3.5 py-2.5 text-sm rounded-xl border font-mono uppercase transition-all ${
-                isEdit ? "bg-slate-100 text-slate-500 cursor-not-allowed" : "bg-slate-50/50 border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
-              }`}
-            />
-            {errors.code && (
-              <p className="text-xs text-rose-500 font-medium">{errors.code.message}</p>
-            )}
-          </div>
+          <InputField<VoucherRequest>
+            label="Mã Voucher"
+            name="code"
+            register={register}
+            rules={{ required: "Vui lòng nhập mã Voucher" }}
+            error={errors.code}
+            disabled={isEdit}
+            placeholder="Ví dụ: HELLOSUMMER"
+            className="font-mono uppercase"
+          />
 
           {/* Tên hiển thị Voucher */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-700">
-              Tên voucher <span className="text-rose-500">*</span>
-            </label>
-            <input
-              type="text"
-              placeholder="Ví dụ: Voucher giảm 30K cho đơn từ 200K"
-              {...register("name", { required: "Vui lòng nhập tên voucher" })}
-              className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 bg-slate-50/50 outline-none transition-all focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
-            />
-            {errors.name && (
-              <p className="text-xs text-rose-500 font-medium">{errors.name.message}</p>
-            )}
-          </div>
-
-          {/* Hình thức giảm giá */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-700">Hình thức giảm giá</label>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => setValue("discountType", "FIXED")}
-                className={`flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
-                  selectedDiscountType === "FIXED"
-                    ? "border-indigo-600 bg-indigo-50 text-indigo-700 shadow-sm"
-                    : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-                }`}
-              >
-                <DollarSign size={14} /> Số tiền cố định (VNĐ)
-              </button>
-              <button
-                type="button"
-                onClick={() => setValue("discountType", "PERCENT")}
-                className={`flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
-                  selectedDiscountType === "PERCENT"
-                    ? "border-indigo-600 bg-indigo-50 text-indigo-700 shadow-sm"
-                    : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-                }`}
-              >
-                <Percent size={14} /> Theo phần trăm (%)
-              </button>
-            </div>
-          </div>
-
-          {/* Giá trị giảm */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-700">
-              Mức giảm {selectedDiscountType === "PERCENT" ? "(%)" : "(VNĐ)"} <span className="text-rose-500">*</span>
-            </label>
-            <input
-              type="number"
-              placeholder={selectedDiscountType === "PERCENT" ? "15" : "30000"}
-              {...register("discountValue", { required: true, valueAsNumber: true })}
-              className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 bg-slate-50/50 outline-none transition-all focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
-            />
-          </div>
-
-          {/* Giá trị đơn hàng tối thiểu */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-700">Giá trị đơn tối thiểu (VNĐ)</label>
-            <input
-              type="number"
-              placeholder="200000"
-              {...register("minOrderValue", { valueAsNumber: true })}
-              className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 bg-slate-50/50 outline-none transition-all focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
-            />
-          </div>
-
-          {/* Giảm tối đa (Nếu theo %) */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-700">Mức giảm tối đa (VNĐ)</label>
-            <input
-              type="number"
-              disabled={selectedDiscountType !== "PERCENT"}
-              placeholder="50000"
-              {...register("maxDiscountValue", { valueAsNumber: true })}
-              className={`w-full px-3.5 py-2.5 text-sm rounded-xl border transition-all ${
-                selectedDiscountType !== "PERCENT"
-                  ? "bg-slate-100 text-slate-400 cursor-not-allowed"
-                  : "border-slate-200 bg-slate-50/50 outline-none focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
-              }`}
-            />
-          </div>
-
-          {/* Số lượng phát hành */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-700">Tổng số lượt phát hành</label>
-            <input
-              type="number"
-              placeholder="100"
-              {...register("quantity", { required: true, valueAsNumber: true })}
-              className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 bg-slate-50/50 outline-none transition-all focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
-            />
-          </div>
-
-          {/* Trạng thái */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-700">Trạng thái phát hành</label>
-            <select
-              {...register("status")}
-              className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 bg-slate-50/50 outline-none transition-all focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 cursor-pointer"
-            >
-              <option value={BaseStatus.ACTIVE}>{getBaseStatusLabel(BaseStatus.ACTIVE)}</option>
-              <option value={BaseStatus.INACTIVE}>{getBaseStatusLabel(BaseStatus.INACTIVE)}</option>
-              <option value={BaseStatus.DELETED}>{getBaseStatusLabel(BaseStatus.DELETED)}</option>
-            </select>
-          </div>
+          <InputField<VoucherRequest>
+            label="Tên voucher"
+            name="name"
+            register={register}
+            rules={{ required: "Vui lòng nhập tên voucher" }}
+            error={errors.name}
+            placeholder="Ví dụ: Voucher giảm 30K cho đơn từ 200K"
+          />
 
           {/* Thời hạn áp dụng */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-700 flex items-center gap-1">
-              <Calendar size={13} /> Ngày bắt đầu
-            </label>
-            <input
-              type="date"
-              {...register("startDate", { required: true })}
-              className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 bg-slate-50/50 outline-none transition-all focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
-            />
-          </div>
+          <InputField<VoucherRequest>
+            label="Ngày bắt đầu"
+            name="startDate"
+            type="date"
+            register={register}
+            rules={{ required: "Vui lòng chọn ngày bắt đầu" }}
+            error={errors.startDate}
+          />
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-700 flex items-center gap-1">
-              <Calendar size={13} /> Ngày kết thúc
-            </label>
-            <input
-              type="date"
-              {...register("endDate", { required: true })}
-              className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 bg-slate-50/50 outline-none transition-all focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
-            />
-          </div>
+          <InputField<VoucherRequest>
+            label="Ngày kết thúc"
+            name="endDate"
+            type="date"
+            register={register}
+            rules={{ required: "Vui lòng chọn ngày kết thúc" }}
+            error={errors.endDate}
+          />
 
-          {/* Mô tả */}
-          <div className="space-y-1.5 md:col-span-2">
-            <label className="text-xs font-semibold text-slate-700">Điều kiện & Điều khoản áp dụng</label>
-            <textarea
-              rows={3}
-              placeholder="Ghi chú điều kiện sử dụng mã voucher..."
-              {...register("description")}
-              className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 bg-slate-50/50 outline-none transition-all focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 resize-none"
+          {/* Giá trị giảm */}
+          <InputField<VoucherRequest>
+            label="Mức giảm (%)"
+            name="discountValue"
+            type="number"
+            register={register}
+            rules={{
+              required: "Vui lòng nhập mức giảm",
+              valueAsNumber: true,
+              min: { value: 1, message: "Mức giảm phải từ 1%" },
+              max: { value: 100, message: "Mức giảm không được quá 100%" },
+            }}
+            error={errors.discountValue}
+            placeholder="10"
+          />
+
+          {/* Trạng thái */}
+          <div>
+            <SelectedBox<VoucherStatus>
+              label="Trạng thái phát hành"
+              options={[
+                {
+                  label: getVoucherStatusLabel(VoucherStatus.ACTIVE),
+                  value: VoucherStatus.ACTIVE,
+                },
+                {
+                  label: getVoucherStatusLabel(VoucherStatus.INACTIVE),
+                  value: VoucherStatus.INACTIVE,
+                },
+                {
+                  label: getVoucherStatusLabel(VoucherStatus.DELETED),
+                  value: VoucherStatus.DELETED,
+                },
+              ]}
+              value={currentStatus}
+              onChange={(val) =>
+                setValue("status", val as VoucherStatus, {
+                  shouldValidate: true,
+                })
+              }
+              searchable={false}
+              required
             />
           </div>
+          {/* Tổng số lượt phát hành */}
+          <InputField<VoucherRequest>
+            label="Tổng số lượt phát hành"
+            name="usageLimit"
+            type="number"
+            register={register}
+            rules={{ required: "Vui lòng nhập số lượng", valueAsNumber: true }}
+            error={errors.usageLimit}
+            placeholder="100"
+          />
+
+          {/* Giảm tối đa */}
+          <InputField<VoucherRequest>
+            label="Mức giảm tối đa (VNĐ)"
+            name="maxDiscountValue"
+            type="number"
+            register={register}
+            rules={{
+              required: "Vui lòng nhập mức giảm tối đa",
+              valueAsNumber: true,
+            }}
+            error={errors.maxDiscountValue}
+            placeholder="50000"
+          />
+          {/* Số lượng mỗi user */}
+          <InputField<VoucherRequest>
+            label="Số lượng mỗi người dùng được sử dụng"
+            name="usageLimitPerUser"
+            type="number"
+            register={register}
+            rules={{ required: "Vui lòng nhập số lượng", valueAsNumber: true }}
+            error={errors.usageLimitPerUser}
+            placeholder="1"
+          />
+          {/* Giá trị đơn hàng tối thiểu */}
+          <InputField<VoucherRequest>
+            label="Giá trị đơn tối thiểu (VNĐ)"
+            name="minOrderValue"
+            type="number"
+            register={register}
+            rules={{
+              required: "Vui lòng nhập giá trị đơn tối thiểu",
+              valueAsNumber: true,
+            }}
+            error={errors.minOrderValue}
+            placeholder="200000"
+          />
         </div>
-      </form>
+      </div>
     </div>
   );
 };

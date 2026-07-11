@@ -1,30 +1,35 @@
-import React from "react";
 import { Search, RotateCcw } from "lucide-react";
-import { BaseStatus, getBaseStatusLabel } from "@/types/status";
+import { VoucherStatus } from "../types/voucher.status";
+import SelectedBox from "@/components/common/SelectedBox";
 
 interface VoucherFilterProps {
-  search: string;
-  statusFilter: string;
+  keyword: string;
+  status: VoucherStatus | null;
+  statusOptions: {
+    label: string;
+    value: VoucherStatus | null;
+  }[];
   startDate: string;
   endDate: string;
-  onSearchChange: (val: string) => void;
-  onStatusFilterChange: (val: string) => void;
+  onKeywordChange: (val: string) => void;
+  onStatusChange: (val: VoucherStatus | null) => void;
   onStartDateChange: (val: string) => void;
   onEndDateChange: (val: string) => void;
   onReset: () => void;
 }
 
-const VoucherFilter: React.FC<VoucherFilterProps> = ({
-  search,
-  statusFilter,
+export default function VoucherFilter({
+  keyword,
+  status,
+  statusOptions,
   startDate,
   endDate,
-  onSearchChange,
-  onStatusFilterChange,
+  onKeywordChange,
+  onStatusChange,
   onStartDateChange,
   onEndDateChange,
   onReset,
-}) => {
+}: VoucherFilterProps) {
   return (
     <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-center md:flex-wrap">
       {/* Search bar */}
@@ -33,9 +38,9 @@ const VoucherFilter: React.FC<VoucherFilterProps> = ({
         <input
           type="text"
           placeholder="Tìm theo mã voucher hoặc tên..."
-          value={search}
-          onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-10 pr-4 py-2.5 text-sm placeholder-slate-400 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100"
+          value={keyword}
+          onChange={(e) => onKeywordChange(e.target.value)}
+          className="w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-10 pr-4 py-2.5 text-sm outline-none transition-all focus:border-indigo-500 focus:bg-white"
         />
       </div>
 
@@ -62,17 +67,13 @@ const VoucherFilter: React.FC<VoucherFilterProps> = ({
       </div>
 
       {/* Status dropdown */}
-      <div className="w-full md:w-48">
-        <select
-          value={statusFilter}
-          onChange={(e) => onStatusFilterChange(e.target.value)}
-          className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-700 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100 cursor-pointer"
-        >
-          <option value="ALL">Tất cả trạng thái</option>
-          <option value={BaseStatus.ACTIVE}>{getBaseStatusLabel(BaseStatus.ACTIVE)}</option>
-          <option value={BaseStatus.INACTIVE}>{getBaseStatusLabel(BaseStatus.INACTIVE)}</option>
-          <option value={BaseStatus.DELETED}>{getBaseStatusLabel(BaseStatus.DELETED)}</option>
-        </select>
+      <div className="w-full md:w-56">
+        <SelectedBox<VoucherStatus | null>
+          options={statusOptions}
+          value={status}
+          onChange={(value) => onStatusChange(value ?? null)}
+          searchable={false}
+        />
       </div>
 
       {/* Reset button */}
@@ -85,6 +86,4 @@ const VoucherFilter: React.FC<VoucherFilterProps> = ({
       </button>
     </div>
   );
-};
-
-export default VoucherFilter;
+}

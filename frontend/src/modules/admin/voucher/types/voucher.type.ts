@@ -1,33 +1,49 @@
 import { BaseStatus } from "@/types/status";
 
 export type VoucherStatus = BaseStatus;
-export type VoucherDiscountType = "PERCENT" | "FIXED";
-
-export interface VoucherItem {
+export interface VoucherResponse {
+  id: number;
   code: string;
   name: string;
-  discountType: VoucherDiscountType;
+
   discountValue: number;
   minOrderValue: number;
-  maxDiscountValue?: number;
+  maxDiscountValue: number;
+
+
+  usageLimit: number;
+  usedCount: number;
+  usageLimitPerUser: number;
+  
   startDate: string;
   endDate: string;
+
   status: VoucherStatus;
-  quantity: number;
-  usedQuantity: number;
-  description?: string;
 }
 
 export interface VoucherRequest {
   code: string;
   name: string;
-  discountType: VoucherDiscountType;
+
   discountValue: number;
   minOrderValue: number;
-  maxDiscountValue?: number;
+  maxDiscountValue: number;
+
+
+  usageLimit: number;
+  usageLimitPerUser: number;
+
   startDate: string;
   endDate: string;
+
   status: VoucherStatus;
-  quantity: number;
-  description?: string;
+}
+
+export interface VoucherSearchRequest {
+  keyword?: string;
+  status?: VoucherStatus;
+  startDate?: string;
+  endDate?: string;
+  page?: number;
+  size?: number;
 }

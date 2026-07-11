@@ -1,11 +1,11 @@
 import React from "react";
 import { Calendar, Edit, Trash2 } from "lucide-react";
-import type { VoucherItem } from "../types/voucher.type";
+import type { VoucherResponse } from "../types/voucher.type";
 import { BaseStatus, getBaseStatusLabel } from "@/types/status";
 
 interface VoucherTableProps {
-  vouchers: VoucherItem[];
-  onEdit: (voucher: VoucherItem) => void;
+  vouchers: VoucherResponse[];
+  onEdit: (voucher: VoucherResponse) => void;
   onDelete: (code: string) => void;
   page: number;
   pageSize: number;
@@ -43,10 +43,7 @@ const VoucherTable: React.FC<VoucherTableProps> = ({
               Mã Voucher / Tên
             </th>
             <th className="py-3.5 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50">
-              Trị giá giảm
-            </th>
-            <th className="py-3.5 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50">
-              Đơn tối thiểu
+              Trị giá giảm / Điều kiện
             </th>
             <th className="py-3.5 px-4 font-semibold text-xs uppercase tracking-wider text-slate-400 bg-slate-50/50">
               Thời hạn
@@ -65,7 +62,7 @@ const VoucherTable: React.FC<VoucherTableProps> = ({
         <tbody className="divide-y divide-slate-100">
           {vouchers.length === 0 ? (
             <tr>
-              <td colSpan={8} className="py-8 text-center text-slate-400">
+              <td colSpan={7} className="py-8 text-center text-slate-400">
                 Không tìm thấy mã giảm giá nào.
               </td>
             </tr>
@@ -88,18 +85,22 @@ const VoucherTable: React.FC<VoucherTableProps> = ({
                     </span>
                   </div>
                 </td>
-                <td className="py-4 px-4 text-slate-700 font-semibold">
-                  {voucher.discountType === "PERCENT"
-                    ? `Giảm ${voucher.discountValue}%`
-                    : `Giảm ${voucher.discountValue.toLocaleString("vi-VN")}đ`}
-                  {voucher.discountType === "PERCENT" && voucher.maxDiscountValue && (
-                    <span className="block text-[10px] text-slate-400 font-normal">
-                      (Tối đa: {voucher.maxDiscountValue.toLocaleString("vi-VN")}đ)
+                <td className="py-4 px-4">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-slate-700 font-bold">
+                      {voucher.discountValue <= 100
+                        ? `Giảm ${voucher.discountValue}%`
+                        : `Giảm ${voucher.discountValue.toLocaleString("vi-VN")}đ`}
+                      {voucher.maxDiscountValue && voucher.maxDiscountValue > 0 && (
+                        <span className="ml-1 text-[10px] text-slate-500 font-normal">
+                          (Tối đa: {voucher.maxDiscountValue.toLocaleString("vi-VN")}đ)
+                        </span>
+                      )}
                     </span>
-                  )}
-                </td>
-                <td className="py-4 px-4 text-slate-600">
-                  {voucher.minOrderValue.toLocaleString("vi-VN")}đ
+                    <span className="text-xs text-slate-500 font-medium">
+                      Đơn từ: <span className="text-slate-700">{voucher.minOrderValue.toLocaleString("vi-VN")}đ</span>
+                    </span>
+                  </div>
                 </td>
                 <td className="py-4 px-4 text-slate-500">
                   <span className="inline-flex items-center gap-1.5 text-xs">
@@ -108,7 +109,7 @@ const VoucherTable: React.FC<VoucherTableProps> = ({
                   </span>
                 </td>
                 <td className="py-4 px-4 text-slate-700 font-medium">
-                  {voucher.usedQuantity}/{voucher.quantity} lượt
+                  {voucher.usedCount}/{voucher.usageLimit} lượt
                 </td>
                 <td className="py-4 px-4">
                   <span

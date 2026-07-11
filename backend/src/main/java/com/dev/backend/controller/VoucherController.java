@@ -6,8 +6,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.dev.backend.dto.author.AuthorFilterRequest;
-import com.dev.backend.dto.author.AuthorResponse;
 import com.dev.backend.dto.voucher.VoucherFilterRequest;
 import com.dev.backend.dto.voucher.VoucherRepsonse;
 import com.dev.backend.response.PageResponse;
@@ -24,7 +22,7 @@ public class VoucherController {
 
     private final VoucherService voucherService;
 
-    @GetMapping("/filter")
+    @GetMapping("/search")
     public ResponseEntity<ResponseData<PageResponse<VoucherRepsonse>>> filter(
             @ModelAttribute VoucherFilterRequest request) {
         PageResponse<VoucherRepsonse> response = voucherService.search(request);

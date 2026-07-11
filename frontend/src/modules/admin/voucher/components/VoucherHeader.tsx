@@ -1,20 +1,13 @@
-import React from "react";
 import { Ticket, Plus } from "lucide-react";
 import Button from "@/components/common/Button";
 
 interface VoucherHeaderProps {
-  onCreateClick?: () => void;
-  title?: string;
-  description?: string;
-  showCreateButton?: boolean;
+  onCreate: () => void;
 }
 
-const VoucherHeader: React.FC<VoucherHeaderProps> = ({
-  onCreateClick,
-  title = "Quản lý mã giảm giá (Voucher)",
-  description = "Thiết lập mã giảm giá, khấu trừ cho đơn hàng và quản lý tổng số lượng phát hành.",
-  showCreateButton = true,
-}) => {
+export default function VoucherHeader({
+  onCreate,
+}: VoucherHeaderProps) {
   return (
     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between card-custom">
       <div className="space-y-1">
@@ -23,27 +16,23 @@ const VoucherHeader: React.FC<VoucherHeaderProps> = ({
             <Ticket size={22} />
           </div>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
-            {title}
+            Quản lý mã giảm giá
           </h1>
         </div>
         <p className="text-sm text-slate-500">
-          {description}
+          Thiết lập mã giảm giá, khấu trừ cho đơn hàng và quản lý tổng số lượng phát hành.
         </p>
       </div>
 
-      {showCreateButton && onCreateClick && (
-        <Button
-          type="button"
-          color="primary"
-          className="w-full sm:w-auto cursor-pointer"
-          onClick={onCreateClick}
-        >
-          <Plus size={18} />
-          Thêm Voucher
-        </Button>
-      )}
+      <Button
+        type="button"
+        color="primary"
+        className="w-full sm:w-auto cursor-pointer"
+        onClick={onCreate}
+      >
+        <Plus size={18} />
+        Thêm Voucher
+      </Button>
     </div>
   );
-};
-
-export default VoucherHeader;
+}
