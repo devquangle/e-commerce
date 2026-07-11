@@ -7,7 +7,10 @@ import PromotionMobileCard from "@/modules/admin/promotion/components/PromotionM
 import Pagination from "@/components/common/Pagination";
 import type { PromotionResponse } from "@/modules/admin/promotion/types/promotion.type";
 import useSearchPromotion from "@/modules/admin/promotion/hooks/useSearchPromotion";
-import { useSearchPromotion as useSearchPromotionQuery, useDeletePromotion } from "@/modules/admin/promotion/hooks/usePromotion";
+import {
+  useSearchPromotion as useSearchPromotionQuery,
+  useDeletePromotion,
+} from "@/modules/admin/promotion/hooks/usePromotion";
 import Modal from "@/components/common/Modal";
 
 export default function Promotion() {
@@ -40,7 +43,8 @@ export default function Promotion() {
     keyword: debouncedKeyword || undefined,
     startDate: startDate || undefined,
     endDate: endDate || undefined,
-    promotionCampaignType: promotionCampaignType === "ALL" ? undefined : promotionCampaignType,
+    promotionCampaignType:
+      promotionCampaignType === "ALL" ? undefined : promotionCampaignType,
     status: status === "ALL" ? undefined : status,
     page,
     size: pageSize,
@@ -118,19 +122,19 @@ export default function Promotion() {
             onEdit={handleEditClick}
             onDelete={handleDeleteClick}
           />
-        </div>
 
-        <Pagination
-          currentPage={page}
-          totalPages={totalPages}
-          onPageChange={setPage}
-          totalItems={totalItems}
-          pageSize={pageSize}
-          onPageSizeChange={(size) => {
-            setPageSize(size);
-            setPage(1);
-          }}
-        />
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+            totalItems={totalItems}
+            pageSize={pageSize}
+            onPageSizeChange={(size) => {
+              setPageSize(size);
+              setPage(1);
+            }}
+          />
+        </div>
       </div>
 
       {/* CONFIRM DELETE MODAL */}

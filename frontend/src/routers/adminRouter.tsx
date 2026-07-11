@@ -3,7 +3,7 @@ import Genre from "@/pages/admin/GenrePage";
 import Order from "@/pages/admin/Order";
 import OrderItem from "@/pages/admin/Order-item";
 import Product from "@/pages/admin/ProductPage";
-import Promotion from "@/pages/admin/Promotion";
+import Promotion from "@/pages/admin/PromotionPage";
 import Revenue from "@/pages/admin/Revenue";
 import TopProduct from "@/pages/admin/TopProduct";
 import Review from "@/pages/admin/Review";
