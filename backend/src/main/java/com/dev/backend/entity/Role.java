@@ -1,5 +1,6 @@
 package com.dev.backend.entity;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import com.dev.backend.constant.Module;
@@ -36,8 +37,8 @@ public class Role extends BaseEntity<Integer> {
     @Column(length = 255)
     private String description;
 
-    @CreationTimestamp
+    
     @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    private LocalDate createdAt;
 
 }

@@ -6,8 +6,8 @@ import lombok.Getter;
 public enum Permission {
     // Product
     PRODUCT_READ(Module.PRODUCT, "Xem sản phẩm"),
-    PRODUCT_CREATE(Module.PRODUCT, "Tạo sản phẩm"),
-    PRODUCT_UPDATE(Module.PRODUCT, "Sửa sản phẩm"),
+    PRODUCT_CREATE(Module.PRODUCT, "Thêm sản phẩm"),
+    PRODUCT_UPDATE(Module.PRODUCT, "Cập nhật sản phẩm"),
     PRODUCT_DELETE(Module.PRODUCT, "Xóa sản phẩm"),
 
     // Order
@@ -17,26 +17,31 @@ public enum Permission {
 
     // Author
     AUTHOR_READ(Module.AUTHOR, "Xem tác giả"),
-    AUTHOR_CREATE(Module.AUTHOR, "Tạo tác giả"),
-    AUTHOR_UPDATE(Module.AUTHOR, "Sửa tác giả"),
+    AUTHOR_CREATE(Module.AUTHOR, "Thêm tác giả"),
+    AUTHOR_UPDATE(Module.AUTHOR, "Cập nhật tác giả"),
     AUTHOR_DELETE(Module.AUTHOR, "Xóa tác giả"),
 
     // Publisher
     PUBLISHER_READ(Module.PUBLISHER, "Xem nhà xuất bản"),
-    PUBLISHER_CREATE(Module.PUBLISHER, "Tạo nhà xuất bản"),
-    PUBLISHER_UPDATE(Module.PUBLISHER, "Sửa nhà xuất bản"),
+    PUBLISHER_CREATE(Module.PUBLISHER, "Thêm nhà xuất bản"),
+    PUBLISHER_UPDATE(Module.PUBLISHER, "Cập nhật nhà xuất bản"),
     PUBLISHER_DELETE(Module.PUBLISHER, "Xóa nhà xuất bản"),
 
     // Promotion
     PROMOTION_READ(Module.PROMOTION, "Xem khuyến mãi"),
-    PROMOTION_CREATE(Module.PROMOTION, "Tạo khuyến mãi"),
-    PROMOTION_UPDATE(Module.PROMOTION, "Sửa khuyến mãi"),
+    PROMOTION_CREATE(Module.PROMOTION, "Thêm khuyến mãi"),
+    PROMOTION_UPDATE(Module.PROMOTION, "Cập nhật khuyến mãi"),
     PROMOTION_DELETE(Module.PROMOTION, "Xóa khuyến mãi"),
+
+    VOUCHER_READ(Module.VOUCHER, "Xem mã giảm giá"),
+    VOUCHER_CREATE(Module.VOUCHER, "Thêm mã giảm giá"),
+    VOUCHER_UPDATE(Module.VOUCHER, "Cập nhật mã giảm giá"),
+    VOUCHER_DELETE(Module.VOUCHER, "Xoá mã giảm giá"),
 
     // Genre
     GENRE_READ(Module.GENRE, "Xem thể loại"),
-    GENRE_CREATE(Module.GENRE, "Tạo thể loại"),
-    GENRE_UPDATE(Module.GENRE, "Sửa thể loại"),
+    GENRE_CREATE(Module.GENRE, "Thêm thể loại"),
+    GENRE_UPDATE(Module.GENRE, "Cập nhật thể loại"),
     GENRE_DELETE(Module.GENRE, "Xóa thể loại"),
 
     // System

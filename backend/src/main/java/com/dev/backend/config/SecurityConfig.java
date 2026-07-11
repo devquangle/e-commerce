@@ -99,6 +99,7 @@ public class SecurityConfig {
                                                 .requestMatchers(PUBLIC_URLS).permitAll()
                                                 .requestMatchers(HttpMethod.GET, PUBLIC_GET_URLS).permitAll()
                                                 .requestMatchers("/api/v1/cart/**").hasRole("CUSTOMER")
+                                                .requestMatchers("/api/v1/voucher/**").hasAnyAuthority("")
                                                 .anyRequest().authenticated())
 
                                 .exceptionHandling(ex -> ex

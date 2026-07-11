@@ -4,15 +4,22 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.dev.backend.constant.VoucherStatus;
+import com.dev.backend.dto.voucher.VoucherFilterRequest;
 import com.dev.backend.dto.voucher.VoucherRepsonse;
 import com.dev.backend.dto.voucher.VoucherRequest;
 import com.dev.backend.entity.Voucher;
 import com.dev.backend.mapper.VoucherMapper;
 import com.dev.backend.repository.VoucherRepository;
+import com.dev.backend.response.PageResponse;
 import com.dev.backend.service.VoucherService;
+import com.dev.backend.util.FilterValidator;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -61,6 +68,35 @@ public class VoucherServiceImpl implements VoucherService {
         }
         voucherRepository.saveAll(vouchers);
 
+    }
+
+    @Override
+    public PageResponse<VoucherRepsonse> search(VoucherFilterRequest request) {
+        int page = (request.getPage() == null || request.getPage() < 1) ? 0 : request.getPage() - 1;
+        int size = (request.getSize() == null || request.getSize() < 1) ? 10 : request.getSize();
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+
+        FilterValidator.validateDateRange(
+                request.getStartDate(),
+                request.getEndDate(),
+                "Ngày bắt đầu",
+                "Ngày kết thúc");
+
+        VoucherStatus status = VoucherStatus.from(request.getStatus());
+        String keyword = request.getKeyword();
+        keyword = (keyword == null || keyword.isBlank())
+                ? null
+                : keyword.trim();
+        Page<Voucher> pageResult = voucherRepository.search(keyword, request.getStartDate(), request.getEndDate(),
+                status, pageable);
+        List<VoucherRepsonse> items = pageResult.getContent().stream().map(voucherMapper::toDTO).toList();
+        return new PageResponse<>(
+                items,
+                pageResult.getNumber(),
+                pageResult.getSize(),
+                pageResult.getTotalElements(),
+                pageResult.getTotalPages());
     }
 
 }

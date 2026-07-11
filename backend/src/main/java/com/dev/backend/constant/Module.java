@@ -6,6 +6,7 @@ public enum Module {
     AUTHOR,
     PUBLISHER,
     PROMOTION,
+    VOUCHER,
     GENRE,
     SYSTEM,
     CUSTOMER
