@@ -1,14 +1,14 @@
 import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import VoucherHeader from "@/modules/admin/voucher/components/VoucherHeader";
 import VoucherFilter from "@/modules/admin/voucher/components/VoucherFilter";
 import VoucherTable from "@/modules/admin/voucher/components/VoucherTable";
 import VoucherMobileCard from "@/modules/admin/voucher/components/VoucherMobileCard";
-import VoucherForm from "@/modules/admin/voucher/components/VoucherForm";
 import Pagination from "@/components/common/Pagination";
-import type { VoucherItem, VoucherRequest } from "@/modules/admin/voucher/types/voucher.type";
+import type { VoucherItem } from "@/modules/admin/voucher/types/voucher.type";
 import { BaseStatus } from "@/types/status";
 
-const initialVouchers: VoucherItem[] = [
+export const initialVouchers: VoucherItem[] = [
   {
     code: "WELCOME50",
     name: "Mã giảm giá chào mừng thành viên mới",
@@ -280,11 +280,12 @@ const initialVouchers: VoucherItem[] = [
 ];
 
 export default function VoucherPage() {
+  const navigate = useNavigate();
   const [vouchers, setVouchers] = useState<VoucherItem[]>(initialVouchers);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
-  const [viewState, setViewState] = useState<"LIST" | "CREATE" | "EDIT">("LIST");
-  const [editingVoucher, setEditingVoucher] = useState<VoucherItem | null>(null);
+  const [startDateFilter, setStartDateFilter] = useState("");
+  const [endDateFilter, setEndDateFilter] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
@@ -295,9 +296,11 @@ export default function VoucherPage() {
         voucher.name.toLowerCase().includes(search.toLowerCase().trim());
       const matchStatus =
         statusFilter === "ALL" ? true : voucher.status === statusFilter;
-      return matchSearch && matchStatus;
+      const matchStartDate = startDateFilter ? voucher.startDate >= startDateFilter : true;
+      const matchEndDate = endDateFilter ? voucher.endDate <= endDateFilter : true;
+      return matchSearch && matchStatus && matchStartDate && matchEndDate;
     });
-  }, [vouchers, search, statusFilter]);
+  }, [vouchers, search, statusFilter, startDateFilter, endDateFilter]);
 
   const paginatedVouchers = useMemo(() => {
     const start = (page - 1) * pageSize;
@@ -309,17 +312,17 @@ export default function VoucherPage() {
   const handleResetFilter = () => {
     setSearch("");
     setStatusFilter("ALL");
+    setStartDateFilter("");
+    setEndDateFilter("");
     setPage(1);
   };
 
   const handleCreateClick = () => {
-    setEditingVoucher(null);
-    setViewState("CREATE");
+    navigate("/admin/vouchers/add");
   };
 
   const handleEditClick = (voucher: VoucherItem) => {
-    setEditingVoucher(voucher);
-    setViewState("EDIT");
+    navigate(`/admin/vouchers/edit/${voucher.code}`);
   };
 
   const handleDelete = (code: string) => {
@@ -328,96 +331,67 @@ export default function VoucherPage() {
     }
   };
 
-  const handleFormSubmit = (formData: VoucherRequest) => {
-    if (viewState === "CREATE") {
-      const newItem: VoucherItem = {
-        ...formData,
-        usedQuantity: 0,
-      };
-      setVouchers((prev) => [newItem, ...prev]);
-    } else if (viewState === "EDIT" && editingVoucher) {
-      setVouchers((prev) =>
-        prev.map((v) =>
-          v.code === editingVoucher.code
-            ? { ...v, ...formData, usedQuantity: v.usedQuantity }
-            : v
-        )
-      );
-    }
-    setViewState("LIST");
-    setEditingVoucher(null);
-  };
-
   return (
     <div className="flex-1 grid grid-cols-1 gap-4 auto-rows-max">
       {/* HEADER */}
       <VoucherHeader
-        viewState={viewState}
-        onBackToList={() => {
-          setViewState("LIST");
-          setEditingVoucher(null);
-        }}
         onCreateClick={handleCreateClick}
       />
 
-      {viewState === "LIST" ? (
-        <>
-          {/* FILTER & DATA */}
-          <div className="card-custom">
-            <VoucherFilter
-              search={search}
-              statusFilter={statusFilter}
-              onSearchChange={(s) => {
-                setSearch(s);
-                setPage(1);
-              }}
-              onStatusFilterChange={(st) => {
-                setStatusFilter(st);
-                setPage(1);
-              }}
-              onReset={handleResetFilter}
-            />
-
-            {/* DESKTOP TABLE */}
-            <VoucherTable
-              vouchers={paginatedVouchers}
-              onEdit={handleEditClick}
-              onDelete={handleDelete}
-              page={page}
-              pageSize={pageSize}
-            />
-
-            {/* MOBILE CARDS */}
-            <VoucherMobileCard
-              vouchers={paginatedVouchers}
-              onEdit={handleEditClick}
-              onDelete={handleDelete}
-            />
-          </div>
-
-          <Pagination
-            currentPage={page}
-            totalPages={totalPages}
-            onPageChange={setPage}
-            totalItems={filteredVouchers.length}
-            pageSize={pageSize}
-            onPageSizeChange={(size) => {
-              setPageSize(size);
-              setPage(1);
-            }}
-          />
-        </>
-      ) : (
-        /* INLINE FORM (NO MODAL) */
-        <VoucherForm
-          initialData={editingVoucher}
-          onSubmit={handleFormSubmit}
-          onCancel={() => {
-            setViewState("LIST");
-            setEditingVoucher(null);
+      {/* FILTER & DATA */}
+      <div className="card-custom">
+        <VoucherFilter
+          search={search}
+          statusFilter={statusFilter}
+          startDate={startDateFilter}
+          endDate={endDateFilter}
+          onSearchChange={(s) => {
+            setSearch(s);
+            setPage(1);
           }}
+          onStatusFilterChange={(st) => {
+            setStatusFilter(st);
+            setPage(1);
+          }}
+          onStartDateChange={(d) => {
+            setStartDateFilter(d);
+            setPage(1);
+          }}
+          onEndDateChange={(d) => {
+            setEndDateFilter(d);
+            setPage(1);
+          }}
+          onReset={handleResetFilter}
         />
-      )}
+
+        {/* DESKTOP TABLE */}
+        <VoucherTable
+          vouchers={paginatedVouchers}
+          onEdit={handleEditClick}
+          onDelete={handleDelete}
+          page={page}
+          pageSize={pageSize}
+        />
+
+        {/* MOBILE CARDS */}
+        <VoucherMobileCard
+          vouchers={paginatedVouchers}
+          onEdit={handleEditClick}
+          onDelete={handleDelete}
+        />
+      </div>
+
+      <Pagination
+        currentPage={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        totalItems={filteredVouchers.length}
+        pageSize={pageSize}
+        onPageSizeChange={(size) => {
+          setPageSize(size);
+          setPage(1);
+        }}
+      />
     </div>
   );
 }

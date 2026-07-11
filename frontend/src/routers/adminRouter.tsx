@@ -16,6 +16,8 @@ import SeriesPage from "@/pages/admin/SeriesPage";
 import VoucherPage from "@/pages/admin/VoucherPage";
 import CreatePromotion from "@/pages/admin/CreatePromotion";
 import UpdatePromotion from "@/pages/admin/UpdatePromotion";
+import CreateVoucher from "@/pages/admin/CreateVoucher";
+import UpdateVoucher from "@/pages/admin/UpdateVoucher";
 import { Navigate } from "react-router-dom";
 
 const adminRouter = [
@@ -42,6 +44,14 @@ const adminRouter = [
   {
     path: "vouchers",
     element: <VoucherPage />,
+  },
+  {
+    path: "vouchers/add",
+    element: <CreateVoucher />,
+  },
+  {
+    path: "vouchers/edit/:code",
+    element: <UpdateVoucher />,
   },
   {
     path: "orders",
