@@ -37,8 +37,5 @@ public class Role extends BaseEntity<Integer> {
     @Column(length = 255)
     private String description;
 
-    
-    @Column(name = "created_at", updatable = false)
-    private LocalDate createdAt;
 
 }
