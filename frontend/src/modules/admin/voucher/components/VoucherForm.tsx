@@ -26,16 +26,26 @@ const VoucherForm: React.FC<VoucherFormProps> = ({ form, isEdit = false }) => {
         {/* FORM GRID */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Mã Voucher */}
-          <InputField<VoucherRequest>
-            label="Mã Voucher"
-            name="code"
-            register={register}
-            rules={{ required: "Vui lòng nhập mã Voucher" }}
-            error={errors.code}
-            disabled={isEdit}
-            placeholder="Ví dụ: HELLOSUMMER"
-            className="font-mono uppercase"
-          />
+          {isEdit ? (
+            <div className="w-full space-y-1.5">
+              <label className="block text-sm font-medium text-slate-700">
+                Mã Voucher <span className="ml-1 text-red-500">*</span>
+              </label>
+              <div className="flex h-11 items-center rounded-xl border border-slate-300 bg-slate-100 opacity-70 px-4 text-sm font-mono uppercase text-slate-900 cursor-not-allowed">
+                {form.getValues("code")}
+              </div>
+            </div>
+          ) : (
+            <InputField<VoucherRequest>
+              label="Mã Voucher"
+              name="code"
+              register={register}
+              rules={{ required: "Vui lòng nhập mã Voucher" }}
+              error={errors.code}
+              placeholder="Ví dụ: HELLOSUMMER"
+              className="font-mono uppercase"
+            />
+          )}
 
           {/* Tên hiển thị Voucher */}
           <InputField<VoucherRequest>
@@ -110,16 +120,7 @@ const VoucherForm: React.FC<VoucherFormProps> = ({ form, isEdit = false }) => {
               required
             />
           </div>
-          {/* Tổng số lượt phát hành */}
-          <InputField<VoucherRequest>
-            label="Tổng số lượt phát hành"
-            name="usageLimit"
-            type="number"
-            register={register}
-            rules={{ required: "Vui lòng nhập số lượng", valueAsNumber: true }}
-            error={errors.usageLimit}
-            placeholder="100"
-          />
+        
 
           {/* Giảm tối đa */}
           <InputField<VoucherRequest>
@@ -134,16 +135,17 @@ const VoucherForm: React.FC<VoucherFormProps> = ({ form, isEdit = false }) => {
             error={errors.maxDiscountValue}
             placeholder="50000"
           />
-          {/* Số lượng mỗi user */}
+            {/* Tổng số lượt phát hành */}
           <InputField<VoucherRequest>
-            label="Số lượng mỗi người dùng được sử dụng"
-            name="usageLimitPerUser"
+            label="Tổng số lượt phát hành"
+            name="usageLimit"
             type="number"
             register={register}
             rules={{ required: "Vui lòng nhập số lượng", valueAsNumber: true }}
-            error={errors.usageLimitPerUser}
-            placeholder="1"
+            error={errors.usageLimit}
+            placeholder="100"
           />
+        
           {/* Giá trị đơn hàng tối thiểu */}
           <InputField<VoucherRequest>
             label="Giá trị đơn tối thiểu (VNĐ)"
@@ -156,6 +158,16 @@ const VoucherForm: React.FC<VoucherFormProps> = ({ form, isEdit = false }) => {
             }}
             error={errors.minOrderValue}
             placeholder="200000"
+          />
+            {/* Số lượng mỗi user */}
+          <InputField<VoucherRequest>
+            label="Số lượng mỗi người dùng được sử dụng"
+            name="usageLimitPerUser"
+            type="number"
+            register={register}
+            rules={{ required: "Vui lòng nhập số lượng", valueAsNumber: true }}
+            error={errors.usageLimitPerUser}
+            placeholder="1"
           />
         </div>
       </div>

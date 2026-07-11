@@ -50,7 +50,7 @@ const adminRouter = [
     element: <CreateVoucher />,
   },
   {
-    path: "vouchers/edit/:code",
+    path: "vouchers/edit/:id",
     element: <UpdateVoucher />,
   },
   {

@@ -15,6 +15,7 @@ import com.dev.backend.dto.voucher.VoucherFilterRequest;
 import com.dev.backend.dto.voucher.VoucherRepsonse;
 import com.dev.backend.dto.voucher.VoucherRequest;
 import com.dev.backend.entity.Voucher;
+import com.dev.backend.exception.NotFoundException;
 import com.dev.backend.mapper.VoucherMapper;
 import com.dev.backend.repository.VoucherRepository;
 import com.dev.backend.response.PageResponse;
@@ -31,6 +32,16 @@ public class VoucherServiceImpl implements VoucherService {
 
     private final VoucherRepository voucherRepository;
     private final VoucherMapper voucherMapper;
+
+    @Override
+    public Voucher findById(Integer id) {
+        return voucherRepository.findById(id).orElseThrow(() -> new NotFoundException("NOT FOUND VOUCHER ID" + id));
+    }
+
+    @Override
+    public VoucherRepsonse edit(Integer id) {
+        return voucherMapper.toDTO(findById(id));
+    }
 
     @Override
     public VoucherRepsonse add(VoucherRequest request) {

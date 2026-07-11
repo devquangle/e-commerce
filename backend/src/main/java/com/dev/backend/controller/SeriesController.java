@@ -50,14 +50,14 @@ public class SeriesController {
     }
 
     @PutMapping("/admin/series/{id}")
-    public ResponseEntity<ResponseData<SeriesResponse>> update(@PathVariable Integer id,
+    public ResponseEntity<ResponseData<SeriesResponse>> update(@PathVariable("id") Integer id,
             @RequestBody SeriesRequest seriesRequest) {
         SeriesResponse response = seriesService.update(id, seriesRequest);
         return ResponseUtil.success("Cập nhật bộ truyện thành công.", response);
     }
 
     @DeleteMapping("/admin/series/{id}")
-    public ResponseEntity<ResponseData<Void>> delete(@PathVariable Integer id) {
+    public ResponseEntity<ResponseData<Void>> delete(@PathVariable("id") Integer id) {
         seriesService.delete(id);
         return ResponseUtil.success("Xoá bộ truyện thành công.", null);
     }

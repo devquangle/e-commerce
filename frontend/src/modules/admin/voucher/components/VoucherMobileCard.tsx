@@ -1,7 +1,9 @@
-import React from "react";
-import { Calendar, Edit, Trash2 } from "lucide-react";
+import React, { useState } from "react";
+import { Calendar, Edit, Trash2, ChevronDown } from "lucide-react";
 import { BaseStatus, getBaseStatusLabel } from "@/types/status";
 import type { VoucherResponse } from "../types/voucher.type";
+import { formatMoney } from "@/utils/number.utils";
+import { formatToMMDDYYYY } from "@/utils/formatDate.utils";
 
 interface VoucherMobileCardProps {
   vouchers: VoucherResponse[];
@@ -20,6 +22,50 @@ const statusClass = (status: BaseStatus) => {
     default:
       return "bg-slate-100 text-slate-600 border border-slate-200 font-semibold";
   }
+};
+
+const DiscountExample: React.FC<{ voucher: VoucherResponse }> = ({ voucher }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  if (voucher.discountValue > 100) return null; // Chỉ hiển thị ví dụ cho voucher %
+
+  const percentDiscount = (voucher.minOrderValue * voucher.discountValue) / 100;
+  const maxDiscount = voucher.maxDiscountValue || percentDiscount;
+  
+  const appliedDiscount = Math.min(percentDiscount, maxDiscount);
+  const isMaxApplied = maxDiscount < percentDiscount && voucher.maxDiscountValue > 0;
+
+  return (
+    <div className="mt-2 flex flex-col items-start border-t border-slate-50 pt-2">
+      <div
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="inline-flex items-center gap-1 text-[11px] text-indigo-600 font-medium cursor-pointer hover:text-indigo-800 transition-colors select-none"
+      >
+        <span>{isExpanded ? 'Thu gọn' : 'Xem ví dụ'}</span>
+        <ChevronDown size={13} className={`transition-transform duration-300 ease-in-out ${isExpanded ? 'rotate-180' : ''}`} />
+      </div>
+      
+      <div 
+        className={`grid transition-all duration-300 ease-in-out w-full ${isExpanded ? 'grid-rows-[1fr] opacity-100 mt-2' : 'grid-rows-[0fr] opacity-0'}`}
+      >
+        <div className="overflow-hidden">
+          <div className="p-2 bg-indigo-50/40 border border-indigo-100/50 rounded-lg text-xs text-indigo-700">
+            <p className="font-semibold mb-1">VD đơn {formatMoney(voucher.minOrderValue)}:</p>
+            <ul className="list-disc list-inside space-y-0.5 text-indigo-500">
+              <li>{voucher.discountValue}% là: {formatMoney(percentDiscount)}</li>
+              {voucher.maxDiscountValue > 0 && <li>Tối đa là: {formatMoney(voucher.maxDiscountValue)}</li>}
+              <li className="font-medium text-indigo-700 mt-1">
+                =&gt; Giảm: {formatMoney(appliedDiscount)} 
+                <span className="font-normal italic text-indigo-500 ml-1">
+                  ({isMaxApplied ? 'Áp dụng tối đa' : 'Áp dụng theo %'})
+                </span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 const VoucherMobileCard: React.FC<VoucherMobileCardProps> = ({
@@ -66,20 +112,21 @@ const VoucherMobileCard: React.FC<VoucherMobileCardProps> = ({
                 <span className="text-slate-800 font-bold">
                   {voucher.discountValue <= 100
                     ? `Giảm ${voucher.discountValue}%`
-                    : `Giảm ${voucher.discountValue.toLocaleString("vi-VN")}đ`}
+                    : `Giảm ${formatMoney(voucher.discountValue)}`}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500 font-medium">Đơn tối thiểu:</span>
                 <span className="text-slate-700 font-semibold">
-                  {voucher.minOrderValue.toLocaleString("vi-VN")}đ
+                  {formatMoney(voucher.minOrderValue)}
                 </span>
               </div>
+              <DiscountExample voucher={voucher} />
               <div className="flex justify-between">
                 <span className="text-slate-500 font-medium">Thời gian:</span>
                 <span className="text-slate-700 font-medium text-xs flex items-center gap-1">
                   <Calendar size={13} className="text-slate-400" />
-                  {voucher.startDate} - {voucher.endDate}
+                  {formatToMMDDYYYY(voucher.startDate)} - {formatToMMDDYYYY(voucher.endDate)}
                 </span>
               </div>
               <div className="flex justify-between border-t border-slate-50 pt-2">
