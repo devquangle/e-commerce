@@ -14,6 +14,7 @@ import com.dev.backend.constant.VoucherStatus;
 import com.dev.backend.dto.voucher.VoucherFilterRequest;
 import com.dev.backend.dto.voucher.VoucherRepsonse;
 import com.dev.backend.dto.voucher.VoucherRequest;
+import com.dev.backend.dto.voucher.VoucherUserRepsonse;
 import com.dev.backend.entity.Voucher;
 import com.dev.backend.exception.NotFoundException;
 import com.dev.backend.mapper.VoucherMapper;
@@ -115,6 +116,11 @@ public class VoucherServiceImpl implements VoucherService {
                 pageResult.getSize(),
                 pageResult.getTotalElements(),
                 pageResult.getTotalPages());
+    }
+
+    @Override
+    public List<VoucherUserRepsonse> getAvailableVouchersForUser(Integer userId) {
+        return voucherRepository.findAvailableVouchersForUser(userId);
     }
 
 }

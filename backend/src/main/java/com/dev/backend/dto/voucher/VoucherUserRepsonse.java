@@ -2,13 +2,15 @@ package com.dev.backend.dto.voucher;
 
 import java.time.LocalDate;
 
-import com.dev.backend.constant.VoucherStatus;
-
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class VoucherUserRepsonse {
     private Integer id;
     private String name;
@@ -19,7 +21,7 @@ public class VoucherUserRepsonse {
     private Integer maxDiscountValue;
 
 
-    private Integer user_used_count;
+    private Integer userUsedCount;
     private Integer usageLimitPerUser;
 
     private LocalDate startDate;
