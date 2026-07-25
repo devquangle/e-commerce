@@ -46,6 +46,7 @@ export default function FormUpdateAddress({ addressId: propAddressId, onSuccess,
     const {
         data: address,
         isFetching: isFetchingAddress,
+        isError,
     } = useAddressDetail(addressId);
 
     useEffect(() => {
@@ -86,6 +87,30 @@ export default function FormUpdateAddress({ addressId: propAddressId, onSuccess,
     };
 
     if ((isFetchingAddress && !address) || isPending) return <Loading inline className="py-16" />;
+
+    if (!address || isError) {
+        return (
+            <div className="py-12 text-center space-y-4">
+                <p className="text-red-500 font-medium text-lg">Địa chỉ không tồn tại</p>
+                {onCancel ? (
+                    <button
+                        type="button"
+                        onClick={onCancel}
+                        className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-sm"
+                    >
+                        Hủy bỏ
+                    </button>
+                ) : (
+                    <NavLink
+                        to="/account/address"
+                        className="inline-block px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-sm"
+                    >
+                        ← Quay lại
+                    </NavLink>
+                )}
+            </div>
+        );
+    }
 
 
     return (

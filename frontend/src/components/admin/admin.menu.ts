@@ -7,7 +7,6 @@ import {
   FolderTree,
   ShoppingCart,
   Star,
-  Image,
   MessageCircle,
   BarChart3,
   Flame,
