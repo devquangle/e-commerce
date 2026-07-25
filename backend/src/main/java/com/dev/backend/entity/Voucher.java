@@ -1,6 +1,8 @@
 package com.dev.backend.entity;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.dev.backend.constant.VoucherStatus;
 
@@ -8,6 +10,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -38,4 +41,7 @@ public class Voucher extends BaseAuditableEntity<Integer> {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private VoucherStatus status;
+
+    @OneToMany(mappedBy = "voucher")
+    private List<Order> orders = new ArrayList<>();
 }

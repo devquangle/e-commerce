@@ -1,5 +1,6 @@
 package com.dev.backend.entity;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,13 +38,12 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
 
     @Enumerated(EnumType.STRING)
     private PaymentStatus paymentStatus;
-    
+
     @Column(nullable = false)
     private String fullName;
 
@@ -62,13 +62,20 @@ public class Order {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OrderStatus status;
-    
+
     @Column(nullable = false)
     private String street;
 
     private String noted;
 
     private String cancel;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "voucher_id")
+    private Voucher voucher; // Cho phép null nếu đơn hàng không dùng voucher
+
+    @Column(name = "voucher_amount")
+    private Integer voucherAmount;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
