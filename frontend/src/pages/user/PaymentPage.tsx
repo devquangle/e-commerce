@@ -3,8 +3,9 @@ import Container from "@/components/common/Container";
 import { CheckoutMobileBar } from "@/components/user/CheckoutUI";
 import { type CouponOption } from "@/modules/user/cart/types/cart.type";
 import { showSuccessToast, showWarningToast } from "@/utils/toastUtil";
+import { formatMoney } from "@/utils/number.utils";
 import { Package } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { getSelectedAddressId, type CouponForm } from "@/types/checkout.type";
 import CartCheckoutSidebar from "@/components/user/CartCheckoutSidebar";
@@ -87,13 +88,25 @@ export default function PaymentPage() {
     [items],
   );
 
-  const voucherDiscount = appliedCoupon
-    ? Math.round(
-        (subtotal - productDiscount) * (appliedCoupon.discountPercent / 100),
-      )
-    : 0;
+  const voucherDiscount = useMemo(() => {
+    if (!appliedCoupon) return 0;
+    const basePrice = subtotal - productDiscount;
+    if (appliedCoupon.minOrderValue && basePrice < appliedCoupon.minOrderValue) {
+      return 0;
+    }
+    let calculated = 0;
+    if (appliedCoupon.discountValue <= 100) {
+      calculated = Math.round((basePrice * appliedCoupon.discountValue) / 100);
+      if (appliedCoupon.maxDiscountValue && appliedCoupon.maxDiscountValue > 0) {
+        calculated = Math.min(calculated, appliedCoupon.maxDiscountValue);
+      }
+    } else {
+      calculated = appliedCoupon.discountValue;
+    }
+    return Math.min(calculated, Math.max(0, basePrice));
+  }, [appliedCoupon, subtotal, productDiscount]);
 
-  const { data: addresses = [] } = useAddresses();
+  const { data: addresses = [], isPending: isAddressLoading } = useAddresses();
   const selectedAddress = useMemo(
     () => addresses.find((a) => a.id === selectedAddressId) ?? null,
     [addresses, selectedAddressId],
@@ -134,6 +147,28 @@ export default function PaymentPage() {
     setValue("couponCode", "");
     showSuccessToast("Đã gỡ mã giảm giá");
   };
+
+  // Tự động gỡ voucher khi tạm tính không còn đủ điều kiện
+  // Dùng queueMicrotask để tránh setState đồng bộ trong effect body
+  useEffect(() => {
+    if (!appliedCoupon) return;
+    const basePrice = subtotal - productDiscount;
+    const isIneligible =
+      appliedCoupon.minOrderValue > 0 &&
+      basePrice < appliedCoupon.minOrderValue;
+    if (!isIneligible) return;
+
+    const code = appliedCoupon.code;
+    const minVal = appliedCoupon.minOrderValue;
+
+    queueMicrotask(() => {
+      setAppliedCoupon(null);
+      setValue("couponCode", "");
+      showWarningToast(
+        `Mã "${code}" đã bị gỡ vì đơn hàng chưa đủ ${formatMoney(minVal)}`
+      );
+    });
+  }, [subtotal, productDiscount, appliedCoupon, setValue]);
 
   if (items.length === 0 && !isCartPending) {
     return (
@@ -198,12 +233,15 @@ export default function PaymentPage() {
           <CartCheckoutSidebar
             selectedCount={selectedCount}
             subtotal={subtotal}
+            basePrice={subtotal - productDiscount}
             discount={productDiscount}
             voucherDiscount={voucherDiscount}
             shippingFee={shippingFee}
             total={total}
             hasSelected={items.length > 0}
             selectedAddressId={selectedAddressId}
+            selectedAddress={selectedAddress}
+            isAddressLoading={isAddressLoading}
             appliedCoupon={appliedCoupon}
             paymentMethod={paymentMethod}
             onPaymentChange={setPaymentMethod}

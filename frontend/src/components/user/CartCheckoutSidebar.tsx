@@ -2,31 +2,32 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import type { UseFormRegister, FieldErrors } from "react-hook-form";
 
-import type {
-  CouponOption,
-} from "@/modules/user/cart/types/cart.type";
+import type { CouponOption } from "@/modules/user/cart/types/cart.type";
+import type { AddressResponse } from "@/modules/user/address/types/address";
 
 import VoucherModal from "./VoucherModal";
-// Import các sub-component sạch sẽ
 import { ShippingAddress } from "./ShippingAddress";
 import { VoucherApply } from "./VoucherApply";
 import { PriceBreakdown } from "./PriceBreakdown";
-import {
-  type CouponForm,
-} from "@/types/checkout.type";
+import { type CouponForm } from "@/types/checkout.type";
 import PaymentMethod from "@/modules/user/payment/components/PaymentMethod";
-import { useAddresses } from "@/modules/user/address/hooks/useAddress";
 import type { PaymentMethodType } from "@/modules/user/payment/types/payment-method.type";
 
 type CartCheckoutSidebarProps = {
   selectedCount: number;
   subtotal: number;
+  /** Giá sau giảm giá sản phẩm, dùng để kiểm tra điều kiện voucher */
+  basePrice?: number;
   discount: number;
   voucherDiscount?: number;
   shippingFee?: number;
   total: number;
   hasSelected: boolean;
   selectedAddressId: number;
+  /** Địa chỉ đã resolve sẵn từ parent — tránh fetch lại */
+  selectedAddress?: AddressResponse | null;
+  /** Đang load địa chỉ */
+  isAddressLoading?: boolean;
   appliedCoupon: CouponOption | null;
   paymentMethod: PaymentMethodType;
   onPaymentChange: (method: PaymentMethodType) => void;
@@ -43,12 +44,15 @@ type CartCheckoutSidebarProps = {
 export default function CartCheckoutSidebar({
   selectedCount,
   subtotal,
+  basePrice,
   discount,
   voucherDiscount,
   shippingFee,
   total,
   hasSelected,
   selectedAddressId,
+  selectedAddress = null,
+  isAddressLoading = false,
   appliedCoupon,
   paymentMethod,
   onPaymentChange,
@@ -59,16 +63,11 @@ export default function CartCheckoutSidebar({
   isCheckoutPage,
 }: CartCheckoutSidebarProps) {
   const [voucherModalOpen, setVoucherModalOpen] = useState(false);
-  const { data: addresses = [] } = useAddresses();
-  const selectedAddress = addresses.find(
-    (a) => a.id === selectedAddressId,
-  ) ?? null;
-
   return (
     <>
       <div className="lg:col-span-5 xl:col-span-4 lg:sticky lg:top-24 lg:self-start mb-4 space-y-3">
         {/* 1. Địa chỉ giao hàng */}
-        <ShippingAddress selectedAddress={selectedAddress} />
+        <ShippingAddress selectedAddress={selectedAddress} isLoading={isAddressLoading} />
 
         {/* 2. Áp dụng mã giảm giá */}
         <VoucherApply
@@ -76,6 +75,8 @@ export default function CartCheckoutSidebar({
           voucherDiscount={voucherDiscount}
           onRemoveCoupon={onRemoveCoupon}
           onOpenModal={() => setVoucherModalOpen(true)}
+          onSelectCoupon={onCouponSelect}
+          subtotal={basePrice ?? subtotal}
         />
         {/* 3. Phương thức thanh toán */}
         <PaymentMethod value={paymentMethod} onChange={onPaymentChange} />
@@ -100,6 +101,7 @@ export default function CartCheckoutSidebar({
         onClose={() => setVoucherModalOpen(false)}
         appliedCoupon={appliedCoupon}
         onSelect={onCouponSelect}
+        subtotal={basePrice ?? subtotal}
       />
     </>
   );

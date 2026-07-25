@@ -100,8 +100,10 @@ public class SecurityConfig {
                                                 .requestMatchers(PUBLIC_URLS).permitAll()
                                                 .requestMatchers(HttpMethod.GET, PUBLIC_GET_URLS).permitAll()
                                                 .requestMatchers("/api/v1/cart/**").hasRole("CUSTOMER")
-                                                  .requestMatchers("/api/v1/vouchers/available/**").hasRole("CUSTOMER")
-                                                .requestMatchers("/api/v1/vouchers/**").hasAnyRole("SUPER_ADMIN", "ADMIN", "VOUCHER")
+                                                .requestMatchers("/api/v1/voucher/available/**").hasRole("CUSTOMER")
+
+                                                .requestMatchers("/api/v1/vouchers/**")
+                                                .hasAnyRole("SUPER_ADMIN", "ADMIN", "VOUCHER")
                                                 .anyRequest().authenticated())
 
                                 .exceptionHandling(ex -> ex
@@ -150,8 +152,6 @@ public class SecurityConfig {
         public BCryptPasswordEncoder passwordEncoder() {
                 return new BCryptPasswordEncoder();
         }
-
-      
 
         @Bean
         public RestTemplate restTemplate() {

@@ -53,9 +53,11 @@ public interface VoucherRepository extends JpaRepository<Voucher, Integer> {
                 WHERE v.status = com.dev.backend.constant.VoucherStatus.ACTIVE
                   AND CURRENT_DATE BETWEEN v.startDate AND v.endDate
                   AND (v.usageLimit IS NULL OR v.usedCount < v.usageLimit)
+                  AND (:code IS NULL OR :code = '' OR v.code = :code)
                 GROUP BY v.id, v.name, v.code, v.discountValue, v.minOrderValue,
                          v.maxDiscountValue, v.usageLimitPerUser, v.startDate, v.endDate
                 HAVING v.usageLimitPerUser IS NULL OR COUNT(o) < v.usageLimitPerUser
             """)
-    List<VoucherUserRepsonse> findAvailableVouchersForUser(@Param("userId") Integer userId);
+    List<VoucherUserRepsonse> findAvailableVouchersForUser(
+            @Param("userId") Integer userId,  @Param("code") String code );
 }

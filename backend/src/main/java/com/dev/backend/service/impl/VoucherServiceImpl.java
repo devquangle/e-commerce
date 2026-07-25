@@ -119,8 +119,9 @@ public class VoucherServiceImpl implements VoucherService {
     }
 
     @Override
-    public List<VoucherUserRepsonse> getAvailableVouchersForUser(Integer userId) {
-        return voucherRepository.findAvailableVouchersForUser(userId);
+    public List<VoucherUserRepsonse> getAvailableVouchersForUser(Integer userId, String code) {
+        String cleanCode = (code != null && !code.isBlank()) ? code.trim() : null;
+        return voucherRepository.findAvailableVouchersForUser(userId, cleanCode);
     }
 
 }

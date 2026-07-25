@@ -47,3 +47,24 @@ export interface VoucherSearchRequest {
   page?: number;
   size?: number;
 }
+
+
+export interface VoucherUserResponse {
+  id: number;
+  code: string;
+  name: string;
+
+  discountValue: number;
+  minOrderValue: number;
+  maxDiscountValue: number;
+
+
+  usedUserCount: number;
+  usageLimitPerUser: number;
+  
+  startDate: string;
+  endDate: string;
+
+
+}
+

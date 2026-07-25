@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dev.backend.dto.voucher.VoucherFilterRequest;
@@ -68,13 +69,12 @@ public class VoucherController {
         return ResponseUtil.success("Xoá voucher thành công", response);
     }
 
-    
-    @GetMapping("/vouchers/available")
+    @GetMapping("/voucher/available")
     public ResponseEntity<ResponseData<List<VoucherUserRepsonse>>> getVoucherForUser(
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
-        List<VoucherUserRepsonse> response = voucherService.getAvailableVouchersForUser(userDetails.getId());
+            @AuthenticationPrincipal CustomUserDetails userDetails , @RequestParam(value = "code", required = false) String code) {
+            
+        List<VoucherUserRepsonse> response = voucherService.getAvailableVouchersForUser(userDetails.getId(),code);
         return ResponseUtil.success("Lấy voucher thành công", response);
     }
-
 
 }

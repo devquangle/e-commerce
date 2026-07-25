@@ -23,7 +23,7 @@ public interface VoucherService {
 
     PageResponse<VoucherRepsonse> search(VoucherFilterRequest request);
 
-    List<VoucherUserRepsonse> getAvailableVouchersForUser(Integer userId);
+    List<VoucherUserRepsonse> getAvailableVouchersForUser(Integer userId,String code);
 
     void insertData();
 }

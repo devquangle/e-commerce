@@ -5,6 +5,7 @@ import type {
   VoucherRequest,
   VoucherResponse,
   VoucherSearchRequest,
+  VoucherUserResponse,
 } from "../types/voucher.type";
 
 const VoucherService = {
@@ -18,6 +19,7 @@ const VoucherService = {
     }
     return res.data.data;
   },
+
   async getVoucherById(id: number) {
     const res = await apiAuth.get<ApiResponse<VoucherResponse>>(
       `/api/v1/vouchers/${id}`,
@@ -27,6 +29,7 @@ const VoucherService = {
     }
     return res.data.data;
   },
+
   async createVoucher(data: VoucherRequest) {
     const res = await apiAuth.post<ApiResponse<VoucherResponse>>(
       "/api/v1/vouchers",
@@ -62,5 +65,22 @@ const VoucherService = {
     }
     return res.data;
   },
+
+  async getVoucherForUser(code?: string) {
+    try {
+      const res = await apiAuth.get<ApiResponse<VoucherUserResponse[] | VoucherUserResponse>>(
+        "/api/v1/voucher/available",
+        { params: code ? { code } : "" },
+      );
+      if (!res.data.success || !res.data.data) {
+        return [];
+      }
+      const data = res.data.data;
+      return Array.isArray(data) ? data : [data];
+    } catch {
+      return [];
+    }
+  },
 };
+
 export default VoucherService;

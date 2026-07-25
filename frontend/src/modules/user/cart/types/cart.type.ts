@@ -62,11 +62,6 @@ export interface ProductPublisherResponse {
 
 /** UI state cho trang giỏ hàng / thanh toán */
 
-export interface CouponOption {
-  code: string;
-  description: string;
-  discountPercent: number;
-}
 
 export interface CartCountResponse {
   count: number;
@@ -107,8 +102,7 @@ export const MOCK_CART_ITEMS: CartResponse[] = [
   },
 ];
 
-export const MOCK_COUPONS: CouponOption[] = [
-  { code: "SALE10", description: "Giảm 10% đơn hàng", discountPercent: 10 },
-  { code: "FREESHIP", description: "Miễn phí vận chuyển", discountPercent: 0 },
-  { code: "BOOK20", description: "Giảm 20% sách", discountPercent: 20 },
-];
+import type { VoucherUserResponse } from "@/modules/admin/voucher/types/voucher.type";
+
+export type CouponOption = VoucherUserResponse;
+
