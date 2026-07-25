@@ -7,7 +7,12 @@ import { formatMoney } from "@/utils/number.utils";
 import { Package } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
-import { getSelectedAddressId, type CouponForm } from "@/types/checkout.type";
+import {
+  getSelectedAddressId,
+  getCachedSelectedAddress,
+  setCachedSelectedAddress,
+  type CouponForm,
+} from "@/types/checkout.type";
 import CartCheckoutSidebar from "@/components/user/CartCheckoutSidebar";
 import CartItemCard from "@/modules/user/cart/components/CartItemCard";
 import type { PaymentMethodType } from "@/modules/user/payment/types/payment-method.type";
@@ -107,11 +112,25 @@ export default function PaymentPage() {
     return Math.min(calculated, Math.max(0, basePrice));
   }, [appliedCoupon, subtotal, productDiscount]);
 
-  const { data: addresses = [], isPending: isAddressLoading } = useAddresses();
-  const selectedAddress = useMemo(
-    () => addresses.find((a) => a.id === selectedAddressId) ?? null,
-    [addresses, selectedAddressId],
-  );
+  const { data: addresses = [], isPending: isAddressesPending } = useAddresses();
+  const cachedAddress = useMemo(() => getCachedSelectedAddress(), []);
+
+  const selectedAddress = useMemo(() => {
+    if (addresses.length > 0) {
+      const found =
+        addresses.find((a) => a.id === selectedAddressId) ??
+        addresses.find((a) => a.default) ??
+        addresses[0] ??
+        null;
+      if (found) {
+        setCachedSelectedAddress(found);
+      }
+      return found;
+    }
+    return cachedAddress;
+  }, [addresses, selectedAddressId, cachedAddress]);
+
+  const isAddressLoading = isAddressesPending && !selectedAddress;
 
   const totalWeight = useMemo(
     () =>
