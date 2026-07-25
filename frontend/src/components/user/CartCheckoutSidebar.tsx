@@ -23,7 +23,6 @@ type CartCheckoutSidebarProps = {
   shippingFee?: number;
   total: number;
   hasSelected: boolean;
-  selectedAddressId: number;
   /** Địa chỉ đã resolve sẵn từ parent — tránh fetch lại */
   selectedAddress?: AddressResponse | null;
   /** Đang load địa chỉ */
@@ -50,7 +49,6 @@ export default function CartCheckoutSidebar({
   shippingFee,
   total,
   hasSelected,
-  selectedAddressId,
   selectedAddress = null,
   isAddressLoading = false,
   appliedCoupon,
