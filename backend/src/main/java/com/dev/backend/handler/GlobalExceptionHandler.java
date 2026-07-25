@@ -100,6 +100,21 @@ public class GlobalExceptionHandler {
                                 ApiErrorCode.ACCESS_DENIED, request.getRequestURI(), null);
         }
 
+        @ExceptionHandler({
+                        org.springframework.web.servlet.resource.NoResourceFoundException.class,
+                        org.springframework.web.servlet.NoHandlerFoundException.class
+        })
+        public ResponseEntity<ResponseData<Object>> handleNotFoundException(
+                        Exception ex,
+                        HttpServletRequest request) {
+                return ResponseUtil.error(
+                                HttpStatus.NOT_FOUND,
+                                "Không tìm thấy đường dẫn hoặc tài nguyên yêu cầu (404)",
+                                ApiErrorCode.NOT_FOUND,
+                                request.getRequestURI(),
+                                null);
+        }
+
         @ExceptionHandler(Exception.class)
         public ResponseEntity<ResponseData<Object>> handleException(Exception ex, HttpServletRequest request) {
                 log.error("Unhandled exception at {}", request.getRequestURI(), ex);
