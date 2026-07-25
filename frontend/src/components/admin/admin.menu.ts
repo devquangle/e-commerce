@@ -114,13 +114,7 @@ export const menuGroups: MenuGroup[] = [
         icon: Ticket,
         role: [Role.SUPER_ADMIN, Role.ADMIN, Role.PROMOTION_MANAGER],
       },
-      {
-        id: 43,
-        label: "Banner",
-        path: "/admin/banners",
-        icon: Image,
-        role: [Role.SUPER_ADMIN, Role.ADMIN, Role.CONTENT_MANAGER],
-      },
+     
     ],
   },
 

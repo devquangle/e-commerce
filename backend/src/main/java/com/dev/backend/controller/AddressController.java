@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dev.backend.bean.AddressBean;
-import com.dev.backend.dto.AddressDTO;
+import com.dev.backend.dto.address.AddressResponse;
 import com.dev.backend.response.ResponseData;
 import com.dev.backend.response.ResponseUtil;
 import com.dev.backend.security.CustomUserDetails;
@@ -26,45 +26,45 @@ public class AddressController {
     private final AddressService addressService;
 
     @GetMapping("/auth/addresses")
-    public ResponseEntity<ResponseData<List<AddressDTO>>> getAddresses(
+    public ResponseEntity<ResponseData<List<AddressResponse>>> getAddresses(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        List<AddressDTO> addresses = addressService.getListAddressByUserId(userDetails);
+        List<AddressResponse> addresses = addressService.getListAddressByUserId(userDetails.getId());
         return ResponseUtil.success("Lấy danh sách địa chỉ thành công", addresses);
     }
 
     @GetMapping("/auth/addresses/{addressId}")
-    public ResponseEntity<ResponseData<AddressDTO>> getAddresses(@PathVariable("addressId") Integer addressId,
+    public ResponseEntity<ResponseData<AddressResponse>> getAddresses(@PathVariable("addressId") Integer addressId,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        AddressDTO addresses = addressService.getAddressDTOByIdAndUserId(addressId, userDetails);
+        AddressResponse addresses = addressService.getAddressDTOByIdAndUserId(addressId, userDetails.getId());
 
         return ResponseUtil.success("Lấy danh sách địa chỉ thành công", addresses);
     }
 
     @PostMapping("/auth/addresses")
-    public ResponseEntity<ResponseData<AddressDTO>> addAddress(@RequestBody AddressBean addressBean,
+    public ResponseEntity<ResponseData<AddressResponse>> addAddress(@RequestBody AddressBean addressBean,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        AddressDTO addressDTO = addressService.savAddress(addressBean, userDetails);
+        AddressResponse addressDTO = addressService.savAddress(addressBean, userDetails.getId());
         return ResponseUtil.success("Lưu địa chỉ thành công", addressDTO);
     }
 
     @PutMapping("/auth/addresses/{addressId}")
-    public ResponseEntity<ResponseData<AddressDTO>> updateAddress(@PathVariable("addressId") Integer addressId,
+    public ResponseEntity<ResponseData<AddressResponse>> updateAddress(@PathVariable("addressId") Integer addressId,
             @RequestBody AddressBean addressBean, @AuthenticationPrincipal CustomUserDetails userDetails) {
-        AddressDTO addressDTO = addressService.updateAddress(addressId, addressBean, userDetails);
+        AddressResponse addressDTO = addressService.updateAddress(addressId, addressBean, userDetails.getId());
         return ResponseUtil.success("Cập nhật địa chỉ thành công", addressDTO);
     }
 
     @DeleteMapping("/auth/addresses/{addressId}")
     public ResponseEntity<ResponseData<Object>> deleteAddress(@PathVariable("addressId") Integer addressId,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        addressService.deleteAddress(addressId, userDetails);
+        addressService.deleteAddress(addressId, userDetails.getId());
         return ResponseUtil.success("Xóa địa chỉ thành công", null);
     }
 
     @PutMapping("/auth/addresses/{addressId}/default")
     public ResponseEntity<ResponseData<Object>> defaultAddress(@PathVariable("addressId") Integer addressId,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        addressService.defaultAddress(addressId, userDetails);
+        addressService.defaultAddress(addressId, userDetails.getId());
         return ResponseUtil.success("Cập nhật địa chỉ thành công", null);
     }
 

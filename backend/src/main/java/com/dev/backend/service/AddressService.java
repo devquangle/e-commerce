@@ -3,25 +3,24 @@ package com.dev.backend.service;
 import java.util.List;
 
 import com.dev.backend.bean.AddressBean;
-import com.dev.backend.dto.AddressDTO;
+import com.dev.backend.dto.address.AddressResponse;
 import com.dev.backend.entity.Address;
-import com.dev.backend.security.CustomUserDetails;
 
 public interface AddressService {
-    List<AddressDTO> getListAddressByUserId(CustomUserDetails userDetails);
+    List<AddressResponse> getListAddressByUserId(Integer userId);
 
-    AddressDTO getAddressDTOByIdAndUserId(Integer addressId, CustomUserDetails userDetails);
+    AddressResponse getAddressDTOByIdAndUserId(Integer addressId, Integer userId);
 
-    AddressDTO savAddress(AddressBean addressBean, CustomUserDetails userDetails);
+    AddressResponse savAddress(AddressBean addressBean, Integer userId);
 
-    AddressDTO updateAddress(Integer addressId, AddressBean addressBean, CustomUserDetails userDetails);
+    AddressResponse updateAddress(Integer addressId, AddressBean addressBean, Integer userId);
 
-    int count(CustomUserDetails userDetails);
+    int count(Integer userId);
 
-    Address getAddressByIdAndUserId(Integer addressId, CustomUserDetails userDetails);
+    Address getAddressByIdAndUserId(Integer addressId, Integer userId);
 
-    void deleteAddress(Integer addressId, CustomUserDetails userDetails);
+    void deleteAddress(Integer addressId, Integer userId);
 
-    void defaultAddress(Integer addressId, CustomUserDetails userDetails);
+    void defaultAddress(Integer addressId, Integer userId);
 
 }

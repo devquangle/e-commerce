@@ -5,14 +5,12 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.dev.backend.bean.AddressBean;
-import com.dev.backend.dto.AddressDTO;
+import com.dev.backend.dto.address.AddressResponse;
 import com.dev.backend.entity.Address;
-import com.dev.backend.entity.User;
 import com.dev.backend.exception.AppException;
 import com.dev.backend.exception.NotFoundException;
 import com.dev.backend.mapper.AddressMapper;
 import com.dev.backend.repository.AddressRepository;
-import com.dev.backend.security.CustomUserDetails;
 import com.dev.backend.service.AddressService;
 import com.dev.backend.service.UserService;
 
@@ -28,39 +26,34 @@ public class AddressServiceImpl implements AddressService {
     private final UserService userService;
 
     @Override
-    public int count(CustomUserDetails userDetails) {
-        User user = userService.userIsLogin(userDetails);
-        return addressRepository.countByUserId(user.getId());
+    public int count(Integer userId) {
+        return addressRepository.countByUserId(userId);
     }
 
     @Override
-    public Address getAddressByIdAndUserId(Integer addressId, CustomUserDetails userDetails) {
-        Integer userId = userService.userIsLogin(userDetails).getId();
+    public Address getAddressByIdAndUserId(Integer addressId, Integer userId) {
         Address address = addressRepository.findByIdAndUserId(addressId, userId)
                 .orElseThrow(() -> new NotFoundException("ADDRESS NOT FOUND"));
         return address;
     }
 
     @Override
-    public void deleteAddress(Integer addressId, CustomUserDetails userDetails) {
-        Integer userId = userService.userIsLogin(userDetails).getId();
+    public void deleteAddress(Integer addressId, Integer userId) {
         Address address = addressRepository.findByIdAndUserId(addressId, userId)
                 .orElseThrow(() -> new NotFoundException("ADDRESS NOT FOUND"));
         addressRepository.delete(address);
     }
 
     @Override
-    public AddressDTO getAddressDTOByIdAndUserId(Integer addressId, CustomUserDetails userDetails) {
-        Address address = getAddressByIdAndUserId(addressId, userDetails);
+    public AddressResponse getAddressDTOByIdAndUserId(Integer addressId, Integer userId) {
+        Address address = getAddressByIdAndUserId(addressId, userId);
         return addressMapper.toDTO(address);
     }
 
-
-
     @Override
-    public List<AddressDTO> getListAddressByUserId(CustomUserDetails userDetails) {
+    public List<AddressResponse> getListAddressByUserId(Integer userId) {
         List<Address> addresses = addressRepository
-                .findByUserId(userDetails.getUser().getId());
+                .findByUserId(userId);
 
         if (addresses == null || addresses.isEmpty()) {
             return List.of();
@@ -71,13 +64,10 @@ public class AddressServiceImpl implements AddressService {
                 .toList();
     }
 
-   
     @Override
     @Transactional
-    public AddressDTO savAddress(AddressBean addressBean, CustomUserDetails userDetails) {
-        User user = userService.userIsLogin(userDetails);
-        Integer userId = userService.userIsLogin(userDetails).getId();
-        if (count(userDetails) >= 6) {
+    public AddressResponse savAddress(AddressBean addressBean, Integer userId) {
+        if (count(userId) >= 6) {
             throw new AppException(422, "Bạn chỉ được lưu tối đa 6 địa chỉ");
         }
 
@@ -92,16 +82,15 @@ public class AddressServiceImpl implements AddressService {
         address.setWardCode(addressBean.getWardCode());
         address.setStreet(addressBean.getStreet());
         address.setDefault(addressBean.isDefault());
-        address.setUser(user);
+        address.setUser(userService.getUserById(userId));
         addressRepository.save(address);
         return addressMapper.toDTO(address);
     }
 
     @Override
     @Transactional
-    public AddressDTO updateAddress(Integer addressId, AddressBean addressBean, CustomUserDetails userDetails) {
-        Integer userId = userService.userIsLogin(userDetails).getId();
-        Address address = getAddressByIdAndUserId(addressId, userDetails);
+    public AddressResponse updateAddress(Integer addressId, AddressBean addressBean, Integer userId) {
+        Address address = getAddressByIdAndUserId(addressId, userId);
         if (addressBean.isDefault()) {
             addressRepository.clearDefaultOnly(userId);
         }
@@ -118,9 +107,8 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     @Transactional
-    public void defaultAddress(Integer addressId, CustomUserDetails userDetails) {
-        Integer userId = userService.userIsLogin(userDetails).getId();
-        Address address = getAddressByIdAndUserId(addressId, userDetails);
+    public void defaultAddress(Integer addressId, Integer userId) {
+        Address address = getAddressByIdAndUserId(addressId, userId);
         addressRepository.clearDefaultOnly(userId);
         address.setDefault(true);
         addressRepository.save(address);

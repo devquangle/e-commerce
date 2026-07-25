@@ -3,6 +3,7 @@ package com.dev.backend.mapper;
 import org.springframework.stereotype.Component;
 
 import com.dev.backend.dto.AddressDTO;
+import com.dev.backend.dto.address.AddressResponse;
 import com.dev.backend.entity.Address;
 import com.dev.backend.service.GHNService;
 
@@ -14,11 +15,11 @@ public class AddressMapper {
         this.ghnService = ghnService;
     }
 
-    public AddressDTO toDTO(Address address) {
+    public AddressResponse toDTO(Address address) {
         if (address == null) {
             return null;
         }
-        AddressDTO dto = new AddressDTO();
+        AddressResponse dto = new AddressResponse();
         dto.setId(address.getId());
         dto.setFullName(address.getFullName());
         dto.setPhone(address.getPhone());
