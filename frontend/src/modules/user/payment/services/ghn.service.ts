@@ -4,15 +4,20 @@ import type { ApiResponse } from "@/types/api-response";
 
 const GHNService = {
   async getShippingFee(data: ShippingFeeRequest) {
-    const res = await apiGuest.post<ApiResponse<number>>(
-      "/public/ghn/shipping-fee",
-      data,
-    );
+    try {
+      const res = await apiGuest.post<ApiResponse<number>>(
+        "/public/ghn/shipping-fee",
+        data,
+      );
 
-    if (!res.data.success || !res.data.data) {
-      throw new Error(res.data.message || "Failed to fetch shipping fee");
+      if (!res.data.success || res.data.data === undefined || res.data.data === null) {
+        return 0;
+      }
+      return res.data.data;
+    } catch (error) {
+      console.warn("GHN Shipping fee error, fallback to 0:", error);
+      return 0;
     }
-    return res.data.data;
   },
 };
 export default GHNService;

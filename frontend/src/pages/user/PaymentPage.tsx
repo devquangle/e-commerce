@@ -138,15 +138,27 @@ export default function PaymentPage() {
     [items],
   );
 
-  const { data: fetchedShippingFee } = useShippingFee(
-    selectedAddress && selectedAddress.districtId && selectedAddress.wardCode
-      ? {
-          toDistrictId: selectedAddress.districtId,
-          toWardCode: selectedAddress.wardCode,
-          weight: totalWeight,
-        }
-      : null,
-  );
+  const shippingFeeRequest = useMemo(() => {
+    if (
+      !selectedAddress ||
+      !selectedAddress.districtId ||
+      !selectedAddress.wardCode
+    ) {
+      return null;
+    }
+    const districtId = Number(selectedAddress.districtId);
+    const wardCode = String(selectedAddress.wardCode).trim();
+    if (isNaN(districtId) || districtId <= 0 || !wardCode) {
+      return null;
+    }
+    return {
+      toDistrictId: districtId,
+      toWardCode: wardCode,
+      weight: Math.max(200, totalWeight),
+    };
+  }, [selectedAddress, totalWeight]);
+
+  const { data: fetchedShippingFee } = useShippingFee(shippingFeeRequest);
 
   const shippingFee = fetchedShippingFee || 0;
 

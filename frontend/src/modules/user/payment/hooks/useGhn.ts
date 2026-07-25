@@ -11,10 +11,16 @@ export const useShippingFee = (request: ShippingFeeRequest | null) => {
       request?.weight,
     ],
     queryFn: () => {
-      if (!request) throw new Error("Missing request data");
+      if (!request) return 0;
       return GHNService.getShippingFee(request);
     },
-    enabled: !!request && !!request.toDistrictId && !!request.toWardCode,
-    staleTime: 5 * 60 * 1000, // Cache phí ship trong 5 phút để tránh gọi API liên tục
+    enabled:
+      !!request &&
+      !!request.toDistrictId &&
+      Number(request.toDistrictId) > 0 &&
+      !!request.toWardCode &&
+      String(request.toWardCode).trim() !== "",
+    staleTime: 5 * 60 * 1000,
+    retry: false,
   });
 };
