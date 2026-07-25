@@ -32,6 +32,7 @@ export default function PaymentPage() {
     return fetchedItems.filter((item) => item.product != null && item.checked);
   }, [cartData]);
 
+  // dùng để resolve selectedAddress trong useMemo bên dưới
   const [selectedAddressId] = useState(() => getSelectedAddressId());
   const [appliedCoupon, setAppliedCoupon] = useState<CouponOption | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodType>("cod");
@@ -239,7 +240,6 @@ export default function PaymentPage() {
             shippingFee={shippingFee}
             total={total}
             hasSelected={items.length > 0}
-            selectedAddressId={selectedAddressId}
             selectedAddress={selectedAddress}
             isAddressLoading={isAddressLoading}
             appliedCoupon={appliedCoupon}

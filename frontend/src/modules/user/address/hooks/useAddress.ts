@@ -13,6 +13,7 @@ export const useAddresses = () => {
   return useQuery<AddressResponse[]>({
     queryKey: ["addresses"],
     queryFn: AddressService.getAddresses,
+    staleTime: 5 * 60 * 1000,
   });
 };
 
