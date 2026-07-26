@@ -45,10 +45,11 @@ export const useCartData = () => {
       );
 
       return data.map((item) => {
-        const isChecked = checkedMap.has(item.cartItemId) 
-          ? checkedMap.get(item.cartItemId) 
-          : (persisted[item.cartItemId] ?? false);
-          
+        const isChecked =
+          checkedMap.get(item.cartItemId) ??
+          persisted[item.cartItemId] ??
+          false;
+
         return {
           ...item,
           checked: isChecked,
@@ -155,7 +156,7 @@ export const useRemoveCartItem = () => {
 
       return { previousCart };
     },
-    onError: (err, cartItemId, context) => {
+    onError: (_err, _cartItemId, context) => {
       if (context?.previousCart) {
         queryClient.setQueryData(["cart", userInfo?.code], context.previousCart);
       }
@@ -193,7 +194,7 @@ export const useRemoveCartItems = () => {
 
       return { previousCart };
     },
-    onError: (err, cartItemIds, context) => {
+    onError: (_err, _cartItemIds, context) => {
       if (context?.previousCart) {
         queryClient.setQueryData(["cart", userInfo?.code], context.previousCart);
       }
@@ -252,7 +253,7 @@ export const useUpdateQuantity = () => {
 
       return { previousCart };
     },
-    onError: (err, newQuantity, context) => {
+    onError: (_err, _newQuantity, context) => {
       if (context?.previousCart) {
         queryClient.setQueryData(["cart", userInfo?.code], context.previousCart);
       }

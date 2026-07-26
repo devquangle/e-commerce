@@ -2,7 +2,7 @@ import Container from "@/components/common/Container";
 
 import { CheckoutMobileBar } from "@/components/user/CheckoutUI";
 import { type CouponOption } from "@/modules/user/cart/types/cart.type";
-import { showSuccessToast, showWarningToast } from "@/utils/toastUtil";
+import { showWarningToast } from "@/utils/toastUtil";
 import { formatMoney } from "@/utils/number.utils";
 import { Package } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
@@ -171,13 +171,11 @@ export default function PaymentPage() {
     }
     setAppliedCoupon(coupon);
     setValue("couponCode", coupon.code);
-    showSuccessToast(`Đã áp dụng mã ${coupon.code}`);
   };
 
   const handleRemoveCoupon = () => {
     setAppliedCoupon(null);
     setValue("couponCode", "");
-    showSuccessToast("Đã gỡ mã giảm giá");
   };
 
   // Tự động gỡ voucher khi tạm tính không còn đủ điều kiện
@@ -225,7 +223,7 @@ export default function PaymentPage() {
     <>
       <Container className="max-w-7xl p-2 my-4">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          <section className="lg:col-span-8">
+          <section className="lg:col-span-7 xl:col-span-8">
             <div className="card-custom space-y-6">
               <h2 className="heading-2 text-slate-900">Xác nhận đơn hàng</h2>
 

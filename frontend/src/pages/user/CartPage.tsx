@@ -139,7 +139,7 @@ export default function Carts() {
 
   return (
     <Container
-      className={`max-w-7xl mx-auto my-6 ${items.length > 0 ? "pb-24 lg:pb-0" : ""}`}
+      className={`max-w-7xl p-2 my-4 ${items.length > 0 ? "pb-24 lg:pb-0" : ""}`}
     >
       {items.length === 0 ? (
         <CheckoutEmptyState
@@ -149,31 +149,34 @@ export default function Carts() {
           action={{ to: "/products", label: "Mua sắm ngay" }}
         />
       ) : (
-        <div className="flex flex-col lg:flex-row gap-4 items-start w-full">
-          <div className="card-custom flex-1 space-y-4 w-full">
-            <CartItemsToolbar
-              allChecked={allChecked}
-              someChecked={someChecked}
-              itemCount={items.length}
-              onToggleAll={toggleAll}
-              onDeleteSelected={handleDeleteSelectedClick}
-            />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start w-full">
+          <section className="lg:col-span-8">
+            <div className="card-custom space-y-4 w-full">
+              <CartItemsToolbar
+                allChecked={allChecked}
+                someChecked={someChecked}
+                itemCount={items.length}
+                onToggleAll={toggleAll}
+                onDeleteSelected={handleDeleteSelectedClick}
+              />
 
-            <div className="my-3 space-y-3">
-              {items.map((item) => (
-                <CartItemCard
-                  key={item.cartItemId}
-                  item={item}
-                  onToggle={() => toggleItem(item.cartItemId, item.checked)}
-                  onUpdateQuantity={(delta) =>
-                    updateQuantity(item.cartItemId, item.quantity, delta)
-                  }
-                  onRemove={() => setItemToDelete(item)}
-                />
-              ))}
+              <div className="my-3 space-y-3">
+                {items.map((item) => (
+                  <CartItemCard
+                    key={item.cartItemId}
+                    item={item}
+                    onToggle={() => toggleItem(item.cartItemId, item.checked)}
+                    onUpdateQuantity={(delta) =>
+                      updateQuantity(item.cartItemId, item.quantity, delta)
+                    }
+                    onRemove={() => setItemToDelete(item)}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-          <div className="w-full lg:w-[350px] lg:shrink-0 lg:sticky lg:top-24">
+          </section>
+
+          <section className="lg:col-span-4 lg:sticky lg:top-24 lg:self-start">
             <PriceBreakdown
               selectedCount={selectedCount}
               subtotal={subtotal}
@@ -184,7 +187,7 @@ export default function Carts() {
               onClick={handleProceedToCheckout}
               backLink={{ to: "/products", label: "Tiếp tục mua sắm" }}
             />
-          </div>
+          </section>
         </div>
       )}
       <DeleteCartItemsModal

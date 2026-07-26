@@ -5,9 +5,9 @@ import type { UseFormRegister, FieldErrors } from "react-hook-form";
 import type { CouponOption } from "@/modules/user/cart/types/cart.type";
 import type { AddressResponse } from "@/modules/user/address/types/address";
 
-import VoucherModal from "./VoucherModal";
-import { ShippingAddress } from "./ShippingAddress";
-import { VoucherApply } from "./VoucherApply";
+import VoucherModal from "../../modules/user/payment/components/VoucherModal";
+import { ShippingAddress } from "../../modules/user/payment/components/ShippingAddress";
+import { VoucherApply } from "../../modules/user/payment/components/VoucherApply";
 import { PriceBreakdown } from "./PriceBreakdown";
 import { type CouponForm } from "@/types/checkout.type";
 import PaymentMethod from "@/modules/user/payment/components/PaymentMethod";
@@ -63,7 +63,7 @@ export default function CartCheckoutSidebar({
   const [voucherModalOpen, setVoucherModalOpen] = useState(false);
   return (
     <>
-      <div className="lg:col-span-5 xl:col-span-4 lg:sticky lg:top-24 lg:self-start space-y-3">
+      <div className="lg:col-span-4 lg:sticky lg:top-24 lg:self-start space-y-3">
         {/* 1. Địa chỉ giao hàng */}
         <ShippingAddress selectedAddress={selectedAddress} isLoading={isAddressLoading} />
 

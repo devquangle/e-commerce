@@ -1,6 +1,42 @@
 import Container from "@/components/common/Container";
+import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/context/useAuth";
+import type { CartResponse } from "@/modules/user/cart/types/cart.type";
 
 export function PaymentSkeleton() {
+  const queryClient = useQueryClient();
+  const { userInfo } = useAuth();
+  const userId = userInfo?.code || "guest";
+
+  // 1. Kiểm tra cache giỏ hàng trong React Query
+  const cartCache = queryClient.getQueryData<CartResponse[]>([
+    "cart",
+    userInfo?.code,
+  ]);
+
+  let checkedCount = 0;
+
+  if (cartCache && Array.isArray(cartCache)) {
+    checkedCount = cartCache.filter(
+      (item) => item.product != null && item.checked
+    ).length;
+  } else {
+    // 2. Nếu React Query cache chưa có, đọc trực tiếp từ SessionStorage (nơi useCart lưu cờ tích chọn)
+    try {
+      const persistedData = sessionStorage.getItem(`cart_checked_${userId}`);
+      if (persistedData) {
+        const parsed: Record<number, boolean> = JSON.parse(persistedData);
+        checkedCount = Object.values(parsed).filter(Boolean).length;
+      }
+    } catch {
+      checkedCount = 0;
+    }
+  }
+
+  // Nếu đếm được số mục đã tích chọn > 0 thì dùng chính số đó, mặc định fallback là 1
+  const skeletonCount = checkedCount > 0 ? checkedCount : 1;
+  const items = Array.from({ length: skeletonCount });
+
   return (
     <Container className="max-w-7xl p-2 my-4">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 animate-pulse">
@@ -12,7 +48,7 @@ export function PaymentSkeleton() {
 
             {/* Danh sách thẻ sản phẩm Skeleton (Readonly mode) */}
             <div className="space-y-4">
-              {[1, 2].map((index) => (
+              {items.map((_, index) => (
                 <div
                   key={index}
                   className="group card-custom-v1 py-4 border border-slate-200/60 bg-white rounded-xl overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.03)]"
@@ -77,8 +113,8 @@ export function PaymentSkeleton() {
           </div>
         </section>
 
-        {/* Cột phải Sidebar: Địa chỉ, Voucher, Phương thức thanh toán, Tóm tắt đơn hàng */}
-        <section className="lg:col-span-4 space-y-3">
+        {/* Cột phải Sidebar */}
+        <section className="lg:col-span-4 lg:sticky lg:top-24 lg:self-start mb-4 space-y-3">
           {/* 1. Địa chỉ giao hàng Skeleton */}
           <div className="card-custom p-4 space-y-3">
             <div className="flex justify-between items-center">
