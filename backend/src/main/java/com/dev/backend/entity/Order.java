@@ -1,8 +1,9 @@
 package com.dev.backend.entity;
 
-import java.math.BigDecimal;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import com.dev.backend.constant.OrderStatus;
 import com.dev.backend.constant.PaymentMethod;
@@ -20,6 +21,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -32,11 +34,9 @@ import lombok.NoArgsConstructor;
 @Setter
 @Entity
 @Table(name = "orders")
-public class Order {
+public class Order extends BaseAuditableEntity<Integer> {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+
 
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
@@ -70,6 +70,9 @@ public class Order {
 
     private String cancel;
 
+    @Column(nullable = false, unique = true, updatable = false)
+    private UUID uuid;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "voucher_id")
     private Voucher voucher; // Cho phép null nếu đơn hàng không dùng voucher
@@ -83,4 +86,11 @@ public class Order {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
+
+    @PrePersist
+    public void prePersist() {
+        if (uuid == null) {
+            uuid = UUID.randomUUID();
+        }
+    }
 }
