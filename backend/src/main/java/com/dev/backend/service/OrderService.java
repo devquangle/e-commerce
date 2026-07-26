@@ -1,0 +1,20 @@
+package com.dev.backend.service;
+
+import com.dev.backend.dto.order.OrderFilterRequest;
+import com.dev.backend.dto.order.OrderResponse;
+
+import com.dev.backend.entity.Order;
+import com.dev.backend.response.PageResponse;
+
+public interface OrderService {
+
+    Long calculateTotal(Order order);
+
+    Order getOrderById(Integer id);
+
+    OrderResponse toOrderResponse(Order order);
+
+    PageResponse<OrderResponse> searchOrderUser(OrderFilterRequest request,Integer userId);
+
+    PageResponse<OrderResponse> searchOrder(OrderFilterRequest request);
+}

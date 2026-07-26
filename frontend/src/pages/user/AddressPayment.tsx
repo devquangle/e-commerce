@@ -10,7 +10,7 @@ import {
   useDeleteAddress,
   useSetDefaultAddress,
 } from "@/modules/user/address/hooks/useAddress";
-import Loading from "@/components/common/Loading";
+import AddressPaymentSkeleton from "@/modules/user/address/components/AddressPaymentSkeleton";
 import { MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
@@ -18,7 +18,7 @@ import { setCachedSelectedAddress } from "@/types/checkout.type";
 
 export default function AddressPayment() {
   const navigate = useNavigate();
-  const { data: addresses = [], isFetching } = useAddresses();
+  const { data: addresses = [], isFetching, isLoading } = useAddresses();
   const deleteMutation = useDeleteAddress();
   const defaultMutation = useSetDefaultAddress();
 
@@ -85,7 +85,9 @@ export default function AddressPayment() {
     });
   };
 
-  if (isFetching) return <Loading />;
+  if (isLoading || (isFetching && addresses.length === 0)) {
+    return <AddressPaymentSkeleton  />;
+  }
 
   return (
     <>

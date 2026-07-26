@@ -1,4 +1,8 @@
-export default function AddressSkeleton({ count = 4 }: { count?: number }) {
+import { useCountAddress } from "@/modules/user/address/hooks/useAddress";
+
+export default function AddressSkeleton() {
+  const addressCount = useCountAddress(1);
+
   return (
     <div className="flex-1 p-2 animate-pulse">
       {/* Header Skeleton */}
@@ -9,7 +13,7 @@ export default function AddressSkeleton({ count = 4 }: { count?: number }) {
 
       {/* Address Cards Grid Skeleton */}
       <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 gap-4">
-        {Array.from({ length: count }).map((_, index) => (
+        {Array.from({ length: addressCount }).map((_, index) => (
           <div
             key={index}
             className="flex flex-col justify-between card-custom min-h-[140px]"

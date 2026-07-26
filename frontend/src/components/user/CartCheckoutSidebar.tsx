@@ -8,7 +8,7 @@ import type { AddressResponse } from "@/modules/user/address/types/address";
 import VoucherModal from "../../modules/user/payment/components/VoucherModal";
 import { ShippingAddress } from "../../modules/user/payment/components/ShippingAddress";
 import { VoucherApply } from "../../modules/user/payment/components/VoucherApply";
-import { PriceBreakdown } from "./PriceBreakdown";
+import { PriceBreakdown } from "../../modules/user/payment/components/PriceBreakdown";
 import { type CouponForm } from "@/types/checkout.type";
 import PaymentMethod from "@/modules/user/payment/components/PaymentMethod";
 import type { PaymentMethodType } from "@/modules/user/payment/types/payment-method.type";

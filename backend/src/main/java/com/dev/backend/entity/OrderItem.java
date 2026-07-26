@@ -34,9 +34,9 @@ public class OrderItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    private int quantity;
-    private double price;
-    private double discount;
+    private Integer  quantity;
+    private Integer  price;
+    private Integer  discountValue;
 
     private String productInfo;
 

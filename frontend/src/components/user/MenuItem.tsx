@@ -98,7 +98,7 @@ export default function MenuItem({ className = "" }) {
                   ))}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 gap-y-2 pr-2 pb-2 custom-scrollbar max-h-[340px] lg:max-h-none lg:flex-grow lg:h-0 overflow-y-auto">
+                <div className="grid grid-cols-1 gap-y-2 pr-2 pb-2 custom-scrollbar max-h-[340px] lg:max-h-none lg:grow lg:h-0 overflow-y-auto">
                   {activeGenres.map((genre) => (
                     <Link
                       key={genre.id}
@@ -161,7 +161,7 @@ export default function MenuItem({ className = "" }) {
                   ))}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 gap-y-2 pr-2 pb-2 custom-scrollbar max-h-[340px] lg:max-h-none lg:flex-grow lg:h-0 overflow-y-auto">
+                <div className="grid grid-cols-1 gap-y-2 pr-2 pb-2 custom-scrollbar max-h-[340px] lg:max-h-none lg:grow lg:h-0 overflow-y-auto">
                   {activeAuthors.map((author) => (
                     <Link
                       key={author.id}

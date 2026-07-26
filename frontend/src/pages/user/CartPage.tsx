@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { type CartResponse } from "@/modules/user/cart/types/cart.type";
 
 import {  showInfoToast, showSuccessToast } from "@/utils/toastUtil";
-import { PriceBreakdown } from "@/components/user/PriceBreakdown";
+import { PriceBreakdown } from "@/modules/user/payment/components/PriceBreakdown";
 import { CartItemsToolbar } from "@/modules/user/cart/components/CartItemsToolbar";
 import CartItemCard from "@/modules/user/cart/components/CartItemCard";
 import DeleteCartItemsModal from "@/modules/user/cart/components/DeleteCartItemsModal";

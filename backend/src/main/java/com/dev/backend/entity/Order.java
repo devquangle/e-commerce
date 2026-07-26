@@ -15,9 +15,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -71,7 +68,7 @@ public class Order extends BaseAuditableEntity<Integer> {
     private String cancel;
 
     @Column(nullable = false, unique = true, updatable = false)
-    private UUID uuid;
+    private String orderCode;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "voucher_id")
@@ -79,6 +76,8 @@ public class Order extends BaseAuditableEntity<Integer> {
 
     @Column(name = "voucher_amount")
     private Integer voucherAmount;
+
+    private Integer shippingFee;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -89,8 +88,13 @@ public class Order extends BaseAuditableEntity<Integer> {
 
     @PrePersist
     public void prePersist() {
-        if (uuid == null) {
-            uuid = UUID.randomUUID();
+        if (orderCode == null) {
+            orderCode = "ODR-" +
+                    UUID.randomUUID()
+                            .toString()
+                            .replace("-", "")
+                            .substring(0, 8)
+                            .toUpperCase();
         }
     }
 }

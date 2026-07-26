@@ -1,8 +1,9 @@
 package com.dev.backend.dto.order;
 
 import java.time.LocalDate;
-
 import com.dev.backend.constant.OrderStatus;
+import com.dev.backend.constant.PaymentMethod;
+import com.dev.backend.constant.PaymentStatus;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,9 +19,11 @@ public class OrderResponse {
     private String fullName;
     private String phone;
     private String streetFull;
-    private LocalDate createdAt;
+
     private Long total;
-    private String paymentMethod;
-    private String paymentStatus;
+    private String orderCode;
+    private PaymentMethod paymentMethod;
+    private PaymentStatus paymentStatus;
     private OrderStatus status;
+    private LocalDate createdAt;
 }

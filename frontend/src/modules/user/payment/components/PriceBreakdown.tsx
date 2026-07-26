@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { ChevronRight, ChevronDown, ChevronUp } from "lucide-react";
 import { Link } from "react-router-dom";
-import { formatMoney } from './../../utils/number.utils';
+import { formatMoney } from '../../../../utils/number.utils';
 
 interface PriceBreakdownProps {
   selectedCount: number;

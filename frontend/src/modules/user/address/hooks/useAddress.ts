@@ -12,8 +12,14 @@ import AddressService from "@/modules/user/address/services/address.service";
 export const useAddresses = () => {
   return useQuery<AddressResponse[]>({
     queryKey: ["addresses"],
-    queryFn: AddressService.getAddresses,
-    staleTime: 5 * 60 * 1000,
+    queryFn: async () => {
+      const data = await AddressService.getAddresses();
+      if (Array.isArray(data)) {
+        sessionStorage.setItem("address_count", data.length.toString());
+      }
+      return data;
+    },
+
   });
 };
 
@@ -98,4 +104,28 @@ export const useSetDefaultAddress = () => {
       }
     },
   });
+};
+
+export const useCountAddress = (defaultCount = 1): number => {
+  const queryClient = useQueryClient();
+  const { data: addresses } = useAddresses();
+
+  if (addresses && Array.isArray(addresses) && addresses.length > 0) {
+    return addresses.length;
+  }
+
+  const cached = queryClient.getQueryData<AddressResponse[]>(["addresses"]);
+  if (cached && Array.isArray(cached) && cached.length > 0) {
+    return cached.length;
+  }
+
+  const storedCount = sessionStorage.getItem("address_count");
+  if (storedCount) {
+    const parsed = parseInt(storedCount, 10);
+    if (!isNaN(parsed) && parsed > 0) {
+      return parsed;
+    }
+  }
+
+  return defaultCount;
 };
