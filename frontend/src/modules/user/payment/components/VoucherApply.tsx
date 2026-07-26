@@ -93,7 +93,7 @@ export function VoucherApply({
         </div>
 
         {appliedCoupon ? (
-          <div className="relative overflow-hidden rounded-xl border border-green-300/50 bg-gradient-to-r from-green-50 to-emerald-50/60 p-3.5">
+          <div className="relative overflow-hidden rounded-xl border border-green-300/50 bg-linear-to-r from-green-50 to-emerald-50/60 p-3.5">
             {/* Decorative ticket notches */}
             <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white border border-green-300/50" />
             <div className="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white border border-green-300/50" />

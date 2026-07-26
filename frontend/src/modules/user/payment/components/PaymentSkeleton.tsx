@@ -85,7 +85,7 @@ export function PaymentSkeleton() {
                   {/* 📱 Mobile/Tablet */}
                   <div className="lg:hidden p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
                     <div className="flex items-center gap-3 w-full sm:w-auto">
-                      <div className="h-[90px] w-[64px] rounded-xl bg-slate-200 shrink-0" />
+                      <div className="h-[90px] w-16 rounded-xl bg-slate-200 shrink-0" />
                       <div className="flex-1 space-y-2 sm:hidden">
                         <div className="h-4 w-4/5 rounded bg-slate-200" />
                         <div className="h-3 w-1/2 rounded bg-slate-200" />
