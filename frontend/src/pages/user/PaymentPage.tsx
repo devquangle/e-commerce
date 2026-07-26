@@ -23,7 +23,7 @@ import {
 } from "@/modules/user/cart/hooks/useCart";
 import { useAddresses } from "@/modules/user/address/hooks/useAddress";
 import { useShippingFee } from "@/modules/user/payment/hooks/useGhn";
-import Loading from "@/components/common/Loading";
+import { PaymentSkeleton } from "@/modules/user/payment/components/PaymentSkeleton";
 
 const mobilePrimaryButtonClass =
   "rounded-2xl bg-red-600 px-6 py-3.5 text-base font-bold text-white shadow-lg active:scale-95 transition hover:bg-red-700";
@@ -217,49 +217,47 @@ export default function PaymentPage() {
     );
   }
 
+  if (isCartPending) {
+    return <PaymentSkeleton />;
+  }
+
   return (
     <>
-      <Container className="max-w-7xl p-2  my-4">
+      <Container className="max-w-7xl p-2 my-4">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           <section className="lg:col-span-8">
-            {isCartPending ? (
-              <div className="card-custom min-h-[300px] flex items-center justify-center">
-                <Loading />
-              </div>
-            ) : (
-              <div className="card-custom space-y-6">
-                <h2 className="heading-2 text-slate-900">Xác nhận đơn hàng</h2>
+            <div className="card-custom space-y-6">
+              <h2 className="heading-2 text-slate-900">Xác nhận đơn hàng</h2>
 
-                <div className="space-y-4">
-                  {items.map((item) => (
-                    <CartItemCard
-                      key={item.cartItemId}
-                      item={item}
-                      onToggle={() => {}}
-                      onUpdateQuantity={(delta) =>
-                        updateQuantity(item.cartItemId, delta)
-                      }
-                      showRemove={false}
-                      readonly
-                    />
-                  ))}
-                </div>
-
-                <div className="pt-5 mt-2 border-t border-slate-100">
-                  <h3 className="text-sm font-bold text-slate-800 mb-2">
-                    Ghi chú đơn hàng
-                  </h3>
-                  <textarea
-                    placeholder="Nhập lời nhắn cho người bán (tùy chọn)..."
-                    className="w-full rounded-xl border border-slate-200 p-3 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition resize-none min-h-20"
+              <div className="space-y-4">
+                {items.map((item) => (
+                  <CartItemCard
+                    key={item.cartItemId}
+                    item={item}
+                    onToggle={() => {}}
+                    onUpdateQuantity={(delta) =>
+                      updateQuantity(item.cartItemId, delta)
+                    }
+                    showRemove={false}
+                    readonly
                   />
-                  <p className="text-xs text-slate-400 mt-1.5 flex items-center gap-1.5">
-                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-400"></span>
-                    Thông tin ghi chú sẽ được in trên hóa đơn giao hàng.
-                  </p>
-                </div>
+                ))}
               </div>
-            )}
+
+              <div className="pt-5 mt-2 border-t border-slate-100">
+                <h3 className="text-sm font-bold text-slate-800 mb-2">
+                  Ghi chú đơn hàng
+                </h3>
+                <textarea
+                  placeholder="Nhập lời nhắn cho người bán (tùy chọn)..."
+                  className="w-full rounded-xl border border-slate-200 p-3 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition resize-none min-h-20"
+                />
+                <p className="text-xs text-slate-400 mt-1.5 flex items-center gap-1.5">
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                  Thông tin ghi chú sẽ được in trên hóa đơn giao hàng.
+                </p>
+              </div>
+            </div>
           </section>
 
           <CartCheckoutSidebar

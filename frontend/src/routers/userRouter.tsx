@@ -14,7 +14,7 @@ import Profile from "@/pages/auth/Profile";
 import Address from "@/pages/user/Address";
 import Favorites from "@/pages/user/Favorites";
 import OrderDetails from "@/pages/user/OrderDetails";
-import Carts from "@/pages/user/Carts";
+import Carts from "@/pages/user/CartPage";
 import PaymentPage from "@/pages/user/PaymentPage";
 import AddressPayment from "@/pages/user/AddressPayment";
 import ProtectedRoute from "@/components/common/ProtectedRoute";

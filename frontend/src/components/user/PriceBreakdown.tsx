@@ -137,7 +137,7 @@ export function PriceBreakdown({
             <button
               type="button"
               onClick={onClick}
-              className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-red-600 py-2.5 text-sm font-bold text-white shadow-md shadow-red-600/10 transition duration-200 hover:bg-red-700 active:scale-[0.99]"
+              className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-red-600 py-2.5 text-sm font-bold text-white shadow-md shadow-red-600/10 transition duration-200 hover:bg-red-700 active:scale-[0.99] cursor-pointer"
             >
               {buttonText}
               {!isCheckout && <ChevronRight size={16} />}

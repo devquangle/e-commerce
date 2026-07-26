@@ -20,7 +20,7 @@ import {
   useUpdateQuantity,
 } from "@/modules/user/cart/hooks/useCart";
 import { CheckoutEmptyState } from "@/modules/user/cart/components/CheckoutEmptyState";
-import Loading from "@/components/common/Loading";
+import { CartSkeleton } from "@/modules/user/cart/components/CartSkeleton";
 
 export default function Carts() {
   const navigate = useNavigate();
@@ -134,7 +134,7 @@ export default function Carts() {
   };
 
   if (isCartPending) {
-    return <Loading />;
+    return <CartSkeleton />;
   }
 
   return (

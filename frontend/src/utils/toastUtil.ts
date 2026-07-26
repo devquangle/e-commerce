@@ -16,21 +16,34 @@ const commonSettings = {
 };
 
 export const showSuccessToast = (message: string, options?: ToastOptions) => {
-  toast.success(message, { ...commonSettings, theme: "colored", toastId: options?.id || "success-id" });
+  toast.success(message, {
+    ...commonSettings,
+    theme: "colored",
+    ...(options?.id ? { toastId: options.id } : {}),
+  });
 };
 
 export const showErrorToast = (message: string, options?: ToastOptions) => {
-  toast.error(message, { ...commonSettings, toastId: options?.id || "error-id" });
+  toast.error(message, {
+    ...commonSettings,
+    ...(options?.id ? { toastId: options.id } : {}),
+  });
 };
 
 export const showWarningToast = (message: string, options?: ToastOptions) => {
-  toast.warning(message, { ...commonSettings, toastId: options?.id || "warning-id" });
+  toast.warning(message, {
+    ...commonSettings,
+    ...(options?.id ? { toastId: options.id } : {}),
+  });
 };
 
 export const showInfoToast = (message: string, options?: ToastOptions) => {
-  toast.info(message, { ...commonSettings, toastId: options?.id || "info-id" });
+  toast.info(message, {
+    ...commonSettings,
+    ...(options?.id ? { toastId: options.id } : {}),
+  });
 };
 
 export const dismissToast = (id: string | number) => {
   toast.dismiss(id);
-};
+};

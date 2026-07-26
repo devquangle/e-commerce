@@ -63,7 +63,7 @@ export default function CartCheckoutSidebar({
   const [voucherModalOpen, setVoucherModalOpen] = useState(false);
   return (
     <>
-      <div className="lg:col-span-5 xl:col-span-4 lg:sticky lg:top-24 lg:self-start mb-4 space-y-3">
+      <div className="lg:col-span-5 xl:col-span-4 lg:sticky lg:top-24 lg:self-start space-y-3">
         {/* 1. Địa chỉ giao hàng */}
         <ShippingAddress selectedAddress={selectedAddress} isLoading={isAddressLoading} />
 

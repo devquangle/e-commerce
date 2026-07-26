@@ -10,7 +10,7 @@ import { showErrorToast, showSuccessToast } from "@/utils/toastUtil";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 export default function Login() {
   const {
@@ -22,16 +22,22 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const auth = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
   const onSubmit = async (requestData: LoginRequest) => {
     setIsLoading(true);
     try {
       const user = await auth.login(requestData);
-      if (!user) {
-        return null;
-      }
       showSuccessToast("Đăng nhập thành công!");
-      const targetPath = user?.roles?.includes("CUSTOMER") ? "/home" : "/admin";
-      navigate(targetPath);
+
+      const from = (location.state as { from?: { pathname?: string } })?.from?.pathname;
+      const isCustomer =
+        !user?.roles ||
+        user.roles.length === 0 ||
+        user.roles.some((role) => role === "CUSTOMER" || role === "ROLE_CUSTOMER");
+
+      const targetPath = from || (isCustomer ? "/home" : "/admin");
+      navigate(targetPath, { replace: true });
     } catch (error: unknown) {
       mapServerErrors(error, setError, showErrorToast);
     } finally {
