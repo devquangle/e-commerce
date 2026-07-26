@@ -2,7 +2,6 @@ package com.dev.backend.mapper;
 
 import org.springframework.stereotype.Component;
 
-import com.dev.backend.dto.AddressDTO;
 import com.dev.backend.dto.address.AddressResponse;
 import com.dev.backend.entity.Address;
 import com.dev.backend.service.GHNService;

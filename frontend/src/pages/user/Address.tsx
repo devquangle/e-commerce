@@ -1,5 +1,4 @@
-import Loading from "@/components/common/Loading";
-
+import AddressSkeleton from "@/modules/user/address/components/AddressSkeleton";
 import AddressCard from "@/modules/user/address/components/AddressCard";
 import AddressHeader from "@/modules/user/address/components/AddressHeader";
 import DeleteAddress from "@/modules/user/address/components/DeleteAddress";
@@ -70,7 +69,7 @@ export default function Address() {
       },
     });
   };
-  if (isFetching) return <Loading />;
+  if (isFetching) return <AddressSkeleton />;
   return (
     <>
       <div className="flex-1 p-2">
