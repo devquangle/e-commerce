@@ -25,6 +25,51 @@ export const useCartCount = () => {
   });
 };
 
+export const useCheckedCartCount = (): number => {
+  const queryClient = useQueryClient();
+  const { userInfo } = useAuth();
+  const userId = userInfo?.code || "guest";
+
+  // 1. Kiểm tra trong React Query cache (thử cả key chính xác lẫn fallback keys)
+  const cartCache =
+    queryClient.getQueryData<CartResponse[]>(["cart", userInfo?.code]) ||
+    queryClient.getQueryData<CartResponse[]>(["cart", undefined]) ||
+    queryClient.getQueryData<CartResponse[]>(["cart", "guest"]);
+
+  if (cartCache && Array.isArray(cartCache)) {
+    const count = cartCache.filter(
+      (item) => item.product != null && item.checked,
+    ).length;
+    if (count > 0) return count;
+  }
+
+  // 2. Kiểm tra trong SessionStorage (duyệt qua tất cả các key lưu cờ checked)
+  try {
+    const primaryData = sessionStorage.getItem(`cart_checked_${userId}`);
+    if (primaryData) {
+      const parsed: Record<number, boolean> = JSON.parse(primaryData);
+      const count = Object.values(parsed).filter(Boolean).length;
+      if (count > 0) return count;
+    }
+
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const sKey = sessionStorage.key(i);
+      if (sKey && sKey.startsWith("cart_checked_")) {
+        const val = sessionStorage.getItem(sKey);
+        if (val) {
+          const parsed: Record<number, boolean> = JSON.parse(val);
+          const count = Object.values(parsed).filter(Boolean).length;
+          if (count > 0) return count;
+        }
+      }
+    }
+  } catch {
+    // fallback
+  }
+
+  return 2;
+};
+
 export const useCartData = () => {
   const queryClient = useQueryClient();
   const { isInitialized, userInfo } = useAuth();
@@ -56,6 +101,7 @@ export const useCartData = () => {
         };
       });
     },
+    staleTime: 1000 * 60 * 5,
     enabled: isInitialized && !!userInfo,
   });
 };

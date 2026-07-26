@@ -1,39 +1,8 @@
 import Container from "@/components/common/Container";
-import { useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@/context/useAuth";
-import type { CartResponse } from "@/modules/user/cart/types/cart.type";
+import { useCheckedCartCount } from "@/modules/user/cart/hooks/useCart";
 
 export function PaymentSkeleton() {
-  const queryClient = useQueryClient();
-  const { userInfo } = useAuth();
-  const userId = userInfo?.code || "guest";
-
-  // 1. Kiểm tra cache giỏ hàng trong React Query
-  const cartCache = queryClient.getQueryData<CartResponse[]>([
-    "cart",
-    userInfo?.code,
-  ]);
-
-  let checkedCount = 0;
-
-  if (cartCache && Array.isArray(cartCache)) {
-    checkedCount = cartCache.filter(
-      (item) => item.product != null && item.checked
-    ).length;
-  } else {
-    // 2. Nếu React Query cache chưa có, đọc trực tiếp từ SessionStorage (nơi useCart lưu cờ tích chọn)
-    try {
-      const persistedData = sessionStorage.getItem(`cart_checked_${userId}`);
-      if (persistedData) {
-        const parsed: Record<number, boolean> = JSON.parse(persistedData);
-        checkedCount = Object.values(parsed).filter(Boolean).length;
-      }
-    } catch {
-      checkedCount = 0;
-    }
-  }
-
-  // Nếu đếm được số mục đã tích chọn > 0 thì dùng chính số đó, mặc định fallback là 1
+  const checkedCount = useCheckedCartCount();
   const skeletonCount = checkedCount > 0 ? checkedCount : 1;
   const items = Array.from({ length: skeletonCount });
 
@@ -116,7 +85,7 @@ export function PaymentSkeleton() {
         {/* Cột phải Sidebar */}
         <section className="lg:col-span-4 lg:sticky lg:top-24 lg:self-start mb-4 space-y-3">
           {/* 1. Địa chỉ giao hàng Skeleton */}
-          <div className="card-custom p-4 space-y-3">
+          <div className="card-custom space-y-3">
             <div className="flex justify-between items-center">
               <div className="h-4 w-32 rounded bg-slate-200" />
               <div className="h-4 w-16 rounded bg-slate-200" />
@@ -126,7 +95,7 @@ export function PaymentSkeleton() {
           </div>
 
           {/* 2. Áp dụng mã giảm giá Skeleton */}
-          <div className="card-custom p-4 space-y-3">
+          <div className="card-custom space-y-3">
             <div className="h-4 w-28 rounded bg-slate-200" />
             <div className="flex gap-2">
               <div className="h-10 flex-1 rounded-xl bg-slate-200" />
@@ -135,7 +104,7 @@ export function PaymentSkeleton() {
           </div>
 
           {/* 3. Phương thức thanh toán Skeleton */}
-          <div className="card-custom p-4 space-y-3">
+          <div className="card-custom space-y-3">
             <div className="h-4 w-40 rounded bg-slate-200" />
             <div className="space-y-2 pt-1">
               <div className="h-12 w-full rounded-xl bg-slate-200" />
@@ -144,7 +113,7 @@ export function PaymentSkeleton() {
           </div>
 
           {/* 4. Tóm tắt chi phí & Nút Đặt hàng Skeleton */}
-          <div className="card-custom space-y-4 p-4">
+          <div className="card-custom space-y-3">
             <div className="h-5 w-36 rounded bg-slate-200" />
 
             <div className="space-y-3 text-sm pt-1">
