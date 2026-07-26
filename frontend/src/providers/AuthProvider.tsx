@@ -1,8 +1,7 @@
-
 import { AuthContext } from "@/context/auth-context";
 import type { User } from "@/types/user";
 import { hasRoleAccess, type RoleType } from "@/types/role";
-import { removeToken, setToken } from "@/utils/cookieUtil";
+import { getToken, removeToken, setToken } from "@/utils/cookieUtil";
 import { useEffect, useState } from "react";
 import type { LoginRequest } from "@/types/auth";
 import authService from "@/services/authService";
@@ -26,7 +25,11 @@ export const AuthProvider = ({ children }: Props) => {
   const { data: user, isLoading, isError } = useQuery({
     queryKey: ["auth", "me"],
     queryFn: async () => {
-      if (sessionStorage.getItem(AUTH_STORAGE_KEY.MANUAL_LOGOUT) === "1") {
+      // 1. Nếu có cờ MANUAL_LOGOUT hoặc không tìm thấy token trong cookie thì không cần gọi API
+      if (
+        sessionStorage.getItem(AUTH_STORAGE_KEY.MANUAL_LOGOUT) === "1" ||
+        !getToken(TOKEN_KEY.ACCESS_TOKEN)
+      ) {
         return null;
       }
       return await authService.getUser();
@@ -42,7 +45,6 @@ export const AuthProvider = ({ children }: Props) => {
         setUserInfo(user);
         setIsAuthenticated(true);
       } else {
-        removeToken(TOKEN_KEY.ACCESS_TOKEN);
         setUserInfo(null);
         setIsAuthenticated(false);
       }
@@ -54,33 +56,32 @@ export const AuthProvider = ({ children }: Props) => {
     sessionStorage.removeItem(AUTH_STORAGE_KEY.MANUAL_LOGOUT);
     const res = await authService.login(request);
     setToken(TOKEN_KEY.ACCESS_TOKEN, res.accessToken);
+
     // Force React Query to fetch and cache new user data
     const fetchedUser = await queryClient.fetchQuery({
       queryKey: ["auth", "me"],
       queryFn: () => authService.getUser(),
     });
+
     setUserInfo(fetchedUser);
     setIsAuthenticated(true);
     return fetchedUser;
   };
 
   const logout = async () => {
-
-
     try {
       sessionStorage.setItem(AUTH_STORAGE_KEY.MANUAL_LOGOUT, "1");
       await authService.logout();
-      showSuccessToast("Đăng xuất thành công");
-    } catch {
-      showSuccessToast("Đăng xuất thất bại");
     } finally {
       queryClient.setQueryData(["auth", "me"], null);
       removeToken(TOKEN_KEY.ACCESS_TOKEN);
       setUserInfo(null);
       setIsAuthenticated(false);
+      showSuccessToast("Đăng xuất thành công");
       navigate("/login", { replace: true });
     }
   };
+
   const hasRole = (requiredRole: RoleType) => {
     const userRoles = userInfo?.roles ?? [];
     return hasRoleAccess(userRoles, requiredRole);
@@ -96,7 +97,6 @@ export const AuthProvider = ({ children }: Props) => {
         login,
         logout,
         hasRole,
-        
       }}
     >
       {children}

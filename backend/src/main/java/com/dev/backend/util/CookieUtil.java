@@ -3,24 +3,34 @@ package com.dev.backend.util;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 
 public class CookieUtil {
 
-    private static final int EXPIRE_7_DAYS = 60 * 60 * 24 * 7;
+    public static final int EXPIRE_7_DAYS = 60 * 60 * 24 * 7;
 
     private static final String PATH = "/";
     private static final boolean HTTP_ONLY = true;
     private static final boolean SECURE = false; // localhost = false, HTTPS = true
+    private static final String SAME_SITE = "Lax"; // Lax, Strict, or None
 
-    // SET COOKIE
+    // SET COOKIE (Mặc định 7 ngày)
     public static void addCookie(HttpServletResponse response, String name, String value) {
-        Cookie cookie = new Cookie(name, value);
-        cookie.setPath(PATH);
-        cookie.setHttpOnly(HTTP_ONLY);
-        cookie.setSecure(SECURE);
-        cookie.setMaxAge(EXPIRE_7_DAYS);
+        addCookie(response, name, value, EXPIRE_7_DAYS);
+    }
 
-        response.addCookie(cookie);
+    // SET COOKIE (Tùy chỉnh thời gian hết hạn)
+    public static void addCookie(HttpServletResponse response, String name, String value, int maxAge) {
+        ResponseCookie cookie = ResponseCookie.from(name, value)
+                .path(PATH)
+                .httpOnly(HTTP_ONLY)
+                .secure(SECURE)
+                .sameSite(SAME_SITE)
+                .maxAge(maxAge)
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
     // GET COOKIE
@@ -37,12 +47,14 @@ public class CookieUtil {
 
     // DELETE COOKIE (QUAN TRỌNG)
     public static void deleteCookie(HttpServletResponse response, String name) {
-        Cookie cookie = new Cookie(name, "");
-        cookie.setPath(PATH);
-        cookie.setHttpOnly(HTTP_ONLY);
-        cookie.setSecure(SECURE); // ⚠️ phải giống lúc set
-        cookie.setMaxAge(0);
+        ResponseCookie cookie = ResponseCookie.from(name, "")
+                .path(PATH)
+                .httpOnly(HTTP_ONLY)
+                .secure(SECURE)
+                .sameSite(SAME_SITE)
+                .maxAge(0)
+                .build();
 
-        response.addCookie(cookie);
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 }
