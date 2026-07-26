@@ -13,8 +13,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
-import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
-import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import com.dev.backend.constant.Permission;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -47,6 +45,7 @@ public class SecurityConfig {
         private List<String> allowedOrigins;
 
         public static final String[] PUBLIC_URLS = {
+
                         "/login",
                         "/logout",
                         "/register",
@@ -56,7 +55,9 @@ public class SecurityConfig {
                         "/api/v1/auth/**",
                         "/home/**",
                         "/images/**",
-                        "/public/**"
+                        "/public/**",
+                        "/api/v1/ghn/**"
+
         };
 
         public static final String[] PUBLIC_GET_URLS = {
@@ -99,7 +100,7 @@ public class SecurityConfig {
                                 .authorizeHttpRequests(req -> req
                                                 .requestMatchers(PUBLIC_URLS).permitAll()
                                                 .requestMatchers(HttpMethod.GET, PUBLIC_GET_URLS).permitAll()
-                                                .requestMatchers("/api/v1/cart/**").hasRole("CUSTOMER")
+                                                .requestMatchers("/api/v1/cart/**").hasRole(Permission.CUSTOMER.name())
                                                 .requestMatchers("/api/v1/voucher/available/**").hasRole("CUSTOMER")
 
                                                 .requestMatchers("/api/v1/vouchers/**")

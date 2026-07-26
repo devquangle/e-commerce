@@ -4,9 +4,9 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.util.Map;
 
-import com.dev.backend.bean.LoginBean;
+import com.dev.backend.dto.auth.LoginRequest;
 
 public interface LoginService {
 
-    Map<String, String> login(LoginBean loginBean, HttpServletResponse response);
+    Map<String, String> login(LoginRequest request, HttpServletResponse response);
 }

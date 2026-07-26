@@ -113,7 +113,6 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void logout(HttpServletResponse response) {
         CookieUtil.deleteCookie(response, "refreshToken");
-
     }
 
 }

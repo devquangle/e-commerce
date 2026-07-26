@@ -47,7 +47,8 @@ public class CustomUserDetails implements UserDetails {
                 roles.add(code);
 
                 permissions.add(code);
-                authorities.add(new SimpleGrantedAuthority(code));
+                String authorityRole = code.startsWith("ROLE_") ? code : "ROLE_" + code;
+                authorities.add(new SimpleGrantedAuthority(authorityRole));
             }
         }
     }
@@ -59,7 +60,10 @@ public class CustomUserDetails implements UserDetails {
         this.authorities = new HashSet<>();
 
         for (String role : roles) {
-            authorities.add(new SimpleGrantedAuthority("ROLE_" + role));
+            if (role != null && !role.trim().isEmpty()) {
+                String authorityRole = role.startsWith("ROLE_") ? role : "ROLE_" + role;
+                authorities.add(new SimpleGrantedAuthority(authorityRole));
+            }
         }
         for (String perm : permissions) {
             if (perm != null && !perm.trim().isEmpty()) {

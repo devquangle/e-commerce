@@ -16,11 +16,14 @@ public class AuditorAwareImpl implements AuditorAware<Integer> {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null ||
                 !authentication.isAuthenticated() ||
-                authentication.getPrincipal().equals("anonymousUser")) {
+                "anonymousUser".equals(authentication.getPrincipal())) {
             return Optional.empty();
         }
 
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        return Optional.of(userDetails.getId());
+        if (authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
+            return Optional.ofNullable(userDetails.getId());
+        }
+
+        return Optional.empty();
     }
 }
