@@ -38,8 +38,8 @@ public class AuthController {
         return ResponseUtil.success("Tạo token mới thành công", data);
     }
 
-    @GetMapping("/logout")
-    public ResponseEntity<ResponseData<Object>> post_logout(HttpServletResponse response) {
+    @PostMapping("/logout")
+    public ResponseEntity<ResponseData<Void>> post_logout(HttpServletResponse response) {
         authService.logout(response);
         return ResponseUtil.success("Đăng xuất thành công", null);
     }
