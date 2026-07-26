@@ -3,7 +3,6 @@ import Loading from "@/components/common/Loading";
 import SelectBox from "@/components/common/SelectedBox";
 import TextAreaField from "@/components/common/TextAreaField";
 import type { AddressRequest } from "@/modules/user/address/types/address";
-import { showErrorToast } from "@/utils/toastUtil";
 import { useEffect } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { useParams, NavLink } from "react-router-dom";

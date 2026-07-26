@@ -19,7 +19,6 @@ export const useAddresses = () => {
       }
       return data;
     },
-
   });
 };
 
@@ -28,8 +27,9 @@ export const useCreateAddress = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: AddressService.createAddress,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["addresses"] });
+    onSuccess: async () => {
+      sessionStorage.removeItem("address_count");
+      await queryClient.invalidateQueries({ queryKey: ["addresses"] });
       showSuccessToast("Thêm mới địa chỉ thành công!");
     },
     onError: (error: unknown) => {
@@ -46,8 +46,9 @@ export const useDeleteAddress = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => AddressService.deleteAddress(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["addresses"] });
+    onSuccess: async () => {
+      sessionStorage.removeItem("address_count");
+      await queryClient.invalidateQueries({ queryKey: ["addresses"] });
       showSuccessToast("Xóa địa chỉ thành công!");
     },
     onError: (error: unknown) => {
@@ -66,8 +67,8 @@ export const useUpdateAddress = () => {
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: AddressRequest }) =>
       AddressService.updateAddress(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["addresses"] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["addresses"] });
       showSuccessToast("Cập nhật địa chỉ thành công!");
     },
     onError: (error: unknown) => {
@@ -92,8 +93,8 @@ export const useSetDefaultAddress = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => AddressService.setDefaultAddress(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["addresses"] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["addresses"] });
       showSuccessToast("Cập nhật địa chỉ thành công!");
     },
     onError: (error: unknown) => {

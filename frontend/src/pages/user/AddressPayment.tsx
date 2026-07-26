@@ -15,6 +15,7 @@ import { MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { setCachedSelectedAddress } from "@/types/checkout.type";
+import Loading from "@/components/common/Loading";
 
 export default function AddressPayment() {
   const navigate = useNavigate();
@@ -84,6 +85,10 @@ export default function AddressPayment() {
       onSuccess: () => handleCloseDefault(),
     });
   };
+
+  if (deleteMutation.isPending || defaultMutation.isPending) {
+    return <Loading />
+  }
 
   if (isLoading || (isFetching && addresses.length === 0)) {
     return <AddressPaymentSkeleton  />;
