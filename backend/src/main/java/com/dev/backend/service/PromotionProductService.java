@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.dev.backend.dto.promotion.PromotionProductMappingResponse;
 import com.dev.backend.dto.promotion.PromotionProductRequest;
+import com.dev.backend.entity.Product;
 import com.dev.backend.entity.Promotion;
 import com.dev.backend.entity.PromotionProduct;
 
@@ -17,4 +18,7 @@ public interface PromotionProductService {
     List<PromotionProductMappingResponse> promotionMappingResponses(List<Integer> productIds);
 
     Integer getDiscountValueByProductId(Integer productId);
+
+    Integer calculateSalePrice(Product product);
+
 }

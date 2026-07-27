@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.dev.backend.dto.promotion.PromotionProductMappingResponse;
 import com.dev.backend.dto.promotion.PromotionProductRequest;
+import com.dev.backend.entity.Product;
 import com.dev.backend.entity.Promotion;
 import com.dev.backend.entity.PromotionProduct;
 import com.dev.backend.repository.PromotionProductRepository;
@@ -106,10 +107,19 @@ public class PromotionProductServiceImpl implements PromotionProductService {
                 .toList();
     }
 
-
     @Override
     public Integer getDiscountValueByProductId(Integer productId) {
-        Integer discountValue =promotionProductRepository.findDiscountValueByProductId(productId);
-        return Optional.ofNullable(discountValue).orElse(null);
+        Integer discountValue = promotionProductRepository.findDiscountValueByProductId(productId);
+        return Optional.ofNullable(discountValue).orElse(0);
+    }
+
+    @Override
+    public Integer calculateSalePrice(Product product) {
+
+        int originalPrice = product.getPrice();
+
+        int discountPercent = getDiscountValueByProductId(product.getId());
+
+        return originalPrice - originalPrice * discountPercent / 100;
     }
 }

@@ -1,1 +1,1 @@
-export type PaymentMethodType = "cod" | "vnpay";
+export type PaymentMethodType = "COD" | "VNPAY";

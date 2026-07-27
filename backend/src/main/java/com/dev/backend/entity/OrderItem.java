@@ -7,10 +7,12 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import com.dev.backend.dto.product.ProductCartItemResponse;
+import com.dev.backend.dto.product.ProductCartItemResponseConverter;
 import com.dev.backend.dto.productsnapshot.ProductSnapshot;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -37,11 +39,11 @@ public class OrderItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private Integer quantity;
-    private Integer price;  // Giá sau giảm 
+    private Integer price; // Giá sau giảm
     private Integer originalPrice; // Giá gốc
-
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "json")
+    
+    @Convert(converter = ProductCartItemResponseConverter.class)
+    @Column(columnDefinition = "LONGTEXT")
     private ProductCartItemResponse productInfo;
 
     @ManyToOne()

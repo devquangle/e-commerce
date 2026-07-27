@@ -10,6 +10,14 @@ export type Order = {
   date: string; // YYYY-MM-DD
 };
 
+export interface OrderRequest {
+  cartItemIds: number[];
+  addressId: number;
+  voucherId?: number | null;
+  paymentMethod: PaymentMethod;
+  note?: string;
+}
+
 export type PaymentMethod = "COD" | "VNPAY";
 
 export type OrderStatus =

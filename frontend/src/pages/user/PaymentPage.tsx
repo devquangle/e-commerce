@@ -2,11 +2,12 @@ import Container from "@/components/common/Container";
 
 import { CheckoutMobileBar } from "@/components/user/CheckoutUI";
 import { type CouponOption } from "@/modules/user/cart/types/cart.type";
-import { showWarningToast } from "@/utils/toastUtil";
+import { showSuccessToast, showErrorToast, showWarningToast } from "@/utils/toastUtil";
 import { formatMoney } from "@/utils/number.utils";
 import { Package } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 import {
   getSelectedAddressId,
   getCachedSelectedAddress,
@@ -24,11 +25,15 @@ import {
 import { useAddresses } from "@/modules/user/address/hooks/useAddress";
 import { useShippingFee } from "@/modules/user/payment/hooks/useGhn";
 import { PaymentSkeleton } from "@/modules/user/payment/components/PaymentSkeleton";
+import { useCreateOrder } from "@/modules/user/order/hooks/useOrder";
+import type { OrderRequest, PaymentMethod } from "@/modules/user/order/types/order.type";
 
 const mobilePrimaryButtonClass =
   "rounded-2xl bg-red-600 px-6 py-3.5 text-base font-bold text-white shadow-lg active:scale-95 transition hover:bg-red-700";
 
 export default function PaymentPage() {
+  const navigate = useNavigate();
+  const createOrderMutation = useCreateOrder();
   const { data: cartData, isPending: isCartPending } = useCartData();
 
   const items = useMemo(() => {
@@ -180,14 +185,39 @@ export default function PaymentPage() {
   };
 
   const handleConfirmOrder = () => {
-    const checkoutData = {
-      addressId: selectedAddress?.id ?? null,
+    if (!selectedAddress || !selectedAddress.id) {
+      showWarningToast("Vui lòng chọn địa chỉ giao hàng trước khi thanh toán");
+      return;
+    }
+    if (items.length === 0) {
+      showWarningToast("Không có sản phẩm nào trong giỏ hàng để thanh toán");
+      return;
+    }
+
+    const method: PaymentMethod =
+      paymentMethod.toUpperCase() === "VNPAY" ? "VNPAY" : "COD";
+
+    const payload: OrderRequest = {
+      addressId: selectedAddress.id,
       cartItemIds: items.map((item) => item.cartItemId),
       voucherId: appliedCoupon?.id ?? null,
-      paymentMethod,
-      note,
+      paymentMethod: method,
+      note: note.trim() || undefined,
     };
-    console.log("=== XÁC NHẬN MUA HÀNG ===", checkoutData);
+
+    console.log("=== THỰC HIỆN ĐẶT HÀNG ===", payload);
+
+    createOrderMutation.mutate(payload, {
+      onSuccess: () => {
+        showSuccessToast("Đặt hàng thành công!");
+        navigate("/account/orders");
+      },
+      onError: (error: any) => {
+        showErrorToast(
+          error?.message || "Đặt hàng thất bại, vui lòng thử lại!"
+        );
+      },
+    });
   };
 
   // Tự động gỡ voucher khi tạm tính không còn đủ điều kiện
@@ -307,9 +337,12 @@ export default function PaymentPage() {
             <button
               type="button"
               onClick={handleConfirmOrder}
-              className={mobilePrimaryButtonClass}
+              disabled={createOrderMutation.isPending}
+              className={`${mobilePrimaryButtonClass} ${
+                createOrderMutation.isPending ? "opacity-60 cursor-not-allowed" : ""
+              }`}
             >
-              Thanh toán
+              {createOrderMutation.isPending ? "Đang xử lý..." : "Thanh toán"}
             </button>
           }
         />
@@ -317,3 +350,4 @@ export default function PaymentPage() {
     </>
   );
 }
+

@@ -97,7 +97,6 @@ public class OrderServiceImpl implements OrderService {
                 return toOrderResponse(savedOrder);
         }
 
-       
         @Override
         public Long calculateTotal(Order order) {
                 // Tổng thanh toán = Tổng tiền hàng - Giảm giá voucher + Phí vận chuyển
@@ -176,7 +175,8 @@ public class OrderServiceImpl implements OrderService {
                                 pageResult.getTotalElements(),
                                 pageResult.getTotalPages());
         }
-         private List<CartItem> getValidCartItems(
+
+        private List<CartItem> getValidCartItems(
                         List<Integer> cartItemIds,
                         Integer userId) {
 
@@ -244,9 +244,7 @@ public class OrderServiceImpl implements OrderService {
 
                         int originalPrice = product.getPrice();
 
-                        int discountPercent = promotionProductService.getDiscountValueByProductId(product.getId());
-
-                        int price = originalPrice - originalPrice * discountPercent / 100;
+                        int price = promotionProductService.calculateSalePrice(product);
 
                         orderItem.setOriginalPrice(originalPrice);
 
