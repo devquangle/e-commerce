@@ -1,8 +1,8 @@
 import Container from "@/components/common/Container";
-import { useCountAddress } from "@/modules/user/address/hooks/useAddress";
+import { useCountAddress } from "../hooks/useAddress";
 
 export default function AddressPaymentSkeleton() {
-  const addressCount = useCountAddress(1);
+  const count = useCountAddress(1);
 
   return (
     <Container className="max-w-7xl p-2 my-6 animate-pulse">
@@ -14,7 +14,7 @@ export default function AddressPaymentSkeleton() {
 
       {/* Address Cards Grid Skeleton */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {Array.from({ length: addressCount }).map((_, index) => (
+        {Array.from({ length: count }).map((_, index) => (
           <div
             key={index}
             className="flex flex-col justify-between card-custom min-h-[140px]"

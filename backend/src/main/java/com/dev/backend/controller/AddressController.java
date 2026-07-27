@@ -37,14 +37,24 @@ public class AddressController {
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         AddressResponse addresses = addressService.getAddressDTOByIdAndUserId(addressId, userDetails.getId());
 
-        return ResponseUtil.success("Lấy danh sách địa chỉ thành công", addresses);
+        return ResponseUtil.success("Lấy địa chỉ thành công", addresses);
+    }
+
+    @GetMapping("/auth/addresses/count")
+    public ResponseEntity<ResponseData<Integer>> getAddressCountByUser(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        int count = addressService.countAddressByUser(userDetails.getId());
+
+        return ResponseUtil.success("Lấy số lượng địa chỉ thành công", count);
     }
 
     @PostMapping("/auth/addresses")
-    public ResponseEntity<ResponseData<AddressResponse>> addAddress(@RequestBody com.dev.backend.dto.address.AddressRequest AddressRequest,
+    public ResponseEntity<ResponseData<AddressResponse>> addAddress(
+            @RequestBody com.dev.backend.dto.address.AddressRequest AddressRequest,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         AddressResponse addressDTO = addressService.savAddress(AddressRequest, userDetails.getId());
-        return ResponseUtil.success("Lưu địa chỉ thành công", addressDTO);
+        return ResponseUtil.success("Thêm địa chỉ thành công", addressDTO);
     }
 
     @PutMapping("/auth/addresses/{addressId}")

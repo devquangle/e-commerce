@@ -12,13 +12,7 @@ import AddressService from "@/modules/user/address/services/address.service";
 export const useAddresses = () => {
   return useQuery<AddressResponse[]>({
     queryKey: ["addresses"],
-    queryFn: async () => {
-      const data = await AddressService.getAddresses();
-      if (Array.isArray(data)) {
-        sessionStorage.setItem("address_count", data.length.toString());
-      }
-      return data;
-    },
+    queryFn: AddressService.getAddresses
   });
 };
 
@@ -30,6 +24,7 @@ export const useCreateAddress = () => {
     onSuccess: async () => {
       sessionStorage.removeItem("address_count");
       await queryClient.invalidateQueries({ queryKey: ["addresses"] });
+      await queryClient.invalidateQueries({ queryKey: ["address-count"] });
       showSuccessToast("Thêm mới địa chỉ thành công!");
     },
     onError: (error: unknown) => {
@@ -49,6 +44,7 @@ export const useDeleteAddress = () => {
     onSuccess: async () => {
       sessionStorage.removeItem("address_count");
       await queryClient.invalidateQueries({ queryKey: ["addresses"] });
+      await queryClient.invalidateQueries({ queryKey: ["address-count"] });
       showSuccessToast("Xóa địa chỉ thành công!");
     },
     onError: (error: unknown) => {
@@ -107,9 +103,30 @@ export const useSetDefaultAddress = () => {
   });
 };
 
+/* ================= COUNT ================== */
+export const useCountAddressesByUser = () => {
+  return useQuery<number>({
+    queryKey: ["address-count"],
+    queryFn: AddressService.getCountAddressesByUser,
+    initialData: () => {
+      const stored = sessionStorage.getItem("address_count");
+      if (stored) {
+        const parsed = parseInt(stored, 10);
+        if (!isNaN(parsed) && parsed >= 0) return parsed;
+      }
+      return undefined;
+    },
+  });
+};
+
 export const useCountAddress = (defaultCount = 1): number => {
+  const { data: count } = useCountAddressesByUser();
   const queryClient = useQueryClient();
   const { data: addresses } = useAddresses();
+
+  if (typeof count === "number" && count > 0) {
+    return count;
+  }
 
   if (addresses && Array.isArray(addresses) && addresses.length > 0) {
     return addresses.length;

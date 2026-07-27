@@ -49,7 +49,7 @@ public class AddressServiceImpl implements AddressService {
     @Override
     public AddressResponse getAddressDTOByIdAndUserId(Integer addressId, Integer userId) {
         Address address = getAddressByIdAndUserId(addressId, userId);
-        return addressMapper.toDTO(address);
+        return toAddressResponse(address);
     }
 
     @Override
@@ -62,7 +62,7 @@ public class AddressServiceImpl implements AddressService {
         }
 
         return addresses.stream()
-                .map(addressMapper::toDTO)
+                .map(this::toAddressResponse)
                 .toList();
     }
 
@@ -80,7 +80,7 @@ public class AddressServiceImpl implements AddressService {
         addressMapper.toEntityAddress(address, request);
         address.setUser(userService.getUserById(userId));
         addressRepository.save(address);
-        return addressMapper.toDTO(address);
+        return toAddressResponse(address);
     }
 
     @Override
@@ -92,7 +92,7 @@ public class AddressServiceImpl implements AddressService {
         }
         addressMapper.toEntityAddress(address, request);
         addressRepository.save(address);
-        return addressMapper.toDTO(address);
+        return toAddressResponse(address);
     }
 
     @Override

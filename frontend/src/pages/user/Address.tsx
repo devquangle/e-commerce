@@ -9,7 +9,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function Address() {
-  const { data: addresses = [], isFetching, isLoading } = useAddresses();
+  const { data: addresses = [], isFetching, isLoading, isPending } = useAddresses();
   const deleteMutation = useDeleteAddress();
   const defaultMutation = useSetDefaultAddress();
   const [isOpenDelete, setIsOpenDelete] = useState(false);
@@ -17,6 +17,10 @@ export default function Address() {
   const [selectedAddress, setSelectedAddress] = useState<AddressResponse | null>(null);
 
   const navigation = useNavigate();
+
+  if (isLoading || isPending || (isFetching && addresses.length === 0)) {
+    return <AddressSkeleton />;
+  }
 
   const handleCloseDelete = () => {
     setIsOpenDelete(false);
@@ -69,9 +73,6 @@ export default function Address() {
       },
     });
   };
-  if (isLoading || (isFetching && addresses.length === 0)) {
-    return <AddressSkeleton  />;
-  }
   return (
     <>
       <div className="flex-1 p-2">

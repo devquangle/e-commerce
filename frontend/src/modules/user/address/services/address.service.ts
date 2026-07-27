@@ -58,6 +58,15 @@ const AddressService = {
     }
     return;
   },
+  async getCountAddressesByUser() {
+    const res =
+      await apiAuth.get<ApiResponse<number>>("/auth/addresses/count");
+    if (!res.data.success || res.data.data === undefined || res.data.data === null) {
+      throw new Error(res.data.message || "Fetch addresses count failed");
+    }
+    sessionStorage.setItem("address_count", res.data.data.toString());
+    return res.data.data;
+  },
 };
 
 export default AddressService;
