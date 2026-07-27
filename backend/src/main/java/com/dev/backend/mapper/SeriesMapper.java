@@ -32,4 +32,11 @@ public class SeriesMapper {
         return dto;
     }
 
+    public String getSeriesName(Series series){
+        if (series == null) {
+                 return null;
+        }
+        return series.getName();
+    }
+
 }

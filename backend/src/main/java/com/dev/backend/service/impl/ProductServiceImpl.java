@@ -1,6 +1,5 @@
 package com.dev.backend.service.impl;
 
-
 import java.util.List;
 import java.util.HashMap;
 
@@ -58,13 +57,11 @@ public class ProductServiceImpl implements ProductService {
     private final PublisherService publisherService;
     private final ProductGenreService productGenreService;
     private final ProductAuthorService productAuthorService;
-
+    private final PublisherMapper publisherMapper;
+    private final SeriesMapper seriesMapper;
     @Lazy
     @Autowired
     private PromotionProductService promotionProductService;
-
-    private final PublisherMapper publisherMapper;
-    private final SeriesMapper seriesMapper;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -311,8 +308,8 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Product findWithDetailsById(Integer id) {
         return productRepository.findWithDetailsById(id).orElseThrow(
-                () -> new NotFoundException("Không tìm thấy sản phẩm với slug: " + id));
-        
+                () -> new NotFoundException("Không tìm thấy sản phẩm với id: " + id));
+
     }
 
     @Override
@@ -320,10 +317,10 @@ public class ProductServiceImpl implements ProductService {
         Product product = findWithDetailsById(productId);
         ProductCartItemResponse dto = productMapper.mapProductCartItemResponse(product);
         dto.setDiscountValue(promotionProductService.getDiscountValueByProductId(productId));
-        dto.setPublisher(product.getPublisher().getName());
-        dto.setSeries(product.getSeries().getName());
-        dto.setProductAuthors(productAuthorService.findAuthorNamesByProductId(productId));
-        dto.setProductGenres(productGenreService.findGenreNamesByProductId(productId));
+        dto.setPublisher(publisherMapper.getPublisherName(product.getPublisher()));
+        dto.setSeries(seriesMapper.getSeriesName(product.getSeries()));
+        dto.setAuthors(productAuthorService.findAuthorNamesByProductId(productId));
+        dto.setGenres(productGenreService.findGenreNamesByProductId(productId));
         dto.setUrlImage(imageService.getUrlImageIsThumbnailByProductId(productId));
         return dto;
     }

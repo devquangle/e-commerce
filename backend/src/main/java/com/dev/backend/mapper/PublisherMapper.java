@@ -35,4 +35,10 @@ public class PublisherMapper {
         return dto;
     }
 
+    public String getPublisherName(Publisher publisher){
+         if (publisher == null) {
+            return null;
+        }
+        return publisher.getName();
+    }
 }

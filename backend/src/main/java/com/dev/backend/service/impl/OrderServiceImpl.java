@@ -34,6 +34,7 @@ import com.dev.backend.service.AddressService;
 import com.dev.backend.service.CartItemService;
 import com.dev.backend.service.GHNService;
 import com.dev.backend.service.OrderService;
+import com.dev.backend.service.ProductService;
 import com.dev.backend.service.PromotionProductService;
 import com.dev.backend.service.UserService;
 import com.dev.backend.service.VoucherService;
@@ -56,7 +57,7 @@ public class OrderServiceImpl implements OrderService {
         private final CartItemService cartItemService;
         private final PromotionProductService promotionProductService;
         private final VoucherService voucherService;
-        private final ProductMapper productMapper;
+        private final ProductService productService;
 
         @Override
         public Order getOrderById(Integer id) {
@@ -108,7 +109,7 @@ public class OrderServiceImpl implements OrderService {
                         int price = originalPrice - (originalPrice * discountPercent / 100);
                         orderItem.setOriginalPrice(originalPrice);
                         orderItem.setPrice(price);
-                        orderItem.setProductInfo(productMapper.toSnapshot(product));
+                        orderItem.setProductInfo(productService.productCartItemResponse(product.getId()));
                         subtotal += price * cartItem.getQuantity();
                         orderItems.add(orderItem);
                 }

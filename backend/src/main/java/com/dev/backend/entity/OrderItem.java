@@ -6,6 +6,7 @@ import java.util.List;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import com.dev.backend.dto.product.ProductCartItemResponse;
 import com.dev.backend.dto.productsnapshot.ProductSnapshot;
 
 import jakarta.persistence.CascadeType;
@@ -41,7 +42,7 @@ public class OrderItem {
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "json")
-    private ProductSnapshot productInfo;
+    private ProductCartItemResponse productInfo;
 
     @ManyToOne()
     @JoinColumn(name = "product_id")

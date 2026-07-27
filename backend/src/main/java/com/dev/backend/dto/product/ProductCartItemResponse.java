@@ -2,10 +2,7 @@ package com.dev.backend.dto.product;
 
 import java.util.List;
 
-import com.dev.backend.dto.author.ProductAuthorsResponse;
-import com.dev.backend.dto.genre.ProductGenresResponse;
-import com.dev.backend.dto.publisher.ProductPublisherResponse;
-import com.dev.backend.dto.series.ProductSeriesResponse;
+
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -31,7 +28,7 @@ public class ProductCartItemResponse {
     private String urlImage;
     private String publisher;
     private String series;
-    private List<String> productGenres;
-    private List<String> productAuthors;
+    private List<String> genres;
+    private List<String> authors;
 
 }

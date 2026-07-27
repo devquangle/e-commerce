@@ -1,6 +1,21 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Minus, Plus, Trash2, Building2, BookOpen, Tag, Calendar, FileText, Weight, Languages, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  Minus,
+  Plus,
+  Trash2,
+  Building2,
+  BookOpen,
+  Tag,
+  Calendar,
+  FileText,
+  Weight,
+  Languages,
+  ChevronDown,
+  ChevronUp,
+  User,
+  Bookmark,
+} from "lucide-react";
 import {
   getLineTotal,
   type CartResponse,
@@ -26,6 +41,28 @@ const getLanguageName = (code?: string) => {
   return name.charAt(0).toUpperCase() + name.slice(1);
 };
 
+const formatFieldText = (value?: string | null): string => {
+  if (!value || !value.trim() || value.trim().toLowerCase() === "khác") {
+    return "Chưa cập nhật";
+  }
+  return value.trim();
+};
+
+const formatArrayText = (items?: string[] | null): string[] => {
+  if (!items || items.length === 0) {
+    return ["Chưa cập nhật"];
+  }
+  const formatted = items.map((item) =>
+    !item || !item.trim() || item.trim().toLowerCase() === "khác"
+      ? "Chưa cập nhật"
+      : item.trim()
+  );
+  if (formatted.every((item) => item === "Chưa cập nhật")) {
+    return ["Chưa cập nhật"];
+  }
+  return formatted;
+};
+
 export default function CartItemCard({
   item,
   onToggle,
@@ -37,9 +74,17 @@ export default function CartItemCard({
   const { product } = item;
   const [showDetails, setShowDetails] = useState(false);
 
-  const originalPrice = product.discountValue > 0 ? product.price / (1 - product.discountValue / 100) : product.price;
+  const originalPrice =
+    product.discountValue > 0
+      ? product.price / (1 - product.discountValue / 100)
+      : product.price;
   const hasDiscount = product.discountValue > 0;
-  const imageUrl = product.urlImage;  
+  const imageUrl = product.urlImage;
+
+  const displayPublisher = formatFieldText(product.publisher);
+  const displaySeries = product.series ? formatFieldText(product.series) : null;
+  const displayAuthors = formatArrayText(product.authors).join(", ");
+  const displayGenres = formatArrayText(product.genres);
 
   return (
     <div
@@ -53,8 +98,14 @@ export default function CartItemCard({
             : "border-slate-200/60 bg-white"
         }`}
     >
-      {/* 💻 1. Giao diện Desktop (lg trở lên) - KHỚP TĂM TẮP VỚI TOOLBAR */}
-      <div className={`hidden lg:grid ${readonly ? 'lg:grid-cols-[1fr_120px_120px_120px] px-4' : 'lg:grid-cols-[40px_1fr_120px_140px_120px_40px]'} lg:items-center `}>
+      {/* 💻 1. Giao diện Desktop (lg trở lên) */}
+      <div
+        className={`hidden lg:grid ${
+          readonly
+            ? "lg:grid-cols-[1fr_120px_120px_120px] px-4"
+            : "lg:grid-cols-[40px_1fr_120px_140px_120px_40px]"
+        } lg:items-center `}
+      >
         {/* Cột 1: Checkbox */}
         {!readonly && (
           <div className="flex justify-center items-center h-full">
@@ -82,29 +133,53 @@ export default function CartItemCard({
                 {product.name}
               </h3>
             </Link>
-            <div 
+            <div
               className={`grid transition-all duration-300 ease-in-out ${
-                showDetails ? "grid-rows-[1fr] opacity-100 mt-1.5" : "grid-rows-[0fr] opacity-0"
+                showDetails
+                  ? "grid-rows-[1fr] opacity-100 mt-1.5"
+                  : "grid-rows-[0fr] opacity-0"
               }`}
             >
               <div className="overflow-hidden">
                 <div className="flex flex-col gap-1 pb-1">
-                  {/* Publisher */}
-                  {product.productPublisher && (
-                    <div className="flex">
+                  {/* Publisher & Series */}
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {displayPublisher && (
                       <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-medium border border-emerald-100/50">
                         <Building2 size={10} />
-                        <span>{product.productPublisher.name}</span>
+                        <span>{displayPublisher}</span>
+                      </div>
+                    )}
+                    {displaySeries && (
+                      <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-50 text-purple-600 text-[10px] font-medium border border-purple-100/50">
+                        <Bookmark size={10} />
+                        <span>{displaySeries}</span>
+                      </div>
+                    )}
+                  </div>
+                  {/* Authors */}
+                  {displayAuthors && (
+                    <div className="flex flex-wrap items-center gap-1">
+                      <div className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-amber-50/70 text-amber-700 border border-amber-200/60">
+                        <User size={10} />
+                        <span>{displayAuthors}</span>
                       </div>
                     </div>
                   )}
                   {/* Genres */}
-                  {product.productGenres && product.productGenres.length > 0 && (
+                  {displayGenres && displayGenres.length > 0 && (
                     <div className="flex flex-wrap items-center gap-1">
-                      {product.productGenres.map((genre, index) => (
-                        <div key={genre.id} className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium border ${index === 0 ? 'bg-indigo-50/50 text-indigo-600 border-indigo-100/50' : 'bg-slate-50/80 text-slate-500 border-slate-200/80'}`}>
+                      {displayGenres.map((genre, index) => (
+                        <div
+                          key={genre || index}
+                          className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium border ${
+                            index === 0
+                              ? "bg-indigo-50/50 text-indigo-600 border-indigo-100/50"
+                              : "bg-slate-50/80 text-slate-500 border-slate-200/80"
+                          }`}
+                        >
                           {index === 0 ? <BookOpen size={10} /> : <Tag size={10} />}
-                          <span>{genre.name}</span>
+                          <span>{genre}</span>
                         </div>
                       ))}
                     </div>
@@ -140,9 +215,12 @@ export default function CartItemCard({
               </div>
             </div>
             <div className="flex items-center mt-0.5">
-              <button 
-                type="button" 
-                onClick={(e) => { e.preventDefault(); setShowDetails(!showDetails); }}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setShowDetails(!showDetails);
+                }}
                 className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-blue-600 transition cursor-pointer"
               >
                 {showDetails ? "Thu gọn" : "Xem thêm chi tiết"}
@@ -201,7 +279,7 @@ export default function CartItemCard({
               <button
                 type="button"
                 onClick={onRemove}
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50  hover:text-red-500 transition lg:opacity-0 group-hover:opacity-100 cursor-pointer"
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 transition lg:opacity-0 group-hover:opacity-100 cursor-pointer"
                 aria-label="Xóa sản phẩm"
               >
                 <Trash2 size={16} />
@@ -212,7 +290,13 @@ export default function CartItemCard({
       </div>
 
       {/* 📟 2. Giao diện Tablet (sm đến md) */}
-      <div className={`hidden sm:grid lg:hidden ${readonly ? 'sm:grid-cols-[1fr_auto_auto]' : 'sm:grid-cols-[auto_1fr_auto_auto_auto]'} sm:items-center gap-5 p-5`}>
+      <div
+        className={`hidden sm:grid lg:hidden ${
+          readonly
+            ? "sm:grid-cols-[1fr_auto_auto]"
+            : "sm:grid-cols-[auto_1fr_auto_auto_auto]"
+        } sm:items-center gap-5 p-5`}
+      >
         {!readonly && (
           <input
             type="checkbox"
@@ -229,34 +313,58 @@ export default function CartItemCard({
             className="h-24 w-16 shrink-0 rounded-xl object-cover border border-slate-200/60"
           />
           <div className="min-w-0 flex flex-col gap-2">
-            <Link to={`/product/${product.slug}`}>
+            <Link to={`/product?slug=${product.slug}`}>
               <h3 className="font-bold text-slate-900 line-clamp-2 text-sm md:text-base leading-snug hover:text-blue-600 transition cursor-pointer">
                 {product.name}
               </h3>
             </Link>
-            <div 
+            <div
               className={`grid transition-all duration-300 ease-in-out ${
-                showDetails ? "grid-rows-[1fr] opacity-100 mt-1.5" : "grid-rows-[0fr] opacity-0"
+                showDetails
+                  ? "grid-rows-[1fr] opacity-100 mt-1.5"
+                  : "grid-rows-[0fr] opacity-0"
               }`}
             >
               <div className="overflow-hidden">
                 <div className="flex flex-col gap-1 pb-1">
-                  {/* Publisher */}
-                  {product.productPublisher && (
-                    <div className="flex">
+                  {/* Publisher & Series */}
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {displayPublisher && (
                       <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-medium border border-emerald-100/50">
                         <Building2 size={10} />
-                        <span>{product.productPublisher.name}</span>
+                        <span>{displayPublisher}</span>
+                      </div>
+                    )}
+                    {displaySeries && (
+                      <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-50 text-purple-600 text-[10px] font-medium border border-purple-100/50">
+                        <Bookmark size={10} />
+                        <span>{displaySeries}</span>
+                      </div>
+                    )}
+                  </div>
+                  {/* Authors */}
+                  {displayAuthors && (
+                    <div className="flex flex-wrap items-center gap-1">
+                      <div className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-amber-50/70 text-amber-700 border border-amber-200/60">
+                        <User size={10} />
+                        <span>{displayAuthors}</span>
                       </div>
                     </div>
                   )}
                   {/* Genres */}
-                  {product.productGenres && product.productGenres.length > 0 && (
+                  {displayGenres && displayGenres.length > 0 && (
                     <div className="flex flex-wrap items-center gap-1">
-                      {product.productGenres.map((genre, index) => (
-                        <div key={genre.id} className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium border ${index === 0 ? 'bg-indigo-50/50 text-indigo-600 border-indigo-100/50' : 'bg-slate-50/80 text-slate-500 border-slate-200/80'}`}>
+                      {displayGenres.map((genre, index) => (
+                        <div
+                          key={genre || index}
+                          className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium border ${
+                            index === 0
+                              ? "bg-indigo-50/50 text-indigo-600 border-indigo-100/50"
+                              : "bg-slate-50/80 text-slate-500 border-slate-200/80"
+                          }`}
+                        >
                           {index === 0 ? <BookOpen size={10} /> : <Tag size={10} />}
-                          <span>{genre.name}</span>
+                          <span>{genre}</span>
                         </div>
                       ))}
                     </div>
@@ -284,7 +392,7 @@ export default function CartItemCard({
                     {product.language && (
                       <div className="flex items-center gap-1">
                         <Languages size={10} className="text-slate-300" />
-                        <span>{product.language}</span>
+                        <span>{getLanguageName(product.language)}</span>
                       </div>
                     )}
                   </div>
@@ -292,9 +400,12 @@ export default function CartItemCard({
               </div>
             </div>
             <div className="flex items-center mt-0.5">
-              <button 
-                type="button" 
-                onClick={(e) => { e.preventDefault(); setShowDetails(!showDetails); }}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setShowDetails(!showDetails);
+                }}
                 className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 hover:text-blue-600 transition"
               >
                 {showDetails ? "Thu gọn" : "Xem thêm chi tiết"}
@@ -371,35 +482,59 @@ export default function CartItemCard({
             className="h-20 w-14 shrink-0 rounded-lg object-cover border border-slate-200/60"
           />
           <div className="flex-1 min-w-0 flex flex-col">
-            <Link to={`/product/${product.slug}`}>
+            <Link to={`/product?slug=${product.slug}`}>
               <h3 className="font-bold text-slate-900 line-clamp-2 text-xs hover:text-blue-600 transition cursor-pointer">
                 {product.name}
               </h3>
             </Link>
-            
-            <div 
+
+            <div
               className={`grid transition-all duration-300 ease-in-out ${
-                showDetails ? "grid-rows-[1fr] opacity-100 mt-1.5" : "grid-rows-[0fr] opacity-0"
+                showDetails
+                  ? "grid-rows-[1fr] opacity-100 mt-1.5"
+                  : "grid-rows-[0fr] opacity-0"
               }`}
             >
               <div className="overflow-hidden">
                 <div className="flex flex-col gap-1 pb-1">
-                  {/* Publisher */}
-                  {product.productPublisher && (
-                    <div className="flex">
+                  {/* Publisher & Series */}
+                  <div className="flex flex-wrap items-center gap-1">
+                    {displayPublisher && (
                       <div className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-[9px] font-medium border border-emerald-100/50">
                         <Building2 size={8} />
-                        <span>{product.productPublisher.name}</span>
+                        <span>{displayPublisher}</span>
+                      </div>
+                    )}
+                    {displaySeries && (
+                      <div className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-purple-50 text-purple-600 text-[9px] font-medium border border-purple-100/50">
+                        <Bookmark size={8} />
+                        <span>{displaySeries}</span>
+                      </div>
+                    )}
+                  </div>
+                  {/* Authors */}
+                  {displayAuthors && (
+                    <div className="flex flex-wrap items-center gap-1">
+                      <div className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[9px] font-medium bg-amber-50/70 text-amber-700 border border-amber-200/60">
+                        <User size={8} />
+                        <span>{displayAuthors}</span>
                       </div>
                     </div>
                   )}
                   {/* Genres */}
-                  {product.productGenres && product.productGenres.length > 0 && (
+                  {displayGenres && displayGenres.length > 0 && (
                     <div className="flex flex-wrap items-center gap-1">
-                      {product.productGenres.map((genre, index) => (
-                        <div key={genre.id} className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-lg text-[9px] font-medium border ${index === 0 ? 'bg-indigo-50/50 text-indigo-600 border-indigo-100/50' : 'bg-slate-50/80 text-slate-500 border-slate-200/80'}`}>
+                      {displayGenres.map((genre, index) => (
+                        <div
+                          key={genre || index}
+                          className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-lg text-[9px] font-medium border ${
+                            index === 0
+                              ? "bg-indigo-50/50 text-indigo-600 border-indigo-100/50"
+                              : "bg-slate-50/80 text-slate-500 border-slate-200/80"
+                          }`}
+                        >
                           {index === 0 ? <BookOpen size={8} /> : <Tag size={8} />}
-                          <span>{genre.name}</span>
+                          <span>{genre}</span>
                         </div>
                       ))}
                     </div>
@@ -427,7 +562,7 @@ export default function CartItemCard({
                     {product.language && (
                       <div className="flex items-center gap-0.5">
                         <Languages size={8} className="text-slate-300" />
-                        <span>{product.language}</span>
+                        <span>{getLanguageName(product.language)}</span>
                       </div>
                     )}
                   </div>
@@ -435,9 +570,12 @@ export default function CartItemCard({
               </div>
             </div>
             <div className="mt-0.5 flex items-center">
-              <button 
-                type="button" 
-                onClick={(e) => { e.preventDefault(); setShowDetails(!showDetails); }}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setShowDetails(!showDetails);
+                }}
                 className="inline-flex items-center gap-1 text-[10px] font-medium text-slate-500 hover:text-blue-600 transition"
               >
                 {showDetails ? "Thu gọn" : "Xem thêm chi tiết"}
@@ -493,3 +631,4 @@ export default function CartItemCard({
     </div>
   );
 }
+

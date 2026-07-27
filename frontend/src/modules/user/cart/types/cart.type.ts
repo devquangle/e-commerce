@@ -32,33 +32,14 @@ export interface ProductResponse {
   pages: number;
   language?: string;
 
-  productPublisher: ProductPublisherResponse;
-  productSeries: ProductSeriesResponse | null;
-  productGenres: ProductGenreResponse[] | [];
-  productAuthors: ProductAuthorResponse[] | [];
+  publisher: string;
+  series: string | null;
+  genres: string[] | [];
+  authors: string[] | [];
   urlImage: string;
 }
 
-export interface ProductGenreResponse {
-  id: number;
-  name: string;
-  slug: string;
-}
-export interface ProductAuthorResponse {
-  id: number;
-  name: string;
-  slug: string;
-}
-export interface ProductSeriesResponse {
-  id: number;
-  name: string;
-  slug: string;
-}
-export interface ProductPublisherResponse {
-  id: number;
-  name: string;
-  slug: string;
-}
+
 
 /** UI state cho trang giỏ hàng / thanh toán */
 
@@ -67,8 +48,6 @@ export interface CartCountResponse {
   count: number;
 }
 
-export const getAuthorNames = (product: ProductResponse): string =>
-  product.productAuthors?.map((a) => a.name).join(", ") || "Không rõ tác giả";
 
 
 

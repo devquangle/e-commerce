@@ -10,8 +10,6 @@ import org.springframework.data.repository.query.Param;
 
 import com.dev.backend.dto.cart.CartCountResponse;
 import com.dev.backend.entity.CartItem;
-import com.google.api.client.util.Lists;
-
 import jakarta.transaction.Transactional;
 
 public interface CartItemRepository extends JpaRepository<CartItem, Integer> {
