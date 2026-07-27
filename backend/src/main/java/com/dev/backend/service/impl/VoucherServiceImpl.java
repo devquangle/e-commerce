@@ -16,8 +16,10 @@ import com.dev.backend.dto.voucher.VoucherRepsonse;
 import com.dev.backend.dto.voucher.VoucherRequest;
 import com.dev.backend.dto.voucher.VoucherUserRepsonse;
 import com.dev.backend.entity.Voucher;
+import com.dev.backend.exception.BadRequestException;
 import com.dev.backend.exception.NotFoundException;
 import com.dev.backend.mapper.VoucherMapper;
+import com.dev.backend.repository.OrderRepository;
 import com.dev.backend.repository.VoucherRepository;
 import com.dev.backend.response.PageResponse;
 import com.dev.backend.service.VoucherService;
@@ -33,6 +35,7 @@ public class VoucherServiceImpl implements VoucherService {
 
     private final VoucherRepository voucherRepository;
     private final VoucherMapper voucherMapper;
+    private final OrderRepository orderRepository;
 
     @Override
     public Voucher findById(Integer id) {
@@ -124,4 +127,55 @@ public class VoucherServiceImpl implements VoucherService {
         return voucherRepository.findAvailableVouchersForUser(userId, cleanCode);
     }
 
+    @Override
+    public Integer calculateDiscount(Voucher voucher, Integer subtotal) {
+
+        int discount = subtotal * voucher.getDiscountValue() / 100;
+
+        if (voucher.getMaxDiscountValue() != null) {
+            discount = Math.min(discount, voucher.getMaxDiscountValue());
+        }
+
+        return discount;
+    }
+
+    @Override
+    public Voucher validateVoucher(Integer id, Integer userId, Integer subtotal) {
+
+        Voucher voucher = voucherRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Voucher không tồn tại"));
+
+        LocalDate today = LocalDate.now();
+
+        if (voucher.getStatus() != VoucherStatus.ACTIVE) {
+            throw new BadRequestException("Voucher không hoạt động");
+        }
+
+        if (today.isBefore(voucher.getStartDate())) {
+            throw new BadRequestException("Voucher chưa bắt đầu");
+        }
+
+        if (today.isAfter(voucher.getEndDate())) {
+            throw new BadRequestException("Voucher đã hết hạn");
+        }
+
+        if (voucher.getUsedCount() >= voucher.getUsageLimit()) {
+            throw new BadRequestException("Voucher đã hết lượt sử dụng");
+        }
+
+        if (subtotal < voucher.getMinOrderValue()) {
+            throw new BadRequestException(
+                    "Đơn hàng phải từ " + voucher.getMinOrderValue());
+        }
+
+        long usedCountByUser = orderRepository.countVoucherUsedByUser(
+                userId,
+                voucher.getId());
+
+        if (usedCountByUser >= voucher.getUsageLimitPerUser()) {
+            throw new BadRequestException("Bạn đã sử dụng hết lượt của voucher này");
+        }
+
+        return voucher;
+    }
 }

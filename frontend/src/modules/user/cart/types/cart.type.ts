@@ -75,32 +75,6 @@ export const getAuthorNames = (product: ProductResponse): string =>
 export const getLineTotal = (item: CartResponse): number =>
   item.product.price * item.quantity;
 
-export const MOCK_CART_ITEMS: CartResponse[] = [
-  {
-    cartItemId: 1,
-    quantity: 1,
-    checked: true,
-    product: { productId: 1,
-      name: "Nghệ Thuật Bán Hàng Bậc Cao",
-      slug: "nghe-thuat-ban-hang-bac-cao",
-      isbn: "978-604-1",
-      discountValue: 25,
-      price: 150000,
-      quantity: 100,
-      weight: 500,
-      publishYear: "2019-01-01",
-      pages: 520,
-      language: "Tiếng Việt",
-      productPublisher: { id: 1, name: "Nhà xuất bản Trẻ", slug: "nxb-tre" },
-      productSeries: { id: 1, name: "Bìa mềm", slug: "bia-mem" },
-      productGenres: [
-        { id: 1, name: "Khác", slug: "khac" },
-      ],
-      productAuthors: [{ id: 1, name: "Zig Ziglar", slug: "zig-ziglar" }],
-      urlImage: "https://picsum.photos/seed/book1/200/280",
-    },
-  },
-];
 
 import type { VoucherUserResponse } from "@/modules/admin/voucher/types/voucher.type";
 

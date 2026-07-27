@@ -14,7 +14,7 @@ import AddressPaymentSkeleton from "@/modules/user/address/components/AddressPay
 import { MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { setSelectedAddressId } from "@/types/checkout.type";
+import { setCachedSelectedAddress } from "@/types/checkout.type";
 import Loading from "@/components/common/Loading";
 
 export default function AddressPayment() {
@@ -32,7 +32,12 @@ export default function AddressPayment() {
     useState<AddressResponse | null>(null);
 
   const handleSelect = (id: number) => {
-    setSelectedAddressId(id);
+    const found = addresses.find((a) => a.id === id);
+    if (found) {
+      setCachedSelectedAddress(found);
+    } else {
+      sessionStorage.setItem("payment_selected_address_id", String(id));
+    }
     navigate("/payment");
   };
 

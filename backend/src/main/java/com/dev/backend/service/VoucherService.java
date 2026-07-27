@@ -23,7 +23,11 @@ public interface VoucherService {
 
     PageResponse<VoucherRepsonse> search(VoucherFilterRequest request);
 
-    List<VoucherUserRepsonse> getAvailableVouchersForUser(Integer userId,String code);
+    List<VoucherUserRepsonse> getAvailableVouchersForUser(Integer userId, String code);
 
     void insertData();
+
+    Voucher validateVoucher(Integer id, Integer userId, Integer subtotal);
+
+    Integer calculateDiscount(Voucher voucher, Integer subtotal);
 }

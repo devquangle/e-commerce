@@ -320,10 +320,10 @@ public class ProductServiceImpl implements ProductService {
         Product product = findWithDetailsById(productId);
         ProductCartItemResponse dto = productMapper.mapProductCartItemResponse(product);
         dto.setDiscountValue(promotionProductService.getDiscountValueByProductId(productId));
-        dto.setProductPublisher(publisherMapper.toProductPublisher(product.getPublisher()));
-        dto.setProductSeries(seriesMapper.toProductSeries(product.getSeries()));
-        dto.setProductAuthors(productAuthorService.findAuthorsByProductId(productId));
-        dto.setProductGenres(productGenreService.findGenresByProductId(productId));
+        dto.setPublisher(product.getPublisher().getName());
+        dto.setSeries(product.getSeries().getName());
+        dto.setProductAuthors(productAuthorService.findAuthorNamesByProductId(productId));
+        dto.setProductGenres(productGenreService.findGenreNamesByProductId(productId));
         dto.setUrlImage(imageService.getUrlImageIsThumbnailByProductId(productId));
         return dto;
     }

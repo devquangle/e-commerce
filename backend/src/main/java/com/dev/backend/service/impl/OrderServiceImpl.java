@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.dev.backend.constant.OrderStatus;
 import com.dev.backend.constant.PaymentMethod;
 import com.dev.backend.constant.PaymentStatus;
+import com.dev.backend.dto.ghn.CalculateFeeRequest;
 import com.dev.backend.dto.order.OrderFilterRequest;
 import com.dev.backend.dto.order.OrderRequest;
 import com.dev.backend.dto.order.OrderResponse;
@@ -26,6 +27,7 @@ import com.dev.backend.entity.Voucher;
 import com.dev.backend.exception.BadRequestException;
 import com.dev.backend.exception.NotFoundException;
 import com.dev.backend.mapper.OrderMapper;
+import com.dev.backend.mapper.ProductMapper;
 import com.dev.backend.repository.OrderRepository;
 import com.dev.backend.response.PageResponse;
 import com.dev.backend.service.AddressService;
@@ -34,6 +36,7 @@ import com.dev.backend.service.GHNService;
 import com.dev.backend.service.OrderService;
 import com.dev.backend.service.PromotionProductService;
 import com.dev.backend.service.UserService;
+import com.dev.backend.service.VoucherService;
 import com.dev.backend.util.FilterValidator;
 
 import jakarta.transaction.Transactional;
@@ -52,6 +55,8 @@ public class OrderServiceImpl implements OrderService {
         private final UserService userService;
         private final CartItemService cartItemService;
         private final PromotionProductService promotionProductService;
+        private final VoucherService voucherService;
+        private final ProductMapper productMapper;
 
         @Override
         public Order getOrderById(Integer id) {
@@ -61,104 +66,71 @@ public class OrderServiceImpl implements OrderService {
         @Override
         @Transactional
         public OrderResponse createOrder(OrderRequest request, Integer userId) {
-
                 User user = userService.getUserById(userId);
-
                 Address address = addressService.getAddressByIdAndUserId(
                                 request.getAddressId(), userId);
-
                 List<CartItem> cartItems = cartItemService.findByIdInAndUserId(
                                 request.getCartItemIds(), userId);
-
                 if (cartItems.isEmpty()) {
                         throw new BadRequestException("Giỏ hàng trống");
                 }
-
                 if (cartItems.size() != request.getCartItemIds().size()) {
                         throw new BadRequestException("Danh sách sản phẩm không hợp lệ");
                 }
-
                 Order order = new Order();
-
                 order.setUser(user);
-
                 order.setFullName(address.getFullName());
                 order.setPhone(address.getPhone());
                 order.setProvinceId(address.getProvinceId());
                 order.setDistrictId(address.getDistrictId());
                 order.setWardCode(address.getWardCode());
                 order.setStreet(address.getStreet());
-
                 order.setNoted(request.getNote());
-
                 order.setPaymentMethod(request.getPaymentMethod());
-
                 if (request.getPaymentMethod() == PaymentMethod.COD) {
                         order.setPaymentStatus(PaymentStatus.UNPAID);
                 } else {
                         order.setPaymentStatus(PaymentStatus.UNPAID);
                 }
-
                 order.setStatus(OrderStatus.PENDING);
-
                 int subtotal = 0;
-
+                int totalWeight = 0;
                 List<OrderItem> orderItems = new ArrayList<>();
-
                 for (CartItem cartItem : cartItems) {
-
                         Product product = cartItem.getProduct();
-
                         OrderItem orderItem = new OrderItem();
-
                         orderItem.setOrder(order);
                         orderItem.setProduct(product);
                         orderItem.setQuantity(cartItem.getQuantity());
-
+                        totalWeight += orderItem.getQuantity() * product.getWeight();
                         int originalPrice = product.getPrice();
-
                         int discountPercent = promotionProductService.getDiscountValueByProductId(product.getId());
-
                         int price = originalPrice - (originalPrice * discountPercent / 100);
-
                         orderItem.setOriginalPrice(originalPrice);
                         orderItem.setPrice(price);
-
-                        // orderItem.setProductInfo(productMapper.toSnapshot(product));
-
+                        orderItem.setProductInfo(productMapper.toSnapshot(product));
                         subtotal += price * cartItem.getQuantity();
-
                         orderItems.add(orderItem);
                 }
-
                 order.setOrderItems(orderItems);
-
                 // Voucher
                 int voucherAmount = 0;
-
                 if (request.getVoucherId() != null) {
-
                         Voucher voucher = voucherService.validateVoucher(
                                         request.getVoucherId(),
                                         userId,
                                         subtotal);
-
                         voucherAmount = voucherService.calculateDiscount(voucher, subtotal);
-
                         order.setVoucher(voucher);
-
                         order.setVoucherAmount(voucherAmount);
                 }
-
-                // Shipping
-                int shippingFee = shippingService.calculateShippingFee(
-                                address,
-                                cartItems);
-
+                CalculateFeeRequest calculateFeeRequest = new CalculateFeeRequest();
+                calculateFeeRequest.setToDistrictId(address.getDistrictId());
+                calculateFeeRequest.setToWardCode(address.getWardCode());
+                calculateFeeRequest.setWeight(totalWeight);
+                Integer shippingFee = ghnService.calculateFee(calculateFeeRequest);
                 order.setShippingFee(shippingFee);
-
                 Order savedOrder = orderRepository.save(order);
-
                 cartItemService.deleteAll(cartItems);
 
                 return toOrderResponse(savedOrder);

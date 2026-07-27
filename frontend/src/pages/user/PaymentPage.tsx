@@ -9,6 +9,8 @@ import { useMemo, useState, useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import {
   getSelectedAddressId,
+  getCachedSelectedAddress,
+  setCachedSelectedAddress,
   type CouponForm,
 } from "@/types/checkout.type";
 import CartCheckoutSidebar from "@/components/user/CartCheckoutSidebar";
@@ -112,18 +114,24 @@ export default function PaymentPage() {
   }, [appliedCoupon, subtotal, productDiscount]);
 
   const { data: addresses = [], isPending: isAddressesPending } = useAddresses();
+  const cachedAddress = useMemo(() => getCachedSelectedAddress(), []);
 
   const selectedAddress = useMemo(() => {
-    if (addresses.length === 0) return null;
-    return (
-      addresses.find((a) => a.id === selectedAddressId) ??
-      addresses.find((a) => a.default) ??
-      addresses[0] ??
-      null
-    );
-  }, [addresses, selectedAddressId]);
+    if (addresses.length > 0) {
+      const found =
+        addresses.find((a) => a.id === selectedAddressId) ??
+        addresses.find((a) => a.default) ??
+        addresses[0] ??
+        null;
+      if (found) {
+        setCachedSelectedAddress(found);
+      }
+      return found;
+    }
+    return cachedAddress;
+  }, [addresses, selectedAddressId, cachedAddress]);
 
-  const isAddressLoading = isAddressesPending;
+  const isAddressLoading = isAddressesPending && !selectedAddress;
 
   const totalWeight = useMemo(
     () =>

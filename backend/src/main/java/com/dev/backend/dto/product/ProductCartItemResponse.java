@@ -29,9 +29,9 @@ public class ProductCartItemResponse {
     private Integer pages;
     private String language;
     private String urlImage;
-    private ProductPublisherResponse productPublisher;
-    private ProductSeriesResponse productSeries;
-    private List<ProductGenresResponse> productGenres;
-    private List<ProductAuthorsResponse> productAuthors;
+    private String publisher;
+    private String series;
+    private List<String> productGenres;
+    private List<String> productAuthors;
 
 }

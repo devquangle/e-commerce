@@ -14,4 +14,6 @@ public interface ProductGenreService {
     void saveProductGenres(Product product, List<Integer> genreIds);
 
     List<ProductGenresResponse> findGenresByProductId(Integer productId);
+
+    List<String> findGenreNamesByProductId(Integer productId);
 }

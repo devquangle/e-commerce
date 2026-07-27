@@ -55,4 +55,8 @@ public class ProductAuthorServiceImpl implements ProductAuthorService {
         productAuthorRepository.saveAll(productAuthorsToSave);
     }
 
+    @Override
+    public List<String> findAuthorNamesByProductId(Integer productId) {
+        return productAuthorRepository.findAuthorNamesByProductId(productId);
+    }
 }

@@ -61,4 +61,8 @@ public class ProductGenreServiceImpl implements ProductGenreService {
     public List<ProductGenresResponse> findGenresByProductId(Integer productId) {
         return productGenreRepository.findGenresByProductId(productId);
     }
+    @Override
+    public List<String> findGenreNamesByProductId(Integer productId) {
+        return productGenreRepository.findGenreNamesByProductId(productId);
+    }
 }

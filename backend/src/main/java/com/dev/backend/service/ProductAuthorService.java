@@ -8,7 +8,10 @@ import com.dev.backend.entity.ProductAuthor;
 
 public interface ProductAuthorService {
     ProductAuthor save(ProductAuthor productAuthor);
-    void saveProductAuthors(Product product,List<Integer> authorIds);
+
+    void saveProductAuthors(Product product, List<Integer> authorIds);
 
     List<ProductAuthorsResponse>  findAuthorsByProductId(Integer productId);
+
+    List<String> findAuthorNamesByProductId(Integer productId);
 }

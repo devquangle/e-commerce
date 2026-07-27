@@ -29,4 +29,12 @@ public interface ProductAuthorRepository extends JpaRepository<ProductAuthor, In
                 ORDER BY pa.author.name
             """)
     List<ProductAuthorsResponse> findAuthorsByProductId(@Param("productId") Integer productId);
+
+    @Query("""
+                SELECT pa.author.name
+                FROM ProductAuthor pa
+                WHERE pa.product.id = :productId
+                ORDER BY pa.author.name
+            """)
+    List<String> findAuthorNamesByProductId(@Param("productId") Integer productId);
 }

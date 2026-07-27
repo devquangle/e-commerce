@@ -15,19 +15,27 @@ public interface ProductGenreRepository extends JpaRepository<ProductGenre, Inte
     @Query("SELECT COUNT(pg)>0 FROM ProductGenre pg WHERE pg.genre.id = :genreId")
     boolean existsByGenreId(@Param("genreId") Integer genreId);
 
-    @Modifying 
+    @Modifying
     @Query("DELETE FROM ProductGenre pg WHERE pg.product.id = :productId")
     void deleteByProductId(@Param("productId") Integer productId);
 
     @Query("""
-          SELECT new com.dev.backend.dto.genre.ProductGenresResponse(
-              pg.genre.id,
-              pg.genre.name,
-              pg.genre.slug
-          )
-          FROM ProductGenre pg
-          WHERE pg.product.id = :productId
-          ORDER BY pg.genre.name
-      """)
-  List<ProductGenresResponse> findGenresByProductId(@Param("productId") Integer productId);
+                SELECT new com.dev.backend.dto.genre.ProductGenresResponse(
+                    pg.genre.id,
+                    pg.genre.name,
+                    pg.genre.slug
+                )
+                FROM ProductGenre pg
+                WHERE pg.product.id = :productId
+                ORDER BY pg.genre.name
+            """)
+    List<ProductGenresResponse> findGenresByProductId(@Param("productId") Integer productId);
+
+    @Query("""
+                SELECT pg.genre.name
+                FROM ProductGenre pg
+                WHERE pg.product.id = :productId
+                ORDER BY pg.genre.name
+            """)
+    List<String> findGenreNamesByProductId(@Param("productId") Integer productId);
 }
