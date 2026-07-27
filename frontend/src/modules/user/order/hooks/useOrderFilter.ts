@@ -5,7 +5,7 @@ import type { OrderStatus } from "../types/order.type";
 
 export type OrderFilterForm = {
   keyword: string;
-  createDate: string;
+  startDate: string;
   endDate: string;
 };
 
@@ -22,13 +22,13 @@ export function useOrderFilter() {
   const form = useForm<OrderFilterForm>({
     defaultValues: {
       keyword: searchParams.get("keyword") || "",
-      createDate: searchParams.get("createDate") || "",
+      startDate: searchParams.get("startDate") || "",
       endDate: searchParams.get("endDate") || "",
     },
   });
 
   const keyword = form.watch("keyword");
-  const createDate = form.watch("createDate");
+  const startDate = form.watch("startDate");
   const endDate = form.watch("endDate");
 
   // Sync state lên URL (có debounce nhẹ 300ms để tránh push URL liên tục khi gõ phím)
@@ -36,7 +36,7 @@ export function useOrderFilter() {
     const handler = setTimeout(() => {
       const params = new URLSearchParams();
       if (keyword) params.set("keyword", keyword);
-      if (createDate) params.set("createDate", createDate);
+      if (startDate) params.set("startDate", startDate);
       if (endDate) params.set("endDate", endDate);
       if (status) params.set("status", status);
       if (page > 1) params.set("page", page.toString());
@@ -46,7 +46,7 @@ export function useOrderFilter() {
     }, 300);
 
     return () => clearTimeout(handler);
-  }, [keyword, createDate, endDate, status, page, size, setSearchParams]);
+  }, [keyword, startDate, endDate, status, page, size, setSearchParams]);
 
   // Tự động reset về trang 1 khi các filter thay đổi (trừ thay đổi page)
   const isFirstRender = useRef(true);
@@ -56,12 +56,12 @@ export function useOrderFilter() {
       return;
     }
     setPage(1);
-  }, [keyword, createDate, endDate, status, size]);
+  }, [keyword, startDate, endDate, status, size]);
 
   const resetFilters = () => {
     setStatus(null);
     setPage(1);
-    form.reset({ keyword: "", createDate: "", endDate: "" });
+    form.reset({ keyword: "", startDate: "", endDate: "" });
   };
 
   return {
@@ -69,7 +69,7 @@ export function useOrderFilter() {
     filters: {
       keyword,
       status,
-      createDate,
+      startDate,
       endDate,
       page,
       size,

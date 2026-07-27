@@ -34,7 +34,7 @@ export default function Login() {
       const isCustomer =
         !user?.roles ||
         user.roles.length === 0 ||
-        user.roles.some((role) => role === "CUSTOMER" || role === "ROLE_CUSTOMER");
+        user.roles.some((role) => role === "CUSTOMER");
 
       const targetPath = from || (isCustomer ? "/home" : "/admin");
       navigate(targetPath, { replace: true });

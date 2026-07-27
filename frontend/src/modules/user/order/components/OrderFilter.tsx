@@ -36,9 +36,9 @@ export function OrderFilter({
               placeholder="Tìm theo tên khách hàng..."
             />
           </div>
-          <div className="flex gap-4 w-full md:w-auto">
+          <div className="flex gap-4 w-full md:w-auto items-center">
             <InputField
-              name="createDate"
+              name="startDate"
               type="date"
               register={register}
               placeholder="Ngày bắt đầu"
@@ -49,46 +49,43 @@ export function OrderFilter({
               register={register}
               placeholder="Ngày kết thúc"
             />
+            <button
+              type="button"
+              onClick={onReset}
+              className="h-11 px-4 text-sm font-medium rounded-xl text-slate-600 bg-slate-100 hover:bg-slate-200 transition cursor-pointer whitespace-nowrap"
+            >
+              Làm mới
+            </button>
           </div>
         </div>
 
-        {/* Status Buttons & Reset - Phía dưới */}
-        <div className="flex justify-between items-center flex-wrap gap-3">
-          <div className="flex gap-2 flex-wrap">
+        {/* Status Buttons - Phía dưới */}
+        <div className="flex gap-2 flex-wrap">
+          <button
+            onClick={() => setStatusFilter(null)}
+            className={`px-3 py-1 text-sm rounded cursor-pointer ${
+              statusFilter === null
+                ? "bg-blue-500 text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            Tất cả
+          </button>
+          {(Object.keys(OrderStatusMapping) as OrderStatus[]).map((status) => (
             <button
-              onClick={() => setStatusFilter(null)}
+              key={status}
+              onClick={() =>
+                setStatusFilter(statusFilter === status ? null : status)
+              }
               className={`px-3 py-1 text-sm rounded cursor-pointer ${
-                statusFilter === null
+                statusFilter === status
                   ? "bg-blue-500 text-white"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
             >
-              Tất cả
+              {OrderStatusMapping[status]}
             </button>
-            {(Object.keys(OrderStatusMapping) as OrderStatus[]).map((status) => (
-              <button
-                key={status}
-                onClick={() =>
-                  setStatusFilter(statusFilter === status ? null : status)
-                }
-                className={`px-3 py-1 text-sm rounded cursor-pointer ${
-                  statusFilter === status
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-              >
-                {OrderStatusMapping[status]}
-              </button>
-            ))}
-          </div>
-
-          <button
-            type="button"
-            onClick={onReset}
-            className="px-4 py-1.5 text-sm font-medium rounded-lg text-slate-600 bg-slate-100 hover:bg-slate-200 transition cursor-pointer"
-          >
-            Làm mới
-          </button>
+          ))}
         </div>
       </div>
     </>
