@@ -33,7 +33,7 @@ export default function Register() {
             {isLoading && <Loading />}
             <Container className="px-4 md:px-8">
                 <div className="flex justify-center items-center min-h-[80vh] py-4">
-                    <form className="w-full max-w-md rounded-xl border" onSubmit={handleSubmit(onSubmit)}>
+                    <form className="w-full max-w-md card-custom-v1 " onSubmit={handleSubmit(onSubmit)}>
 
                         <div className="flex flex-col gap-5 p-6 md:p-8">
 
@@ -76,7 +76,8 @@ export default function Register() {
                             />
 
                             {/* Password */}
-                            <InputField label="Mật khẩu" name="password" type='password'
+                            <InputField label="Mật khẩu" name="password" type="password"
+                                placeholder="••••••••"
                                 register={register}
                                 rules={{
                                     required: "Mật khẩu là bắt buộc",
@@ -84,11 +85,12 @@ export default function Register() {
                                 error={errors?.password}
                             />
                             <InputField label="Xác nhận mật khẩu" name="confirmPassword" type="password"
+                                placeholder="••••••••"
                                 register={register}
                                 rules={{
-                                    required: "Mật khẩu là bắt buộc",
+                                    required: "Xác nhận mật khẩu là bắt buộc",
                                 }}
-                                error={errors?.password}
+                                error={errors?.confirmPassword}
                             />
 
 

@@ -5,6 +5,7 @@ import type {
   UseFormRegister,
   RegisterOptions,
 } from "react-hook-form";
+import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 
 interface InputFieldProps<
@@ -71,7 +72,7 @@ export default function InputField<T extends FieldValues>({
           id={name}
           type={inputType}
           disabled={disabled}
-          placeholder={placeholder}
+          placeholder={placeholder || (isPassword ? "••••••••" : undefined)}
           autoComplete={autoComplete || (isPassword ? "current-password" : "on")}
           {...register(name, rules)}
           {...rest}
@@ -88,9 +89,9 @@ export default function InputField<T extends FieldValues>({
           <button
             type="button"
             onClick={() => setShowPassword((prev) => !prev)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer"
           >
-            {showPassword ? "🙈" : "👁"}
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
         )}
       </div>

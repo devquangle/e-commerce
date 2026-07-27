@@ -51,7 +51,7 @@ export default function Login() {
         <div className="flex justify-center items-center min-h-[80vh] py-4">
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="w-full max-w-md rounded-xl border space-y-4"
+            className="w-full max-w-md card-custom-v1 space-y-4"
           >
             <div className="flex flex-col gap-3 p-6 md:p-8">
               {/* Title */}
@@ -84,6 +84,7 @@ export default function Login() {
                 label="Mật khẩu"
                 name="password"
                 type="password"
+                placeholder="••••••••"
                 id="current-password"
                 register={register}
                 rules={{
