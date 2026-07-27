@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.dev.backend.bean.AddressBean;
+import com.dev.backend.dto.address.AddressRequest;
 import com.dev.backend.dto.address.AddressResponse;
 import com.dev.backend.response.ResponseData;
 import com.dev.backend.response.ResponseUtil;
@@ -41,16 +41,16 @@ public class AddressController {
     }
 
     @PostMapping("/auth/addresses")
-    public ResponseEntity<ResponseData<AddressResponse>> addAddress(@RequestBody AddressBean addressBean,
+    public ResponseEntity<ResponseData<AddressResponse>> addAddress(@RequestBody com.dev.backend.dto.address.AddressRequest AddressRequest,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        AddressResponse addressDTO = addressService.savAddress(addressBean, userDetails.getId());
+        AddressResponse addressDTO = addressService.savAddress(AddressRequest, userDetails.getId());
         return ResponseUtil.success("Lưu địa chỉ thành công", addressDTO);
     }
 
     @PutMapping("/auth/addresses/{addressId}")
     public ResponseEntity<ResponseData<AddressResponse>> updateAddress(@PathVariable("addressId") Integer addressId,
-            @RequestBody AddressBean addressBean, @AuthenticationPrincipal CustomUserDetails userDetails) {
-        AddressResponse addressDTO = addressService.updateAddress(addressId, addressBean, userDetails.getId());
+            @RequestBody AddressRequest AddressRequest, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        AddressResponse addressDTO = addressService.updateAddress(addressId, AddressRequest, userDetails.getId());
         return ResponseUtil.success("Cập nhật địa chỉ thành công", addressDTO);
     }
 

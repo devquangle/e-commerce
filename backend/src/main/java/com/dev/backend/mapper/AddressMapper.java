@@ -2,33 +2,37 @@ package com.dev.backend.mapper;
 
 import org.springframework.stereotype.Component;
 
+import com.dev.backend.dto.address.AddressRequest;
 import com.dev.backend.dto.address.AddressResponse;
 import com.dev.backend.entity.Address;
-import com.dev.backend.service.GHNService;
 
 @Component
 public class AddressMapper {
-    private final GHNService ghnService;
-
-    public AddressMapper(GHNService ghnService) {
-        this.ghnService = ghnService;
-    }
-
     public AddressResponse toDTO(Address address) {
         if (address == null) {
             return null;
         }
-        AddressResponse dto = new AddressResponse();
-        dto.setId(address.getId());
-        dto.setFullName(address.getFullName());
-        dto.setPhone(address.getPhone());
-        dto.setProvinceId(address.getProvinceId());
-        dto.setDistrictId(address.getDistrictId());
-        dto.setWardCode(address.getWardCode());
-        dto.setStreet(address.getStreet());
-        dto.setStreetFull(ghnService.getStreetFull(address.getProvinceId(), address.getDistrictId(),
-                address.getWardCode(), address.getStreet()));
-        dto.setDefault(address.isDefault());
-        return dto;
+        AddressResponse response = new AddressResponse();
+        response.setId(address.getId());
+        response.setFullName(address.getFullName());
+        response.setPhone(address.getPhone());
+        response.setProvinceId(address.getProvinceId());
+        response.setDistrictId(address.getDistrictId());
+        response.setWardCode(address.getWardCode());
+        response.setStreet(address.getStreet());   
+        response.setDefault(address.isDefault());
+        return response;
     }
+
+    public Address toEntityAddress(Address address, AddressRequest request) {
+        address.setFullName(request.getFullName());
+        address.setPhone(request.getPhone());
+        address.setStreet(request.getStreet());
+        address.setProvinceId(request.getProvinceId());
+        address.setDistrictId(request.getDistrictId());
+        address.setWardCode(request.getWardCode());
+        address.setDefault(request.isDefault());
+        return address;
+    }
+
 }

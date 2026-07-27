@@ -2,7 +2,7 @@ package com.dev.backend.service;
 
 import java.util.List;
 
-import com.dev.backend.bean.AddressBean;
+import com.dev.backend.dto.address.AddressRequest;
 import com.dev.backend.dto.address.AddressResponse;
 import com.dev.backend.entity.Address;
 
@@ -11,11 +11,11 @@ public interface AddressService {
 
     AddressResponse getAddressDTOByIdAndUserId(Integer addressId, Integer userId);
 
-    AddressResponse savAddress(AddressBean addressBean, Integer userId);
+    AddressResponse savAddress(AddressRequest request, Integer userId);
 
-    AddressResponse updateAddress(Integer addressId, AddressBean addressBean, Integer userId);
+    AddressResponse updateAddress(Integer addressId, AddressRequest request, Integer userId);
 
-    int count(Integer userId);
+    int countAddressByUser(Integer userId);
 
     Address getAddressByIdAndUserId(Integer addressId, Integer userId);
 
@@ -23,4 +23,5 @@ public interface AddressService {
 
     void defaultAddress(Integer addressId, Integer userId);
 
+    AddressResponse toAddressResponse(Address address);
 }

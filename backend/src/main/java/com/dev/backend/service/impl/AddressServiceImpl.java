@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.dev.backend.bean.AddressBean;
+import com.dev.backend.dto.address.AddressRequest;
 import com.dev.backend.dto.address.AddressResponse;
 import com.dev.backend.entity.Address;
 import com.dev.backend.exception.AppException;
@@ -12,6 +12,7 @@ import com.dev.backend.exception.NotFoundException;
 import com.dev.backend.mapper.AddressMapper;
 import com.dev.backend.repository.AddressRepository;
 import com.dev.backend.service.AddressService;
+import com.dev.backend.service.GHNService;
 import com.dev.backend.service.UserService;
 
 import jakarta.transaction.Transactional;
@@ -23,10 +24,11 @@ public class AddressServiceImpl implements AddressService {
 
     private final AddressRepository addressRepository;
     private final AddressMapper addressMapper;
+    private final GHNService ghnService;
     private final UserService userService;
 
     @Override
-    public int count(Integer userId) {
+    public int countAddressByUser(Integer userId) {
         return addressRepository.countByUserId(userId);
     }
 
@@ -66,22 +68,16 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     @Transactional
-    public AddressResponse savAddress(AddressBean addressBean, Integer userId) {
-        if (count(userId) >= 6) {
+    public AddressResponse savAddress(AddressRequest request, Integer userId) {
+        if (countAddressByUser(userId) >= 6) {
             throw new AppException(422, "Bạn chỉ được lưu tối đa 6 địa chỉ");
         }
 
-        if (addressBean.isDefault()) {
+        if (request.isDefault()) {
             addressRepository.clearDefaultOnly(userId);
         }
         Address address = new Address();
-        address.setFullName(addressBean.getFullName());
-        address.setPhone(addressBean.getPhone());
-        address.setProvinceId(addressBean.getProvinceId());
-        address.setDistrictId(addressBean.getDistrictId());
-        address.setWardCode(addressBean.getWardCode());
-        address.setStreet(addressBean.getStreet());
-        address.setDefault(addressBean.isDefault());
+        addressMapper.toEntityAddress(address, request);
         address.setUser(userService.getUserById(userId));
         addressRepository.save(address);
         return addressMapper.toDTO(address);
@@ -89,18 +85,12 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     @Transactional
-    public AddressResponse updateAddress(Integer addressId, AddressBean addressBean, Integer userId) {
+    public AddressResponse updateAddress(Integer addressId, AddressRequest request, Integer userId) {
         Address address = getAddressByIdAndUserId(addressId, userId);
-        if (addressBean.isDefault()) {
+        if (request.isDefault()) {
             addressRepository.clearDefaultOnly(userId);
         }
-        address.setFullName(addressBean.getFullName());
-        address.setPhone(addressBean.getPhone());
-        address.setProvinceId(addressBean.getProvinceId());
-        address.setDistrictId(addressBean.getDistrictId());
-        address.setWardCode(addressBean.getWardCode());
-        address.setStreet(addressBean.getStreet());
-        address.setDefault(addressBean.isDefault());
+        addressMapper.toEntityAddress(address, request);
         addressRepository.save(address);
         return addressMapper.toDTO(address);
     }
@@ -112,6 +102,14 @@ public class AddressServiceImpl implements AddressService {
         addressRepository.clearDefaultOnly(userId);
         address.setDefault(true);
         addressRepository.save(address);
+    }
+
+    @Override
+    public AddressResponse toAddressResponse(Address address) {
+        AddressResponse response = addressMapper.toDTO(address);
+        response.setStreetFull(ghnService.getStreetFull(address.getProvinceId(), address.getDistrictId(),
+                address.getWardCode(), address.getStreet()));
+        return response;
     }
 
 }
