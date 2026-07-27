@@ -180,18 +180,14 @@ export default function PaymentPage() {
   };
 
   const handleConfirmOrder = () => {
-    console.log("=== XÁC NHẬN MUA HÀNG ===", {
-      products: items,
-      shippingFee,
-      appliedCoupon,
-      selectedAddress,
+    const checkoutData = {
+      addressId: selectedAddress?.id ?? null,
+      cartItemIds: items.map((item) => item.cartItemId),
+      voucherId: appliedCoupon?.id ?? null,
       paymentMethod,
       note,
-      subtotal,
-      productDiscount,
-      voucherDiscount,
-      total,
-    });
+    };
+    console.log("=== XÁC NHẬN MUA HÀNG ===", checkoutData);
   };
 
   // Tự động gỡ voucher khi tạm tính không còn đủ điều kiện

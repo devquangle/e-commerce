@@ -2,8 +2,6 @@ package com.dev.backend.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.commons.math3.analysis.function.Add;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -11,12 +9,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.dev.backend.constant.OrderStatus;
-import com.dev.backend.constant.PaymentMethod;
 import com.dev.backend.constant.PaymentStatus;
 import com.dev.backend.dto.ghn.CalculateFeeRequest;
 import com.dev.backend.dto.order.OrderFilterRequest;
 import com.dev.backend.dto.order.OrderRequest;
 import com.dev.backend.dto.order.OrderResponse;
+import com.dev.backend.dto.order.OrderSummary;
 import com.dev.backend.entity.Address;
 import com.dev.backend.entity.CartItem;
 import com.dev.backend.entity.Order;
@@ -27,7 +25,6 @@ import com.dev.backend.entity.Voucher;
 import com.dev.backend.exception.BadRequestException;
 import com.dev.backend.exception.NotFoundException;
 import com.dev.backend.mapper.OrderMapper;
-import com.dev.backend.mapper.ProductMapper;
 import com.dev.backend.repository.OrderRepository;
 import com.dev.backend.response.PageResponse;
 import com.dev.backend.service.AddressService;
@@ -67,76 +64,40 @@ public class OrderServiceImpl implements OrderService {
         @Override
         @Transactional
         public OrderResponse createOrder(OrderRequest request, Integer userId) {
+
                 User user = userService.getUserById(userId);
+
                 Address address = addressService.getAddressByIdAndUserId(
-                                request.getAddressId(), userId);
-                List<CartItem> cartItems = cartItemService.findByIdInAndUserId(
-                                request.getCartItemIds(), userId);
-                if (cartItems.isEmpty()) {
-                        throw new BadRequestException("Giỏ hàng trống");
-                }
-                if (cartItems.size() != request.getCartItemIds().size()) {
-                        throw new BadRequestException("Danh sách sản phẩm không hợp lệ");
-                }
-                Order order = new Order();
-                order.setUser(user);
-                order.setFullName(address.getFullName());
-                order.setPhone(address.getPhone());
-                order.setProvinceId(address.getProvinceId());
-                order.setDistrictId(address.getDistrictId());
-                order.setWardCode(address.getWardCode());
-                order.setStreet(address.getStreet());
-                order.setNoted(request.getNote());
-                order.setPaymentMethod(request.getPaymentMethod());
-                if (request.getPaymentMethod() == PaymentMethod.COD) {
-                        order.setPaymentStatus(PaymentStatus.UNPAID);
-                } else {
-                        order.setPaymentStatus(PaymentStatus.UNPAID);
-                }
-                order.setStatus(OrderStatus.PENDING);
-                int subtotal = 0;
-                int totalWeight = 0;
-                List<OrderItem> orderItems = new ArrayList<>();
-                for (CartItem cartItem : cartItems) {
-                        Product product = cartItem.getProduct();
-                        OrderItem orderItem = new OrderItem();
-                        orderItem.setOrder(order);
-                        orderItem.setProduct(product);
-                        orderItem.setQuantity(cartItem.getQuantity());
-                        totalWeight += orderItem.getQuantity() * product.getWeight();
-                        int originalPrice = product.getPrice();
-                        int discountPercent = promotionProductService.getDiscountValueByProductId(product.getId());
-                        int price = originalPrice - (originalPrice * discountPercent / 100);
-                        orderItem.setOriginalPrice(originalPrice);
-                        orderItem.setPrice(price);
-                        orderItem.setProductInfo(productService.productCartItemResponse(product.getId()));
-                        subtotal += price * cartItem.getQuantity();
-                        orderItems.add(orderItem);
-                }
-                order.setOrderItems(orderItems);
-                // Voucher
-                int voucherAmount = 0;
-                if (request.getVoucherId() != null) {
-                        Voucher voucher = voucherService.validateVoucher(
-                                        request.getVoucherId(),
-                                        userId,
-                                        subtotal);
-                        voucherAmount = voucherService.calculateDiscount(voucher, subtotal);
-                        order.setVoucher(voucher);
-                        order.setVoucherAmount(voucherAmount);
-                }
-                CalculateFeeRequest calculateFeeRequest = new CalculateFeeRequest();
-                calculateFeeRequest.setToDistrictId(address.getDistrictId());
-                calculateFeeRequest.setToWardCode(address.getWardCode());
-                calculateFeeRequest.setWeight(totalWeight);
-                Integer shippingFee = ghnService.calculateFee(calculateFeeRequest);
-                order.setShippingFee(shippingFee);
+                                request.getAddressId(),
+                                userId);
+
+                List<CartItem> cartItems = getValidCartItems(
+                                request.getCartItemIds(),
+                                userId);
+
+                Order order = buildOrder(request, user, address);
+
+                OrderSummary summary = buildOrderItems(order, cartItems);
+
+                applyVoucher(
+                                order,
+                                request.getVoucherId(),
+                                userId,
+                                summary.getSubtotal());
+
+                applyShippingFee(
+                                order,
+                                address,
+                                summary.getTotalWeight());
+
                 Order savedOrder = orderRepository.save(order);
+
                 cartItemService.deleteAll(cartItems);
 
                 return toOrderResponse(savedOrder);
         }
 
+       
         @Override
         public Long calculateTotal(Order order) {
                 // Tổng thanh toán = Tổng tiền hàng - Giảm giá voucher + Phí vận chuyển
@@ -215,4 +176,140 @@ public class OrderServiceImpl implements OrderService {
                                 pageResult.getTotalElements(),
                                 pageResult.getTotalPages());
         }
+         private List<CartItem> getValidCartItems(
+                        List<Integer> cartItemIds,
+                        Integer userId) {
+
+                List<CartItem> cartItems = cartItemService.findByIdInAndUserId(cartItemIds, userId);
+
+                if (cartItems.isEmpty()) {
+                        throw new BadRequestException("Giỏ hàng trống");
+                }
+
+                if (cartItems.size() != cartItemIds.size()) {
+                        throw new BadRequestException("Danh sách sản phẩm không hợp lệ");
+                }
+
+                return cartItems;
+        }
+
+        private Order buildOrder(
+                        OrderRequest request,
+                        User user,
+                        Address address) {
+
+                Order order = new Order();
+
+                order.setUser(user);
+
+                order.setFullName(address.getFullName());
+                order.setPhone(address.getPhone());
+
+                order.setProvinceId(address.getProvinceId());
+                order.setDistrictId(address.getDistrictId());
+                order.setWardCode(address.getWardCode());
+                order.setStreet(address.getStreet());
+
+                order.setNoted(request.getNote());
+
+                order.setPaymentMethod(request.getPaymentMethod());
+
+                order.setPaymentStatus(PaymentStatus.UNPAID);
+
+                order.setStatus(OrderStatus.PENDING);
+
+                return order;
+        }
+
+        private OrderSummary buildOrderItems(
+                        Order order,
+                        List<CartItem> cartItems) {
+
+                List<OrderItem> orderItems = new ArrayList<>();
+
+                int subtotal = 0;
+                int totalWeight = 0;
+
+                for (CartItem cartItem : cartItems) {
+
+                        Product product = cartItem.getProduct();
+
+                        OrderItem orderItem = new OrderItem();
+
+                        orderItem.setOrder(order);
+
+                        orderItem.setProduct(product);
+
+                        orderItem.setQuantity(cartItem.getQuantity());
+
+                        int originalPrice = product.getPrice();
+
+                        int discountPercent = promotionProductService.getDiscountValueByProductId(product.getId());
+
+                        int price = originalPrice - originalPrice * discountPercent / 100;
+
+                        orderItem.setOriginalPrice(originalPrice);
+
+                        orderItem.setPrice(price);
+
+                        orderItem.setProductInfo(
+                                        productService.productCartItemResponse(product.getId()));
+
+                        subtotal += price * cartItem.getQuantity();
+
+                        totalWeight += product.getWeight() * cartItem.getQuantity();
+
+                        orderItems.add(orderItem);
+                }
+
+                order.setOrderItems(orderItems);
+
+                return new OrderSummary(
+                                orderItems,
+                                subtotal,
+                                totalWeight);
+        }
+
+        private void applyVoucher(
+                        Order order,
+                        Integer voucherId,
+                        Integer userId,
+                        Integer subtotal) {
+
+                if (voucherId == null) {
+                        return;
+                }
+
+                Voucher voucher = voucherService.validateVoucher(
+                                voucherId,
+                                userId,
+                                subtotal);
+
+                Integer voucherAmount = voucherService.calculateDiscount(
+                                voucher,
+                                subtotal);
+
+                order.setVoucher(voucher);
+
+                order.setVoucherAmount(voucherAmount);
+        }
+
+        private void applyShippingFee(
+                        Order order,
+                        Address address,
+                        Integer totalWeight) {
+
+                CalculateFeeRequest request = new CalculateFeeRequest();
+
+                request.setToDistrictId(address.getDistrictId());
+
+                request.setToWardCode(address.getWardCode());
+
+                request.setWeight(totalWeight);
+
+                Integer shippingFee = ghnService.calculateFee(request);
+
+                order.setShippingFee(shippingFee);
+        }
+
 }
