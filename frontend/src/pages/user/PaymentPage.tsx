@@ -9,8 +9,6 @@ import { useMemo, useState, useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import {
   getSelectedAddressId,
-  getCachedSelectedAddress,
-  setCachedSelectedAddress,
   type CouponForm,
 } from "@/types/checkout.type";
 import CartCheckoutSidebar from "@/components/user/CartCheckoutSidebar";
@@ -41,6 +39,7 @@ export default function PaymentPage() {
   const [selectedAddressId] = useState(() => getSelectedAddressId());
   const [appliedCoupon, setAppliedCoupon] = useState<CouponOption | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodType>("cod");
+  const [note, setNote] = useState("");
 
   const updateQuantityMutation = useUpdateQuantity();
 
@@ -113,24 +112,18 @@ export default function PaymentPage() {
   }, [appliedCoupon, subtotal, productDiscount]);
 
   const { data: addresses = [], isPending: isAddressesPending } = useAddresses();
-  const cachedAddress = useMemo(() => getCachedSelectedAddress(), []);
 
   const selectedAddress = useMemo(() => {
-    if (addresses.length > 0) {
-      const found =
-        addresses.find((a) => a.id === selectedAddressId) ??
-        addresses.find((a) => a.default) ??
-        addresses[0] ??
-        null;
-      if (found) {
-        setCachedSelectedAddress(found);
-      }
-      return found;
-    }
-    return cachedAddress;
-  }, [addresses, selectedAddressId, cachedAddress]);
+    if (addresses.length === 0) return null;
+    return (
+      addresses.find((a) => a.id === selectedAddressId) ??
+      addresses.find((a) => a.default) ??
+      addresses[0] ??
+      null
+    );
+  }, [addresses, selectedAddressId]);
 
-  const isAddressLoading = isAddressesPending && !selectedAddress;
+  const isAddressLoading = isAddressesPending;
 
   const totalWeight = useMemo(
     () =>
@@ -176,6 +169,21 @@ export default function PaymentPage() {
   const handleRemoveCoupon = () => {
     setAppliedCoupon(null);
     setValue("couponCode", "");
+  };
+
+  const handleConfirmOrder = () => {
+    console.log("=== XÁC NHẬN MUA HÀNG ===", {
+      products: items,
+      shippingFee,
+      appliedCoupon,
+      selectedAddress,
+      paymentMethod,
+      note,
+      subtotal,
+      productDiscount,
+      voucherDiscount,
+      total,
+    });
   };
 
   // Tự động gỡ voucher khi tạm tính không còn đủ điều kiện
@@ -247,6 +255,8 @@ export default function PaymentPage() {
                   Ghi chú đơn hàng
                 </h3>
                 <textarea
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
                   placeholder="Nhập lời nhắn cho người bán (tùy chọn)..."
                   className="w-full rounded-xl border border-slate-200 p-3 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition resize-none min-h-20"
                 />
@@ -279,6 +289,7 @@ export default function PaymentPage() {
             couponInput={couponInput}
             backLink={{ to: "/cart", label: "← Quay lại giỏ hàng" }}
             isCheckoutPage
+            onCheckout={handleConfirmOrder}
           />
         </div>
       </Container>
@@ -289,7 +300,11 @@ export default function PaymentPage() {
           total={total}
           discount={productDiscount + voucherDiscount}
           action={
-            <button type="button" className={mobilePrimaryButtonClass}>
+            <button
+              type="button"
+              onClick={handleConfirmOrder}
+              className={mobilePrimaryButtonClass}
+            >
               Thanh toán
             </button>
           }

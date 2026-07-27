@@ -3,13 +3,14 @@ package com.dev.backend.entity;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.dev.backend.constant.OrderStatus;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import com.dev.backend.dto.productsnapshot.ProductSnapshot;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -34,14 +35,13 @@ public class OrderItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    private Integer  quantity;
-    private Integer  price;
-    private Integer  discountValue;
+    private Integer quantity;
+    private Integer price;  // Giá sau giảm 
+    private Integer originalPrice; // Giá gốc
 
-    private String productInfo;
-
-    
-
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "json")
+    private ProductSnapshot productInfo;
 
     @ManyToOne()
     @JoinColumn(name = "product_id")

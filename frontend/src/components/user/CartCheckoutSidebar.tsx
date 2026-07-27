@@ -38,6 +38,7 @@ type CartCheckoutSidebarProps = {
   primaryAction?: ReactNode;
   backLink?: { to: string; label: string };
   isCheckoutPage?: boolean;
+  onCheckout?: () => void;
 };
 
 export default function CartCheckoutSidebar({
@@ -59,6 +60,7 @@ export default function CartCheckoutSidebar({
   primaryAction,
   backLink,
   isCheckoutPage,
+  onCheckout,
 }: CartCheckoutSidebarProps) {
   const [voucherModalOpen, setVoucherModalOpen] = useState(false);
   return (
@@ -91,6 +93,7 @@ export default function CartCheckoutSidebar({
           primaryAction={primaryAction}
           backLink={backLink}
           isCheckout={isCheckoutPage}
+          onClick={onCheckout}
         />
       </div>
 

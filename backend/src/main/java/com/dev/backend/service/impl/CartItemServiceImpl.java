@@ -84,13 +84,23 @@ public class CartItemServiceImpl implements CartItemService {
 
     @Override
     public void deleteCartItem(Integer cartItemId, Integer userId) {
-       CartItem cartItem= findByIdAndUserId(cartItemId, userId);
-       cartItemRepository.delete(cartItem);
+        CartItem cartItem = findByIdAndUserId(cartItemId, userId);
+        cartItemRepository.delete(cartItem);
     }
 
     @Override
     public void deleteCartItems(DeleteCartItemsRequest cartItemsRequest, Integer userId) {
-        cartItemRepository.deleteCartItemsByIds(userId, cartItemsRequest.getCartItemIds());       
+        cartItemRepository.deleteCartItemsByIds(userId, cartItemsRequest.getCartItemIds());
     }
 
+    @Override
+    public List<CartItem> findByIdInAndUserId(List<Integer> ids, Integer userId) {
+        return cartItemRepository.findByIdInAndUserId(ids, userId);
+    }
+
+    @Override
+    public void deleteAll(List<CartItem> cartItems) {
+        cartItemRepository.deleteAll(cartItems);
+
+    }
 }

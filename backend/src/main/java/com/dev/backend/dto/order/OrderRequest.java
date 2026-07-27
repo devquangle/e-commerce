@@ -1,16 +1,18 @@
 package com.dev.backend.dto.order;
 
+import java.util.List;
+
 import com.dev.backend.constant.PaymentMethod;
 
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class OrderRequest {
-    private String fullName;
-    private String phone;
-    private Integer provinceId;
-    private Integer districtId;
-    private String wardCode;
-    private String street;
-    
+    private Integer addressId;
+    private List<Integer> cartItemIds;
+    private Integer voucherId;
     private PaymentMethod paymentMethod;
-    private Integer shippingFee;
+    private String note;
 }

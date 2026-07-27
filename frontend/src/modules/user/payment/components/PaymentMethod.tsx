@@ -1,4 +1,3 @@
-import { CreditCard } from "lucide-react";
 import { PaymentMethodOptions } from "./PaymentMethodOptions";
 import type { PaymentMethodType } from "../types/payment-method.type";
 

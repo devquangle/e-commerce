@@ -25,4 +25,8 @@ public interface CartItemService {
     void deleteCartItem(Integer cartItemId, Integer userId);
 
     void deleteCartItems(DeleteCartItemsRequest cartItemsRequest, Integer userId);
+
+    List<CartItem> findByIdInAndUserId(List<Integer> ids, Integer userId);
+
+    void deleteAll (List<CartItem> cartItems);
 }

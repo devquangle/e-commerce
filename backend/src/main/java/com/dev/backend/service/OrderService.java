@@ -1,6 +1,7 @@
 package com.dev.backend.service;
 
 import com.dev.backend.dto.order.OrderFilterRequest;
+import com.dev.backend.dto.order.OrderRequest;
 import com.dev.backend.dto.order.OrderResponse;
 
 import com.dev.backend.entity.Order;
@@ -17,4 +18,7 @@ public interface OrderService {
     PageResponse<OrderResponse> searchOrderUser(OrderFilterRequest request,Integer userId);
 
     PageResponse<OrderResponse> searchOrder(OrderFilterRequest request);
+
+
+    OrderResponse createOrder(OrderRequest request, Integer userId);
 }

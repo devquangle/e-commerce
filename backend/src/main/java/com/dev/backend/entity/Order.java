@@ -1,6 +1,5 @@
 package com.dev.backend.entity;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -33,14 +32,6 @@ import lombok.NoArgsConstructor;
 @Table(name = "orders")
 public class Order extends BaseAuditableEntity<Integer> {
 
-
-
-    @Enumerated(EnumType.STRING)
-    private PaymentMethod paymentMethod;
-
-    @Enumerated(EnumType.STRING)
-    private PaymentStatus paymentStatus;
-
     @Column(nullable = false)
     private String fullName;
 
@@ -56,14 +47,20 @@ public class Order extends BaseAuditableEntity<Integer> {
     @Column(nullable = false)
     private String wardCode;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private OrderStatus status;
-
     @Column(nullable = false)
     private String street;
 
     private String noted;
+    
+    @Enumerated(EnumType.STRING)
+    private PaymentMethod paymentMethod;
+
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus paymentStatus;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private OrderStatus status;
 
     private String cancel;
 

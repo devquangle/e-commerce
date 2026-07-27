@@ -16,5 +16,5 @@ public interface PromotionProductService {
 
     List<PromotionProductMappingResponse> promotionMappingResponses(List<Integer> productIds);
 
-    Integer findDiscountValueByProductId(Integer productId);
+    Integer getDiscountValueByProductId(Integer productId);
 }

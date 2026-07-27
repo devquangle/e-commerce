@@ -108,8 +108,8 @@ public class PromotionProductServiceImpl implements PromotionProductService {
 
 
     @Override
-    public Integer findDiscountValueByProductId(Integer productId) {
+    public Integer getDiscountValueByProductId(Integer productId) {
         Integer discountValue =promotionProductRepository.findDiscountValueByProductId(productId);
-        return Optional.ofNullable(discountValue).orElse(0);
+        return Optional.ofNullable(discountValue).orElse(null);
     }
 }
