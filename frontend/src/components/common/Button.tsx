@@ -10,6 +10,7 @@ interface ButtonProps
     | "success"
     | "warning"
     | "outline";
+  size?: "sm" | "md" | "lg";
   icon?: LucideIcon;
 }
 
@@ -17,13 +18,20 @@ const Button: React.FC<ButtonProps> = ({
   children,
   className,
   color = "primary",
+  size = "md",
   icon: Icon,
   type = "button",
   disabled,
   ...props
 }) => {
   const baseStyles =
-    "inline-flex items-center  justify-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold transition-all active:scale-95 ";
+    "inline-flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer";
+
+  const sizeStyles = {
+    sm: "px-3 py-1 text-xs font-medium rounded-lg",
+    md: "px-3.5 py-1.5 text-sm font-medium rounded-lg",
+    lg: "px-5 py-2 text-base font-semibold rounded-xl",
+  };
 
   const colorStyles = {
     primary: "bg-indigo-600 text-white hover:bg-indigo-700",
@@ -44,13 +52,14 @@ const Button: React.FC<ButtonProps> = ({
       disabled={disabled}
       className={`
         ${baseStyles}
+        ${sizeStyles[size]}
         ${colorStyles[color]}
         ${disabledStyles}
         ${className ?? ""}
       `}
       {...props}
     >
-      {Icon && <Icon size={15} />}
+      {Icon && <Icon size={size === "sm" ? 13 : size === "lg" ? 18 : 15} />}
       {children}
     </button>
   );

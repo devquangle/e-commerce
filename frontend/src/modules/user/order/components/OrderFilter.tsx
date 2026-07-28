@@ -1,5 +1,6 @@
 import { OrderStatusMapping, type OrderStatus } from "../types/order.type";
 import { RotateCcw } from "lucide-react";
+import Button from "@/components/common/Button";
 
 interface OrderFilterProps {
   keyword: string;
@@ -60,14 +61,14 @@ export function OrderFilter({
               placeholder="Ngày kết thúc"
               className="h-11 rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
             />
-            <button
-              type="button"
+            <Button
+              color="secondary"
+              icon={RotateCcw}
               onClick={onReset}
-              className="flex items-center gap-2 h-11 px-4 text-sm font-medium rounded-xl text-slate-600 bg-slate-100 hover:bg-slate-200 transition cursor-pointer whitespace-nowrap"
+              className="h-11 whitespace-nowrap"
             >
-              <RotateCcw size={16} />
               Làm mới
-            </button>
+            </Button>
           </div>
         </div>
 

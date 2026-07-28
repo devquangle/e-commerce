@@ -12,8 +12,11 @@ import {
   ChevronUp,
   User,
   Bookmark,
+  Star,
 } from "lucide-react";
-import type { OrderItemResponse } from "../types/order.type";
+import Button from "@/components/common/Button";
+import { ReviewModal } from "./ReviewModal";
+import type { OrderItemResponse, OrderStatus } from "../types/order.type";
 import { formatMoney } from "@/utils/number.utils";
 import viLocale from "@cospired/i18n-iso-languages/langs/vi.json";
 import { getName, registerLocale } from "@cospired/i18n-iso-languages";
@@ -21,6 +24,7 @@ registerLocale(viLocale);
 
 type OrderItemCardProps = {
   item: OrderItemResponse;
+  orderStatus?: OrderStatus;
 };
 
 const getLanguageName = (code?: string) => {
@@ -52,9 +56,10 @@ const formatArrayText = (items?: string[] | null): string[] => {
   return formatted;
 };
 
-export function OrderItemCard({ item }: OrderItemCardProps) {
+export function OrderItemCard({ item, orderStatus }: OrderItemCardProps) {
   const product = item.productInfo;
   const [showDetails, setShowDetails] = useState(false);
+  const [isReviewOpen, setIsReviewOpen] = useState(false);
 
   const unitPrice = item.price;
   const originalPrice = item.originalPrice;
@@ -69,7 +74,7 @@ export function OrderItemCard({ item }: OrderItemCardProps) {
   return (
     <div className="group card-custom-v1 py-4 transition-all duration-200 border-slate-200/60 bg-white shadow-[0_4px_12px_rgba(0,0,0,0.03)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] overflow-hidden">
       {/* 💻 1. Giao diện Desktop (lg trở lên) */}
-      <div className="hidden lg:grid lg:grid-cols-[1fr_120px_120px_120px] lg:items-center px-4">
+      <div className="hidden lg:grid lg:grid-cols-[1fr_110px_80px_auto] lg:items-center px-4 gap-2">
         {/* Cột 1: Hình ảnh & Thông tin chi tiết sản phẩm */}
         <div className="flex items-center gap-4 min-w-0 pl-2">
           <div className="relative shrink-0 overflow-hidden rounded-xl border border-slate-200/80 bg-slate-50 shadow-sm">
@@ -201,11 +206,21 @@ export function OrderItemCard({ item }: OrderItemCardProps) {
           </span>
         </div>
 
-        {/* Cột 4: Thành tiền */}
-        <div className="text-right pr-2">
-          <p className="text-sm font-bold text-red-600 tabular-nums">
+        {/* Cột 4: Thành tiền & Đánh giá (Nằm ngang) */}
+        <div className="flex items-center justify-end gap-3 pr-2">
+          <p className="text-sm font-bold text-red-600 tabular-nums whitespace-nowrap">
             {formatMoney(unitPrice * item.quantity)}
           </p>
+          {(orderStatus === "COMPLETED" || orderStatus === "DELIVERED") && (
+            <Button
+              size="sm"
+              color="warning"
+              icon={Star}
+              onClick={() => setIsReviewOpen(true)}
+            >
+              Đánh giá
+            </Button>
+          )}
         </div>
       </div>
 
@@ -328,18 +343,30 @@ export function OrderItemCard({ item }: OrderItemCardProps) {
           </span>
         </div>
 
-        <div className="text-right min-w-[120px]">
-          {hasDiscount && (
-            <p className="text-xs text-slate-400 line-through">
-              {formatMoney(originalPrice)}
+        <div className="flex items-center justify-end gap-3 min-w-[140px]">
+          <div className="text-right">
+            {hasDiscount && (
+              <p className="text-xs text-slate-400 line-through">
+                {formatMoney(originalPrice)}
+              </p>
+            )}
+            <p className="text-xs font-medium text-slate-500">
+              {formatMoney(unitPrice)}
             </p>
+            <p className="text-sm font-bold text-red-600 mt-0.5">
+              {formatMoney(unitPrice * item.quantity)}
+            </p>
+          </div>
+          {(orderStatus === "COMPLETED" || orderStatus === "DELIVERED") && (
+            <Button
+              size="sm"
+              color="warning"
+              icon={Star}
+              onClick={() => setIsReviewOpen(true)}
+            >
+              Đánh giá
+            </Button>
           )}
-          <p className="text-xs font-medium text-slate-500">
-            {formatMoney(unitPrice)}
-          </p>
-          <p className="text-sm font-bold text-red-600 mt-1">
-            {formatMoney(unitPrice * item.quantity)}
-          </p>
         </div>
       </div>
 
@@ -470,11 +497,29 @@ export function OrderItemCard({ item }: OrderItemCardProps) {
           <span className="text-xs text-slate-500">
             Số lượng: <strong className="text-slate-900">x{item.quantity}</strong>
           </span>
-          <p className="text-sm font-bold text-red-600">
-            {formatMoney(unitPrice * item.quantity)}
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-bold text-red-600">
+              {formatMoney(unitPrice * item.quantity)}
+            </p>
+            {(orderStatus === "COMPLETED" || orderStatus === "DELIVERED") && (
+              <Button
+                size="sm"
+                color="warning"
+                icon={Star}
+                onClick={() => setIsReviewOpen(true)}
+              >
+                Đánh giá
+              </Button>
+            )}
+          </div>
         </div>
       </div>
+
+      <ReviewModal
+        isOpen={isReviewOpen}
+        onClose={() => setIsReviewOpen(false)}
+        item={item}
+      />
     </div>
   );
 }

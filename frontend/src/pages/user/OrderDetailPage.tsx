@@ -1,6 +1,8 @@
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useOrderDetail } from "@/modules/user/order/hooks/useOrder";
 import { OrderItemCard } from "@/modules/user/order/components/OrderItemCard";
+import { OrderDetailSkeleton } from "@/modules/user/order/components/OrderDetailSkeleton";
+import Button from "@/components/common/Button";
 import {
   OrderStatusColor,
   OrderStatusMapping,
@@ -14,16 +16,15 @@ export default function OrderDetailPage() {
   const orderCode = searchParams.get("orderCode");
   const navigate = useNavigate();
 
-  const { data: orderDetail, isLoading, isError, error } = useOrderDetail(
-    orderCode ?? undefined
-  );
+  const {
+    data: orderDetail,
+    isLoading,
+    isError,
+    error,
+  } = useOrderDetail(orderCode ?? undefined);
 
   if (isLoading) {
-    return (
-      <div className="flex-1 p-6 text-center text-gray-500 font-medium min-h-screen">
-        Đang tải chi tiết đơn hàng...
-      </div>
-    );
+    return <OrderDetailSkeleton />;
   }
 
   if (isError || !orderDetail) {
@@ -38,18 +39,19 @@ export default function OrderDetailPage() {
 
   const statusColor =
     OrderStatusColor[orderInfo.status] || "bg-gray-100 text-gray-700";
-  const statusLabel =
-    OrderStatusMapping[orderInfo.status] || orderInfo.status;
+  const statusLabel = OrderStatusMapping[orderInfo.status] || orderInfo.status;
   const paymentMethodLabel =
     PaymentMethodMapping[orderInfo.paymentMethod] || orderInfo.paymentMethod;
   const paymentStatusLabel =
     PaymentStatusMapping[orderInfo.paymentStatus] || orderInfo.paymentStatus;
 
   return (
-    <div className="flex-1 p-3 sm:p-6 bg-gray-50 min-h-screen">
-      <h2 className="text-xl sm:text-2xl font-semibold mb-4">
-        Chi tiết đơn hàng #{orderInfo.orderCode}
-      </h2>
+    <div className="flex-1 p-2 flex flex-col min-h-full">
+      <div className="flex justify-between items-center gap-3 mb-4">
+        <h2 className="text-xl font-semibold text-gray-800">
+          Chi tiết đơn hàng #{orderInfo.orderCode}
+        </h2>
+      </div>
 
       {/* ===== INFO ===== */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -87,7 +89,11 @@ export default function OrderDetailPage() {
 
         <div className="space-y-3">
           {items.map((item) => (
-            <OrderItemCard key={item.orderItemId} item={item} />
+            <OrderItemCard
+              key={item.orderItemId}
+              item={item}
+              orderStatus={orderInfo.status}
+            />
           ))}
         </div>
       </div>
@@ -95,16 +101,17 @@ export default function OrderDetailPage() {
       {/* ===== ACTION ===== */}
       <div className="flex flex-col sm:flex-row gap-3 justify-end">
         {orderInfo.status === "PENDING" && (
-          <button className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 cursor-pointer">
+          <Button color="danger" size="md">
             Huỷ đơn
-          </button>
+          </Button>
         )}
-        <button
-          onClick={() => navigate(-1)}
-          className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer"
+        <Button
+          color="secondary"
+          size="md"
+          onClick={() => navigate("/account/orders")}
         >
           Quay lại
-        </button>
+        </Button>
       </div>
     </div>
   );

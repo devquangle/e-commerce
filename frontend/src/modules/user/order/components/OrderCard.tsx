@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { formatMoney } from "@/utils/number.utils";
+import Button from "@/components/common/Button";
 import { 
   OrderStatusMapping, 
   OrderStatusColor, 
@@ -24,7 +25,7 @@ const formatDate = (dateStr: string) => {
 
 export function OrderCard({ order }: OrderCardProps) {
   return (
-    <div className="rounded-xl shadow-sm hover:shadow-md bg-white p-4 space-y-4">
+    <div className="card-custom space-y-4">
       {/* Header */}
       <div className="flex justify-between items-start m-0">
         <div className="text-sm">
@@ -82,22 +83,21 @@ export function OrderCard({ order }: OrderCardProps) {
           Tổng tiền:  {formatMoney(order.total)}
         </p>
 
-        <div className="flex gap-2 flex-wrap">
-          <Link
-            to={`/account/order?orderCode=${order.orderCode}`}
-            className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer inline-block"
-          >
-            Chi tiết
+        <div className="flex gap-2 flex-wrap items-center">
+          <Link to={`/account/order?orderCode=${order.orderCode}`}>
+            <Button size="md" color="primary">
+              Chi tiết
+            </Button>
           </Link>
 
-          <button className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 cursor-pointer">
+          <Button size="md" color="secondary">
             Mua lại
-          </button>
+          </Button>
 
           {order.status === "PENDING" && (
-            <button className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 cursor-pointer">
+            <Button size="md" color="danger">
               Huỷ đơn
-            </button>
+            </Button>
           )}
         </div>
       </div>

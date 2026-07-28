@@ -18,7 +18,7 @@ export default function AccountLayout() {
 
                 {/* Content */}
                 <main className="account-content flex-1">
-                    <div className="card-custom-v1 p-4 min-h-75">
+                    <div className="card-custom-v1 p-4">
                         <Outlet />
                     </div>
                 </main>
