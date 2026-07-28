@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Upload, Trash2, Edit, Eye, X } from "lucide-react"; // Thêm Eye và X
 
 type SingleImageUploadProps = {

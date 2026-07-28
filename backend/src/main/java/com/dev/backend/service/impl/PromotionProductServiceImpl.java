@@ -18,10 +18,13 @@ import com.dev.backend.repository.PromotionProductRepository;
 import com.dev.backend.service.ProductService;
 import com.dev.backend.service.PromotionProductService;
 
+import ch.qos.logback.classic.Logger;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PromotionProductServiceImpl implements PromotionProductService {
 
     private final PromotionProductRepository promotionProductRepository;
@@ -49,6 +52,7 @@ public class PromotionProductServiceImpl implements PromotionProductService {
             pp.setDiscountValue(item.getLocalDiscount());
             pp.setMaxQuantity(item.getLocalQty());
             pp.setSoldQuantity(0);
+            pp.setReservedQuantity(0);
             entities.add(pp);
         }
 
@@ -110,6 +114,8 @@ public class PromotionProductServiceImpl implements PromotionProductService {
     @Override
     public Integer getDiscountValueByProductId(Integer productId) {
         Integer discountValue = promotionProductRepository.findDiscountValueByProductId(productId);
+        log.info("ProductId = {}", productId);
+        log.info("discountValue: {}", discountValue);
         return Optional.ofNullable(discountValue).orElse(0);
     }
 

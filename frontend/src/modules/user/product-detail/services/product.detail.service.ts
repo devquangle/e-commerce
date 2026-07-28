@@ -11,6 +11,8 @@ const ProductDetailService = {
     if (!res.data.success || !res.data.data) {
       throw new Error(res.data.message || "Failed to fetch product");
     }
+    console.log(res.data.data);
+    
     return res.data.data;
   },
 };

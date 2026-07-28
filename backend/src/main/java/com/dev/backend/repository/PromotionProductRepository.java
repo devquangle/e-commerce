@@ -32,7 +32,7 @@ public interface PromotionProductRepository extends JpaRepository<PromotionProdu
                 WHERE pp.product.id = :productId
                   AND pp.promotion.status = com.dev.backend.constant.BaseStatus.ACTIVE
                   AND CURRENT_DATE BETWEEN pp.promotion.startDate AND pp.promotion.expireDate
-                  AND pp.soldQuantity < pp.maxQuantity
+                  AND (pp.soldQuantity + COALESCE(pp.reservedQuantity, 0)) < pp.maxQuantity
             """)
     Integer findDiscountValueByProductId(@Param("productId") Integer productId);
 }
