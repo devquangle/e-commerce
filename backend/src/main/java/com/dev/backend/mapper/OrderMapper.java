@@ -22,6 +22,10 @@ public class OrderMapper {
         response.setDistrictId(order.getDistrictId());
         response.setWardCode(order.getWardCode());
         response.setStreet(order.getStreet());
+        response.setNoted(order.getNoted());
+        response.setCancel(order.getCancel());
+        response.setVoucherAmount(order.getVoucherAmount());
+        response.setShippingFee(order.getShippingFee());
         response.setOrderCode(order.getOrderCode());
         response.setPaymentMethod(order.getPaymentMethod());
         response.setPaymentStatus(order.getPaymentStatus());

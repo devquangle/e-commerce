@@ -1,23 +1,25 @@
 export interface OrderResponse {
-
   id: number;
   fullName: string;
   phone: string;
 
-  provinceId:number;
-  districtId:number;
-  wardCode:string;
-  street:string;
+  provinceId: number;
+  districtId: number;
+  wardCode: string;
+  street: string;
 
-  
   streetFull: string;
-  total: number;
-  orderCode: string;
-
+  noted: string;
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
-  createdAt: string; // YYYY-MM-DD
+  cancel: string;
+  orderCode: string;
+
   status: OrderStatus;
+  voucherAmount: number;
+  shippingFee: number;
+  total: number;
+  createdAt: string; // YYYY-MM-DD
 }
 export interface OrderItemResponse {
   orderItemId: number;
@@ -46,9 +48,9 @@ export interface ProductSnapshot {
   urlImage: string;
 }
 
-export interface OrderDetailResponse{
+export interface OrderDetailResponse {
   orderInfo: OrderResponse;
-  items: OrderItemResponse[]|[];
+  items: OrderItemResponse[] | [];
 }
 
 export interface OrderRequest {

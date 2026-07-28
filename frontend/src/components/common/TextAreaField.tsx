@@ -41,7 +41,7 @@ export default function TextAreaField<T extends FieldValues = FieldValues>({
       {label && (
         <label
           htmlFor={name || "textarea"}
-          className="block text-xs font-medium text-slate-600"
+          className="block text-sm font-medium text-slate-700"
         >
           {label}
           {(required || hasRequiredRule) && (
@@ -59,10 +59,10 @@ export default function TextAreaField<T extends FieldValues = FieldValues>({
         onChange={onChange}
         {...registerProps}
         {...rest}
-        className={`w-full rounded-xl border p-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all resize-none ${
+        className={`w-full rounded-xl border p-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all resize-none ${
           errorMessage
             ? "border-red-500 bg-red-50"
-            : "border-slate-300 bg-white focus:border-red-500 focus:ring-2 focus:ring-red-100"
+            : "border-slate-300 bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
         } ${disabled ? "bg-slate-100 opacity-70" : ""} ${className}`}
       />
 
