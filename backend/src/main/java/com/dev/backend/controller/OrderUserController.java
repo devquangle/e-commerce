@@ -59,16 +59,15 @@ public class OrderUserController {
             @RequestBody @Valid ChangeAddressOrderRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         orderService.changeAddressByOrderCode(userDetails.getId(), request);
-        return ResponseUtil.success("Lấy đơn hàng thành công", null);
+        return ResponseUtil.success("Đổi địa chỉ đơn hàng thành công #" + request.getOrderCode(), null);
     }
 
-     @PostMapping("/order/cancel")
+    @PostMapping("/order/cancel")
     public ResponseEntity<ResponseData<Void>> postCancel(
             @RequestBody @Valid CancelOrderRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         orderService.cancelOrder(userDetails.getId(), request);
-        return ResponseUtil.success("Huỷ đơn hàng thành công", null);
+        return ResponseUtil.success("Huỷ đơn hàng thành công #" + request.getOrderCode(), null);
     }
-    
 
 }

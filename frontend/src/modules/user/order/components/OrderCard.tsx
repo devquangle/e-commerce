@@ -38,7 +38,7 @@ export function OrderCard({ order }: OrderCardProps) {
           <div className="text-sm">
             <p className="font-semibold text-gray-900 flex items-center gap-2 flex-wrap">
               <span>
-                Mã đơn: <span className="text-blue-600">#{order.orderCode}</span>
+                Mã đơn: <span className="text-blue-600">{order.orderCode}</span>
               </span>
               <span className="text-gray-400">•</span>
               <span className="text-gray-500 font-normal text-xs">

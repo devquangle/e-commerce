@@ -7,7 +7,7 @@ import {
   ArrowRight,
   AlertTriangle,
 } from "lucide-react";
-import { toast } from "react-toastify";
+import { showWarningToast } from "@/utils/toastUtil";
 import { useForm, useWatch } from "react-hook-form";
 import {
   useProvinces,
@@ -181,31 +181,29 @@ export function ChangeAddressModal({
 
   if (!order) return null;
 
-  const onSubmit = async () => {
+  const onSubmit = () => {
     if (isAddressIdentical) {
-      toast.warning("Địa chỉ mới chọn trùng khớp hoàn toàn với địa chỉ ban đầu của đơn hàng!");
+      showWarningToast("Địa chỉ mới chọn trùng khớp hoàn toàn với địa chỉ ban đầu của đơn hàng!");
       return;
     }
 
     if (!selectedSavedId) {
-      toast.warning("Vui lòng chọn 1 địa chỉ từ sổ địa chỉ!");
+      showWarningToast("Vui lòng chọn 1 địa chỉ từ sổ địa chỉ!");
       return;
     }
 
-    try {
-      await changeAddressMutation.mutateAsync({
+    changeAddressMutation.mutate(
+      {
         orderCode: order.orderCode,
         addressId: selectedSavedId,
-      });
-      toast.success(`Đã cập nhật địa chỉ nhận hàng cho đơn hàng #${order.orderCode}`);
-      onClose();
-      if (onSuccess) onSuccess();
-    } catch (err: unknown) {
-      console.error(err);
-      const errorMessage =
-        err instanceof Error ? err.message : "Cập nhật địa chỉ thất bại. Vui lòng thử lại!";
-      toast.error(errorMessage);
-    }
+      },
+      {
+        onSuccess: () => {
+          onClose();
+          if (onSuccess) onSuccess();
+        },
+      }
+    );
   };
 
   return (
@@ -218,15 +216,15 @@ export function ChangeAddressModal({
       cancelText="Hủy"
       size="lg"
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pb-12">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-base">
         {/* Banner thông tin đơn hàng (Layout 12) */}
-        <div className="flex items-center gap-3 p-3.5 bg-linear-to-r from-blue-50 to-indigo-50/70 rounded-2xl border border-blue-200/60 text-blue-900 shadow-2xs">
-          <MapPin size={22} className="text-blue-600 shrink-0" />
-          <div className="text-sm">
+        <div className="flex items-center gap-3 p-4 bg-linear-to-r from-blue-50 to-indigo-50/70 rounded-2xl border border-blue-200/60 text-blue-900 shadow-2xs">
+          <MapPin size={24} className="text-blue-600 shrink-0" />
+          <div className="text-base space-y-1">
             <p className="font-bold text-blue-950 text-base">
               Cập nhật địa chỉ nhận hàng cho đơn #{order.orderCode}
             </p>
-            <p className="text-blue-700/90 text-xs mt-0.5 leading-relaxed">
+            <p className="text-blue-800 text-sm leading-relaxed">
               Lưu ý: Bạn có thể chọn từ sổ địa chỉ đã lưu bên dưới để cập nhật địa chỉ giao hàng. Phí vận chuyển có thể cao hoặc thấp hơn tùy vào địa chỉ bạn nhận hàng.
             </p>
           </div>
@@ -238,13 +236,13 @@ export function ChangeAddressModal({
           {savedAddresses.length > 0 ? (
             <div className="bg-slate-50/80 p-4 rounded-2xl border border-slate-200/70 space-y-3">
               <div className="flex justify-between items-center text-base font-bold text-slate-800 border-b border-slate-200/60 pb-2">
-                <span className="flex items-center gap-2">
-                  <BookUser size={18} className="text-blue-600" />
+                <span className="flex items-center gap-2 text-base">
+                  <BookUser size={20} className="text-blue-600" />
                   Sổ địa chỉ đã lưu
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-52 overflow-y-auto pr-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-56 overflow-y-auto pr-1">
                 {savedAddresses.map((addr) => {
                   const isSelected = selectedSavedId === addr.id;
 
@@ -276,10 +274,10 @@ export function ChangeAddressModal({
                       <div className="flex items-start justify-between gap-1">
                         <div className="min-w-0 flex-1 space-y-1">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-bold text-sm text-slate-900 line-clamp-1">
+                            <span className="font-bold text-base text-slate-900 line-clamp-1">
                               {addr.fullName}
                             </span>
-                            <span className="text-xs text-slate-600 font-medium">
+                            <span className="text-sm text-slate-600 font-medium">
                               ({addr.phone})
                             </span>
                             {addr.default && (
@@ -288,7 +286,7 @@ export function ChangeAddressModal({
                               </span>
                             )}
                           </div>
-                          <p className="text-xs text-slate-700 line-clamp-2 leading-relaxed">
+                          <p className="text-sm text-slate-700 line-clamp-2 leading-relaxed">
                             {addr.streetFull || addr.street}
                           </p>
                         </div>
@@ -299,7 +297,7 @@ export function ChangeAddressModal({
               </div>
             </div>
           ) : (
-            <div className="p-8 text-center bg-slate-50 rounded-2xl border border-slate-200 text-slate-500 text-sm">
+            <div className="p-8 text-center bg-slate-50 rounded-2xl border border-slate-200 text-slate-500 text-base">
               Không tìm thấy địa chỉ đã lưu nào trong sổ địa chỉ của bạn.
             </div>
           )}
@@ -308,13 +306,13 @@ export function ChangeAddressModal({
           {orderItems.length > 0 && (
             <div className="bg-slate-50/60 p-4 rounded-2xl border border-slate-200/70 space-y-3">
               <div className="flex justify-between items-center text-base font-bold text-slate-900 pb-1.5 border-b border-slate-200/60">
-                <span className="flex items-center gap-2">
-                  <ShoppingBag size={18} className="text-blue-600" />
+                <span className="flex items-center gap-2 text-base">
+                  <ShoppingBag size={20} className="text-blue-600" />
                   Sản phẩm
                 </span>
               </div>
 
-              <div className="max-h-48 overflow-y-auto space-y-2 pr-1">
+              <div className="max-h-48 overflow-y-auto space-y-2.5 pr-1">
                 {orderItems.map((item) => {
                   const product = item.productInfo;
                   const itemOrigPrice =
@@ -326,7 +324,7 @@ export function ChangeAddressModal({
                   return (
                     <div
                       key={item.orderItemId || product?.id}
-                      className="flex items-center gap-3 bg-white p-2.5 rounded-xl border border-slate-200/60 shadow-2xs"
+                      className="flex items-center gap-3 bg-white p-3 rounded-xl border border-slate-200/60 shadow-2xs"
                     >
                       <img
                         src={product?.urlImage}
@@ -334,12 +332,12 @@ export function ChangeAddressModal({
                         className="w-12 h-14 object-cover rounded-md border border-slate-200 shrink-0"
                       />
                       <div className="min-w-0 flex-1 space-y-1">
-                        <h5 className="text-sm font-bold text-slate-900 line-clamp-1">
+                        <h5 className="text-base font-bold text-slate-900 line-clamp-1">
                           {product?.name}
                         </h5>
-                        <div className="flex items-center justify-end gap-2 text-sm">
+                        <div className="flex items-center justify-end gap-2 text-base">
                           {hasDiscount && (
-                            <span className="line-through text-slate-400 text-xs font-normal">
+                            <span className="line-through text-slate-400 text-sm font-normal">
                               {formatMoney(itemOrigPrice)}
                             </span>
                           )}
@@ -358,10 +356,10 @@ export function ChangeAddressModal({
           {/* 3. CARD SO SÁNH ĐỊA CHỈ CỦ / ĐỊA CHỈ MỚI (LAYOUT 6 - 6 SONG SONG) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* CARD ĐỊA CHỈ CỦ (BAN ĐẦU) */}
-            <div className="bg-slate-100/70 p-4 rounded-2xl border border-slate-200/90 space-y-1.5 text-sm">
+            <div className="bg-slate-100/70 p-4 rounded-2xl border border-slate-200/90 space-y-2 text-base">
               <div className="flex items-center justify-between border-b border-slate-200 pb-1.5">
-                <h4 className="font-bold text-slate-800 text-sm flex items-center gap-1.5">
-                  <MapPin size={15} className="text-slate-500 shrink-0" />
+                <h4 className="font-bold text-slate-800 text-base flex items-center gap-1.5">
+                  <MapPin size={17} className="text-slate-500 shrink-0" />
                   Địa chỉ cũ
                 </h4>
                 <span className="text-xs bg-slate-200 text-slate-700 font-bold px-2 py-0.5 rounded-md">
@@ -369,20 +367,20 @@ export function ChangeAddressModal({
                 </span>
               </div>
               <div className="pt-1 space-y-1">
-                <p className="font-bold text-slate-900 text-sm">
-                  {order.fullName} <span className="font-medium text-slate-600 text-xs">({order.phone})</span>
+                <p className="font-bold text-slate-900 text-base">
+                  {order.fullName} <span className="font-medium text-slate-600 text-sm">({order.phone})</span>
                 </p>
-                <p className="text-xs text-slate-700 leading-relaxed">
+                <p className="text-sm text-slate-700 leading-relaxed">
                   {order.streetFull || order.street}
                 </p>
               </div>
             </div>
 
             {/* CARD ĐỊA CHỈ MỚI (THAY ĐỔI DỰ KIẾN) */}
-            <div className="bg-blue-50/70 p-4 rounded-2xl border border-blue-200 space-y-1.5 text-sm">
+            <div className="bg-blue-50/70 p-4 rounded-2xl border border-blue-200 space-y-2 text-base">
               <div className="flex items-center justify-between border-b border-blue-200/60 pb-1.5">
-                <h4 className="font-bold text-blue-950 text-sm flex items-center gap-1.5">
-                  <MapPin size={15} className="text-blue-600 shrink-0" />
+                <h4 className="font-bold text-blue-950 text-base flex items-center gap-1.5">
+                  <MapPin size={17} className="text-blue-600 shrink-0" />
                   Địa chỉ mới
                 </h4>
                 <span className="text-xs bg-blue-600 text-white font-bold px-2 py-0.5 rounded-md">
@@ -392,16 +390,16 @@ export function ChangeAddressModal({
               <div className="pt-1 space-y-1">
                 {selectedSavedId !== null && (fullName || phone || fullAddressPreview) ? (
                   <>
-                    <p className="font-bold text-blue-950 text-sm">
+                    <p className="font-bold text-blue-950 text-base">
                       {fullName || "Chưa nhập họ tên"}{" "}
-                      {phone && <span className="font-medium text-blue-800 text-xs">({phone})</span>}
+                      {phone && <span className="font-medium text-blue-800 text-sm">({phone})</span>}
                     </p>
-                    <p className="text-xs text-blue-900/90 leading-relaxed">
+                    <p className="text-sm text-blue-900/90 leading-relaxed">
                       {fullAddressPreview || "Chưa chọn đủ Tỉnh/Thành, Quận/Huyện, Phường/Xã..."}
                     </p>
                   </>
                 ) : (
-                  <p className="text-blue-400 italic text-xs pt-1">
+                  <p className="text-blue-500 italic text-sm pt-1">
                     Vui lòng chọn địa chỉ từ sổ địa chỉ bên trên...
                   </p>
                 )}
@@ -411,11 +409,11 @@ export function ChangeAddressModal({
 
           {/* THẺ BÁO LỖI NẾU ĐỊA CHỈ MỚI GIỐNG Y TRANG ĐỊA CHỈ CỦ */}
           {isAddressIdentical && (
-            <div className="flex items-start gap-2.5 p-3.5 bg-amber-50 border border-amber-200/90 rounded-2xl text-amber-900 text-sm font-medium animate-in fade-in duration-200 shadow-2xs">
-              <AlertTriangle size={19} className="text-amber-600 shrink-0 mt-0.5" />
+            <div className="flex items-start gap-2.5 p-3.5 bg-amber-50 border border-amber-200/90 rounded-2xl text-amber-900 text-base font-medium animate-in fade-in duration-200 shadow-2xs">
+              <AlertTriangle size={20} className="text-amber-600 shrink-0 mt-0.5" />
               <div className="space-y-0.5">
-                <p className="font-bold text-amber-950 text-sm">Địa chỉ không thay đổi</p>
-                <p className="text-xs text-amber-800/90 leading-relaxed">
+                <p className="font-bold text-amber-950 text-base">Địa chỉ không thay đổi</p>
+                <p className="text-sm text-amber-800/90 leading-relaxed">
                   Địa chỉ mới vừa chọn trùng khớp hoàn toàn với địa chỉ ban đầu của đơn hàng. Vui lòng chọn địa chỉ khác để thay đổi.
                 </p>
               </div>
@@ -424,7 +422,7 @@ export function ChangeAddressModal({
 
           {/* 4. TÓM TẮT ĐƠN HÀNG (LAYOUT 12 TRÀN VIỀN DƯỚI CÙNG) */}
           {orderItems.length > 0 && (
-            <div className="bg-slate-50/60 p-4 rounded-2xl border border-slate-200/70 space-y-2.5 text-sm">
+            <div className="bg-slate-50/60 p-4 rounded-2xl border border-slate-200/70 space-y-3 text-base">
               <h4 className="font-bold text-base text-slate-900 pb-1 border-b border-slate-200/60">
                 Tóm tắt đơn hàng
               </h4>
@@ -455,7 +453,7 @@ export function ChangeAddressModal({
                     </span>
                   </div>
 
-                  <div className="border-l-2 border-slate-200/80 pl-3 ml-1 space-y-0.5 text-xs text-slate-600">
+                  <div className="border-l-2 border-slate-200/80 pl-3 ml-1 space-y-1 text-sm text-slate-600">
                     {productDiscount > 0 && (
                       <div className="flex justify-between items-center">
                         <span>Sản phẩm</span>
@@ -480,11 +478,11 @@ export function ChangeAddressModal({
               <div className="flex justify-between items-center text-slate-700">
                 <span>Phí vận chuyển</span>
                 <div className="flex items-center gap-1.5 font-medium">
-                  <span className="text-slate-400 line-through text-xs">
+                  <span className="text-slate-400 line-through text-sm">
                     {oldShippingFee > 0 ? formatMoney(oldShippingFee) : "0đ"}
                   </span>
-                  <ArrowRight size={12} className="text-slate-400" />
-                  <span className="text-slate-900 font-bold text-sm">
+                  <ArrowRight size={14} className="text-slate-400" />
+                  <span className="text-slate-900 font-bold text-base">
                     {currentShippingFee > 0 ? formatMoney(currentShippingFee) : "Miễn phí"}
                   </span>
                 </div>
@@ -492,7 +490,7 @@ export function ChangeAddressModal({
 
               {/* Dòng phân cách nét đứt */}
               <div className="border-t border-dashed border-slate-200 pt-3 flex justify-between items-baseline">
-                <span className="font-bold text-slate-900 text-sm">
+                <span className="font-bold text-slate-900 text-base">
                   Tổng cộng
                 </span>
                 <span className="font-bold text-red-600 text-xl tabular-nums">

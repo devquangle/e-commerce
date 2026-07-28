@@ -7,6 +7,8 @@ import type {
   OrderRequest,
 } from "../types/order.type";
 import type { OrderFilterRequest } from "../types/order.search.type";
+import { showErrorToast, showSuccessToast } from "@/utils/toastUtil";
+import axios from "axios";
 
 export const useSearchOrderByUser = (options?: OrderFilterRequest) => {
   const { isInitialized, userInfo } = useAuth();
@@ -62,6 +64,16 @@ export const useChangeAddress = () => {
           queryKey: ["orders"],
         }),
       ]);
+       showSuccessToast(`Đã đổi địa chỉ thành công đơn hàng #${variables.orderCode}`);
+    },
+     onError: (error: unknown) => {
+      let errorMsg = "Đã xảy ra lỗi khi đổi địa chỉ.";
+      if (axios.isAxiosError(error)) {
+        errorMsg = error.response?.data?.message || error.message || errorMsg;
+      } else if (error instanceof Error) {
+        errorMsg = error.message;
+      }
+      showErrorToast(errorMsg);
     },
   });
 };
@@ -80,7 +92,20 @@ export const useCancelOrder = () => {
         queryClient.invalidateQueries({
           queryKey: ["orders"],
         }),
+        queryClient.invalidateQueries({
+          queryKey: ["voucher-user", userInfo?.code],
+        }),
       ]);
+      showSuccessToast(`Đã hủy thành công đơn hàng #${variables.orderCode}`);
+    },
+    onError: (error: unknown) => {
+      let errorMsg = "Đã xảy ra lỗi khi hủy đơn.";
+      if (axios.isAxiosError(error)) {
+        errorMsg = error.response?.data?.message || error.message || errorMsg;
+      } else if (error instanceof Error) {
+        errorMsg = error.message;
+      }
+      showErrorToast(errorMsg);
     },
   });
 };

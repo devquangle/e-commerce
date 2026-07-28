@@ -2,7 +2,7 @@ import { useState } from "react";
 import Modal from "@/components/common/Modal";
 import TextAreaField from "@/components/common/TextAreaField";
 import { Frown } from "lucide-react";
-import { toast } from "react-toastify";
+import { showWarningToast } from "@/utils/toastUtil";
 import { useCancelOrder } from "@/modules/user/order/hooks/useOrder";
 
 interface CancelOrderModalProps {
@@ -45,31 +45,28 @@ export function CancelOrderModal({
     setCustomReason(updated.join("; "));
   };
 
-  const handleConfirm = async () => {
+  const handleConfirm = () => {
     const finalReason = customReason.trim() || selectedReasons.join("; ");
 
     if (!finalReason) {
-      toast.warning("Vui lòng chọn hoặc nhập lý do hủy đơn hàng!");
+      showWarningToast("Vui lòng chọn hoặc nhập lý do hủy đơn hàng!");
       return;
     }
 
-    try {
-      await cancelOrderMutation.mutateAsync({
+    cancelOrderMutation.mutate(
+      {
         orderCode,
         cancel: finalReason,
-      });
-      toast.success(`Đã hủy thành công đơn hàng #${orderCode}`);
-      onClose();
-      // Reset form state
-      setSelectedReasons([]);
-      setCustomReason("");
-      if (onSuccess) onSuccess();
-    } catch (err: unknown) {
-      console.error(err);
-      const errorMessage =
-        err instanceof Error ? err.message : "Hủy đơn hàng thất bại. Vui lòng thử lại!";
-      toast.error(errorMessage);
-    }
+      },
+      {
+        onSuccess: () => {
+          onClose();
+          setSelectedReasons([]);
+          setCustomReason("");
+          if (onSuccess) onSuccess();
+        },
+      }
+    );
   };
 
   return (
@@ -78,7 +75,7 @@ export function CancelOrderModal({
       onClose={onClose}
       onConfirm={handleConfirm}
       title="Xác nhận hủy đơn hàng"
-      confirmText={cancelOrderMutation.isPending ? "Đang xử lý..." : "Xác nhận hủy đơn"}
+      confirmText="Xác nhận hủy đơn"
       cancelText="Quay lại"
       size="lg"
     >
