@@ -1,5 +1,7 @@
 package com.dev.backend.service;
 
+import com.dev.backend.constant.OrderStatus;
+import com.dev.backend.dto.order.CancelOrderRequest;
 import com.dev.backend.dto.order.ChangeAddressOrderRequest;
 import com.dev.backend.dto.order.OrderDetailResponse;
 import com.dev.backend.dto.order.OrderFilterRequest;
@@ -19,7 +21,7 @@ public interface OrderService {
 
     Order getOrderByOrderCode(String orderCode);
 
-    Order getOrderByOrderCodeAndUserId(String orderCode,Integer userId);
+    Order getOrderByOrderCodeAndUserId(String orderCode, Integer userId);
 
     OrderDetailResponse getOrderDetailResponse(String orderCode);
 
@@ -32,4 +34,10 @@ public interface OrderService {
     OrderResponse createOrder(OrderRequest request, Integer userId);
 
     void changeAddressByOrderCode(Integer userId, ChangeAddressOrderRequest request);
+
+    void validateStatusTransition(
+            OrderStatus currentStatus,
+            OrderStatus newStatus);
+
+    void cancelOrder(Integer userId, CancelOrderRequest request);
 }

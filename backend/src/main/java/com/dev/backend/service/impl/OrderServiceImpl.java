@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.dev.backend.constant.OrderStatus;
 import com.dev.backend.constant.PaymentStatus;
 import com.dev.backend.dto.ghn.CalculateFeeRequest;
+import com.dev.backend.dto.order.CancelOrderRequest;
 import com.dev.backend.dto.order.ChangeAddressOrderRequest;
 import com.dev.backend.dto.order.OrderDetailResponse;
 import com.dev.backend.dto.order.OrderFilterRequest;
@@ -82,6 +83,62 @@ public class OrderServiceImpl implements OrderService {
         public Order getOrderByOrderCodeAndUserId(String orderCode, Integer userId) {
                 return orderRepository.findByOrderCodeAndUserId(orderCode, userId)
                                 .orElseThrow(() -> new NotFoundException("ORDER_NOT_FOUND" + orderCode));
+        }
+
+        @Override
+        public void validateStatusTransition(
+                        OrderStatus currentStatus,
+                        OrderStatus newStatus) {
+
+                switch (currentStatus) {
+
+                        case PENDING -> {
+                                if (newStatus != OrderStatus.CONFIRMED
+                                                && newStatus != OrderStatus.CANCELLED) {
+                                        throw new BadRequestException("Không thể chuyển trạng thái đơn hàng.");
+                                }
+                        }
+
+                        case CONFIRMED -> {
+                                if (newStatus != OrderStatus.SHIPPING
+                                                && newStatus != OrderStatus.CANCELLED) {
+                                        throw new BadRequestException("Không thể chuyển trạng thái đơn hàng.");
+                                }
+                        }
+
+                        case SHIPPING -> {
+                                if (newStatus != OrderStatus.DELIVERED
+                                                && newStatus != OrderStatus.FAILED_DELIVERY) {
+                                        throw new BadRequestException("Không thể chuyển trạng thái đơn hàng.");
+                                }
+                        }
+
+                        case DELIVERED -> {
+                                if (newStatus != OrderStatus.COMPLETED
+                                                && newStatus != OrderStatus.RETURNED) {
+                                        throw new BadRequestException("Không thể chuyển trạng thái đơn hàng.");
+                                }
+                        }
+
+                        case COMPLETED,
+                                        CANCELLED,
+                                        RETURNED,
+                                        FAILED_DELIVERY -> {
+                                throw new BadRequestException(
+                                                "Đơn hàng đã kết thúc, không thể cập nhật trạng thái.");
+                        }
+                }
+        }
+
+        @Override
+        public void cancelOrder(Integer userId, CancelOrderRequest request) {
+
+                Order order = getOrderByOrderCodeAndUserId(request.getOrderCode(), userId);
+                validateStatusTransition(order.getStatus(), OrderStatus.CANCELLED);
+                order.setStatus(OrderStatus.CANCELLED);
+                order.setCancel(request.getCancel());
+                orderRepository.save(order);
+
         }
 
         @Override

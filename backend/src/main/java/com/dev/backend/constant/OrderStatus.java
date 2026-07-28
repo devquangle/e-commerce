@@ -9,7 +9,7 @@ public enum OrderStatus {
     DELIVERED,      // Đã giao
     COMPLETED,      // Hoàn tất (hết thời gian đổi trả)
     CANCELLED,      // Hủy trước khi giao
-    // RETURNED,       // Đã trả hàng
+    RETURNED,       // Đã trả hàng
     FAILED_DELIVERY; // Giao thất bại (bom hàng, không liên lạc được...)
 
       public static OrderStatus from(String status) {

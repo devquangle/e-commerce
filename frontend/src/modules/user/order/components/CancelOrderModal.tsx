@@ -3,6 +3,7 @@ import Modal from "@/components/common/Modal";
 import TextAreaField from "@/components/common/TextAreaField";
 import { Frown } from "lucide-react";
 import { toast } from "react-toastify";
+import { useCancelOrder } from "@/modules/user/order/hooks/useOrder";
 
 interface CancelOrderModalProps {
   isOpen: boolean;
@@ -28,7 +29,8 @@ export function CancelOrderModal({
 }: CancelOrderModalProps) {
   const [selectedReasons, setSelectedReasons] = useState<string[]>([]);
   const [customReason, setCustomReason] = useState<string>("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const cancelOrderMutation = useCancelOrder();
 
   if (!orderCode) return null;
 
@@ -43,7 +45,7 @@ export function CancelOrderModal({
     setCustomReason(updated.join("; "));
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     const finalReason = customReason.trim() || selectedReasons.join("; ");
 
     if (!finalReason) {
@@ -51,16 +53,23 @@ export function CancelOrderModal({
       return;
     }
 
-    setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      await cancelOrderMutation.mutateAsync({
+        orderCode,
+        cancel: finalReason,
+      });
       toast.success(`Đã hủy thành công đơn hàng #${orderCode}`);
       onClose();
       // Reset form state
       setSelectedReasons([]);
       setCustomReason("");
       if (onSuccess) onSuccess();
-    }, 600);
+    } catch (err: unknown) {
+      console.error(err);
+      const errorMessage =
+        err instanceof Error ? err.message : "Hủy đơn hàng thất bại. Vui lòng thử lại!";
+      toast.error(errorMessage);
+    }
   };
 
   return (
@@ -69,7 +78,7 @@ export function CancelOrderModal({
       onClose={onClose}
       onConfirm={handleConfirm}
       title="Xác nhận hủy đơn hàng"
-      confirmText={isSubmitting ? "Đang xử lý..." : "Xác nhận hủy đơn"}
+      confirmText={cancelOrderMutation.isPending ? "Đang xử lý..." : "Xác nhận hủy đơn"}
       cancelText="Quay lại"
       size="lg"
     >

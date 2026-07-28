@@ -1,9 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "@/context/useAuth";
 import useDebounce from "@/hooks/useDebounce";
-import OrderService from "../services/order.service";
 import type { OrderFilterRequest } from "../types/order.search.type";
 import type { OrderStatus } from "../types/order.type";
 
@@ -18,7 +15,6 @@ const initialFilterOptions = {
 
 export function useOrderFilter() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { isInitialized, userInfo } = useAuth();
 
   const [keyword, setKeyword] = useState<string>(
     () => searchParams.get("keyword") ?? initialFilterOptions.keyword
@@ -114,12 +110,6 @@ export function useOrderFilter() {
     size,
   };
 
-  const query = useQuery({
-    queryKey: ["orders", userInfo?.code, filterParams],
-    queryFn: () => OrderService.getMyOrders(filterParams),
-    enabled: isInitialized && !!userInfo,
-  });
-
   return {
     keyword,
     startDate,
@@ -138,16 +128,5 @@ export function useOrderFilter() {
     handleEndDateChange,
     handleStatusChange,
     handleResetFilter,
-
-    // API data & query state
-    orders: query.data?.items ?? [],
-    totalItems: query.data?.totalItems ?? 0,
-    totalPages: query.data?.totalPages ?? 0,
-    isLoading: query.isLoading,
-    isPending: query.isPending,
-    isError: query.isError,
-    error: query.error,
-    refetch: query.refetch,
-    query,
   };
 }

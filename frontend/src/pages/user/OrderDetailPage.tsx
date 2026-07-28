@@ -6,6 +6,7 @@ import { OrderDetailSkeleton } from "@/modules/user/order/components/OrderDetail
 import { CancelOrderModal } from "@/modules/user/order/components/CancelOrderModal";
 import { ChangeAddressModal } from "@/modules/user/order/components/ChangeAddressModal";
 import Button from "@/components/common/Button";
+import { AlertCircle, FileText } from "lucide-react";
 import {
   OrderStatusColor,
   OrderStatusMapping,
@@ -67,6 +68,9 @@ export default function OrderDetailPage() {
   const shippingFee = orderInfo.shippingFee || 0;
   const grandTotal = orderInfo.total;
 
+  const hasCancelReason = Boolean(orderInfo.cancel && orderInfo.cancel.trim() !== "");
+  const hasNote = Boolean(orderInfo.noted && orderInfo.noted.trim() !== "");
+
   return (
     <div className="flex-1 p-2 flex flex-col min-h-full">
       <div className="flex justify-between items-center gap-3 mb-4">
@@ -105,6 +109,41 @@ export default function OrderDetailPage() {
         </div>
       </div>
 
+      {/* ===== CANCELLATION REASON & NOTE CARDS (HIỂN THỊ PHÍA TRÊN SẢN PHẨM - COL 12) ===== */}
+      {(hasCancelReason || hasNote) && (
+        <div className="space-y-3 mt-4">
+          {/* Card Lý do hủy đơn */}
+          {hasCancelReason && (
+            <div className="bg-red-50/80 border border-red-200/80 rounded-xl p-4 flex items-start gap-3 text-red-900 shadow-2xs">
+              <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+              <div className="space-y-1 min-w-0 flex-1">
+                <h3 className="font-bold text-sm text-red-950 flex items-center gap-2">
+                  🚫 Lý do hủy đơn hàng
+                </h3>
+                <p className="text-sm text-red-800 leading-relaxed font-medium">
+                  {orderInfo.cancel}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Card Ghi chú đơn hàng */}
+          {hasNote && (
+            <div className="bg-amber-50/80 border border-amber-200/80 rounded-xl p-4 flex items-start gap-3 text-amber-900 shadow-2xs">
+              <FileText className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+              <div className="space-y-1 min-w-0 flex-1">
+                <h3 className="font-bold text-sm text-amber-950 flex items-center gap-2">
+                  📝 Ghi chú đơn hàng
+                </h3>
+                <p className="text-sm text-amber-800 leading-relaxed font-medium">
+                  {orderInfo.noted}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* ===== PRODUCTS ===== */}
       <div className="bg-white p-4 rounded-lg border my-5 space-y-4">
         <h3 className="font-medium text-lg">🛒 Sản phẩm</h3>
@@ -119,7 +158,7 @@ export default function OrderDetailPage() {
           ))}
         </div>
 
-        {/* Card Footer: Tóm tắt đơn hàng (Giống mẫu) */}
+        {/* Card Footer: Tóm tắt đơn hàng */}
         <div className="pt-4 border-t border-slate-200/80 flex flex-col items-end text-sm">
           <div className="w-full sm:w-80 space-y-2.5">
             <h4 className="font-bold text-base text-slate-900 pb-0.5">

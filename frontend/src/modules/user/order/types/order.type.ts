@@ -65,7 +65,10 @@ export interface ChangeAddressRequest {
   orderCode: string;
   addressId: number;
 }
-
+export interface CancelOrderRequest {
+  orderCode: string;
+  cancel: string;
+}
 export type PaymentMethod = "COD" | "VNPAY";
 
 export type OrderStatus =

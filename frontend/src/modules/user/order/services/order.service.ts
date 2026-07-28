@@ -1,5 +1,6 @@
 import type { ApiResponse } from "@/types/api-response";
 import type {
+  CancelOrderRequest,
   ChangeAddressRequest,
   OrderDetailResponse,
   OrderRequest,
@@ -51,6 +52,17 @@ const OrderService = {
     );
     if (!res.data.success) {
       throw new Error(res.data.message || "Fetch change-address failed");
+    }
+    return res.data.data;
+  },
+
+  async cancelOrder(data: CancelOrderRequest) {
+    const res = await apiAuth.post<ApiResponse<void>>(
+      "/api/v1/order/cancel",
+      data
+    );
+    if (!res.data.success) {
+      throw new Error(res.data.message || "Fetch cancel failed");
     }
     return res.data.data;
   },

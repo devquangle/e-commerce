@@ -2,6 +2,7 @@ import { OrderFilter } from "@/modules/user/order/components/OrderFilter";
 import { OrderCard } from "@/modules/user/order/components/OrderCard";
 import { OrderCardSkeleton } from "@/modules/user/order/components/OrderCardSkeleton";
 import { useOrderFilter } from "@/modules/user/order/hooks/useOrderFilter";
+import { useSearchOrderByUser } from "@/modules/user/order/hooks/useOrder";
 import Pagination from "@/components/common/Pagination";
 
 export default function Orders() {
@@ -12,6 +13,7 @@ export default function Orders() {
     status,
     page,
     size,
+    filterParams,
     handleKeywordChange,
     handleStartDateChange,
     handleEndDateChange,
@@ -19,11 +21,13 @@ export default function Orders() {
     handleResetFilter,
     setPage,
     setSize,
-    orders,
-    totalItems,
-    totalPages,
-    isLoading,
   } = useOrderFilter();
+
+  const { data: orderData, isFetching } = useSearchOrderByUser(filterParams);
+
+  const orders = orderData?.items ?? [];
+  const totalItems = orderData?.totalItems ?? 0;
+  const totalPages = orderData?.totalPages ?? 0;
 
   return (
     <div className="flex-1 p-2 flex flex-col min-h-full">
@@ -41,7 +45,7 @@ export default function Orders() {
 
       {/* Orders */}
       <div className="grid grid-cols-1 gap-3 flex-1">
-        {isLoading ? (
+        {isFetching ? (
           Array.from({ length: 3 }).map((_, index) => (
             <OrderCardSkeleton key={index} />
           ))

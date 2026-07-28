@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.dev.backend.dto.order.CancelOrderRequest;
 import com.dev.backend.dto.order.ChangeAddressOrderRequest;
 import com.dev.backend.dto.order.OrderDetailResponse;
 import com.dev.backend.dto.order.OrderFilterRequest;
@@ -60,5 +61,14 @@ public class OrderUserController {
         orderService.changeAddressByOrderCode(userDetails.getId(), request);
         return ResponseUtil.success("Lấy đơn hàng thành công", null);
     }
+
+     @PostMapping("/order/cancel")
+    public ResponseEntity<ResponseData<Void>> postCancel(
+            @RequestBody @Valid CancelOrderRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        orderService.cancelOrder(userDetails.getId(), request);
+        return ResponseUtil.success("Huỷ đơn hàng thành công", null);
+    }
+    
 
 }
