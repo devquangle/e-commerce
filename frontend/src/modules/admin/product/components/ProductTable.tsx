@@ -297,8 +297,10 @@ export default function ProductTable({ products, onDelete }: Props) {
 // ─── COMPONENT HIỂN THỊ CHIPS TÁC GIẢ ────────────────────────
 export const ExpandableAuthors = ({
   authors,
+  limit,
 }: {
   authors: string[];
+  limit?: number;
 }) => {
   if (!authors || authors.length === 0) {
     return (
@@ -306,9 +308,13 @@ export const ExpandableAuthors = ({
     );
   }
 
+  const displayedAuthors = limit ? authors.slice(0, limit) : authors;
+  const remainingCount =
+    limit && authors.length > limit ? authors.length - limit : 0;
+
   return (
     <div className="flex flex-wrap gap-1 items-center">
-      {authors.map((name, index) => (
+      {displayedAuthors.map((name, index) => (
         <span
           key={`a-${index}`}
           className="inline-flex items-center gap-1 bg-indigo-50 text-indigo-600 border border-indigo-100 px-1.5 py-0.5 rounded text-[10px]"
@@ -319,6 +325,11 @@ export const ExpandableAuthors = ({
           </span>
         </span>
       ))}
+      {remainingCount > 0 && (
+        <span className="text-[10px] text-slate-400 font-medium">
+          +{remainingCount}
+        </span>
+      )}
     </div>
   );
 };
@@ -326,14 +337,20 @@ export const ExpandableAuthors = ({
 // ─── COMPONENT HIỂN THỊ CHIPS THỂ LOẠI ───────────────────────
 export const ExpandableGenres = ({
   genres,
+  limit,
 }: {
   genres: string[];
+  limit?: number;
 }) => {
   if (!genres || genres.length === 0) return null;
 
+  const displayedGenres = limit ? genres.slice(0, limit) : genres;
+  const remainingCount =
+    limit && genres.length > limit ? genres.length - limit : 0;
+
   return (
     <div className="flex flex-wrap gap-1 items-center">
-      {genres.map((name, index) => (
+      {displayedGenres.map((name, index) => (
         <span
           key={`g-${index}`}
           className="inline-flex items-center gap-1 bg-slate-50 text-slate-500 border border-slate-200 px-1.5 py-0.5 rounded text-[10px]"
@@ -344,6 +361,11 @@ export const ExpandableGenres = ({
           </span>
         </span>
       ))}
+      {remainingCount > 0 && (
+        <span className="text-[10px] text-slate-400 font-medium">
+          +{remainingCount}
+        </span>
+      )}
     </div>
   );
 };

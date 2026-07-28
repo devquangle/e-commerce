@@ -1,7 +1,6 @@
 package com.dev.backend.repository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

@@ -59,6 +59,7 @@ public class RegisterServiceImpl implements RegisterService {
         re.setFullName(registerBean.getFullName());
         re.setPassword(passwordEncoder.encode(registerBean.getPassword()));
         re.setCode(generatedCode);
+        re.setEnabled(true);
 
         re.getRoles().add(roleService.findByCode(role));
         User saved = userService.saveUser(re);
