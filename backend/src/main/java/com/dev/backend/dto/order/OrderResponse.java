@@ -5,6 +5,7 @@ import com.dev.backend.constant.OrderStatus;
 import com.dev.backend.constant.PaymentMethod;
 import com.dev.backend.constant.PaymentStatus;
 
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,6 +19,12 @@ public class OrderResponse {
     private Integer id;
     private String fullName;
     private String phone;
+
+    private Integer provinceId;
+    private Integer districtId;
+    private String wardCode;
+    private String street;
+    
     private String streetFull;
 
     private Long total;

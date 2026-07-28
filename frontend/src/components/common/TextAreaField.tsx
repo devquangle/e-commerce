@@ -1,50 +1,74 @@
 import type {
-    FieldError,
-    RegisterOptions,
-    UseFormRegister,
-    FieldValues,
-    Path
+  FieldError,
+  FieldValues,
+  Path,
+  UseFormRegister,
+  RegisterOptions,
 } from "react-hook-form";
 
-interface TextAreaFieldProps<T extends FieldValues> {
-    label: string;
-    name: Path<T>;
-    placeholder?: string;
-    register: UseFormRegister<T>;
-    rules?: RegisterOptions<T, Path<T>>;
-    error?: FieldError;
-    rows?: number;
+interface TextAreaFieldProps<T extends FieldValues = FieldValues>
+  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+  label?: string;
+  name?: Path<T>;
+  register?: UseFormRegister<T>;
+  rules?: RegisterOptions<T, Path<T>>;
+  error?: FieldError | string;
+  required?: boolean;
 }
 
-export default function TextAreaField<T extends FieldValues>({
-    label,
-    name,
-    placeholder,
-    register,
-    rules,
-    error,
-    rows = 2
+export default function TextAreaField<T extends FieldValues = FieldValues>({
+  label,
+  name,
+  placeholder,
+  register,
+  rules,
+  error,
+  rows = 4,
+  required = false,
+  disabled = false,
+  className = "",
+  value,
+  onChange,
+  ...rest
 }: TextAreaFieldProps<T>) {
-    return (
-        <div>
-            <label htmlFor="text" className="block text-sm font-medium mb-1" >
-                {label} <span className="text-red-500">*</span>
-            </label>
+  const errorMessage = typeof error === "string" ? error : error?.message;
+  const hasRequiredRule = rules?.required !== undefined;
 
-            <textarea
-                id="text"
-                rows={rows}
-                placeholder={placeholder}
-                {...register(name, rules)}
-                className={`w-full border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400
-                ${error ? "border-red-500" : "border-gray-300"}`}
-            />
+  const registerProps = register && name ? register(name, rules) : {};
 
-            {error && (
-                <p className="text-red-500 text-sm mt-1">
-                    {error.message}
-                </p>
-            )}
-        </div>
-    );
+  return (
+    <div className="w-full space-y-1.5">
+      {label && (
+        <label
+          htmlFor={name || "textarea"}
+          className="block text-xs font-medium text-slate-600"
+        >
+          {label}
+          {(required || hasRequiredRule) && (
+            <span className="ml-1 text-red-500">*</span>
+          )}
+        </label>
+      )}
+
+      <textarea
+        id={name || "textarea"}
+        rows={rows}
+        disabled={disabled}
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        {...registerProps}
+        {...rest}
+        className={`w-full rounded-xl border p-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all resize-none ${
+          errorMessage
+            ? "border-red-500 bg-red-50"
+            : "border-slate-300 bg-white focus:border-red-500 focus:ring-2 focus:ring-red-100"
+        } ${disabled ? "bg-slate-100 opacity-70" : ""} ${className}`}
+      />
+
+      {errorMessage && (
+        <p className="text-xs text-red-500 mt-1">{errorMessage}</p>
+      )}
+    </div>
+  );
 }

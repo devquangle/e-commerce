@@ -33,10 +33,25 @@ export default function SelectBox<T>({
 }: Props<T>) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [openUpwards, setOpenUpwards] = useState(false);
 
   const ref = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Tự động kiểm tra không gian hiển thị để mở lên trên hoặc xuống dưới
+  useEffect(() => {
+    if (open && ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      if (spaceBelow < 240 && rect.top > spaceBelow) {
+        setOpenUpwards(true);
+      } else {
+        setOpenUpwards(false);
+      }
+    }
+  }, [open]);
+
+  // Selected Option
   const selected = useMemo(() => {
     return options.find((o) => value !== undefined && isEqual(o.value, value));
   }, [options, value]);
@@ -138,8 +153,9 @@ export default function SelectBox<T>({
       {/* Dropdown Menu */}
       <div
         className={`
-          absolute left-0 right-0 z-50 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-lg 
-          transition-all duration-200 origin-top overflow-hidden p-2 space-y-2
+          absolute left-0 right-0 z-50 bg-white border border-slate-200 rounded-xl shadow-xl 
+          transition-all duration-200 overflow-hidden p-2 space-y-2
+          ${openUpwards ? "bottom-full mb-1.5 origin-bottom" : "top-full mt-1.5 origin-top"}
           ${
             open
               ? "opacity-100 scale-100"

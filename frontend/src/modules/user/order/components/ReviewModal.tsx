@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import Modal from "@/components/common/Modal";
+import TextAreaField from "@/components/common/TextAreaField";
 import { Star, Camera, X, Eye, Pencil, Trash2 } from "lucide-react";
 import type { OrderItemResponse } from "../types/order.type";
 import { toast } from "react-toastify";
@@ -318,18 +319,13 @@ export function ReviewModal({ isOpen, onClose, item }: ReviewModalProps) {
           />
 
           {/* Nội dung nhận xét */}
-          <div className="space-y-1.5">
-            <label className="block text-xs font-medium text-slate-600">
-              Nhận xét chi tiết:
-            </label>
-            <textarea
-              rows={3}
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              placeholder="Hãy chia sẻ nhận xét của bạn về sản phẩm nhé..."
-              className="w-full rounded-xl border border-slate-300 p-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all resize-none"
-            />
-          </div>
+          <TextAreaField
+            label="Nhận xét chi tiết:"
+            rows={3}
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            placeholder="Hãy chia sẻ nhận xét của bạn về sản phẩm nhé..."
+          />
         </div>
       </Modal>
 

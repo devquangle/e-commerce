@@ -3,6 +3,13 @@ export interface OrderResponse {
   id: number;
   fullName: string;
   phone: string;
+
+  provinceId:number;
+  districtId:number;
+  wardCode:string;
+  street:string;
+
+  
   streetFull: string;
   total: number;
   orderCode: string;

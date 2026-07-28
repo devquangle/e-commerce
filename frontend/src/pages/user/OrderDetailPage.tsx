@@ -1,7 +1,10 @@
+import { useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useOrderDetail } from "@/modules/user/order/hooks/useOrder";
 import { OrderItemCard } from "@/modules/user/order/components/OrderItemCard";
 import { OrderDetailSkeleton } from "@/modules/user/order/components/OrderDetailSkeleton";
+import { CancelOrderModal } from "@/modules/user/order/components/CancelOrderModal";
+import { ChangeAddressModal } from "@/modules/user/order/components/ChangeAddressModal";
 import Button from "@/components/common/Button";
 import {
   OrderStatusColor,
@@ -15,6 +18,8 @@ export default function OrderDetailPage() {
   const [searchParams] = useSearchParams();
   const orderCode = searchParams.get("orderCode");
   const navigate = useNavigate();
+  const [isCancelOpen, setIsCancelOpen] = useState(false);
+  const [isAddressOpen, setIsAddressOpen] = useState(false);
 
   const {
     data: orderDetail,
@@ -101,9 +106,22 @@ export default function OrderDetailPage() {
       {/* ===== ACTION ===== */}
       <div className="flex flex-col sm:flex-row gap-3 justify-end">
         {orderInfo.status === "PENDING" && (
-          <Button color="danger" size="md">
-            Huỷ đơn
-          </Button>
+          <>
+            <Button
+              color="warning"
+              size="md"
+              onClick={() => setIsAddressOpen(true)}
+            >
+              Đổi địa chỉ
+            </Button>
+            <Button
+              color="danger"
+              size="md"
+              onClick={() => setIsCancelOpen(true)}
+            >
+              Huỷ đơn
+            </Button>
+          </>
         )}
         <Button
           color="secondary"
@@ -113,6 +131,18 @@ export default function OrderDetailPage() {
           Quay lại
         </Button>
       </div>
+
+      <CancelOrderModal
+        isOpen={isCancelOpen}
+        onClose={() => setIsCancelOpen(false)}
+        orderCode={orderInfo.orderCode}
+      />
+
+      <ChangeAddressModal
+        isOpen={isAddressOpen}
+        onClose={() => setIsAddressOpen(false)}
+        order={orderInfo}
+      />
     </div>
   );
 }

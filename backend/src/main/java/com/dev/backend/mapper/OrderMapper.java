@@ -18,6 +18,10 @@ public class OrderMapper {
         response.setId(order.getId());
         response.setFullName(order.getFullName());
         response.setPhone(order.getPhone());
+        response.setProvinceId(order.getProvinceId());
+        response.setDistrictId(order.getDistrictId());
+        response.setWardCode(order.getWardCode());
+        response.setStreet(order.getStreet());
         response.setOrderCode(order.getOrderCode());
         response.setPaymentMethod(order.getPaymentMethod());
         response.setPaymentStatus(order.getPaymentStatus());
