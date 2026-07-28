@@ -12,14 +12,32 @@ interface ProductImagesProps {
 export default function ProductImages({ product }: ProductImagesProps) {
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperType | null>(null);
 
-  // Use coverImages from product if available, else use mockImages
-  const images = product.coverImages?.length
-    ? product.coverImages.map((img) => img.url)
-    : [];
+  const rawImages: string[] = [];
 
+  if (product.coverImages && product.coverImages.length > 0) {
+    product.coverImages.forEach((img: any) => {
+      if (typeof img === "string") rawImages.push(img);
+      else if (img?.url) rawImages.push(img.url);
+    });
+  }
+
+  if ((product as any).urlImage) {
+    const url = (product as any).urlImage;
+    if (!rawImages.includes(url)) {
+      rawImages.push(url);
+    }
+  }
+
+  const images = rawImages;
   const productName = product.name || "Product Image";
 
-  if (!images.length) return null;
+  if (!images.length) {
+    return (
+      <div className="aspect-4/5 bg-slate-50 flex flex-col items-center justify-center text-slate-400 gap-2 rounded-xl border border-slate-200">
+        <span className="text-sm font-medium">Chưa có hình ảnh</span>
+      </div>
+    );
+  }
 
   return (
     <div className="lg:col-span-6 xl:col-span-4 flex flex-col gap-3">

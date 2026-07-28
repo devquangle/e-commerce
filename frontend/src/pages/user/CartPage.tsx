@@ -51,28 +51,21 @@ export default function Carts() {
     [selectedItems],
   );
 
-  // 1. ✨ TẠM TÍNH = Tính dựa trên giá gốc chưa giảm của sản phẩm
+  // 1. ✨ TẠM TÍNH = Tính dựa trên giá gốc của sản phẩm
   const subtotal = useMemo(
     () =>
-      selectedItems.reduce((sum, i) => {
-        const originalPrice =
-          i.product.discountValue > 0
-            ? i.product.price / (1 - i.product.discountValue / 100)
-            : i.product.price;
-        return sum + originalPrice * i.quantity;
-      }, 0),
+      selectedItems.reduce((sum, i) => sum + (i.product.price || 0) * i.quantity, 0),
     [selectedItems],
   );
 
-  // 2. ✨ GIẢM GIÁ SẢN PHẨM = Tổng chênh lệch giữa (Giá gốc - Giá bán hiện tại)
+  // 2. ✨ GIẢM GIÁ SẢN PHẨM = Tổng số tiền được giảm theo phần trăm discountValue
   const productDiscount = useMemo(
     () =>
       selectedItems.reduce((sum, i) => {
-        const originalPrice =
-          i.product.discountValue > 0
-            ? i.product.price / (1 - i.product.discountValue / 100)
-            : i.product.price;
-        return sum + (originalPrice - i.product.price) * i.quantity;
+        const origPrice = i.product.price || 0;
+        const discountPct = i.product.discountValue || 0;
+        const discountAmt = discountPct > 0 ? (origPrice * discountPct) / 100 : 0;
+        return sum + Math.round(discountAmt) * i.quantity;
       }, 0),
     [selectedItems],
   );

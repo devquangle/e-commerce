@@ -48,17 +48,10 @@ export default function ProductDescription({ product }: ProductDescriptionProps)
             ${!isExpanded ? 'max-h-[300px]' : ''}
           `}
         >
-          {/* MÔ TẢ HTML TỪ TIPTAP */}
           {product.description ? (
             <div dangerouslySetInnerHTML={{ __html: product.description }} />
           ) : (
-             <>
-               <h2>Nội dung chính</h2>
-               <p>
-                 Nội dung chi tiết của cuốn sách này hiện đang được cập nhật. 
-                 Quý độc giả có thể tham khảo thêm các thông số kỹ thuật chi tiết của sách trong mục thuộc tính.
-               </p>
-             </>
+            <p className="text-slate-500 italic">Chưa có mô tả cho sản phẩm này.</p>
           )}
         </div>
         

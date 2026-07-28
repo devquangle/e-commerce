@@ -3,11 +3,11 @@ import { Star, Minus, Plus, ShoppingCart, Heart } from "lucide-react";
 import type { ProductResponse } from "../types/product-detail.type";
 import type { ProductReviewResponse } from "../types/product-review.type";
 import { useAddToCart } from "@/modules/user/cart/hooks/useCart";
-import { showSuccessToast, showErrorToast } from "@/utils/toastUtil";
+import { showErrorToast } from "@/utils/toastUtil";
 
 interface ProductInfoProps {
   product: Partial<ProductResponse>;
-  review: Partial<ProductReviewResponse>;
+  review?: Partial<ProductReviewResponse>;
 }
 
 export default function ProductInfo({ product, review }: ProductInfoProps) {
@@ -18,53 +18,47 @@ export default function ProductInfo({ product, review }: ProductInfoProps) {
   const handleIncrease = () => setQuantity((prev) => prev + 1);
 
   const handleAddToCart = () => {
-    const productId = (product as any).id || (product as any).productId;
+    const productId = product.id;
     if (!productId) {
       showErrorToast("Không tìm thấy mã sản phẩm");
       return;
     }
 
-    addToCartMutation.mutate(
-      { productId, quantity },
-      {
-        onSuccess: () => {
-          showSuccessToast("Đã thêm sản phẩm vào giỏ hàng");
-        },
-        onError: (error: any) => {
-          showErrorToast(error.message || "Thêm vào giỏ hàng thất bại");
-        },
-      }
-    );
+    addToCartMutation.mutate({ productId, quantity });
   };
 
-  const price = product.price || 0;
+  const originalPrice = product.price || 0;
   const discountPercent = product.discountValue || 0;
   const hasDiscount = discountPercent > 0 && discountPercent < 100;
-  const originalPrice = hasDiscount
-    ? Math.round(price / (1 - discountPercent / 100))
-    : price;
+  const finalPrice = hasDiscount
+    ? Math.round(originalPrice - (originalPrice * discountPercent / 100))
+    : originalPrice;
+
+  const rating = review?.rating ?? 5.0;
+  const reviewCount = review?.reviewCount ?? 0;
+  const soldCount = product.soldCount ?? 0;
 
   return (
     <div className="flex flex-col gap-4">
       <div>
         {/* Title */}
         <h1 className="heading-1 text-slate-900 leading-tight mb-3 tracking-tight">
-          {product.name}
+          {product.name || "Chưa có tên sản phẩm"}
         </h1>
 
         {/* Rating & Sold Info */}
         <div className="flex items-center flex-wrap gap-3 caption-text mt-3 mb-6">
           <div className="flex items-center gap-1.5 font-medium">
             <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-            <span className="text-slate-700">{review.rating?.toFixed(1)}</span>
+            <span className="text-slate-700">{rating.toFixed(1)}</span>
           </div>
           <span className="text-slate-300">•</span>
           <div className="hover:text-red-600 cursor-pointer transition-colors duration-200 font-medium">
-            <span className="text-slate-700">{review.reviewCount}</span> đánh giá
+            <span className="text-slate-700">{reviewCount}</span> đánh giá
           </div>
           <span className="text-slate-300">•</span>
           <div className="font-medium">
-            Đã bán <span className="text-slate-700">{product.soldCount}</span> cuốn
+            Đã bán <span className="text-slate-700">{soldCount}</span> cuốn
           </div>
         </div>
       </div>
@@ -73,7 +67,7 @@ export default function ProductInfo({ product, review }: ProductInfoProps) {
       <div className="py-2">
         <div className="flex items-center gap-4 flex-wrap">
           <span className="text-4xl font-bold text-red-600 tracking-tight">
-            {price.toLocaleString()} ₫
+            {finalPrice.toLocaleString()} ₫
           </span>
           {hasDiscount && (
             <div className="flex items-center gap-2">
@@ -116,7 +110,7 @@ export default function ProductInfo({ product, review }: ProductInfoProps) {
             </div>
             {/* Subtotal next to it */}
             <div className="text-sm text-slate-500 flex items-center gap-2">
-              Tạm tính: <span className="text-lg font-bold text-red-600">{(price * quantity).toLocaleString()} ₫</span>
+              Tạm tính: <span className="text-lg font-bold text-red-600">{(finalPrice * quantity).toLocaleString()} ₫</span>
             </div>
           </div>
         </div>

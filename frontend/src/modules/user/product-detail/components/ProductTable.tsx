@@ -14,6 +14,13 @@ const getLanguageName = (code?: string) => {
 };
 
 
+const formatFieldText = (value?: string | null): string => {
+  if (!value || !value.trim() || value.trim().toLowerCase() === "khác") {
+    return "Chưa cập nhật";
+  }
+  return value.trim();
+};
+
 interface ProductTableProps {
   product: Partial<ProductResponse>;
 }
@@ -30,68 +37,108 @@ export default function ProductTable({ product }: ProductTableProps) {
   const fields: SpecField[] = [];
 
   // Tác giả
+  const authorsList: { name: string; slug?: string }[] = [];
   if (product.productAuthors && product.productAuthors.length > 0) {
+    product.productAuthors.forEach((a) =>
+      authorsList.push({ name: formatFieldText(a.name), slug: a.slug })
+    );
+  } else if ((product as any).authors && Array.isArray((product as any).authors)) {
+    (product as any).authors.forEach((a: any) => {
+      if (typeof a === "string") authorsList.push({ name: formatFieldText(a) });
+      else if (a?.name) authorsList.push({ name: formatFieldText(a.name), slug: a.slug });
+    });
+  }
+
+  if (authorsList.length > 0) {
     fields.push({
       key: "authors",
       label: "Tác giả",
       value: (
         <div className="flex flex-wrap gap-1.5">
-          {product.productAuthors.map((author, idx) => (
-            <span key={author.id}>
-              <Link to={`/products?authors=${author.slug}`} className="text-blue-600 hover:underline">
-                {author.name}
-              </Link>
-              {idx < product.productAuthors!.length - 1 && <span className="text-slate-400">, </span>}
+          {authorsList.map((author, idx) => (
+            <span key={idx}>
+              {author.slug ? (
+                <Link to={`/products?authors=${author.slug}`} className="text-blue-600 hover:underline">
+                  {author.name}
+                </Link>
+              ) : (
+                <span className="text-slate-800 font-semibold">{author.name}</span>
+              )}
+              {idx < authorsList.length - 1 && <span className="text-slate-400">, </span>}
             </span>
           ))}
         </div>
-      )
+      ),
     });
   }
 
   // Thể loại
+  const genresList: { name: string; slug?: string }[] = [];
   if (product.productGenres && product.productGenres.length > 0) {
+    product.productGenres.forEach((g) =>
+      genresList.push({ name: formatFieldText(g.name), slug: g.slug })
+    );
+  } else if ((product as any).genres && Array.isArray((product as any).genres)) {
+    (product as any).genres.forEach((g: any) => {
+      if (typeof g === "string") genresList.push({ name: formatFieldText(g) });
+      else if (g?.name) genresList.push({ name: formatFieldText(g.name), slug: g.slug });
+    });
+  }
+
+  if (genresList.length > 0) {
     fields.push({
       key: "genres",
       label: "Thể loại",
       value: (
         <div className="flex flex-wrap gap-1.5 font-semibold text-blue-600">
-          {product.productGenres.map((genre, idx) => (
-            <span key={genre.id}>
-              <Link to={`/products?genres=${genre.slug}`} className="hover:underline">
-                {genre.name}
-              </Link>
-              {idx < product.productGenres!.length - 1 && <span className="text-slate-400 font-normal">, </span>}
+          {genresList.map((genre, idx) => (
+            <span key={idx}>
+              {genre.slug ? (
+                <Link to={`/products?genres=${genre.slug}`} className="hover:underline">
+                  {genre.name}
+                </Link>
+              ) : (
+                <span className="text-slate-800 font-semibold">{genre.name}</span>
+              )}
+              {idx < genresList.length - 1 && <span className="text-slate-400 font-normal">, </span>}
             </span>
           ))}
         </div>
-      )
+      ),
     });
   }
 
   // Nhà xuất bản
-  if (product.productPublisher) {
+  const publisherName = product.productPublisher?.name || formatFieldText((product as any).publisher);
+  const publisherSlug = product.productPublisher?.slug;
+  if (publisherName) {
     fields.push({
       key: "publisher",
       label: "Nhà xuất bản",
-      value: (
-        <Link to={`/products?publisher=${product.productPublisher.slug}`} className="text-blue-600 hover:underline">
-          {product.productPublisher.name}
+      value: publisherSlug ? (
+        <Link to={`/products?publisher=${publisherSlug}`} className="text-blue-600 hover:underline">
+          {publisherName}
         </Link>
-      )
+      ) : (
+        <span className="text-slate-800 font-semibold">{publisherName}</span>
+      ),
     });
   }
 
   // Series
-  if (product.productSeries) {
+  const seriesName = product.productSeries?.name || formatFieldText((product as any).series);
+  const seriesSlug = product.productSeries?.slug;
+  if (seriesName && seriesName !== "Chưa cập nhật") {
     fields.push({
       key: "series",
       label: "Series",
-      value: (
-        <Link to={`/products?series=${product.productSeries.slug}`} className="text-blue-600 hover:underline">
-          {product.productSeries.name}
+      value: seriesSlug ? (
+        <Link to={`/products?series=${seriesSlug}`} className="text-blue-600 hover:underline">
+          {seriesName}
         </Link>
-      )
+      ) : (
+        <span className="text-slate-800 font-semibold">{seriesName}</span>
+      ),
     });
   }
 

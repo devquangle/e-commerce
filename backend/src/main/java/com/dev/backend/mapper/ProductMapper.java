@@ -2,8 +2,8 @@ package com.dev.backend.mapper;
 
 import com.dev.backend.dto.product.*;
 import com.dev.backend.dto.productdetail.ProductInfo;
+import com.dev.backend.dto.productsnapshot.ProductSnapshot;
 import com.dev.backend.entity.*;
-
 
 import lombok.RequiredArgsConstructor;
 
@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class ProductMapper {
-
 
     public ProductResponse toDTO(Product product) {
         if (product == null)
@@ -195,8 +194,20 @@ public class ProductMapper {
         return dto;
     }
 
+    public ProductSnapshot mapProductSnapshot(Product product) {
+        if (product == null) {
+            return null;
+        }
+        ProductSnapshot dto = new ProductSnapshot();
+        dto.setId(product.getId());
+        dto.setName(product.getName());
+        dto.setSlug(product.getSlug());
+        dto.setIsbn(product.getIsbn());
+        dto.setWeight(product.getWeight());
+        dto.setPublishYear(product.getPublishYear().toString());
+        dto.setPages(product.getPages());
+        dto.setLanguage(product.getLanguage());
+        return dto;
+    }
 
-
-
-    
 }

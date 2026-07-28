@@ -1,7 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import CartService from "../services/cart.service";
 import { useAuth } from "@/context/useAuth";
-import type { CartCountResponse, CartResponse, CartItemRequest } from "../types/cart.type";
+import type {
+  CartCountResponse,
+  CartResponse,
+  CartItemRequest,
+} from "../types/cart.type";
+import axios from "axios";
+import { showErrorToast, showSuccessToast } from "@/utils/toastUtil";
 
 const getPersistedCheckedState = (userId: string): Record<number, boolean> => {
   try {
@@ -78,15 +84,15 @@ export const useCartData = () => {
     queryFn: async () => {
       const data = await CartService.getCartItems();
       const userId = userInfo?.code || "guest";
-      
+
       const currentCache = queryClient.getQueryData<CartResponse[]>([
-        "cart", 
-        userInfo?.code
+        "cart",
+        userInfo?.code,
       ]);
-      
+
       const persisted = getPersistedCheckedState(userId);
       const checkedMap = new Map(
-        currentCache?.map((item) => [item.cartItemId, item.checked]) || []
+        currentCache?.map((item) => [item.cartItemId, item.checked]) || [],
       );
 
       return data.map((item) => {
@@ -142,11 +148,11 @@ export const useToggleCartItem = () => {
           const newData = oldData.map((item) =>
             item.cartItemId === cartItemId ? { ...item, checked } : item,
           );
-          
+
           const persisted = getPersistedCheckedState(userId);
           persisted[cartItemId] = checked;
           persistCheckedState(userId, persisted);
-          
+
           return newData;
         },
       );
@@ -165,13 +171,13 @@ export const useToggleAllCartItems = () => {
         (oldData) => {
           if (!oldData) return oldData;
           const newData = oldData.map((item) => ({ ...item, checked }));
-          
+
           const persisted = getPersistedCheckedState(userId);
           newData.forEach((item) => {
             persisted[item.cartItemId] = checked;
           });
           persistCheckedState(userId, persisted);
-          
+
           return newData;
         },
       );
@@ -204,7 +210,10 @@ export const useRemoveCartItem = () => {
     },
     onError: (_err, _cartItemId, context) => {
       if (context?.previousCart) {
-        queryClient.setQueryData(["cart", userInfo?.code], context.previousCart);
+        queryClient.setQueryData(
+          ["cart", userInfo?.code],
+          context.previousCart,
+        );
       }
     },
     onSettled: () => {
@@ -233,7 +242,9 @@ export const useRemoveCartItems = () => {
         queryClient.setQueryData<CartResponse[]>(
           ["cart", userInfo?.code],
           (old) => {
-            return old?.filter((item) => !cartItemIds.includes(item.cartItemId));
+            return old?.filter(
+              (item) => !cartItemIds.includes(item.cartItemId),
+            );
           },
         );
       }
@@ -242,7 +253,10 @@ export const useRemoveCartItems = () => {
     },
     onError: (_err, _cartItemIds, context) => {
       if (context?.previousCart) {
-        queryClient.setQueryData(["cart", userInfo?.code], context.previousCart);
+        queryClient.setQueryData(
+          ["cart", userInfo?.code],
+          context.previousCart,
+        );
       }
     },
     onSettled: () => {
@@ -264,6 +278,16 @@ export const useAddToCart = () => {
       queryClient.invalidateQueries({
         queryKey: ["cartCount", userInfo?.code],
       });
+      showSuccessToast("Đã thêm sản phẩm vào giỏ hàng");
+    },
+    onError: (error: unknown) => {
+      let errorMsg = "Đã xảy ra lỗi khi thêm vào giỏ hàng.";
+      if (axios.isAxiosError(error)) {
+        errorMsg = error.response?.data?.message || error.message || errorMsg;
+      } else if (error instanceof Error) {
+        errorMsg = error.message;
+      }
+      showErrorToast(errorMsg);
     },
   });
 };
@@ -301,7 +325,10 @@ export const useUpdateQuantity = () => {
     },
     onError: (_err, _newQuantity, context) => {
       if (context?.previousCart) {
-        queryClient.setQueryData(["cart", userInfo?.code], context.previousCart);
+        queryClient.setQueryData(
+          ["cart", userInfo?.code],
+          context.previousCart,
+        );
       }
     },
     onSettled: () => {

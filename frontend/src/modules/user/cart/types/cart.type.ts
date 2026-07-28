@@ -51,8 +51,15 @@ export interface CartCountResponse {
 
 
 
-export const getLineTotal = (item: CartResponse): number =>
-  item.product.price * item.quantity;
+export const getLineTotal = (item: CartResponse): number => {
+  const originalPrice = item.product.price || 0;
+  const discountPercent = item.product.discountValue || 0;
+  const hasDiscount = discountPercent > 0 && discountPercent < 100;
+  const finalPrice = hasDiscount
+    ? Math.round(originalPrice - (originalPrice * discountPercent / 100))
+    : originalPrice;
+  return finalPrice * item.quantity;
+};
 
 
 import type { VoucherUserResponse } from "@/modules/admin/voucher/types/voucher.type";

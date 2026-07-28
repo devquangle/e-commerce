@@ -9,6 +9,7 @@ import com.dev.backend.dto.product.ProductRequest;
 import com.dev.backend.dto.product.ProductResponse;
 import com.dev.backend.dto.product.ProductSearchRequest;
 import com.dev.backend.dto.productdetail.ProductInfo;
+import com.dev.backend.dto.productsnapshot.ProductSnapshot;
 import com.dev.backend.entity.Product;
 import com.dev.backend.response.PageResponse;
 
@@ -42,6 +43,7 @@ public interface ProductService {
 
     ProductCartItemResponse productCartItemResponse(Integer productId);
 
+    ProductSnapshot productSnapshot(Integer productId);
 
     Product findWithDetailsById(Integer id);
 }

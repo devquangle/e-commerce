@@ -74,11 +74,12 @@ export default function CartItemCard({
   const { product } = item;
   const [showDetails, setShowDetails] = useState(false);
 
-  const originalPrice =
-    product.discountValue > 0
-      ? product.price / (1 - product.discountValue / 100)
-      : product.price;
-  const hasDiscount = product.discountValue > 0;
+  const originalPrice = product.price || 0;
+  const discountPercent = product.discountValue || 0;
+  const hasDiscount = discountPercent > 0 && discountPercent < 100;
+  const finalPrice = hasDiscount
+    ? Math.round(originalPrice - (originalPrice * discountPercent / 100))
+    : originalPrice;
   const imageUrl = product.urlImage;
 
   const displayPublisher = formatFieldText(product.publisher);
@@ -238,7 +239,7 @@ export default function CartItemCard({
             </p>
           )}
           <p className="text-sm text-slate-900 font-bold tabular-nums mt-0.5">
-            {formatMoney(product.price)}
+            {formatMoney(finalPrice)}
           </p>
         </div>
 
@@ -442,7 +443,7 @@ export default function CartItemCard({
             </p>
           )}
           <p className="text-xs font-medium text-slate-500">
-            {formatMoney(product.price)}
+            {formatMoney(finalPrice)}
           </p>
           <p className="text-sm font-bold text-red-600 mt-1">
             {formatMoney(getLineTotal(item))}
@@ -584,7 +585,7 @@ export default function CartItemCard({
             </div>
             <div className="mt-1.5 flex flex-wrap items-baseline gap-1.5">
               <span className="text-xs font-bold text-slate-900">
-                {formatMoney(product.price)}
+                {formatMoney(finalPrice)}
               </span>
               {hasDiscount && (
                 <span className="text-[10px] text-slate-400 line-through">

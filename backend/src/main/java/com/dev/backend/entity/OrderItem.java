@@ -3,12 +3,8 @@ package com.dev.backend.entity;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
-
-import com.dev.backend.dto.product.ProductCartItemResponse;
-import com.dev.backend.dto.product.ProductCartItemResponseConverter;
 import com.dev.backend.dto.productsnapshot.ProductSnapshot;
+import com.dev.backend.dto.productsnapshot.ProductSnapshotConverter;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -42,9 +38,9 @@ public class OrderItem {
     private Integer price; // Giá sau giảm
     private Integer originalPrice; // Giá gốc
     
-    @Convert(converter = ProductCartItemResponseConverter.class)
+    @Convert(converter = ProductSnapshotConverter.class)
     @Column(columnDefinition = "LONGTEXT")
-    private ProductCartItemResponse productInfo;
+    private ProductSnapshot productInfo;
 
     @ManyToOne()
     @JoinColumn(name = "product_id")

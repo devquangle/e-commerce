@@ -21,6 +21,7 @@ import com.dev.backend.dto.product.ProductRequest;
 import com.dev.backend.dto.product.ProductResponse;
 import com.dev.backend.dto.product.ProductSearchRequest;
 import com.dev.backend.dto.productdetail.ProductInfo;
+import com.dev.backend.dto.productsnapshot.ProductSnapshot;
 import com.dev.backend.entity.Product;
 import com.dev.backend.exception.NotFoundException;
 import com.dev.backend.exception.DuplicateFieldException;
@@ -316,6 +317,19 @@ public class ProductServiceImpl implements ProductService {
     public ProductCartItemResponse productCartItemResponse(Integer productId) {
         Product product = findWithDetailsById(productId);
         ProductCartItemResponse dto = productMapper.mapProductCartItemResponse(product);
+        dto.setDiscountValue(promotionProductService.getDiscountValueByProductId(productId));
+        dto.setPublisher(publisherMapper.getPublisherName(product.getPublisher()));
+        dto.setSeries(seriesMapper.getSeriesName(product.getSeries()));
+        dto.setAuthors(productAuthorService.findAuthorNamesByProductId(productId));
+        dto.setGenres(productGenreService.findGenreNamesByProductId(productId));
+        dto.setUrlImage(imageService.getUrlImageIsThumbnailByProductId(productId));
+        return dto;
+    }
+
+    @Override
+    public ProductSnapshot productSnapshot(Integer productId) {
+        Product product = findWithDetailsById(productId);
+        ProductSnapshot dto = productMapper.mapProductSnapshot(product);
         dto.setDiscountValue(promotionProductService.getDiscountValueByProductId(productId));
         dto.setPublisher(publisherMapper.getPublisherName(product.getPublisher()));
         dto.setSeries(seriesMapper.getSeriesName(product.getSeries()));

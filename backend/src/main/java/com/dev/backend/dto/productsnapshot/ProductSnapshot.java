@@ -2,35 +2,25 @@ package com.dev.backend.dto.productsnapshot;
 
 import java.util.List;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-
 public class ProductSnapshot {
-
     private Integer id;
-
-    private String slug;
-
     private String name;
-
-    private String image;
-
-    private List<String> authors;
-
-    private String publisher;
-
-    private List<String> genres;
-
-    private String language;
-
-    private Integer pageCount;
-
+    private String slug;
+    private String isbn;
+    private Integer discountValue;
+    private Integer price;
+    private Integer quantity;
     private Integer weight;
+    private String publishYear;
+    private Integer pages;
+    private String language;
+    private String urlImage;
+    private String publisher;
+    private String series;
+    private List<String> genres;
+    private List<String> authors;
 }

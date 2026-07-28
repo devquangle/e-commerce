@@ -251,7 +251,7 @@ public class OrderServiceImpl implements OrderService {
                         orderItem.setPrice(price);
 
                         orderItem.setProductInfo(
-                                        productService.productCartItemResponse(product.getId()));
+                                        productService.productSnapshot(product.getId()));
 
                         subtotal += price * cartItem.getQuantity();
 

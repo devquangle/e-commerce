@@ -78,24 +78,17 @@ export default function PaymentPage() {
 
   const subtotal = useMemo(
     () =>
-      items.reduce((sum, i) => {
-        const originalPrice =
-          i.product.discountValue > 0
-            ? i.product.price / (1 - i.product.discountValue / 100)
-            : i.product.price;
-        return sum + originalPrice * i.quantity;
-      }, 0),
+      items.reduce((sum, i) => sum + (i.product.price || 0) * i.quantity, 0),
     [items],
   );
 
   const productDiscount = useMemo(
     () =>
       items.reduce((sum, i) => {
-        const originalPrice =
-          i.product.discountValue > 0
-            ? i.product.price / (1 - i.product.discountValue / 100)
-            : i.product.price;
-        return sum + (originalPrice - i.product.price) * i.quantity;
+        const origPrice = i.product.price || 0;
+        const discountPct = i.product.discountValue || 0;
+        const discountAmt = discountPct > 0 ? (origPrice * discountPct) / 100 : 0;
+        return sum + Math.round(discountAmt) * i.quantity;
       }, 0),
     [items],
   );
