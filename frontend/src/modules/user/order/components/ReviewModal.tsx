@@ -332,7 +332,7 @@ export function ReviewModal({ isOpen, onClose, item }: ReviewModalProps) {
       {/* Lightbox Xem lại ảnh lớn */}
       {previewImage && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-xs p-4"
+          className="fixed inset-0 z-100 flex items-center justify-center bg-black/80 backdrop-blur-xs p-4"
           onClick={() => setPreviewImage(null)}
         >
           <div className="relative max-w-xl max-h-[85vh] flex items-center justify-center">

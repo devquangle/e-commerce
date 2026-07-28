@@ -81,4 +81,14 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
                             WHERE o.orderCode = :orderCode
                         """)
         Optional<Order> getOrderByOrderCode(@Param("orderCode") String orderCode);
+
+        @Query("""
+                            SELECT o
+                            FROM Order o
+                            WHERE o.orderCode = :orderCode
+                              AND o.user.id = :userId
+                        """)
+        Optional<Order> findByOrderCodeAndUserId(
+                        @Param("orderCode") String orderCode,
+                        @Param("userId") Integer userId);
 }

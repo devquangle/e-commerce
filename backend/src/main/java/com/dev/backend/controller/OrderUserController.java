@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.dev.backend.dto.order.ChangeAddressOrderRequest;
 import com.dev.backend.dto.order.OrderDetailResponse;
 import com.dev.backend.dto.order.OrderFilterRequest;
 import com.dev.backend.dto.order.OrderRequest;
@@ -50,6 +51,14 @@ public class OrderUserController {
             @RequestParam("orderCode") String orderCode) {
         OrderDetailResponse response = orderService.getOrderDetailResponse(orderCode);
         return ResponseUtil.success("Lấy đơn hàng thành công", response);
+    }
+
+    @PostMapping("/order/change-address")
+    public ResponseEntity<ResponseData<Void>> postChangeAddress(
+            @RequestBody @Valid ChangeAddressOrderRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        orderService.changeAddressByOrderCode(userDetails.getId(), request);
+        return ResponseUtil.success("Lấy đơn hàng thành công", null);
     }
 
 }

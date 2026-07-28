@@ -1,5 +1,6 @@
 package com.dev.backend.service;
 
+import com.dev.backend.dto.order.ChangeAddressOrderRequest;
 import com.dev.backend.dto.order.OrderDetailResponse;
 import com.dev.backend.dto.order.OrderFilterRequest;
 import com.dev.backend.dto.order.OrderRequest;
@@ -18,6 +19,8 @@ public interface OrderService {
 
     Order getOrderByOrderCode(String orderCode);
 
+    Order getOrderByOrderCodeAndUserId(String orderCode,Integer userId);
+
     OrderDetailResponse getOrderDetailResponse(String orderCode);
 
     OrderResponse toOrderResponse(Order order);
@@ -27,4 +30,6 @@ public interface OrderService {
     PageResponse<OrderResponse> searchOrder(OrderFilterRequest request);
 
     OrderResponse createOrder(OrderRequest request, Integer userId);
+
+    void changeAddressByOrderCode(Integer userId, ChangeAddressOrderRequest request);
 }

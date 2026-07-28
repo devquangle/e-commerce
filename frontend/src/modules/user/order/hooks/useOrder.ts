@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import OrderService from "../services/order.service";
 import { useAuth } from "@/context/useAuth";
-import type { OrderRequest } from "../types/order.type";
+import type { ChangeAddressRequest, OrderRequest } from "../types/order.type";
 
 export const useCreateOrder = () => {
   const queryClient = useQueryClient();
@@ -28,6 +28,23 @@ export const useOrderDetail = (orderCode?: string) => {
     queryKey: ["orderDetail", userInfo?.code, orderCode],
     queryFn: () => OrderService.getOrderDetail(orderCode),
     enabled: isInitialized && !!userInfo && !!orderCode,
+  });
+};
+
+export const useChangeAddress = () => {
+  const queryClient = useQueryClient();
+  const { userInfo } = useAuth();
+
+  return useMutation({
+    mutationFn: (data: ChangeAddressRequest) => OrderService.changeAddress(data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["orderDetail", userInfo?.code, variables.orderCode],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["orders", userInfo?.code],
+      });
+    },
   });
 };
 

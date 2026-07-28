@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.dev.backend.constant.OrderStatus;
 import com.dev.backend.constant.PaymentStatus;
 import com.dev.backend.dto.ghn.CalculateFeeRequest;
+import com.dev.backend.dto.order.ChangeAddressOrderRequest;
 import com.dev.backend.dto.order.OrderDetailResponse;
 import com.dev.backend.dto.order.OrderFilterRequest;
 import com.dev.backend.dto.order.OrderRequest;
@@ -78,11 +79,43 @@ public class OrderServiceImpl implements OrderService {
         };
 
         @Override
+        public Order getOrderByOrderCodeAndUserId(String orderCode, Integer userId) {
+                return orderRepository.findByOrderCodeAndUserId(orderCode, userId)
+                                .orElseThrow(() -> new NotFoundException("ORDER_NOT_FOUND" + orderCode));
+        }
+
+        @Override
         public OrderDetailResponse getOrderDetailResponse(String orderCode) {
                 OrderDetailResponse response = new OrderDetailResponse();
                 response.setOrderInfo(this.toOrderResponse(getOrderByOrderCode(orderCode)));
                 response.setItems(orderItemService.findByOrderCode(orderCode));
                 return response;
+        }
+
+        @Override
+        public void changeAddressByOrderCode(Integer userId, ChangeAddressOrderRequest request) {
+
+                Address address = addressService.getAddressByIdAndUserId(
+                                request.getAddressId(),
+                                userId);
+                Order order = getOrderByOrderCodeAndUserId(request.getOrderCode(), userId);
+                order.setFullName(address.getFullName());
+                order.setPhone(address.getPhone());
+                order.setProvinceId(address.getProvinceId());
+                order.setDistrictId(address.getDistrictId());
+                order.setWardCode(address.getWardCode());
+                order.setStreet(address.getStreet());
+
+                int totalWeight = order.getOrderItems().stream()
+                                .mapToInt(item -> item.getProductInfo().getWeight() * item.getQuantity())
+                                .sum();
+
+                applyShippingFee(
+                                order,
+                                address,
+                                totalWeight);
+                orderRepository.save(order);
+
         }
 
         @Override

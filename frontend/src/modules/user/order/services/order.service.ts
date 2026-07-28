@@ -1,5 +1,6 @@
 import type { ApiResponse } from "@/types/api-response";
 import type {
+  ChangeAddressRequest,
   OrderDetailResponse,
   OrderRequest,
   OrderResponse,
@@ -40,6 +41,17 @@ const OrderService = {
       throw new Error(res.data.message || "Fetch order failed");
     }
     console.log(res.data.data);
+    return res.data.data;
+  },
+
+  async changeAddress(data: ChangeAddressRequest) {
+    const res = await apiAuth.post<ApiResponse<void>>(
+      "/api/v1/order/change-address",
+      data
+    );
+    if (!res.data.success) {
+      throw new Error(res.data.message || "Fetch change-address failed");
+    }
     return res.data.data;
   },
 };
