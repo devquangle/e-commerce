@@ -2,7 +2,6 @@ package com.dev.backend.entity;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import com.dev.backend.constant.OrderStatus;
 import com.dev.backend.constant.PaymentMethod;
@@ -17,7 +16,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -83,15 +81,5 @@ public class Order extends BaseAuditableEntity<Integer> {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
 
-    @PrePersist
-    public void prePersist() {
-        if (orderCode == null) {
-            orderCode = "ODR-" +
-                    UUID.randomUUID()
-                            .toString()
-                            .replace("-", "")
-                            .substring(0, 8)
-                            .toUpperCase();
-        }
-    }
+  
 }

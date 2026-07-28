@@ -1,4 +1,5 @@
 export interface OrderResponse {
+
   id: number;
   fullName: string;
   phone: string;
@@ -10,7 +11,38 @@ export interface OrderResponse {
   paymentStatus: PaymentStatus;
   createdAt: string; // YYYY-MM-DD
   status: OrderStatus;
-};
+}
+export interface OrderItemResponse {
+  orderItemId: number;
+  quantity: number;
+  price: number;
+  originalPrice: number;
+  productInfo: ProductSnapshot;
+}
+export interface ProductSnapshot {
+  id: number;
+  name: string;
+  slug: string;
+  isbn: string;
+  discountValue: number; //%
+  price: number; //giá bán
+  quantity: number;
+  weight: number;
+  publishYear: string;
+  pages: number;
+  language?: string;
+
+  publisher: string;
+  series: string | null;
+  genres: string[] | [];
+  authors: string[] | [];
+  urlImage: string;
+}
+
+export interface OrderDetailResponse{
+  orderInfo: OrderResponse;
+  items: OrderItemResponse[]|[];
+}
 
 export interface OrderRequest {
   cartItemIds: number[];
@@ -19,9 +51,6 @@ export interface OrderRequest {
   paymentMethod: PaymentMethod;
   note?: string;
 }
-
-
-
 
 export type PaymentMethod = "COD" | "VNPAY";
 

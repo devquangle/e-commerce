@@ -1,20 +1,23 @@
 package com.dev.backend.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.dev.backend.dto.promotion.PromotionProductMappingResponse;
 import com.dev.backend.dto.promotion.PromotionProductRequest;
+import com.dev.backend.entity.CartItem;
 import com.dev.backend.entity.Product;
 import com.dev.backend.entity.Promotion;
 import com.dev.backend.entity.PromotionProduct;
-import com.dev.backend.exception.NotFoundException;
 import com.dev.backend.repository.PromotionProductRepository;
 import com.dev.backend.service.ProductService;
 import com.dev.backend.service.PromotionProductService;
@@ -130,8 +133,93 @@ public class PromotionProductServiceImpl implements PromotionProductService {
     }
 
     @Override
-    public PromotionProduct findActivePromotion(Integer productId) {
-        return promotionProductRepository.findActivePromotion(productId)
-                .orElseThrow(() -> new NotFoundException("NOT FOUND"));
+    @Transactional(readOnly = true)
+    public List<PromotionProduct> findActivePromotions(List<Integer> productIds) {
+
+        if (productIds == null || productIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return promotionProductRepository.findActivePromotions(productIds);
     }
+
+    @Override
+@Transactional
+public void reservePromotions(List<CartItem> cartItems) {
+
+    List<Integer> productIds = cartItems.stream()
+            .map(item -> item.getProduct().getId())
+            .toList();
+
+
+    List<PromotionProduct> promotionProducts =
+            promotionProductRepository.findActivePromotions(productIds);
+
+
+    Map<Integer, PromotionProduct> promotionMap =
+            promotionProducts.stream()
+                    .collect(Collectors.toMap(
+                            pp -> pp.getProduct().getId(),
+                            Function.identity()
+                    ));
+
+
+    List<PromotionProduct> updates = new ArrayList<>();
+
+
+    for (CartItem cartItem : cartItems) {
+
+        PromotionProduct promotionProduct =
+                promotionMap.get(
+                    cartItem.getProduct().getId()
+                );
+
+
+        // Không có promotion
+        if (promotionProduct == null) {
+            continue;
+        }
+
+
+        int quantity = cartItem.getQuantity();
+
+
+        int soldQuantity = 
+                promotionProduct.getSoldQuantity() == null
+                ? 0
+                : promotionProduct.getSoldQuantity();
+
+
+        int reservedQuantity =
+                promotionProduct.getReservedQuantity() == null
+                ? 0
+                : promotionProduct.getReservedQuantity();
+
+
+        int available =
+                promotionProduct.getMaxQuantity()
+                - soldQuantity
+                - reservedQuantity;
+
+
+        if (available < quantity) {
+            throw new RuntimeException(
+                    "Số lượng khuyến mãi không đủ"
+            );
+        }
+
+
+        promotionProduct.setReservedQuantity(
+                reservedQuantity + quantity
+        );
+
+
+        updates.add(promotionProduct);
+    }
+
+
+    if (!updates.isEmpty()) {
+        promotionProductRepository.saveAll(updates);
+    }
+}
 }

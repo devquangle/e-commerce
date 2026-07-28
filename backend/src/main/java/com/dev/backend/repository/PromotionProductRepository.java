@@ -1,7 +1,6 @@
 package com.dev.backend.repository;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -33,22 +32,23 @@ public interface PromotionProductRepository extends JpaRepository<PromotionProdu
           WHERE pp.product.id = :productId
             AND pp.promotion.status = com.dev.backend.constant.BaseStatus.ACTIVE
             AND CURRENT_DATE BETWEEN pp.promotion.startDate AND pp.promotion.expireDate
-            AND (pp.soldQuantity + COALESCE(pp.reservedQuantity, 0)) < pp.maxQuantity
+            AND ( COALESCE(pp.soldQuantity,0) + COALESCE(pp.reservedQuantity, 0)) < pp.maxQuantity
       """)
   Integer findDiscountValueByProductId(@Param("productId") Integer productId);
 
   @Query("""
-      SELECT pp
-      FROM PromotionProduct pp
-      WHERE pp.product.id = :productId
-        AND pp.promotion.status = com.dev.backend.constant.BaseStatus.ACTIVE
-        AND CURRENT_DATE BETWEEN pp.promotion.startDate AND pp.promotion.expireDate
-        AND (
-            COALESCE(pp.soldQuantity,0)
-            + COALESCE(pp.reservedQuantity,0)
-        ) < pp.maxQuantity
+          SELECT pp
+          FROM PromotionProduct pp
+          JOIN FETCH pp.promotion p
+          WHERE pp.product.id IN :productIds
+            AND p.status = com.dev.backend.constant.BaseStatus.ACTIVE
+            AND CURRENT_DATE BETWEEN p.startDate AND p.expireDate
+            AND (
+                COALESCE(pp.soldQuantity,0)
+                + COALESCE(pp.reservedQuantity,0)
+            ) < pp.maxQuantity
       """)
-  Optional<PromotionProduct> findActivePromotion(
-      @Param("productId") Integer productId);
+  List<PromotionProduct> findActivePromotions(
+      @Param("productIds") List<Integer> productIds);
 
 }

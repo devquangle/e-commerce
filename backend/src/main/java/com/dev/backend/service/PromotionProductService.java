@@ -1,9 +1,11 @@
 package com.dev.backend.service;
 
 import java.util.List;
+import java.util.Map;
 
 import com.dev.backend.dto.promotion.PromotionProductMappingResponse;
 import com.dev.backend.dto.promotion.PromotionProductRequest;
+import com.dev.backend.entity.CartItem;
 import com.dev.backend.entity.Product;
 import com.dev.backend.entity.Promotion;
 import com.dev.backend.entity.PromotionProduct;
@@ -21,11 +23,8 @@ public interface PromotionProductService {
 
     Integer calculateSalePrice(Product product);
 
-    PromotionProduct findActivePromotion(Integer productId);
 
-    // public void reserveQuantity(Integer productId, Integer quantity);
+    List<PromotionProduct> findActivePromotions(List<Integer> productIds);
 
-    // public void confirmQuantity(Integer productId, Integer quantity);
-
-    // public void releaseReservedQuantity(Integer productId, Integer quantity);
+    void reservePromotions(List<CartItem> cartItems);
 }

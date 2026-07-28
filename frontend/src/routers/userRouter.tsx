@@ -13,7 +13,7 @@ import Profile from "@/pages/auth/Profile";
 
 import Address from "@/pages/user/Address";
 import Favorites from "@/pages/user/Favorites";
-import OrderDetails from "@/pages/user/OrderDetails";
+import OrderDetailPage from "@/pages/user/OrderDetailPage";
 import Carts from "@/pages/user/CartPage";
 import PaymentPage from "@/pages/user/PaymentPage";
 import AddressPayment from "@/pages/user/AddressPayment";
@@ -98,8 +98,8 @@ const userRouter = [
                 element: <Orders />,
             },
             {
-                path: "order/:id",
-                element: <OrderDetails />,
+                path: "order",
+                element: <OrderDetailPage />,
             },
             {
                 path: "address",

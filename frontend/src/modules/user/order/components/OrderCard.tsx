@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { formatMoney } from "@/utils/number.utils";
 import { 
   OrderStatusMapping, 
@@ -82,9 +83,12 @@ export function OrderCard({ order }: OrderCardProps) {
         </p>
 
         <div className="flex gap-2 flex-wrap">
-          <button className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer">
+          <Link
+            to={`/account/order?orderCode=${order.orderCode}`}
+            className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer inline-block"
+          >
             Chi tiết
-          </button>
+          </Link>
 
           <button className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 cursor-pointer">
             Mua lại

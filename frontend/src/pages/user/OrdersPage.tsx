@@ -1,17 +1,24 @@
-
 import { OrderFilter } from "@/modules/user/order/components/OrderFilter";
 import { OrderCard } from "@/modules/user/order/components/OrderCard";
+import { OrderCardSkeleton } from "@/modules/user/order/components/OrderCardSkeleton";
 import { useOrderFilter } from "@/modules/user/order/hooks/useOrderFilter";
 import Pagination from "@/components/common/Pagination";
 
 export default function Orders() {
-  const { 
-    form, 
-    filters, 
-    setStatus, 
-    setPage, 
-    setSize, 
-    resetFilters,
+  const {
+    keyword,
+    startDate,
+    endDate,
+    status,
+    page,
+    size,
+    handleKeywordChange,
+    handleStartDateChange,
+    handleEndDateChange,
+    handleStatusChange,
+    handleResetFilter,
+    setPage,
+    setSize,
     orders,
     totalItems,
     totalPages,
@@ -21,22 +28,25 @@ export default function Orders() {
   return (
     <div className="flex-1 p-2 flex flex-col min-h-full">
       <OrderFilter
-        register={form.register}
-        statusFilter={filters.status}
-        setStatusFilter={setStatus}
-        onReset={resetFilters}
+        keyword={keyword}
+        startDate={startDate}
+        endDate={endDate}
+        status={status}
+        onKeywordChange={handleKeywordChange}
+        onStartDateChange={handleStartDateChange}
+        onEndDateChange={handleEndDateChange}
+        onStatusChange={handleStatusChange}
+        onReset={handleResetFilter}
       />
 
       {/* Orders */}
       <div className="grid grid-cols-1 gap-3 flex-1">
         {isLoading ? (
-          <p className="text-center text-gray-500 text-sm py-8">
-            Đang tải đơn hàng...
-          </p>
-        ) : orders.length > 0 ? (
-          orders.map((order) => (
-            <OrderCard key={order.id} order={order} />
+          Array.from({ length: 3 }).map((_, index) => (
+            <OrderCardSkeleton key={index} />
           ))
+        ) : orders.length > 0 ? (
+          orders.map((order) => <OrderCard key={order.id} order={order} />)
         ) : (
           <p className="text-center text-gray-500 text-sm py-8">
             Không có đơn hàng nào
@@ -48,10 +58,10 @@ export default function Orders() {
       {totalPages > 0 && (
         <div className="mt-4">
           <Pagination
-            currentPage={filters.page}
+            currentPage={page}
             totalPages={totalPages}
             onPageChange={setPage}
-            pageSize={filters.size}
+            pageSize={size}
             onPageSizeChange={setSize}
             totalItems={totalItems}
           />

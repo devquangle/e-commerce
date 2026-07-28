@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import OrderService from "../services/order.service";
 import { useAuth } from "@/context/useAuth";
 import type { OrderRequest } from "../types/order.type";
@@ -20,3 +20,14 @@ export const useCreateOrder = () => {
     },
   });
 };
+
+export const useOrderDetail = (orderCode?: string) => {
+  const { isInitialized, userInfo } = useAuth();
+
+  return useQuery({
+    queryKey: ["orderDetail", userInfo?.code, orderCode],
+    queryFn: () => OrderService.getOrderDetail(orderCode),
+    enabled: isInitialized && !!userInfo && !!orderCode,
+  });
+};
+

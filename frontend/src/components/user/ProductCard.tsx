@@ -8,12 +8,12 @@ interface Props {
 }
 
 export default function ProductCard({ product }: Props) {
-  const discountValue = product.discountValue || 0;
-  const hasDiscount = discountValue > 0;
-  
-  const originalPrice = hasDiscount
-    ? Math.round(product.price / (1 - discountValue / 100))
-    : product.price;
+  const originalPrice = product.price || 0;
+  const discountPercent = product.discountValue || 0;
+  const hasDiscount = discountPercent > 0 && discountPercent < 100;
+  const finalPrice = hasDiscount
+    ? Math.round(originalPrice - (originalPrice * discountPercent) / 100)
+    : originalPrice;
 
   return (
     <Link
@@ -27,8 +27,8 @@ export default function ProductCard({ product }: Props) {
       {/* Coral Discount Badge Overlay */}
       {hasDiscount && (
         <div className="absolute -top-px -right-px z-10">
-          <span className="inline-flex items-center px-3  rounded-tr-lg rounded-bl-lg text-[10px] font-bold bg-[#ff7f50] text-white shadow-xs tracking-wide py-2">
-            -{discountValue}%
+          <span className="inline-flex items-center px-3 rounded-tr-lg rounded-bl-lg text-[10px] font-bold bg-[#ff7f50] text-white shadow-xs tracking-wide py-2">
+            -{discountPercent}%
           </span>
         </div>
       )}
@@ -41,7 +41,8 @@ export default function ProductCard({ product }: Props) {
           loading="lazy"
           className="absolute inset-0 w-full h-full object-cover"
           onError={(e) => {
-            (e.target as HTMLImageElement).src = 'https://via.placeholder.com/300x400?text=No+Image';
+            (e.target as HTMLImageElement).src =
+              "https://via.placeholder.com/300x400?text=No+Image";
           }}
         />
       </div>
@@ -91,7 +92,7 @@ export default function ProductCard({ product }: Props) {
         {/* Price Area */}
         <div className="mt-auto pt-2.5 border-t border-slate-50 flex items-baseline gap-2 flex-wrap">
           <span className="text-[15px] sm:text-[17px] font-bold text-rose-600 tracking-tight">
-            {formatMoney(product.price)}
+            {formatMoney(finalPrice)}
           </span>
           {hasDiscount && (
             <span className="text-[12px] font-medium text-slate-400 line-through">

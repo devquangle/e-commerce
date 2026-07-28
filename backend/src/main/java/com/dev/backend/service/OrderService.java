@@ -1,5 +1,6 @@
 package com.dev.backend.service;
 
+import com.dev.backend.dto.order.OrderDetailResponse;
 import com.dev.backend.dto.order.OrderFilterRequest;
 import com.dev.backend.dto.order.OrderRequest;
 import com.dev.backend.dto.order.OrderResponse;
@@ -13,12 +14,17 @@ public interface OrderService {
 
     Order getOrderById(Integer id);
 
+    boolean existsByOrderCode(String orderCode);
+
+    Order getOrderByOrderCode(String orderCode);
+
+    OrderDetailResponse getOrderDetailResponse(String orderCode);
+
     OrderResponse toOrderResponse(Order order);
 
-    PageResponse<OrderResponse> searchOrderUser(OrderFilterRequest request,Integer userId);
+    PageResponse<OrderResponse> searchOrderUser(OrderFilterRequest request, Integer userId);
 
     PageResponse<OrderResponse> searchOrder(OrderFilterRequest request);
-
 
     OrderResponse createOrder(OrderRequest request, Integer userId);
 }

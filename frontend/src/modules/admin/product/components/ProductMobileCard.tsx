@@ -40,16 +40,18 @@ const ProductMobileCard = ({ products, onDelete }: Props) => {
         products.map((product) => {
           const discount = discountPercent(product.originalPrice, product.price);
           return (
-            <div key={product.id} className="card-custom space-y-3">
+            <div key={product.id} className="card-custom space-y-3 group">
 
               {/* ===== HEADER: Ảnh + Tên + Badge ===== */}
               <div className="flex items-start gap-3">
                 {product.urlImageDefault ? (
-                  <img
-                    src={product.urlImageDefault}
-                    alt={product.name}
-                    className="w-14 h-[76px] rounded-xl object-cover border border-slate-200 shadow-sm shrink-0"
-                  />
+                  <div className="relative shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-50 shadow-sm">
+                    <img
+                      src={product.urlImageDefault}
+                      alt={product.name}
+                      className="w-14 h-[76px] object-cover"
+                    />
+                  </div>
                 ) : (
                   <div className="w-14 h-[76px] rounded-xl border border-dashed border-slate-200 bg-slate-50 flex items-center justify-center shrink-0">
                     <BookOpen size={18} className="text-slate-300" />

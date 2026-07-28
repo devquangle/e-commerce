@@ -1,6 +1,7 @@
 package com.dev.backend.repository;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -66,4 +67,18 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
         long countVoucherUsedByUser(
                         @Param("userId") Integer userId,
                         @Param("voucherId") Integer voucherId);
+
+        @Query("""
+                            SELECT COUNT(o) > 0
+                            FROM Order o
+                            WHERE o.orderCode = :orderCode
+                        """)
+        boolean existsByOrderCode(@Param("orderCode") String orderCode);
+
+        @Query("""
+                            SELECT o
+                            FROM Order o
+                            WHERE o.orderCode = :orderCode
+                        """)
+        Optional<Order> getOrderByOrderCode(@Param("orderCode") String orderCode);
 }

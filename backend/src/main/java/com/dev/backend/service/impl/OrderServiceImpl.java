@@ -2,6 +2,8 @@ package com.dev.backend.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.dev.backend.constant.OrderStatus;
 import com.dev.backend.constant.PaymentStatus;
 import com.dev.backend.dto.ghn.CalculateFeeRequest;
+import com.dev.backend.dto.order.OrderDetailResponse;
 import com.dev.backend.dto.order.OrderFilterRequest;
 import com.dev.backend.dto.order.OrderRequest;
 import com.dev.backend.dto.order.OrderResponse;
@@ -30,6 +33,7 @@ import com.dev.backend.response.PageResponse;
 import com.dev.backend.service.AddressService;
 import com.dev.backend.service.CartItemService;
 import com.dev.backend.service.GHNService;
+import com.dev.backend.service.OrderItemService;
 import com.dev.backend.service.OrderService;
 import com.dev.backend.service.ProductService;
 import com.dev.backend.service.PromotionProductService;
@@ -55,10 +59,30 @@ public class OrderServiceImpl implements OrderService {
         private final PromotionProductService promotionProductService;
         private final VoucherService voucherService;
         private final ProductService productService;
+        private final OrderItemService orderItemService;
 
         @Override
         public Order getOrderById(Integer id) {
                 return orderRepository.findById(id).orElseThrow(() -> new NotFoundException("NOT FOUND ORDER ID" + id));
+        }
+
+        @Override
+        public boolean existsByOrderCode(String orderCode) {
+                return orderRepository.existsByOrderCode(orderCode);
+        }
+
+        @Override
+        public Order getOrderByOrderCode(String orderCode) {
+                return orderRepository.getOrderByOrderCode(orderCode)
+                                .orElseThrow(() -> new NotFoundException("NOT FOUND ORDER orderCode" + orderCode));
+        };
+
+        @Override
+        public OrderDetailResponse getOrderDetailResponse(String orderCode) {
+                OrderDetailResponse response = new OrderDetailResponse();
+                response.setOrderInfo(this.toOrderResponse(getOrderByOrderCode(orderCode)));
+                response.setItems(orderItemService.findByOrderCode(orderCode));
+                return response;
         }
 
         @Override
@@ -75,6 +99,7 @@ public class OrderServiceImpl implements OrderService {
                                 request.getCartItemIds(),
                                 userId);
 
+                promotionProductService.reservePromotions(cartItems);
                 Order order = buildOrder(request, user, address);
 
                 OrderSummary summary = buildOrderItems(order, cartItems);
@@ -217,8 +242,25 @@ public class OrderServiceImpl implements OrderService {
                 order.setPaymentStatus(PaymentStatus.UNPAID);
 
                 order.setStatus(OrderStatus.PENDING);
-
+                order.setOrderCode(generateOrderCode());
                 return order;
+        }
+
+        private String generateOrderCode() {
+
+                String orderCode;
+
+                do {
+                        orderCode = "ODR-" +
+                                        UUID.randomUUID()
+                                                        .toString()
+                                                        .replace("-", "")
+                                                        .substring(0, 8)
+                                                        .toUpperCase();
+
+                } while (orderRepository.existsByOrderCode(orderCode));
+
+                return orderCode;
         }
 
         private OrderSummary buildOrderItems(

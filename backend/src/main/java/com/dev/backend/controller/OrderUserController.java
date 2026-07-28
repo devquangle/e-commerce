@@ -7,8 +7,10 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.dev.backend.dto.order.OrderDetailResponse;
 import com.dev.backend.dto.order.OrderFilterRequest;
 import com.dev.backend.dto.order.OrderRequest;
 import com.dev.backend.dto.order.OrderResponse;
@@ -23,24 +25,31 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/my-order")
+@RequestMapping("/api/v1")
 public class OrderUserController {
 
     private final OrderService orderService;
 
-    @PostMapping
+    @PostMapping("/my-order")
     public ResponseEntity<ResponseData<OrderResponse>> createOrder(@RequestBody @Valid OrderRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         OrderResponse response = orderService.createOrder(request, userDetails.getId());
         return ResponseUtil.success("Tạo đơn thành công", response);
     }
 
-    @GetMapping
+    @GetMapping("/my-order")
     public ResponseEntity<ResponseData<PageResponse<OrderResponse>>> getMyOrder(
             @ModelAttribute OrderFilterRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         PageResponse<OrderResponse> response = orderService.searchOrderUser(request, userDetails.getId());
         return ResponseUtil.success("Lấy danh sách đơn hàng thành công", response);
+    }
+
+    @GetMapping("/order")
+    public ResponseEntity<ResponseData<OrderDetailResponse>> getOrderDetail(
+            @RequestParam("orderCode") String orderCode) {
+        OrderDetailResponse response = orderService.getOrderDetailResponse(orderCode);
+        return ResponseUtil.success("Lấy đơn hàng thành công", response);
     }
 
 }

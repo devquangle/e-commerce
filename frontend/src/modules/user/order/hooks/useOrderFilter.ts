@@ -1,76 +1,112 @@
-import { useState, useEffect, useRef } from "react";
-import { useForm } from "react-hook-form";
+import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/context/useAuth";
+import useDebounce from "@/hooks/useDebounce";
 import OrderService from "../services/order.service";
 import type { OrderFilterRequest } from "../types/order.search.type";
 import type { OrderStatus } from "../types/order.type";
 
-export type OrderFilterForm = {
-  keyword: string;
-  startDate: string;
-  endDate: string;
+const initialFilterOptions = {
+  keyword: "",
+  startDate: "",
+  endDate: "",
+  status: null as OrderStatus | null,
+  page: 1,
+  size: 10,
 };
 
 export function useOrderFilter() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { isInitialized, userInfo } = useAuth();
 
-  // Khởi tạo state từ URL
-  const [status, setStatus] = useState<OrderStatus | null>(
-    (searchParams.get("status") as OrderStatus) || null
+  const [keyword, setKeyword] = useState<string>(
+    () => searchParams.get("keyword") ?? initialFilterOptions.keyword
   );
-  const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
-  const [size, setSize] = useState(Number(searchParams.get("size")) || 10);
 
-  const form = useForm<OrderFilterForm>({
-    defaultValues: {
-      keyword: searchParams.get("keyword") || "",
-      startDate: searchParams.get("startDate") || "",
-      endDate: searchParams.get("endDate") || "",
-    },
-  });
+  const [startDate, setStartDate] = useState<string>(
+    () => searchParams.get("startDate") ?? initialFilterOptions.startDate
+  );
 
-  const keyword = form.watch("keyword");
-  const startDate = form.watch("startDate");
-  const endDate = form.watch("endDate");
+  const [endDate, setEndDate] = useState<string>(
+    () => searchParams.get("endDate") ?? initialFilterOptions.endDate
+  );
 
-  // Sync state lên URL (có debounce nhẹ 300ms để tránh push URL liên tục khi gõ phím)
+  const [status, setStatus] = useState<OrderStatus | null>(
+    () => (searchParams.get("status") as OrderStatus) ?? initialFilterOptions.status
+  );
+
+  const [page, setPage] = useState<number>(
+    () => Number(searchParams.get("page")) || initialFilterOptions.page
+  );
+
+  const [size, setSize] = useState<number>(
+    () => Number(searchParams.get("size")) || initialFilterOptions.size
+  );
+
+  const debouncedKeyword = useDebounce(keyword, 500);
+
   useEffect(() => {
-    const handler = setTimeout(() => {
-      const params = new URLSearchParams();
-      if (keyword) params.set("keyword", keyword);
-      if (startDate) params.set("startDate", startDate);
-      if (endDate) params.set("endDate", endDate);
-      if (status) params.set("status", status);
-      if (page > 1) params.set("page", page.toString());
-      if (size !== 10) params.set("size", size.toString());
+    const params = new URLSearchParams();
 
-      setSearchParams(params, { replace: true });
-    }, 300);
-
-    return () => clearTimeout(handler);
-  }, [keyword, startDate, endDate, status, page, size, setSearchParams]);
-
-  // Tự động reset về trang 1 khi các filter thay đổi (trừ thay đổi page)
-  const isFirstRender = useRef(true);
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
+    if (debouncedKeyword) {
+      params.set("keyword", debouncedKeyword.trim());
     }
-    setPage(1);
-  }, [keyword, startDate, endDate, status, size]);
 
-  const resetFilters = () => {
-    setStatus(null);
+    if (startDate) {
+      params.set("startDate", startDate);
+    }
+
+    if (endDate) {
+      params.set("endDate", endDate);
+    }
+
+    if (status) {
+      params.set("status", status);
+    }
+
+    if (page !== initialFilterOptions.page) {
+      params.set("page", String(page));
+    }
+
+    if (size !== initialFilterOptions.size) {
+      params.set("size", String(size));
+    }
+
+    setSearchParams(params, { replace: true });
+  }, [debouncedKeyword, startDate, endDate, status, page, size, setSearchParams]);
+
+  const handleKeywordChange = useCallback((value: string) => {
+    setKeyword(value);
     setPage(1);
-    form.reset({ keyword: "", startDate: "", endDate: "" });
-  };
+  }, []);
+
+  const handleStartDateChange = useCallback((value: string) => {
+    setStartDate(value);
+    setPage(1);
+  }, []);
+
+  const handleEndDateChange = useCallback((value: string) => {
+    setEndDate(value);
+    setPage(1);
+  }, []);
+
+  const handleStatusChange = useCallback((value: OrderStatus | null) => {
+    setStatus(value);
+    setPage(1);
+  }, []);
+
+  const handleResetFilter = useCallback(() => {
+    setKeyword(initialFilterOptions.keyword);
+    setStartDate(initialFilterOptions.startDate);
+    setEndDate(initialFilterOptions.endDate);
+    setStatus(initialFilterOptions.status);
+    setPage(initialFilterOptions.page);
+    setSize(initialFilterOptions.size);
+  }, []);
 
   const filterParams: OrderFilterRequest = {
-    keyword: keyword ? keyword.trim() : undefined,
+    keyword: debouncedKeyword ? debouncedKeyword.trim() : undefined,
     startDate: startDate || undefined,
     endDate: endDate || undefined,
     status: status || undefined,
@@ -85,25 +121,30 @@ export function useOrderFilter() {
   });
 
   return {
-    form,
-    filters: {
-      keyword,
-      status,
-      startDate,
-      endDate,
-      page,
-      size,
-    },
+    keyword,
+    startDate,
+    endDate,
+    status,
+    page,
+    size,
+    debouncedKeyword,
     filterParams,
-    setStatus,
+
     setPage,
     setSize,
-    resetFilters,
+
+    handleKeywordChange,
+    handleStartDateChange,
+    handleEndDateChange,
+    handleStatusChange,
+    handleResetFilter,
+
     // API data & query state
     orders: query.data?.items ?? [],
     totalItems: query.data?.totalItems ?? 0,
     totalPages: query.data?.totalPages ?? 0,
     isLoading: query.isLoading,
+    isPending: query.isPending,
     isError: query.isError,
     error: query.error,
     refetch: query.refetch,

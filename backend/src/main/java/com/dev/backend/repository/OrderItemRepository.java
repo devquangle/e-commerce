@@ -1,5 +1,7 @@
 package com.dev.backend.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,5 +16,14 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Integer> {
                 WHERE oi.product.id = :productId
                   AND oi.order.status = :status
             """)
-    Long getSoldCountByProductId(@Param("productId") Integer productId, @Param("status") com.dev.backend.constant.OrderStatus status);
+    Long getSoldCountByProductId(@Param("productId") Integer productId,
+            @Param("status") com.dev.backend.constant.OrderStatus status);
+
+    @Query("""
+                SELECT oi
+                FROM OrderItem oi
+                WHERE oi.order.orderCode = :orderCode
+            """)
+    List<OrderItem> findByOrderCode(
+            @Param("orderCode") String orderCode);
 }
