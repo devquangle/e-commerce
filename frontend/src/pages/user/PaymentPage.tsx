@@ -45,7 +45,7 @@ export default function PaymentPage() {
   // dùng để resolve selectedAddress trong useMemo bên dưới
   const [selectedAddressId] = useState(() => getSelectedAddressId());
   const [appliedCoupon, setAppliedCoupon] = useState<CouponOption | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodType>("cod");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodType>("COD");
   const [note, setNote] = useState("");
 
   const updateQuantityMutation = useUpdateQuantity();

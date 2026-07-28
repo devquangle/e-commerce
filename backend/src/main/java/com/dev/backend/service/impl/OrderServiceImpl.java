@@ -132,11 +132,13 @@ public class OrderServiceImpl implements OrderService {
 
         @Override
         public void cancelOrder(Integer userId, CancelOrderRequest request) {
-
+// reservedQuantity -= quantity
+// soldQuantity += quantity
                 Order order = getOrderByOrderCodeAndUserId(request.getOrderCode(), userId);
                 validateStatusTransition(order.getStatus(), OrderStatus.CANCELLED);
                 order.setStatus(OrderStatus.CANCELLED);
                 order.setCancel(request.getCancel());
+                // reservedQuantity -= quantity
                 orderRepository.save(order);
 
         }

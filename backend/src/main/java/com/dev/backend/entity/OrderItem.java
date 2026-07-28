@@ -39,7 +39,7 @@ public class OrderItem {
     private Integer originalPrice; // Giá gốc
     
     @Convert(converter = ProductSnapshotConverter.class)
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "LONGTEXT",updatable = false)
     private ProductSnapshot productInfo;
 
     @ManyToOne()
