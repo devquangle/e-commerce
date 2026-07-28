@@ -33,11 +33,11 @@ export default function Modal({
 
   if (!isOpen) return null;
 
-  // Thay đổi cấu trúc size: tăng max-width cho lg để form thoáng hơn nếu cần
   const sizeClass = {
     sm: "max-w-sm",
     md: "max-w-md",
-    lg: "max-w-2xl", // Phù hợp cho form tác giả có ảnh preview
+    lg: "max-w-4xl",
+    xl: "max-w-5xl",
   };
 
   return (

@@ -216,7 +216,14 @@ export default function PaymentPage() {
   // Tự động gỡ voucher khi tạm tính không còn đủ điều kiện
   // Dùng queueMicrotask để tránh setState đồng bộ trong effect body
   useEffect(() => {
-    if (!appliedCoupon) return;
+    if (
+      !appliedCoupon ||
+      items.length === 0 ||
+      createOrderMutation.isPending ||
+      createOrderMutation.isSuccess
+    )
+      return;
+
     const basePrice = subtotal - productDiscount;
     const isIneligible =
       appliedCoupon.minOrderValue > 0 &&
@@ -233,7 +240,15 @@ export default function PaymentPage() {
         `Mã "${code}" đã bị gỡ vì đơn hàng chưa đủ ${formatMoney(minVal)}`
       );
     });
-  }, [subtotal, productDiscount, appliedCoupon, setValue]);
+  }, [
+    subtotal,
+    productDiscount,
+    appliedCoupon,
+    setValue,
+    items.length,
+    createOrderMutation.isPending,
+    createOrderMutation.isSuccess,
+  ]);
 
   if (items.length === 0 && !isCartPending) {
     return (
