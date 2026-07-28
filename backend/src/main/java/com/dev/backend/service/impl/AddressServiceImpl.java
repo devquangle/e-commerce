@@ -79,6 +79,9 @@ public class AddressServiceImpl implements AddressService {
         Address address = new Address();
         addressMapper.toEntityAddress(address, request);
         address.setUser(userService.getUserById(userId));
+        if (countAddressByUser(userId) == 0) {
+            address.setDefault(true);
+        }
         addressRepository.save(address);
         return toAddressResponse(address);
     }
