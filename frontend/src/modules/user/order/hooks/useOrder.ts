@@ -17,6 +17,7 @@ export const useSearchOrderByUser = (options?: OrderFilterRequest) => {
     queryKey: ["orders", userInfo?.code, options],
     queryFn: () => OrderService.getMyOrders(options),
     enabled: isInitialized && !!userInfo,
+    staleTime: 5 * 60 * 1000,
   });
 };
 

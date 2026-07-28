@@ -42,7 +42,7 @@ export function OrderFilter({
               type="text"
               value={keyword}
               onChange={(e) => onKeywordChange(e.target.value)}
-              placeholder="Tìm theo tên khách hàng..."
+              placeholder="Tìm theo mã, tên và số điện thoại khách hàng..."
               className="w-full h-11 rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
             />
           </div>

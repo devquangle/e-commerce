@@ -1,6 +1,7 @@
 import { OrderFilter } from "@/modules/user/order/components/OrderFilter";
 import { OrderCard } from "@/modules/user/order/components/OrderCard";
 import { OrderCardSkeleton } from "@/modules/user/order/components/OrderCardSkeleton";
+import { OrderEmpty } from "@/modules/user/order/components/OrderEmpty";
 import { useOrderFilter } from "@/modules/user/order/hooks/useOrderFilter";
 import { useSearchOrderByUser } from "@/modules/user/order/hooks/useOrder";
 import Pagination from "@/components/common/Pagination";
@@ -52,9 +53,7 @@ export default function Orders() {
         ) : orders.length > 0 ? (
           orders.map((order) => <OrderCard key={order.id} order={order} />)
         ) : (
-          <p className="text-center text-gray-500 text-sm py-8">
-            Không có đơn hàng nào
-          </p>
+          <OrderEmpty />
         )}
       </div>
 
