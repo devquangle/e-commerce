@@ -34,4 +34,5 @@ public interface PromotionService {
     void delete(Integer id);
 
 
+
 }

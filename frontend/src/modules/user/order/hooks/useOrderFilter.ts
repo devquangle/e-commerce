@@ -1,6 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/context/useAuth";
+import OrderService from "../services/order.service";
+import type { OrderFilterRequest } from "../types/order.search.type";
 import type { OrderStatus } from "../types/order.type";
 
 export type OrderFilterForm = {
@@ -11,6 +15,7 @@ export type OrderFilterForm = {
 
 export function useOrderFilter() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { isInitialized, userInfo } = useAuth();
 
   // Khởi tạo state từ URL
   const [status, setStatus] = useState<OrderStatus | null>(
@@ -64,6 +69,21 @@ export function useOrderFilter() {
     form.reset({ keyword: "", startDate: "", endDate: "" });
   };
 
+  const filterParams: OrderFilterRequest = {
+    keyword: keyword ? keyword.trim() : undefined,
+    startDate: startDate || undefined,
+    endDate: endDate || undefined,
+    status: status || undefined,
+    page,
+    size,
+  };
+
+  const query = useQuery({
+    queryKey: ["orders", userInfo?.code, filterParams],
+    queryFn: () => OrderService.getMyOrders(filterParams),
+    enabled: isInitialized && !!userInfo,
+  });
+
   return {
     form,
     filters: {
@@ -74,9 +94,19 @@ export function useOrderFilter() {
       page,
       size,
     },
+    filterParams,
     setStatus,
     setPage,
     setSize,
     resetFilters,
+    // API data & query state
+    orders: query.data?.items ?? [],
+    totalItems: query.data?.totalItems ?? 0,
+    totalPages: query.data?.totalPages ?? 0,
+    isLoading: query.isLoading,
+    isError: query.isError,
+    error: query.error,
+    refetch: query.refetch,
+    query,
   };
 }

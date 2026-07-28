@@ -14,11 +14,11 @@ import com.dev.backend.dto.promotion.PromotionProductRequest;
 import com.dev.backend.entity.Product;
 import com.dev.backend.entity.Promotion;
 import com.dev.backend.entity.PromotionProduct;
+import com.dev.backend.exception.NotFoundException;
 import com.dev.backend.repository.PromotionProductRepository;
 import com.dev.backend.service.ProductService;
 import com.dev.backend.service.PromotionProductService;
 
-import ch.qos.logback.classic.Logger;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -127,5 +127,11 @@ public class PromotionProductServiceImpl implements PromotionProductService {
         int discountPercent = getDiscountValueByProductId(product.getId());
 
         return originalPrice - originalPrice * discountPercent / 100;
+    }
+
+    @Override
+    public PromotionProduct findActivePromotion(Integer productId) {
+        return promotionProductRepository.findActivePromotion(productId)
+                .orElseThrow(() -> new NotFoundException("NOT FOUND"));
     }
 }

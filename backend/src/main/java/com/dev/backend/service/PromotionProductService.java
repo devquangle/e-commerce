@@ -21,4 +21,11 @@ public interface PromotionProductService {
 
     Integer calculateSalePrice(Product product);
 
+    PromotionProduct findActivePromotion(Integer productId);
+
+    // public void reserveQuantity(Integer productId, Integer quantity);
+
+    // public void confirmQuantity(Integer productId, Integer quantity);
+
+    // public void releaseReservedQuantity(Integer productId, Integer quantity);
 }

@@ -8,7 +8,7 @@ import Contact from "@/pages/user/Contact";
 import Blogs from "@/pages/user/Blogs";
 import AccountLayout from "@/layouts/AccountLayout";
 
-import Orders from "@/pages/user/Orders";
+import Orders from "@/pages/user/OrdersPage";
 import Profile from "@/pages/auth/Profile";
 
 import Address from "@/pages/user/Address";

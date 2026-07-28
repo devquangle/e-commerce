@@ -1,13 +1,16 @@
+import { formatMoney } from "@/utils/number.utils";
 import { 
-  type Order, 
   OrderStatusMapping, 
   OrderStatusColor, 
   PaymentStatusMapping, 
-  PaymentMethodMapping 
+  PaymentMethodMapping, 
+  type OrderResponse
 } from "../types/order.type";
 
+export type { OrderResponse };
+
 interface OrderCardProps {
-  order: Order;
+  order: OrderResponse;
 }
 
 // Hàm format ngày từ YYYY-MM-DD sang DD/MM/YYYY
@@ -23,9 +26,15 @@ export function OrderCard({ order }: OrderCardProps) {
     <div className="rounded-xl shadow-sm hover:shadow-md bg-white p-4 space-y-4">
       {/* Header */}
       <div className="flex justify-between items-start m-0">
-        <div className="text-sm space-y-0.5">
-          <p className="font-medium text-gray-800">
-            {order.fullname} - Ngày đặt: {formatDate(order.date)}
+        <div className="text-sm">
+          <p className="font-semibold text-gray-900 flex items-center gap-2 flex-wrap">
+            <span>
+              Mã đơn: <span className="text-blue-600">#{order.orderCode}</span>
+            </span>
+            <span className="text-gray-400">•</span>
+            <span className="text-gray-500 font-normal text-xs">
+              Ngày tạo: {formatDate(order.createdAt)}
+            </span>
           </p>
         </div>
 
@@ -39,8 +48,11 @@ export function OrderCard({ order }: OrderCardProps) {
       {/* Body */}
       <div className="grid md:grid-cols-2 gap-3 text-sm bg-gray-50 rounded-lg m-0 p-3">
         <div className="space-y-1">
-          <p className="text-gray-500">{order.phone}</p>
-          <p className="text-gray-600">{order.address}</p>
+          <p className="text-gray-800">
+            <span className="font-medium">{order.fullName}</span>{" "}
+            <span className="text-gray-500">({order.phone})</span>
+          </p>
+          <p className="text-gray-600">{order.streetFull}</p>
         </div>
 
         <div className="space-y-1">
@@ -66,7 +78,7 @@ export function OrderCard({ order }: OrderCardProps) {
       {/* Footer */}
       <div className="flex flex-wrap justify-between items-center gap-3 pt-1">
         <p className="font-semibold text-gray-800">
-          Tổng tiền: {order.total.toLocaleString("vi-VN")}₫
+          Tổng tiền:  {formatMoney(order.total)}
         </p>
 
         <div className="flex gap-2 flex-wrap">

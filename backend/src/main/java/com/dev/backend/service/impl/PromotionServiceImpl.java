@@ -229,4 +229,8 @@ public class PromotionServiceImpl implements PromotionService {
                 }
                 promotionRepository.saveAll(promotions);
         }
+
+
+
+        
 }

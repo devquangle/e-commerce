@@ -1,13 +1,15 @@
-export type Order = {
+export interface OrderResponse {
   id: number;
-  fullname: string;
+  fullName: string;
   phone: string;
-  address: string;
+  streetFull: string;
   total: number;
-  status: OrderStatus;
+  orderCode: string;
+
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
-  date: string; // YYYY-MM-DD
+  createdAt: string; // YYYY-MM-DD
+  status: OrderStatus;
 };
 
 export interface OrderRequest {
@@ -17,6 +19,9 @@ export interface OrderRequest {
   paymentMethod: PaymentMethod;
   note?: string;
 }
+
+
+
 
 export type PaymentMethod = "COD" | "VNPAY";
 
