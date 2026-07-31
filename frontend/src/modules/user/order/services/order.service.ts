@@ -23,6 +23,8 @@ const OrderService = {
     return res.data.data;
   },
   async getMyOrders(options?: OrderFilterRequest) {
+    const start = performance.now();
+
     const res = await apiAuth.get<ApiResponse<Pagination<OrderResponse>>>(
       "/api/v1/my-order",
       { params: options },
@@ -30,6 +32,8 @@ const OrderService = {
     if (!res.data.success || !res.data.data) {
       throw new Error(res.data.message || "Fetch list order failed");
     }
+    const end = performance.now();
+    console.log(`Time: ${((end - start) / 1000).toFixed(2)} s`);
     console.log(res.data.data);
     return res.data.data;
   },
@@ -48,7 +52,7 @@ const OrderService = {
   async changeAddress(data: ChangeAddressRequest) {
     const res = await apiAuth.post<ApiResponse<void>>(
       "/api/v1/order/change-address",
-      data
+      data,
     );
     if (!res.data.success) {
       throw new Error(res.data.message || "Fetch change-address failed");
@@ -59,7 +63,7 @@ const OrderService = {
   async cancelOrder(data: CancelOrderRequest) {
     const res = await apiAuth.post<ApiResponse<void>>(
       "/api/v1/order/cancel",
-      data
+      data,
     );
     if (!res.data.success) {
       throw new Error(res.data.message || "Fetch cancel failed");

@@ -48,8 +48,11 @@ public class Order extends BaseAuditableEntity<Integer> {
     @Column(nullable = false)
     private String street;
 
+    @Column(nullable = false)
+    private String streetFull;
+
     private String noted;
-    
+
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
 
@@ -64,6 +67,9 @@ public class Order extends BaseAuditableEntity<Integer> {
 
     @Column(nullable = false, unique = true, updatable = false)
     private String orderCode;
+
+    @Column(nullable = false)
+    private Integer total;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "voucher_id")
@@ -81,5 +87,4 @@ public class Order extends BaseAuditableEntity<Integer> {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
 
-  
 }

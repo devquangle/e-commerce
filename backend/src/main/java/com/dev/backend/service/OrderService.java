@@ -13,7 +13,6 @@ import com.dev.backend.response.PageResponse;
 
 public interface OrderService {
 
-    Long calculateTotal(Order order);
 
     Order getOrderById(Integer id);
 
@@ -25,7 +24,6 @@ public interface OrderService {
 
     OrderDetailResponse getOrderDetailResponse(String orderCode);
 
-    OrderResponse toOrderResponse(Order order);
 
     PageResponse<OrderResponse> searchOrderUser(OrderFilterRequest request, Integer userId);
 

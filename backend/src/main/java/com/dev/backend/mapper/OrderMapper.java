@@ -22,6 +22,8 @@ public class OrderMapper {
         response.setDistrictId(order.getDistrictId());
         response.setWardCode(order.getWardCode());
         response.setStreet(order.getStreet());
+        response.setStreetFull(order.getStreetFull());
+        response.setTotal(order.getTotal());
         response.setNoted(order.getNoted());
         response.setCancel(order.getCancel());
         response.setVoucherAmount(order.getVoucherAmount());

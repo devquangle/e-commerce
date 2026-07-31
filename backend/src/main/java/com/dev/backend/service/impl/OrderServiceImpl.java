@@ -132,8 +132,8 @@ public class OrderServiceImpl implements OrderService {
 
         @Override
         public void cancelOrder(Integer userId, CancelOrderRequest request) {
-// reservedQuantity -= quantity
-// soldQuantity += quantity
+                // reservedQuantity -= quantity
+                // soldQuantity += quantity
                 Order order = getOrderByOrderCodeAndUserId(request.getOrderCode(), userId);
                 validateStatusTransition(order.getStatus(), OrderStatus.CANCELLED);
                 order.setStatus(OrderStatus.CANCELLED);
@@ -146,7 +146,7 @@ public class OrderServiceImpl implements OrderService {
         @Override
         public OrderDetailResponse getOrderDetailResponse(String orderCode) {
                 OrderDetailResponse response = new OrderDetailResponse();
-                response.setOrderInfo(this.toOrderResponse(getOrderByOrderCode(orderCode)));
+                response.setOrderInfo(orderMapper.toDTO(getOrderByOrderCode(orderCode)));
                 response.setItems(orderItemService.findByOrderCode(orderCode));
                 return response;
         }
@@ -193,49 +193,18 @@ public class OrderServiceImpl implements OrderService {
 
                 promotionProductService.reservePromotions(cartItems);
                 Order order = buildOrder(request, user, address);
-
                 OrderSummary summary = buildOrderItems(order, cartItems);
-
-                applyVoucher(
-                                order,
-                                request.getVoucherId(),
-                                userId,
-                                summary.getSubtotal());
-
-                applyShippingFee(
-                                order,
-                                address,
-                                summary.getTotalWeight());
-
+                applyVoucher(order, request.getVoucherId(), userId, summary.getSubtotal());
+                Integer shippingFee = applyShippingFee(address, summary.getTotalWeight());
+                Integer total = calculateTotal(summary.getSubtotal(), order.getVoucherAmount(), shippingFee);
+                applyPaymentInfo(order, shippingFee, total);
                 Order savedOrder = orderRepository.save(order);
-
                 cartItemService.deleteAll(cartItems);
 
-                return toOrderResponse(savedOrder);
+                return orderMapper.toDTO(savedOrder);
         }
 
-        @Override
-        public Long calculateTotal(Order order) {
-                // Tổng thanh toán = Tổng tiền hàng - Giảm giá voucher + Phí vận chuyển
-                long subtotal = order.getOrderItems().stream()
-                                .mapToLong(item -> (long) item.getPrice() * item.getQuantity())
-                                .sum();
-
-                return Math.max(
-                                0L,
-                                subtotal
-                                                - (order.getVoucherAmount() == null ? 0L : order.getVoucherAmount())
-                                                + (order.getShippingFee() == null ? 0L : order.getShippingFee()));
-        }
-
-        @Override
-        public OrderResponse toOrderResponse(Order order) {
-                OrderResponse response = orderMapper.toDTO(order);
-                response.setStreetFull(ghnService.getStreetFull(order.getProvinceId(), order.getDistrictId(),
-                                order.getWardCode(), order.getStreet()));
-                response.setTotal(calculateTotal(order));
-                return response;
-        }
+       
 
         @Override
         public PageResponse<OrderResponse> searchOrder(OrderFilterRequest request) {
@@ -256,7 +225,7 @@ public class OrderServiceImpl implements OrderService {
                                 : keyword.trim();
                 Page<Order> pageResult = orderRepository.searchOrder(keyword, request.getStartDate(),
                                 request.getEndDate(), status, pageable);
-                List<OrderResponse> items = pageResult.getContent().stream().map(this::toOrderResponse).toList();
+                List<OrderResponse> items = pageResult.getContent().stream().map(orderMapper::toDTO).toList();
                 return new PageResponse<>(
                                 items,
                                 pageResult.getNumber(),
@@ -284,7 +253,7 @@ public class OrderServiceImpl implements OrderService {
                                 : keyword.trim();
                 Page<Order> pageResult = orderRepository.searchOrderUser(userId, keyword, request.getStartDate(),
                                 request.getEndDate(), status, pageable);
-                List<OrderResponse> items = pageResult.getContent().stream().map(this::toOrderResponse).toList();
+                List<OrderResponse> items = pageResult.getContent().stream().map(orderMapper::toDTO).toList();
                 return new PageResponse<>(
                                 items,
                                 pageResult.getNumber(),
@@ -319,13 +288,7 @@ public class OrderServiceImpl implements OrderService {
 
                 order.setUser(user);
 
-                order.setFullName(address.getFullName());
-                order.setPhone(address.getPhone());
-
-                order.setProvinceId(address.getProvinceId());
-                order.setDistrictId(address.getDistrictId());
-                order.setWardCode(address.getWardCode());
-                order.setStreet(address.getStreet());
+                applyOrderAddress(order, address);
 
                 order.setNoted(request.getNote());
 
@@ -426,22 +389,46 @@ public class OrderServiceImpl implements OrderService {
                 order.setVoucherAmount(voucherAmount);
         }
 
-        private void applyShippingFee(
-                        Order order,
+        private Integer applyShippingFee(
                         Address address,
                         Integer totalWeight) {
-
                 CalculateFeeRequest request = new CalculateFeeRequest();
-
                 request.setToDistrictId(address.getDistrictId());
-
                 request.setToWardCode(address.getWardCode());
-
                 request.setWeight(totalWeight);
+                return ghnService.calculateShippingFee(request);
+        }
 
-                Integer shippingFee = ghnService.calculateFee(request);
+        private Integer calculateTotal(
+                        Integer subtotal,
+                        Integer voucherAmount,
+                        Integer shippingFee) {
+
+                return Math.max(
+                                0,
+                                subtotal
+                                                - (voucherAmount == null ? 0 : voucherAmount)
+                                                + (shippingFee == null ? 0 : shippingFee));
+        }
+
+        private void applyPaymentInfo(
+                        Order order,
+                        Integer shippingFee,
+                        Integer total) {
 
                 order.setShippingFee(shippingFee);
+                order.setTotal(total);
+        }
+
+        private void applyOrderAddress(Order order, Address address) {
+                order.setFullName(address.getFullName());
+                order.setPhone(address.getPhone());
+                order.setProvinceId(address.getProvinceId());
+                order.setDistrictId(address.getDistrictId());
+                order.setWardCode(address.getWardCode());
+                order.setStreet(address.getStreet());
+                order.setStreetFull(ghnService.getStreetFull(address.getProvinceId(), address.getDistrictId(),
+                                address.getWardCode(), address.getStreet()));
         }
 
 }

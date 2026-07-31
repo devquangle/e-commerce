@@ -47,7 +47,7 @@ public class ApiGhnController {
     @PostMapping("/public/ghn/shipping-fee")
     public ResponseEntity<ResponseData<Integer>> getCalculateFee(
             @RequestBody CalculateFeeRequest calculateFeeRequest) {
-        Integer fee = ghnService.calculateFee(calculateFeeRequest);
+        Integer fee = ghnService.calculateShippingFee(calculateFeeRequest);
         return ResponseUtil.success("Tính phí vận chuyển thành công", fee);
     }
 

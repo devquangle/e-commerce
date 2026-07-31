@@ -174,7 +174,7 @@ public class GHNServiceImpl implements GHNService {
     }
 
     @Override
-    public Integer calculateFee(CalculateFeeRequest request) {
+    public Integer calculateShippingFee(CalculateFeeRequest request) {
         try {
             Map<String, Object> body = new HashMap<>();
             body.put("service_type_id", 2);

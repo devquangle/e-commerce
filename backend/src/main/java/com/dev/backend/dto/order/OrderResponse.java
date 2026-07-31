@@ -36,7 +36,7 @@ public class OrderResponse {
     private Integer voucherAmount;
     private Integer shippingFee;
 
-    private Long total;
+    private Integer total;
 
     private LocalDate createdAt;
 }
