@@ -14,7 +14,6 @@ import {
 import OrderSkeleton from "@/modules/admin/order/components/OrderSkeleton";
 import { CancelOrderModal } from "@/modules/admin/order/components/CancelOrderModal";
 import type { OrderResponse } from "@/modules/admin/order/types/order.type";
-import Spinner from "@/components/common/Spinner";
 
 export default function Order() {
   const navigate = useNavigate();

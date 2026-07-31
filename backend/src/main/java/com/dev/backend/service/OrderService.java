@@ -39,4 +39,5 @@ public interface OrderService {
             OrderStatus newStatus);
 
     void cancelOrder(Integer userId, CancelOrderRequest request);
+    
 }

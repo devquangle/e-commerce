@@ -3,6 +3,7 @@ import type { OrderFilterRequest } from "../types/order.search.type";
 import type { ApiResponse } from "@/types/api-response";
 import type { Pagination } from "@/types/pagination";
 import type {
+  CancelOrderRequest,
   OrderDetailResponse,
   OrderResponse,
   OrderStatus,
@@ -42,11 +43,14 @@ const OrderService = {
     return res.data.data;
   },
 
-  async cancel(id: number, reason?: string) {
-    const res = await apiAuth.put<ApiResponse<OrderResponse>>(
-      `/api/v1/admin/orders/${id}/cancel`,
-      { cancel: reason },
+  async cancelOrder(data: CancelOrderRequest) {
+    const res = await apiAuth.post<ApiResponse<void>>(
+      "/api/v1/admin/order/cancel",
+      data,
     );
+    if (!res.data.success) {
+      throw new Error(res.data.message || "Fetch cancel failed");
+    }
     return res.data.data;
   },
 };

@@ -1,7 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { OrderFilterRequest } from "../types/order.search.type";
 import type { Pagination } from "@/types/pagination";
-import type { OrderResponse, OrderStatus } from "../types/order.type";
+import type {
+  CancelOrderRequest,
+  OrderResponse,
+  OrderStatus,
+} from "../types/order.type";
 import OrderService from "../services/order.service";
 import { showErrorToast, showSuccessToast } from "@/utils/toastUtil";
 import axios from "axios";
@@ -19,6 +23,7 @@ export const useOrderDetail = (orderCode?: string) => {
   return useQuery({
     queryKey: ["orderDetail", orderCode],
     queryFn: () => OrderService.getOrderDetail(orderCode),
+    enabled: !!orderCode,
   });
 };
 
@@ -30,6 +35,7 @@ export const useUpdateOrderStatus = () => {
       OrderService.updateStatus(id, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orders-filter"] });
+      queryClient.invalidateQueries({ queryKey: ["orderDetail"] });
       showSuccessToast("Duyệt đơn hàng thành công!");
     },
     onError: (error: unknown) => {
@@ -48,11 +54,15 @@ export const useCancelOrder = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, reason }: { id: number; reason?: string }) =>
-      OrderService.cancel(id, reason),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["orders-filter"] });
-      showSuccessToast("Hủy đơn hàng thành công!");
+    mutationFn: (data: CancelOrderRequest) => OrderService.cancelOrder(data),
+    onSuccess: async (_, variables) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["orders-filter"] }),
+        queryClient.invalidateQueries({
+          queryKey: ["orderDetail", variables.orderCode],
+        }),
+      ]);
+      showSuccessToast(`Đã hủy thành công đơn hàng #${variables.orderCode}`);
     },
     onError: (error: unknown) => {
       let errorMsg = "Đã xảy ra lỗi khi hủy đơn hàng.";

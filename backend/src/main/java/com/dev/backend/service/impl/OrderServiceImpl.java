@@ -50,7 +50,7 @@ import com.dev.backend.service.UserService;
 import com.dev.backend.service.VoucherService;
 import com.dev.backend.util.FilterValidator;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
@@ -155,10 +155,20 @@ public class OrderServiceImpl implements OrderService {
         }
 
         @Override
+        @Transactional
         public void cancelOrder(Integer userId, CancelOrderRequest request) {
-                Order order = getOrderByOrderCodeAndUserId(request.getOrderCode(), userId);
-                validateStatusTransition(order.getStatus(), OrderStatus.CANCELLED);
-                promotionProductService.releasePromotions(order.getOrderItems());
+                Order order;
+                if (userId != null) {
+                        order = getOrderByOrderCodeAndUserId(request.getOrderCode(), userId);
+                } else {
+                        order = getOrderByOrderCode(request.getOrderCode());
+
+                }
+                OrderStatus currentStatus = order.getStatus();
+                validateStatusTransition(currentStatus , OrderStatus.CANCELLED);
+                if (currentStatus == OrderStatus.PENDING) {
+                        promotionProductService.releasePromotions(order.getOrderItems());
+                }
                 order.setStatus(OrderStatus.CANCELLED);
                 order.setCancel(request.getCancel());
                 orderRepository.save(order);

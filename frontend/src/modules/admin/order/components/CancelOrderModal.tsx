@@ -56,8 +56,8 @@ export function CancelOrderModal({
 
     cancelOrderMutation.mutate(
       {
-        id: order.id,
-        reason: finalReason,
+        orderCode: order.orderCode,
+        cancel: finalReason,
       },
       {
         onSuccess: () => {

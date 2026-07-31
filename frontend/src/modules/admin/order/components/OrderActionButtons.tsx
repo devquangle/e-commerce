@@ -66,7 +66,7 @@ export default function OrderActionButtons({
       {/* DROPDOWN MENU */}
       {isOpen && (
         <div
-          className={`absolute right-0 w-36 bg-white border border-slate-200 rounded-xl shadow-lg z-50 p-1 flex flex-col gap-0.5 animate-in fade-in zoom-in-95 duration-150 ${
+          className={`absolute right-0 w-40 bg-white border border-slate-200 rounded-xl shadow-lg z-50 p-1 flex flex-col gap-0.5 animate-in fade-in zoom-in-95 duration-150 ${
             openUpward ? "bottom-full mb-1" : "top-full mt-1"
           }`}
         >
@@ -77,9 +77,9 @@ export default function OrderActionButtons({
                 onViewDetail(item);
                 setIsOpen(false);
               }}
-              className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-indigo-600 rounded-lg transition-colors cursor-pointer text-left"
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-indigo-600 rounded-lg transition-colors cursor-pointer text-left"
             >
-              <Eye size={14} className="text-slate-500 shrink-0" />
+              <Eye size={16} className="text-slate-500 shrink-0" />
               Chi tiết
             </button>
           )}
@@ -91,9 +91,9 @@ export default function OrderActionButtons({
                 onApprove(item);
                 setIsOpen(false);
               }}
-              className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer text-left"
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm font-semibold text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer text-left"
             >
-              <Check size={14} className="shrink-0" />
+              <Check size={16} className="shrink-0" />
               Duyệt đơn
             </button>
           )}
@@ -105,9 +105,9 @@ export default function OrderActionButtons({
                 onCancel(item);
                 setIsOpen(false);
               }}
-              className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer text-left"
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm font-semibold text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer text-left"
             >
-              <Trash2 size={14} className="shrink-0" />
+              <Trash2 size={16} className="shrink-0" />
               Hủy đơn
             </button>
           )}
