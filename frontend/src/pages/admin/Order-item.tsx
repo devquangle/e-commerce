@@ -1,15 +1,12 @@
 import { useState } from "react";
 import { useSearchParams, useLocation, useNavigate } from "react-router-dom";
-import {
-  useOrderDetail,
-  useUpdateOrderStatus,
-} from "@/modules/admin/order/hooks/useOrder";
+import { useOrderDetail } from "@/modules/admin/order/hooks/useOrder";
 import OrderItemHeader from "@/modules/admin/order-item/components/OrderItemHeader";
 import OrderInfoCards from "@/modules/admin/order-item/components/OrderInfoCards";
 import OrderNoteCards from "@/modules/admin/order-item/components/OrderNoteCards";
 import OrderSummaryFooter from "@/modules/admin/order-item/components/OrderSummaryFooter";
-
 import { CancelOrderModal } from "@/modules/admin/order/components/CancelOrderModal";
+import { ApproveOrderModal } from "@/modules/admin/order/components/ApproveOrderModal";
 import Button from "@/components/common/Button";
 import { ArrowLeft } from "lucide-react";
 import { OrderItemCard } from "@/modules/admin/order-item/components/OrderItemCard";
@@ -20,6 +17,7 @@ export default function OrderItem() {
   const location = useLocation();
   const navigate = useNavigate();
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
 
   const orderCodeParam = searchParams.get("orderCode");
   const stateOrder = location.state?.order;
@@ -31,8 +29,6 @@ export default function OrderItem() {
     isError,
     error,
   } = useOrderDetail(orderCode);
-
-  const updateStatusMutation = useUpdateOrderStatus();
 
   if (isLoading) {
     return <OrderDetailSkeleton />;
@@ -60,7 +56,7 @@ export default function OrderItem() {
   }
 
   const handleApprove = () => {
-    updateStatusMutation.mutate({ id: orderInfo.id, status: "CONFIRMED" });
+    setIsApproveModalOpen(true);
   };
 
   const handleCancel = () => {
@@ -109,6 +105,13 @@ export default function OrderItem() {
         {/* Card Footer: Tóm tắt đơn hàng */}
         <OrderSummaryFooter orderInfo={orderInfo} items={items} />
       </div>
+
+      {/* APPROVE ORDER MODAL */}
+      <ApproveOrderModal
+        isOpen={isApproveModalOpen}
+        onClose={() => setIsApproveModalOpen(false)}
+        order={orderInfo}
+      />
 
       {/* CANCEL ORDER MODAL */}
       <CancelOrderModal

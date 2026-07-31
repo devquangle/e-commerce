@@ -7,17 +7,16 @@ import { OrderFilter } from "@/modules/admin/order/components/OrderFilter";
 import OrderTable from "@/modules/admin/order/components/OrderTable";
 import OrderMobileCard from "@/modules/admin/order/components/OrderMobileCard";
 import { useOrderFilter } from "@/modules/admin/order/hooks/useOrderFilter";
-import {
-  useFilterOrder,
-  useUpdateOrderStatus,
-} from "@/modules/admin/order/hooks/useOrder";
+import { useFilterOrder } from "@/modules/admin/order/hooks/useOrder";
 import OrderSkeleton from "@/modules/admin/order/components/OrderSkeleton";
 import { CancelOrderModal } from "@/modules/admin/order/components/CancelOrderModal";
+import { ApproveOrderModal } from "@/modules/admin/order/components/ApproveOrderModal";
 import type { OrderResponse } from "@/modules/admin/order/types/order.type";
 
 export default function Order() {
   const navigate = useNavigate();
   const [cancelModalOrder, setCancelModalOrder] = useState<OrderResponse | null>(null);
+  const [approveModalOrder, setApproveModalOrder] = useState<OrderResponse | null>(null);
 
   const {
     keyword,
@@ -37,12 +36,11 @@ export default function Order() {
   } = useOrderFilter();
 
   const { data: orderData, isPending } = useFilterOrder(filterParams);
-  const updateStatusMutation = useUpdateOrderStatus();
 
   const orders = orderData?.items || [];
 
   const handleApproveOrder = (order: OrderResponse) => {
-    updateStatusMutation.mutate({ id: order.id, status: "CONFIRMED" });
+    setApproveModalOrder(order);
   };
 
   const handleCancelOrder = (order: OrderResponse) => {
@@ -54,7 +52,6 @@ export default function Order() {
       state: { orderCode: order.orderCode, order },
     });
   };
-
 
   return (
     <section className="flex-1 flex flex-col gap-4">
@@ -121,6 +118,13 @@ export default function Order() {
           </>
         )}
       </div>
+
+      {/* APPROVE ORDER MODAL */}
+      <ApproveOrderModal
+        isOpen={!!approveModalOrder}
+        onClose={() => setApproveModalOrder(null)}
+        order={approveModalOrder}
+      />
 
       {/* CANCEL ORDER MODAL */}
       <CancelOrderModal
