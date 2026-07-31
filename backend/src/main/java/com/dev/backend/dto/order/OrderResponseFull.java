@@ -1,20 +1,17 @@
 package com.dev.backend.dto.order;
 
 import java.time.LocalDate;
+
 import com.dev.backend.constant.OrderStatus;
 import com.dev.backend.constant.PaymentMethod;
 import com.dev.backend.constant.PaymentStatus;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
-public class OrderResponse {
+public class OrderResponseFull {
     private Integer id;
     private String fullName;
     private String phone;
@@ -33,7 +30,9 @@ public class OrderResponse {
     private String cancel;
     private String orderCode;
 
-    private Long successRate;
+    private Long successOrders;
+    private Long finishedOrders;
+    private Double successRate;
 
     private Integer voucherAmount;
     private Integer shippingFee;

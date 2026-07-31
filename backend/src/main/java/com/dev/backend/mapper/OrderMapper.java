@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.dev.backend.dto.order.OrderItemResponse;
 import com.dev.backend.dto.order.OrderResponse;
+import com.dev.backend.dto.order.OrderResponseFull;
 import com.dev.backend.entity.Order;
 import com.dev.backend.entity.OrderItem;
 
@@ -15,6 +16,32 @@ public class OrderMapper {
             return null;
         }
         OrderResponse response = new OrderResponse();
+        response.setId(order.getId());
+        response.setFullName(order.getFullName());
+        response.setPhone(order.getPhone());
+        response.setProvinceId(order.getProvinceId());
+        response.setDistrictId(order.getDistrictId());
+        response.setWardCode(order.getWardCode());
+        response.setStreet(order.getStreet());
+        response.setStreetFull(order.getStreetFull());
+        response.setTotal(order.getTotal());
+        response.setNoted(order.getNoted());
+        response.setCancel(order.getCancel());
+        response.setVoucherAmount(order.getVoucherAmount());
+        response.setShippingFee(order.getShippingFee());
+        response.setOrderCode(order.getOrderCode());
+        response.setPaymentMethod(order.getPaymentMethod());
+        response.setPaymentStatus(order.getPaymentStatus());
+        response.setStatus(order.getStatus());
+        response.setCreatedAt(order.getCreatedAt());
+        return response;
+    }
+
+    public OrderResponseFull toOrderFullDTO(Order order) {
+        if (order == null) {
+            return null;
+        }
+        OrderResponseFull response = new OrderResponseFull();
         response.setId(order.getId());
         response.setFullName(order.getFullName());
         response.setPhone(order.getPhone());

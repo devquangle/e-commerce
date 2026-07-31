@@ -19,6 +19,8 @@ import com.dev.backend.dto.order.OrderDetailResponse;
 import com.dev.backend.dto.order.OrderFilterRequest;
 import com.dev.backend.dto.order.OrderRequest;
 import com.dev.backend.dto.order.OrderResponse;
+import com.dev.backend.dto.order.OrderResponseFull;
+import com.dev.backend.dto.order.OrderStatistic;
 import com.dev.backend.dto.order.OrderSummary;
 import com.dev.backend.entity.Address;
 import com.dev.backend.entity.CartItem;
@@ -131,6 +133,23 @@ public class OrderServiceImpl implements OrderService {
         }
 
         @Override
+        public OrderResponseFull toOrderResponseFull(Order order) {
+                OrderResponseFull response = orderMapper.toOrderFullDTO(order);
+                OrderStatistic statistic = orderRepository.getOrderStatistic(order.getUser().getId());
+                double successRate = statistic.getFinishedOrders() == 0
+                                ? 0
+                                : Math.round(
+                                                (double) statistic.getSuccessOrders()
+                                                                * 10000
+                                                                / statistic.getFinishedOrders())
+                                                / 100.0;
+                response.setSuccessOrders(statistic.getSuccessOrders());
+                response.setFinishedOrders(statistic.getFinishedOrders());
+                response.setSuccessRate(successRate);
+                return response;
+        }
+
+        @Override
         public void cancelOrder(Integer userId, CancelOrderRequest request) {
                 // reservedQuantity -= quantity
                 // soldQuantity += quantity
@@ -186,7 +205,7 @@ public class OrderServiceImpl implements OrderService {
                 Order order = buildOrder(request, user, address);
                 OrderSummary summary = buildOrderItems(order, cartItems);
                 applyVoucher(order, request.getVoucherId(), userId, summary.getSubtotal());
-                applyPayment(order, address,summary);
+                applyPayment(order, address, summary);
                 Order savedOrder = orderRepository.save(order);
                 cartItemService.deleteAll(cartItems);
 
@@ -194,7 +213,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         @Override
-        public PageResponse<OrderResponse> searchOrder(OrderFilterRequest request) {
+        public PageResponse<OrderResponseFull> searchOrder(OrderFilterRequest request) {
                 int page = (request.getPage() == null || request.getPage() < 1) ? 0 : request.getPage() - 1;
                 int size = (request.getSize() == null || request.getSize() < 1) ? 10 : request.getSize();
 
@@ -212,7 +231,8 @@ public class OrderServiceImpl implements OrderService {
                                 : keyword.trim();
                 Page<Order> pageResult = orderRepository.searchOrder(keyword, request.getStartDate(),
                                 request.getEndDate(), status, pageable);
-                List<OrderResponse> items = pageResult.getContent().stream().map(orderMapper::toDTO).toList();
+                List<OrderResponseFull> items = pageResult.getContent().stream().map(this::toOrderResponseFull)
+                                .toList();
                 return new PageResponse<>(
                                 items,
                                 pageResult.getNumber(),

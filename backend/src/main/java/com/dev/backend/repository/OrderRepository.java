@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.dev.backend.constant.OrderStatus;
+import com.dev.backend.dto.order.OrderStatistic;
 import com.dev.backend.entity.Order;
 
 public interface OrderRepository extends JpaRepository<Order, Integer> {
@@ -91,4 +92,28 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
         Optional<Order> findByOrderCodeAndUserId(
                         @Param("orderCode") String orderCode,
                         @Param("userId") Integer userId);
+
+        @Query("""
+                            SELECT new com.dev.backend.dto.order.OrderStatistic(
+                                SUM(CASE
+                                        WHEN o.status IN (
+                                            com.dev.backend.constant.OrderStatus.COMPLETED,
+                                            com.dev.backend.constant.OrderStatus.RETURNED
+                                        )
+                                        THEN 1L ELSE 0L
+                                    END),
+                                SUM(CASE
+                                        WHEN o.status IN (
+                                            com.dev.backend.constant.OrderStatus.COMPLETED,
+                                            com.dev.backend.constant.OrderStatus.RETURNED,
+                                            com.dev.backend.constant.OrderStatus.CANCELLED,
+                                            com.dev.backend.constant.OrderStatus.FAILED_DELIVERY
+                                        )
+                                        THEN 1L ELSE 0L
+                                    END)
+                            )
+                            FROM Order o
+                            WHERE o.user.id = :userId
+                        """)
+        OrderStatistic getOrderStatistic(@Param("userId") Integer userId);
 }
