@@ -8,10 +8,9 @@ import OrderItemHeader from "@/modules/admin/order-item/components/OrderItemHead
 import OrderInfoCards from "@/modules/admin/order-item/components/OrderInfoCards";
 import OrderNoteCards from "@/modules/admin/order-item/components/OrderNoteCards";
 import OrderSummaryFooter from "@/modules/admin/order-item/components/OrderSummaryFooter";
-
 import OrderDetailSkeleton from "@/modules/admin/order/components/OrderDetailSkeleton";
 import Button from "@/components/common/Button";
-import { ArrowLeft, Check, X } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { OrderItemCard } from "@/modules/admin/order-item/components/OrderItemCard";
 
 export default function OrderItem() {
@@ -22,7 +21,6 @@ export default function OrderItem() {
   const orderCodeParam = searchParams.get("orderCode");
   const stateOrder = location.state?.order;
   const orderCode = orderCodeParam || stateOrder?.orderCode;
-  const orderId = location.state?.orderId || stateOrder?.id;
 
   const {
     data: orderDetail,
@@ -73,8 +71,14 @@ export default function OrderItem() {
 
   return (
     <div className="flex-1 flex flex-col gap-4">
-      {/* HEADER */}
-      <OrderItemHeader orderCode={orderInfo.orderCode} onBack={handleBack} />
+      {/* HEADER WITH ACTION BUTTONS */}
+      <OrderItemHeader
+        orderCode={orderInfo.orderCode}
+        status={orderInfo.status}
+        onBack={handleBack}
+        onApprove={handleApprove}
+        onCancel={handleCancel}
+      />
 
       {/* ===== INFO CARDS ===== */}
       <OrderInfoCards orderInfo={orderInfo} />
@@ -103,8 +107,6 @@ export default function OrderItem() {
         {/* Card Footer: Tóm tắt đơn hàng */}
         <OrderSummaryFooter orderInfo={orderInfo} items={items} />
       </div>
-
-     
     </div>
   );
 }

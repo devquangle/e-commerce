@@ -40,10 +40,10 @@ export default function OrderActionButtons({
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className="inline-flex items-center justify-center p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg border border-slate-200 transition-all cursor-pointer active:scale-95 bg-white"
+        className="inline-flex items-center justify-center p-1 lg:p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg border border-slate-200 transition-all cursor-pointer active:scale-95 bg-white"
         title="Thao tác"
       >
-        <MoreVertical size={16} />
+        <MoreVertical className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
       </button>
 
       {/* DROPDOWN MENU */}
