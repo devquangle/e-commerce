@@ -16,7 +16,7 @@ export function PaymentMethodOptions({
     badges: ReactNode;
   }[] = [
     {
-      id: "cod" as PaymentMethodType,
+      id: "COD" as PaymentMethodType,
       label: "Thanh toán khi nhận hàng",
       icon: <Banknote size={18} />,
       badges: (
@@ -27,7 +27,7 @@ export function PaymentMethodOptions({
       ),
     },
     {
-      id: "vnpay",
+      id: "VNPAY",
       label: "Thanh toán online",
       icon: <Landmark size={18} />,
       badges: (

@@ -195,16 +195,12 @@ public class OrderServiceImpl implements OrderService {
                 Order order = buildOrder(request, user, address);
                 OrderSummary summary = buildOrderItems(order, cartItems);
                 applyVoucher(order, request.getVoucherId(), userId, summary.getSubtotal());
-                Integer shippingFee = applyShippingFee(address, summary.getTotalWeight());
-                Integer total = calculateTotal(summary.getSubtotal(), order.getVoucherAmount(), shippingFee);
-                applyPaymentInfo(order, shippingFee, total);
+                applyPayment(order, address, summary.getTotalWeight(), summary.getSubtotal());
                 Order savedOrder = orderRepository.save(order);
                 cartItemService.deleteAll(cartItems);
 
                 return orderMapper.toDTO(savedOrder);
         }
-
-       
 
         @Override
         public PageResponse<OrderResponse> searchOrder(OrderFilterRequest request) {
@@ -411,12 +407,19 @@ public class OrderServiceImpl implements OrderService {
                                                 + (shippingFee == null ? 0 : shippingFee));
         }
 
-        private void applyPaymentInfo(
+        private void applyPayment(
                         Order order,
-                        Integer shippingFee,
-                        Integer total) {
+                        Address address,
+                        Integer totalWeight,
+                        Integer subtotal) {
 
+                Integer shippingFee = applyShippingFee(address, totalWeight);
+                Integer total = calculateTotal(
+                                subtotal,
+                                order.getVoucherAmount(),
+                                shippingFee);
                 order.setShippingFee(shippingFee);
+
                 order.setTotal(total);
         }
 

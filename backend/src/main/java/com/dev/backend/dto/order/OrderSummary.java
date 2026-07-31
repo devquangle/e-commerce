@@ -15,5 +15,5 @@ public class OrderSummary {
 
     private Integer subtotal;
 
-    private Integer totalWeight;
+    private Integer totalWeight; // tổng cân nặng
 }
