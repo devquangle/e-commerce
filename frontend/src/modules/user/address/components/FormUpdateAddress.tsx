@@ -1,5 +1,5 @@
 import InputField from "@/components/common/InputField";
-import Loading from "@/components/common/Loading";
+import Loading from "@/components/common/Spinner";
 import SelectBox from "@/components/common/SelectedBox";
 import TextAreaField from "@/components/common/TextAreaField";
 import type { AddressRequest } from "@/modules/user/address/types/address";

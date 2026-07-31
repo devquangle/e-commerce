@@ -1,4 +1,4 @@
-import Loading from "@/components/common/Loading";
+import Loading from "@/components/common/Spinner";
 
 import { useState } from "react";
 import type { UseFormSetError } from "react-hook-form";

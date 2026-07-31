@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useBookFormData } from "@/hooks/useBookFormData";
 import type { ProductFilterOptions } from "../types/product.filter.options";
 import { Building2, Layers, ChevronDown, Star } from "lucide-react";
-import Loading from "@/components/common/Loading";
+import Loading from "@/components/common/Spinner";
 import type { GenreWithProductCountResponse } from "@/types/genre";
 import type { AuthorWithProductCountResponse } from "@/types/author";
 import type { PublisherWithProductCountResponse } from "@/modules/admin/publisher/types/publisher.type";

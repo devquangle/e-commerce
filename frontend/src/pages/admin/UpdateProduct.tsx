@@ -8,7 +8,7 @@ import ProductBasicInfo from "@/modules/admin/product/components/ProductBasicInf
 import ProductAttribute from "@/modules/admin/product/components/ProductAttribute";
 import ProductDescriptionEditor from "@/modules/admin/product/components/ProductDescriptionEditor";
 import MultipleImageUpload from "@/components/common/MultipleImageUploadProps";
-import Loading from "@/components/common/Loading";
+import Loading from "@/components/common/Spinner";
 
 import { useBookFormData } from "@/hooks/useBookFormData";
 import imageService from "@/services/imageService";

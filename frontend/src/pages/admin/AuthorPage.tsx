@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback } from "react";
 import Pagination from "@/components/common/Pagination";
-import Loading from "@/components/common/Loading";
+import Loading from "@/components/common/Spinner";
 import AuthorTable from "@/modules/admin/author/components/AuthorTable";
 import AuthorMobileCard from "@/modules/admin/author/components/AuthorMobileCard";
 

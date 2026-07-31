@@ -15,7 +15,7 @@ import { MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { setCachedSelectedAddress } from "@/types/checkout.type";
-import Loading from "@/components/common/Loading";
+import Loading from "@/components/common/Spinner";
 
 export default function AddressPayment() {
   const navigate = useNavigate();

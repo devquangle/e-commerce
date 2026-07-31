@@ -6,7 +6,7 @@ import { OrderDetailSkeleton } from "@/modules/user/order/components/OrderDetail
 import { CancelOrderModal } from "@/modules/user/order/components/CancelOrderModal";
 import { ChangeAddressModal } from "@/modules/user/order/components/ChangeAddressModal";
 import Button from "@/components/common/Button";
-import { AlertCircle, FileText } from "lucide-react";
+import { AlertCircle, ArrowLeft, FileText } from "lucide-react";
 import {
   OrderStatusColor,
   OrderStatusMapping,
@@ -35,8 +35,16 @@ export default function OrderDetailPage() {
 
   if (isError || !orderDetail) {
     return (
-      <div className="flex-1 p-6 text-center text-red-500 font-medium min-h-screen">
-        {error ? error.message : "Không tìm thấy đơn hàng"}
+      <div className="flex-1 p-6 text-center text-red-500 font-medium min-h-screen space-y-4">
+        <p>{error ? error.message : "Không tìm thấy đơn hàng"}</p>
+        <Button
+          color="secondary"
+          size="md"
+          icon={ArrowLeft}
+          onClick={() => navigate("/account/orders")}
+        >
+          Quay lại danh sách đơn hàng
+        </Button>
       </div>
     );
   }
@@ -55,12 +63,14 @@ export default function OrderDetailPage() {
   const totalQuantity = items.reduce((acc, item) => acc + item.quantity, 0);
   const subtotalOriginal = items.reduce(
     (acc, item) =>
-      acc + (item.originalPrice > 0 ? item.originalPrice : item.price) * item.quantity,
-    0
+      acc +
+      (item.originalPrice > 0 ? item.originalPrice : item.price) *
+        item.quantity,
+    0,
   );
   const subtotalSelling = items.reduce(
     (acc, item) => acc + item.price * item.quantity,
-    0
+    0,
   );
   const productDiscount = Math.max(0, subtotalOriginal - subtotalSelling);
   const voucherDiscount = orderInfo.voucherAmount || 0;
@@ -68,15 +78,27 @@ export default function OrderDetailPage() {
   const shippingFee = orderInfo.shippingFee || 0;
   const grandTotal = orderInfo.total;
 
-  const hasCancelReason = Boolean(orderInfo.cancel && orderInfo.cancel.trim() !== "");
+  const hasCancelReason = Boolean(
+    orderInfo.cancel && orderInfo.cancel.trim() !== "",
+  );
   const hasNote = Boolean(orderInfo.noted && orderInfo.noted.trim() !== "");
 
   return (
     <div className="flex-1 p-2 flex flex-col min-h-full">
       <div className="flex justify-between items-center gap-3 mb-4">
-        <h2 className="text-xl font-semibold text-gray-800">
-          Chi tiết đơn hàng #{orderInfo.orderCode}
-        </h2>
+        <div className="flex items-center gap-3">
+          <Button
+            color="secondary"
+            size="md"
+            icon={ArrowLeft}
+            onClick={() => navigate("/account/orders")}
+          >
+            Quay lại
+          </Button>
+          <h2 className="text-xl font-semibold text-gray-800">
+            Chi tiết đơn hàng {orderInfo.orderCode}
+          </h2>
+        </div>
       </div>
 
       {/* ===== INFO ===== */}
@@ -257,6 +279,7 @@ export default function OrderDetailPage() {
         <Button
           color="secondary"
           size="md"
+          icon={ArrowLeft}
           onClick={() => navigate("/account/orders")}
         >
           Quay lại

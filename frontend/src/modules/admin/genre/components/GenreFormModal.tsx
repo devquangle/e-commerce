@@ -6,7 +6,7 @@ import {
 } from "react-hook-form";
 
 import Modal from "@/components/common/Modal";
-import Loading from "@/components/common/Loading";
+import Loading from "@/components/common/Spinner";
 import InputField from "@/components/common/InputField";
 import SelectBox from "@/components/common/SelectedBox";
 import SingleImageUpload from "@/components/common/SingleImageUpload";

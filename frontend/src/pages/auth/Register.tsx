@@ -1,7 +1,7 @@
 
 import Container from '@/components/common/Container'
 import InputField from '@/components/common/InputField';
-import Loading from '@/components/common/Loading';
+import Loading from '@/components/common/Spinner';
 import authService from '@/services/authService';
 import type { RegisterFrom } from '@/types/register';
 import { mapServerErrors } from '@/utils/mapServerErrors';

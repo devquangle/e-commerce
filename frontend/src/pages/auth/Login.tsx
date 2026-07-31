@@ -1,6 +1,6 @@
 import Container from "@/components/common/Container";
 import InputField from "@/components/common/InputField";
-import Loading from "@/components/common/Loading";
+import Loading from "@/components/common/Spinner";
 import { useAuth } from "@/context/useAuth";
 
 import type { LoginRequest } from "@/types/auth";

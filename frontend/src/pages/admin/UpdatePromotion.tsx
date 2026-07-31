@@ -5,7 +5,7 @@ import PromotionForm from "@/modules/admin/promotion/components/PromotionForm";
 import PromotionProductSelector from "@/modules/admin/promotion/components/PromotionProductSelector";
 import type { PromotionRequest, PromotionProductResponse } from "@/modules/admin/promotion/types/promotion.type";
 import { useGetPromotionDetail, useUpdatePromotion } from "@/modules/admin/promotion/hooks/usePromotion";
-import Loading from "@/components/common/Loading";
+import Loading from "@/components/common/Spinner";
 import { showErrorToast } from "@/utils/toastUtil";
 
 export default function UpdatePromotion() {

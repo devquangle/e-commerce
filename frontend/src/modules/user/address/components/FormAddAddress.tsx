@@ -1,7 +1,7 @@
 import InputField from "@/components/common/InputField";
 import SelectBox from "@/components/common/SelectedBox";
 import TextAreaField from "@/components/common/TextAreaField";
-import Loading from "@/components/common/Loading";
+import Loading from "@/components/common/Spinner";
 
 import {
   useProvinces,
