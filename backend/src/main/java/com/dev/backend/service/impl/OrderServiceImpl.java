@@ -155,26 +155,17 @@ public class OrderServiceImpl implements OrderService {
         public void changeAddressByOrderCode(Integer userId, ChangeAddressOrderRequest request) {
 
                 Address address = addressService.getAddressByIdAndUserId(
-                                request.getAddressId(),
-                                userId);
-                Order order = getOrderByOrderCodeAndUserId(request.getOrderCode(), userId);
-                order.setFullName(address.getFullName());
-                order.setPhone(address.getPhone());
-                order.setProvinceId(address.getProvinceId());
-                order.setDistrictId(address.getDistrictId());
-                order.setWardCode(address.getWardCode());
-                order.setStreet(address.getStreet());
+                                request.getAddressId(), userId);
 
-                int totalWeight = order.getOrderItems().stream()
-                                .mapToInt(item -> item.getProductInfo().getWeight() * item.getQuantity())
-                                .sum();
+                Order order = getOrderByOrderCodeAndUserId(
+                                request.getOrderCode(), userId);
 
-                applyShippingFee(
-                                order,
-                                address,
-                                totalWeight);
+                OrderSummary summary = calculateOrderSummary(order);
+
+                applyOrderAddress(order, address);
+                applyPayment(order, address, summary);
+
                 orderRepository.save(order);
-
         }
 
         @Override
@@ -195,7 +186,7 @@ public class OrderServiceImpl implements OrderService {
                 Order order = buildOrder(request, user, address);
                 OrderSummary summary = buildOrderItems(order, cartItems);
                 applyVoucher(order, request.getVoucherId(), userId, summary.getSubtotal());
-                applyPayment(order, address, summary.getTotalWeight(), summary.getSubtotal());
+                applyPayment(order, address,summary);
                 Order savedOrder = orderRepository.save(order);
                 cartItemService.deleteAll(cartItems);
 
@@ -410,12 +401,11 @@ public class OrderServiceImpl implements OrderService {
         private void applyPayment(
                         Order order,
                         Address address,
-                        Integer totalWeight,
-                        Integer subtotal) {
+                        OrderSummary orderSummary) {
 
-                Integer shippingFee = applyShippingFee(address, totalWeight);
+                Integer shippingFee = applyShippingFee(address, orderSummary.getTotalWeight());
                 Integer total = calculateTotal(
-                                subtotal,
+                                orderSummary.getSubtotal(),
                                 order.getVoucherAmount(),
                                 shippingFee);
                 order.setShippingFee(shippingFee);
@@ -434,4 +424,19 @@ public class OrderServiceImpl implements OrderService {
                                 address.getWardCode(), address.getStreet()));
         }
 
+        private OrderSummary calculateOrderSummary(Order order) {
+
+                int subtotal = 0;
+                int totalWeight = 0;
+
+                for (OrderItem item : order.getOrderItems()) {
+                        subtotal += item.getPrice() * item.getQuantity();
+                        totalWeight += item.getProductInfo().getWeight() * item.getQuantity();
+                }
+
+                return new OrderSummary(
+                                order.getOrderItems(),
+                                subtotal,
+                                totalWeight);
+        }
 }
