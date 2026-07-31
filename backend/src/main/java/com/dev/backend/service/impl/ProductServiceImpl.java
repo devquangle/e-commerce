@@ -296,7 +296,7 @@ public class ProductServiceImpl implements ProductService {
         Product product = findBySlug(slug);
         Integer productId = product.getId();
         ProductInfo productInfo = productMapper.mapProductInfo(product);
-        productInfo.setDiscountValue(promotionProductService.getDiscountValueByProductId(productId));
+        productInfo.setDiscountValue(promotionProductService.getCurrentDiscountPercent(productId));
         productInfo.setProductPublisher(publisherMapper.toProductPublisher(product.getPublisher()));
         productInfo.setProductSeries(seriesMapper.toProductSeries(product.getSeries()));
         productInfo.setProductAuthors(productAuthorService.findAuthorsByProductId(productId));
@@ -317,7 +317,7 @@ public class ProductServiceImpl implements ProductService {
     public ProductCartItemResponse productCartItemResponse(Integer productId) {
         Product product = findWithDetailsById(productId);
         ProductCartItemResponse dto = productMapper.mapProductCartItemResponse(product);
-        dto.setDiscountValue(promotionProductService.getDiscountValueByProductId(productId));
+        dto.setDiscountValue(promotionProductService.getCurrentDiscountPercent(productId));
         dto.setPublisher(publisherMapper.getPublisherName(product.getPublisher()));
         dto.setSeries(seriesMapper.getSeriesName(product.getSeries()));
         dto.setAuthors(productAuthorService.findAuthorNamesByProductId(productId));
@@ -330,7 +330,7 @@ public class ProductServiceImpl implements ProductService {
     public ProductSnapshot productSnapshot(Integer productId) {
         Product product = findWithDetailsById(productId);
         ProductSnapshot dto = productMapper.mapProductSnapshot(product);
-        dto.setDiscountValue(promotionProductService.getDiscountValueByProductId(productId));
+        dto.setDiscountValue(promotionProductService.getCurrentDiscountPercent(productId));
         dto.setPublisher(publisherMapper.getPublisherName(product.getPublisher()));
         dto.setSeries(seriesMapper.getSeriesName(product.getSeries()));
         dto.setAuthors(productAuthorService.findAuthorNamesByProductId(productId));

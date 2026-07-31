@@ -205,11 +205,6 @@ export default function PaymentPage() {
         showSuccessToast("Đặt hàng thành công!");
         navigate("/account/orders");
       },
-      onError: (error: any) => {
-        showErrorToast(
-          error?.message || "Đặt hàng thất bại, vui lòng thử lại!"
-        );
-      },
     });
   };
 

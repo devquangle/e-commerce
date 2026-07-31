@@ -15,9 +15,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.dev.backend.dto.promotion.PromotionProductMappingResponse;
 import com.dev.backend.dto.promotion.PromotionProductRequest;
 import com.dev.backend.entity.CartItem;
-import com.dev.backend.entity.Product;
+import com.dev.backend.entity.OrderItem;
 import com.dev.backend.entity.Promotion;
 import com.dev.backend.entity.PromotionProduct;
+import com.dev.backend.exception.BadRequestException;
 import com.dev.backend.repository.PromotionProductRepository;
 import com.dev.backend.service.ProductService;
 import com.dev.backend.service.PromotionProductService;
@@ -88,7 +89,7 @@ public class PromotionProductServiceImpl implements PromotionProductService {
     @Override
     public List<PromotionProductMappingResponse> promotionMappingResponses(List<Integer> productIds) {
 
-        List<PromotionProduct> promotionProducts = promotionProductRepository.findPromotionByProductIds(productIds);
+        List<PromotionProduct> promotionProducts = findActivePromotions(productIds);
 
         Map<Integer, List<PromotionProductMappingResponse.PromotionProductDetailResponse>> grouped = new HashMap<>();
 
@@ -115,24 +116,6 @@ public class PromotionProductServiceImpl implements PromotionProductService {
     }
 
     @Override
-    public Integer getDiscountValueByProductId(Integer productId) {
-        Integer discountValue = promotionProductRepository.findDiscountValueByProductId(productId);
-        log.info("ProductId = {}", productId);
-        log.info("discountValue: {}", discountValue);
-        return Optional.ofNullable(discountValue).orElse(0);
-    }
-
-    @Override
-    public Integer calculateSalePrice(Product product) {
-
-        int originalPrice = product.getPrice();
-
-        int discountPercent = getDiscountValueByProductId(product.getId());
-
-        return originalPrice - originalPrice * discountPercent / 100;
-    }
-
-    @Override
     @Transactional(readOnly = true)
     public List<PromotionProduct> findActivePromotions(List<Integer> productIds) {
 
@@ -140,7 +123,29 @@ public class PromotionProductServiceImpl implements PromotionProductService {
             return Collections.emptyList();
         }
 
-        return promotionProductRepository.findActivePromotions(productIds);
+        return promotionProductRepository.findActivePromotionProducts(productIds);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Integer getCurrentDiscountPercent(Integer productId) {
+
+        PromotionProduct promotionProduct = promotionProductRepository
+                .findActivePromotionByProductId(productId)
+                .orElse(null);
+
+        if (promotionProduct == null) {
+            return 0;
+        }
+
+        int sold = Optional.ofNullable(promotionProduct.getSoldQuantity()).orElse(0);
+        int reserved = Optional.ofNullable(promotionProduct.getReservedQuantity()).orElse(0);
+
+        if (sold + reserved >= promotionProduct.getMaxQuantity()) {
+            return 0;
+        }
+
+        return promotionProduct.getDiscountValue();
     }
 
     @Override
@@ -151,7 +156,7 @@ public class PromotionProductServiceImpl implements PromotionProductService {
                 .map(item -> item.getProduct().getId())
                 .toList();
 
-        List<PromotionProduct> promotionProducts = promotionProductRepository.findActivePromotions(productIds);
+        List<PromotionProduct> promotionProducts = promotionProductRepository.findActivePromotionProducts(productIds);
 
         Map<Integer, PromotionProduct> promotionMap = promotionProducts.stream()
                 .collect(Collectors.toMap(
@@ -185,12 +190,66 @@ public class PromotionProductServiceImpl implements PromotionProductService {
                     - reservedQuantity;
 
             if (available < quantity) {
-                throw new RuntimeException(
-                        "Số lượng khuyến mãi không đủ");
+                throw new BadRequestException(
+                        "Sản phẩm \"" + promotionProduct.getProduct().getName()
+                                + "\" chỉ còn " + available + " suất khuyến mãi.");
             }
 
             promotionProduct.setReservedQuantity(
                     reservedQuantity + quantity);
+
+            updates.add(promotionProduct);
+        }
+
+        if (!updates.isEmpty()) {
+            promotionProductRepository.saveAll(updates);
+        }
+    }
+
+    @Override
+    public void confirmPromotions(List<OrderItem> orderItems) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    @Transactional
+    public void releasePromotions(List<OrderItem> orderItems) {
+        List<Integer> productIds = orderItems.stream()
+                .map(item -> item.getProduct().getId())
+                .toList();
+
+        List<PromotionProduct> promotionProducts = promotionProductRepository.findActivePromotionProducts(productIds);
+
+        Map<Integer, PromotionProduct> promotionMap = promotionProducts.stream()
+                .collect(Collectors.toMap(
+                        pp -> pp.getProduct().getId(),
+                        Function.identity()));
+
+        List<PromotionProduct> updates = new ArrayList<>();
+
+        for (OrderItem orderItem : orderItems) {
+
+            boolean isPromotion = orderItem.getOriginalPrice() != null
+                    && orderItem.getPrice() != null
+                    && orderItem.getOriginalPrice() > orderItem.getPrice();
+
+            if (!isPromotion) {
+                continue;
+            }
+
+            PromotionProduct promotionProduct = promotionMap.get(orderItem.getProduct().getId());
+
+            if (promotionProduct == null) {
+                continue;
+            }
+
+            int reservedQuantity = promotionProduct.getReservedQuantity() == null
+                    ? 0
+                    : promotionProduct.getReservedQuantity();
+
+            promotionProduct.setReservedQuantity(
+                    Math.max(0, reservedQuantity - orderItem.getQuantity()));
 
             updates.add(promotionProduct);
         }

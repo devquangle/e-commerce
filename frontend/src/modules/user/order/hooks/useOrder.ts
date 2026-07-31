@@ -35,6 +35,16 @@ export const useCreateOrder = () => {
       queryClient.invalidateQueries({
         queryKey: ["orders", userInfo?.code],
       });
+      queryClient.invalidateQueries({ queryKey: ["orders-filter"] });
+    },
+    onError: (error: unknown) => {
+      let errorMsg = "Đã xảy ra lỗi khi tạo đơn hàng.";
+      if (axios.isAxiosError(error)) {
+        errorMsg = error.response?.data?.message || error.message || errorMsg;
+      } else if (error instanceof Error) {
+        errorMsg = error.message;
+      }
+      showErrorToast(errorMsg);
     },
   });
 };
@@ -65,9 +75,11 @@ export const useChangeAddress = () => {
           queryKey: ["orders"],
         }),
       ]);
-       showSuccessToast(`Đã đổi địa chỉ thành công đơn hàng #${variables.orderCode}`);
+      showSuccessToast(
+        `Đã đổi địa chỉ thành công đơn hàng #${variables.orderCode}`,
+      );
     },
-     onError: (error: unknown) => {
+    onError: (error: unknown) => {
       let errorMsg = "Đã xảy ra lỗi khi đổi địa chỉ.";
       if (axios.isAxiosError(error)) {
         errorMsg = error.response?.data?.message || error.message || errorMsg;

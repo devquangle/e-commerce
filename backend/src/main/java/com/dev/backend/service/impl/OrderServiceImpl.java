@@ -2,7 +2,10 @@ package com.dev.backend.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,6 +30,7 @@ import com.dev.backend.entity.CartItem;
 import com.dev.backend.entity.Order;
 import com.dev.backend.entity.OrderItem;
 import com.dev.backend.entity.Product;
+import com.dev.backend.entity.PromotionProduct;
 import com.dev.backend.entity.User;
 import com.dev.backend.entity.Voucher;
 import com.dev.backend.exception.BadRequestException;
@@ -151,13 +155,11 @@ public class OrderServiceImpl implements OrderService {
 
         @Override
         public void cancelOrder(Integer userId, CancelOrderRequest request) {
-                // reservedQuantity -= quantity
-                // soldQuantity += quantity
                 Order order = getOrderByOrderCodeAndUserId(request.getOrderCode(), userId);
                 validateStatusTransition(order.getStatus(), OrderStatus.CANCELLED);
+                promotionProductService.releasePromotions(order.getOrderItems());
                 order.setStatus(OrderStatus.CANCELLED);
                 order.setCancel(request.getCancel());
-                // reservedQuantity -= quantity
                 orderRepository.save(order);
 
         }
@@ -201,9 +203,10 @@ public class OrderServiceImpl implements OrderService {
                                 request.getCartItemIds(),
                                 userId);
 
-                promotionProductService.reservePromotions(cartItems);
                 Order order = buildOrder(request, user, address);
                 OrderSummary summary = buildOrderItems(order, cartItems);
+
+                promotionProductService.reservePromotions(cartItems);
                 applyVoucher(order, request.getVoucherId(), userId, summary.getSubtotal());
                 applyPayment(order, address, summary);
                 Order savedOrder = orderRepository.save(order);
@@ -333,7 +336,15 @@ public class OrderServiceImpl implements OrderService {
 
                 int subtotal = 0;
                 int totalWeight = 0;
+                List<Integer> productIds = cartItems.stream()
+                                .map(item -> item.getProduct().getId())
+                                .toList();
 
+                Map<Integer, PromotionProduct> promotionMap = promotionProductService.findActivePromotions(productIds)
+                                .stream()
+                                .collect(Collectors.toMap(
+                                                pp -> pp.getProduct().getId(),
+                                                Function.identity()));
                 for (CartItem cartItem : cartItems) {
 
                         Product product = cartItem.getProduct();
@@ -341,24 +352,27 @@ public class OrderServiceImpl implements OrderService {
                         OrderItem orderItem = new OrderItem();
 
                         orderItem.setOrder(order);
-
                         orderItem.setProduct(product);
-
                         orderItem.setQuantity(cartItem.getQuantity());
 
                         int originalPrice = product.getPrice();
+                        int price = originalPrice;
 
-                        int price = promotionProductService.calculateSalePrice(product);
+                        PromotionProduct promotionProduct = promotionMap.get(product.getId());
+
+                        if (promotionProduct != null) {
+
+                                price = originalPrice
+                                                - originalPrice * promotionProduct.getDiscountValue() / 100;
+                        }
 
                         orderItem.setOriginalPrice(originalPrice);
-
                         orderItem.setPrice(price);
 
                         orderItem.setProductInfo(
                                         productService.productSnapshot(product.getId()));
 
                         subtotal += price * cartItem.getQuantity();
-
                         totalWeight += product.getWeight() * cartItem.getQuantity();
 
                         orderItems.add(orderItem);
