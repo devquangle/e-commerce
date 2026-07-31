@@ -156,7 +156,7 @@ public class PromotionProductServiceImpl implements PromotionProductService {
                 .map(item -> item.getProduct().getId())
                 .toList();
 
-        List<PromotionProduct> promotionProducts = promotionProductRepository.findActivePromotionProducts(productIds);
+        List<PromotionProduct> promotionProducts = promotionProductRepository.findAvailablePromotions(productIds);
 
         Map<Integer, PromotionProduct> promotionMap = promotionProducts.stream()
                 .collect(Collectors.toMap(
@@ -167,37 +167,26 @@ public class PromotionProductServiceImpl implements PromotionProductService {
 
         for (CartItem cartItem : cartItems) {
 
-            PromotionProduct promotionProduct = promotionMap.get(
-                    cartItem.getProduct().getId());
+            PromotionProduct promotionProduct = promotionMap.get(cartItem.getProduct().getId());
 
-            // Không có promotion
             if (promotionProduct == null) {
+                // Không có hoặc đã hết khuyến mãi
                 continue;
             }
 
             int quantity = cartItem.getQuantity();
 
-            int soldQuantity = promotionProduct.getSoldQuantity() == null
-                    ? 0
-                    : promotionProduct.getSoldQuantity();
+            int sold = Optional.ofNullable(promotionProduct.getSoldQuantity()).orElse(0);
+            int reserved = Optional.ofNullable(promotionProduct.getReservedQuantity()).orElse(0);
 
-            int reservedQuantity = promotionProduct.getReservedQuantity() == null
-                    ? 0
-                    : promotionProduct.getReservedQuantity();
-
-            int available = promotionProduct.getMaxQuantity()
-                    - soldQuantity
-                    - reservedQuantity;
+            int available = promotionProduct.getMaxQuantity() - sold - reserved;
 
             if (available < quantity) {
-                throw new BadRequestException(
-                        "Sản phẩm \"" + promotionProduct.getProduct().getName()
-                                + "\" chỉ còn " + available + " suất khuyến mãi.");
+                // Không đủ suất -> giữ giá gốc, không reserve
+                continue;
             }
 
-            promotionProduct.setReservedQuantity(
-                    reservedQuantity + quantity);
-
+            promotionProduct.setReservedQuantity(reserved + quantity);
             updates.add(promotionProduct);
         }
 

@@ -3,6 +3,7 @@ package com.dev.backend.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -362,8 +363,17 @@ public class OrderServiceImpl implements OrderService {
 
                         if (promotionProduct != null) {
 
-                                price = originalPrice
-                                                - originalPrice * promotionProduct.getDiscountValue() / 100;
+                                int sold = Optional.ofNullable(promotionProduct.getSoldQuantity()).orElse(0);
+                                int reserved = Optional.ofNullable(promotionProduct.getReservedQuantity()).orElse(0);
+
+                                int available = promotionProduct.getMaxQuantity() - sold - reserved;
+
+                                if (available >= cartItem.getQuantity()) {
+                                        price = originalPrice
+                                                        - originalPrice * promotionProduct.getDiscountValue() / 100;
+                                }
+                        } else {
+                                price = originalPrice;
                         }
 
                         orderItem.setOriginalPrice(originalPrice);

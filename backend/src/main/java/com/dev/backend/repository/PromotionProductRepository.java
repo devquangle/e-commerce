@@ -52,12 +52,12 @@ public interface PromotionProductRepository extends JpaRepository<PromotionProdu
       @Param("quantity") Integer quantity);
 
   @Query("""
-      SELECT pp
-      FROM PromotionProduct pp
-      JOIN FETCH pp.promotion p
-      WHERE pp.product.id IN :productIds
-        AND p.status = com.dev.backend.constant.BaseStatus.ACTIVE
-        AND CURRENT_DATE BETWEEN p.startDate AND p.expireDate
+          SELECT pp
+          FROM PromotionProduct pp
+          JOIN FETCH pp.promotion p
+          WHERE pp.product.id IN :productIds
+            AND p.status = com.dev.backend.constant.BaseStatus.ACTIVE
+            AND CURRENT_DATE BETWEEN p.startDate AND p.expireDate
       """)
   List<PromotionProduct> findActivePromotionProducts(
       @Param("productIds") List<Integer> productIds);
@@ -72,4 +72,20 @@ public interface PromotionProductRepository extends JpaRepository<PromotionProdu
       """)
   Optional<PromotionProduct> findActivePromotionByProductId(
       @Param("productId") Integer productId);
+
+  @Query("""
+          SELECT pp
+          FROM PromotionProduct pp
+          JOIN FETCH pp.promotion p
+          WHERE pp.product.id IN :productIds
+            AND p.status = com.dev.backend.constant.BaseStatus.ACTIVE
+            AND CURRENT_DATE BETWEEN p.startDate AND p.expireDate
+            AND (
+                  COALESCE(pp.soldQuantity,0)
+                + COALESCE(pp.reservedQuantity,0)
+            ) < pp.maxQuantity
+      """)
+  List<PromotionProduct> findAvailablePromotions(
+      @Param("productIds") List<Integer> productIds);
+
 }
