@@ -2,7 +2,11 @@ import { apiAuth } from "@/configs/axios";
 import type { OrderFilterRequest } from "../types/order.search.type";
 import type { ApiResponse } from "@/types/api-response";
 import type { Pagination } from "@/types/pagination";
-import type { OrderResponse, OrderStatus } from "../types/order.type";
+import type {
+  OrderDetailResponse,
+  OrderResponse,
+  OrderStatus,
+} from "../types/order.type";
 
 const OrderService = {
   async search(options?: OrderFilterRequest) {
@@ -19,11 +23,21 @@ const OrderService = {
     console.log(res.data.data);
     return res.data.data;
   },
-
+  async getOrderDetail(orderCode?: string) {
+    const res = await apiAuth.get<ApiResponse<OrderDetailResponse>>(
+      "/api/v1/order",
+      { params: { orderCode } },
+    );
+    if (!res.data.success || !res.data.data) {
+      throw new Error(res.data.message || "Fetch order failed");
+    }
+    console.log(res.data.data);
+    return res.data.data;
+  },
   async updateStatus(id: number, status: OrderStatus) {
     const res = await apiAuth.put<ApiResponse<OrderResponse>>(
       `/api/v1/admin/orders/${id}/status`,
-      { status }
+      { status },
     );
     return res.data.data;
   },
@@ -31,7 +45,7 @@ const OrderService = {
   async cancel(id: number, reason?: string) {
     const res = await apiAuth.put<ApiResponse<OrderResponse>>(
       `/api/v1/admin/orders/${id}/cancel`,
-      { cancel: reason }
+      { cancel: reason },
     );
     return res.data.data;
   },

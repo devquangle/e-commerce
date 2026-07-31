@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useLocation, useNavigate } from "react-router-dom";
 import { useOrderDetail } from "@/modules/user/order/hooks/useOrder";
 import { OrderItemCard } from "@/modules/user/order/components/OrderItemCard";
 import { OrderDetailSkeleton } from "@/modules/user/order/components/OrderDetailSkeleton";
@@ -15,10 +15,26 @@ import {
 } from "@/modules/user/order/types/order.type";
 import { formatMoney } from "@/utils/number.utils";
 
-export default function OrderDetailPage() {
+interface OrderDetailPageProps {
+  backPath?: string;
+}
+
+export default function OrderDetailPage({ backPath }: OrderDetailPageProps) {
   const [searchParams] = useSearchParams();
-  const orderCode = searchParams.get("orderCode");
+  const location = useLocation();
   const navigate = useNavigate();
+
+  const orderCode =
+    searchParams.get("orderCode") ||
+    location.state?.orderCode ||
+    location.state?.order?.orderCode;
+
+  const resolvedBackPath =
+    backPath ||
+    (location.pathname.startsWith("/admin")
+      ? "/admin/orders"
+      : "/account/orders");
+
   const [isCancelOpen, setIsCancelOpen] = useState(false);
   const [isAddressOpen, setIsAddressOpen] = useState(false);
 
@@ -41,7 +57,7 @@ export default function OrderDetailPage() {
           color="secondary"
           size="md"
           icon={ArrowLeft}
-          onClick={() => navigate("/account/orders")}
+          onClick={() => navigate(resolvedBackPath)}
         >
           Quay lại danh sách đơn hàng
         </Button>
@@ -91,7 +107,7 @@ export default function OrderDetailPage() {
             color="secondary"
             size="md"
             icon={ArrowLeft}
-            onClick={() => navigate("/account/orders")}
+            onClick={() => navigate(resolvedBackPath)}
           >
             Quay lại
           </Button>
@@ -280,7 +296,7 @@ export default function OrderDetailPage() {
           color="secondary"
           size="md"
           icon={ArrowLeft}
-          onClick={() => navigate("/account/orders")}
+          onClick={() => navigate(resolvedBackPath)}
         >
           Quay lại
         </Button>

@@ -15,6 +15,13 @@ export const useFilterOrder = (options?: OrderFilterRequest) => {
 
 export const useOrder = useFilterOrder;
 
+export const useOrderDetail = (orderCode?: string) => {
+  return useQuery({
+    queryKey: ["orderDetail", orderCode],
+    queryFn: () => OrderService.getOrderDetail(orderCode),
+  });
+};
+
 export const useUpdateOrderStatus = () => {
   const queryClient = useQueryClient();
 

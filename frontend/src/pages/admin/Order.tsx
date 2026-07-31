@@ -49,7 +49,9 @@ export default function Order() {
   };
 
   const handleViewDetail = (order: OrderResponse) => {
-    navigate(`/admin/order-items`, { state: { orderId: order.id, order } });
+    navigate(`/admin/order-items?orderCode=${order.orderCode}`, {
+      state: { orderCode: order.orderCode, order },
+    });
   };
 
   return (
