@@ -44,20 +44,30 @@ export default function OrderMobileCard({
           key={order.id}
           className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col gap-2"
         >
+          {/* HEADER: ORDER CODE & STATUS + ACTION BUTTON */}
           <div className="flex justify-between items-center border-b border-slate-100 pb-2">
             <span className="font-semibold text-indigo-600">
               {order.orderCode}
             </span>
-            <span
-              className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                OrderStatusColor[order.status] || "bg-gray-100 text-gray-700"
-              }`}
-            >
-              {OrderStatusMapping[order.status] || order.status}
-            </span>
+            <div className="flex items-center gap-2">
+              <span
+                className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                  OrderStatusColor[order.status] || "bg-gray-100 text-gray-700"
+                }`}
+              >
+                {OrderStatusMapping[order.status] || order.status}
+              </span>
+              <OrderActionButtons
+                item={order}
+                onApprove={onApprove}
+                onCancel={onCancel}
+                onViewDetail={onViewDetail}
+              />
+            </div>
           </div>
 
-          <div className="flex justify-between items-start text-sm">
+          {/* CUSTOMER & TOTAL */}
+          <div className="flex justify-between items-start text-sm pt-1">
             <div>
               <p className="font-medium text-slate-900">
                 {order.fullName}{" "}
@@ -94,32 +104,23 @@ export default function OrderMobileCard({
             </div>
           </div>
 
-          <div className="flex flex-col pt-2 border-t border-slate-100 text-xs gap-2">
-            <div>
-              <span className="text-slate-500">Thanh toán: </span>
-              <span className="font-medium text-slate-700">
-                {PaymentMethodMapping[order.paymentMethod] || order.paymentMethod}
-              </span>
-              {" ("}
-              <span
-                className={
-                  order.paymentStatus === "PAID"
-                    ? "text-emerald-600 font-semibold"
-                    : "text-amber-600 font-semibold"
-                }
-              >
-                {PaymentStatusMapping[order.paymentStatus] || order.paymentStatus}
-              </span>
-              {")"}
-            </div>
-
-            <OrderActionButtons
-              item={order}
-              onApprove={onApprove}
-              onCancel={onCancel}
-              onViewDetail={onViewDetail}
-              mobile
-            />
+          {/* PAYMENT METHOD & STATUS */}
+          <div className="pt-2 border-t border-slate-100 text-xs">
+            <span className="text-slate-500">Thanh toán: </span>
+            <span className="font-medium text-slate-700">
+              {PaymentMethodMapping[order.paymentMethod] || order.paymentMethod}
+            </span>
+            {" ("}
+            <span
+              className={
+                order.paymentStatus === "PAID"
+                  ? "text-emerald-600 font-semibold"
+                  : "text-amber-600 font-semibold"
+              }
+            >
+              {PaymentStatusMapping[order.paymentStatus] || order.paymentStatus}
+            </span>
+            {")"}
           </div>
         </div>
       ))}

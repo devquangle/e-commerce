@@ -144,82 +144,59 @@ public class PromotionProductServiceImpl implements PromotionProductService {
     }
 
     @Override
-@Transactional
-public void reservePromotions(List<CartItem> cartItems) {
+    @Transactional
+    public void reservePromotions(List<CartItem> cartItems) {
 
-    List<Integer> productIds = cartItems.stream()
-            .map(item -> item.getProduct().getId())
-            .toList();
+        List<Integer> productIds = cartItems.stream()
+                .map(item -> item.getProduct().getId())
+                .toList();
 
+        List<PromotionProduct> promotionProducts = promotionProductRepository.findActivePromotions(productIds);
 
-    List<PromotionProduct> promotionProducts =
-            promotionProductRepository.findActivePromotions(productIds);
+        Map<Integer, PromotionProduct> promotionMap = promotionProducts.stream()
+                .collect(Collectors.toMap(
+                        pp -> pp.getProduct().getId(),
+                        Function.identity()));
 
+        List<PromotionProduct> updates = new ArrayList<>();
 
-    Map<Integer, PromotionProduct> promotionMap =
-            promotionProducts.stream()
-                    .collect(Collectors.toMap(
-                            pp -> pp.getProduct().getId(),
-                            Function.identity()
-                    ));
+        for (CartItem cartItem : cartItems) {
 
+            PromotionProduct promotionProduct = promotionMap.get(
+                    cartItem.getProduct().getId());
 
-    List<PromotionProduct> updates = new ArrayList<>();
+            // Không có promotion
+            if (promotionProduct == null) {
+                continue;
+            }
 
+            int quantity = cartItem.getQuantity();
 
-    for (CartItem cartItem : cartItems) {
+            int soldQuantity = promotionProduct.getSoldQuantity() == null
+                    ? 0
+                    : promotionProduct.getSoldQuantity();
 
-        PromotionProduct promotionProduct =
-                promotionMap.get(
-                    cartItem.getProduct().getId()
-                );
+            int reservedQuantity = promotionProduct.getReservedQuantity() == null
+                    ? 0
+                    : promotionProduct.getReservedQuantity();
 
+            int available = promotionProduct.getMaxQuantity()
+                    - soldQuantity
+                    - reservedQuantity;
 
-        // Không có promotion
-        if (promotionProduct == null) {
-            continue;
+            if (available < quantity) {
+                throw new RuntimeException(
+                        "Số lượng khuyến mãi không đủ");
+            }
+
+            promotionProduct.setReservedQuantity(
+                    reservedQuantity + quantity);
+
+            updates.add(promotionProduct);
         }
 
-
-        int quantity = cartItem.getQuantity();
-
-
-        int soldQuantity = 
-                promotionProduct.getSoldQuantity() == null
-                ? 0
-                : promotionProduct.getSoldQuantity();
-
-
-        int reservedQuantity =
-                promotionProduct.getReservedQuantity() == null
-                ? 0
-                : promotionProduct.getReservedQuantity();
-
-
-        int available =
-                promotionProduct.getMaxQuantity()
-                - soldQuantity
-                - reservedQuantity;
-
-
-        if (available < quantity) {
-            throw new RuntimeException(
-                    "Số lượng khuyến mãi không đủ"
-            );
+        if (!updates.isEmpty()) {
+            promotionProductRepository.saveAll(updates);
         }
-
-
-        promotionProduct.setReservedQuantity(
-                reservedQuantity + quantity
-        );
-
-
-        updates.add(promotionProduct);
     }
-
-
-    if (!updates.isEmpty()) {
-        promotionProductRepository.saveAll(updates);
-    }
-}
 }

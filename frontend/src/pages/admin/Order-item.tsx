@@ -12,6 +12,7 @@ import OrderSummaryFooter from "@/modules/admin/order-item/components/OrderSumma
 import OrderDetailSkeleton from "@/modules/admin/order/components/OrderDetailSkeleton";
 import Button from "@/components/common/Button";
 import { ArrowLeft, Check, X } from "lucide-react";
+import { OrderItemCard } from "@/modules/admin/order-item/components/OrderItemCard";
 
 export default function OrderItem() {
   const [searchParams] = useSearchParams();
