@@ -19,6 +19,8 @@ export default function OrderActionButtons({
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  const isPending = item.status === "PENDING";
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -63,7 +65,7 @@ export default function OrderActionButtons({
             </button>
           )}
 
-          {onApprove && (
+          {onApprove && isPending && (
             <button
               type="button"
               onClick={() => {
@@ -77,7 +79,7 @@ export default function OrderActionButtons({
             </button>
           )}
 
-          {onCancel && (
+          {onCancel && isPending && (
             <button
               type="button"
               onClick={() => {

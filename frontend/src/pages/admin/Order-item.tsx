@@ -8,7 +8,7 @@ import OrderItemHeader from "@/modules/admin/order-item/components/OrderItemHead
 import OrderInfoCards from "@/modules/admin/order-item/components/OrderInfoCards";
 import OrderNoteCards from "@/modules/admin/order-item/components/OrderNoteCards";
 import OrderSummaryFooter from "@/modules/admin/order-item/components/OrderSummaryFooter";
-import OrderDetailSkeleton from "@/modules/admin/order/components/OrderDetailSkeleton";
+import OrderDetailSkeleton from "@/modules/admin/order-item/components/OrderDetailSkeleton";
 import Button from "@/components/common/Button";
 import { ArrowLeft } from "lucide-react";
 import { OrderItemCard } from "@/modules/admin/order-item/components/OrderItemCard";
