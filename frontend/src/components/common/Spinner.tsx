@@ -7,7 +7,7 @@ interface LoadingProps {
   subMessage?: string;
 }
 
-const Loading: React.FC<LoadingProps> = ({
+const Spinner: React.FC<LoadingProps> = ({
   inline = false,
   className = "",
   message = "Đang tải...",
@@ -51,7 +51,7 @@ const Loading: React.FC<LoadingProps> = ({
       {/* Glass card container */}
       <div className="relative flex flex-col items-center justify-center p-8 bg-white/95 dark:bg-slate-900/95 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800/60 max-w-[280px] w-full mx-4 transition-transform duration-300 scale-100">
         
-        {/* Animated Loading Spinner Container */}
+        {/* Animated Spinner Spinner Container */}
         <div className="relative w-16 h-16 mb-4 flex items-center justify-center">
           {/* Outer glowing ripple */}
           <div className="absolute inset-0 rounded-full bg-indigo-500/10 animate-ping duration-[1.5s]"></div>
@@ -80,4 +80,4 @@ const Loading: React.FC<LoadingProps> = ({
   );
 };
 
-export default Loading;
+export default Spinner;

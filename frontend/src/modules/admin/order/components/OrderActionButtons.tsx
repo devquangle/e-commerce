@@ -17,9 +17,24 @@ export default function OrderActionButtons({
   onViewDetail,
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
+  const [openUpward, setOpenUpward] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const isPending = item.status === "PENDING";
+
+  const handleToggle = () => {
+    if (!isOpen && dropdownRef.current) {
+      const rect = dropdownRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      // Nếu khoảng trống phía dưới màn hình ít hơn 160px thì mở menu hướng lên trên
+      if (spaceBelow < 160) {
+        setOpenUpward(true);
+      } else {
+        setOpenUpward(false);
+      }
+    }
+    setIsOpen((prev) => !prev);
+  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -41,7 +56,7 @@ export default function OrderActionButtons({
       {/* 3-DOTS BUTTON */}
       <button
         type="button"
-        onClick={() => setIsOpen((prev) => !prev)}
+        onClick={handleToggle}
         className="inline-flex items-center justify-center p-1 lg:p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg border border-slate-200 transition-all cursor-pointer active:scale-95 bg-white"
         title="Thao tác"
       >
@@ -50,7 +65,11 @@ export default function OrderActionButtons({
 
       {/* DROPDOWN MENU */}
       {isOpen && (
-        <div className="absolute right-0 mt-1 w-36 bg-white border border-slate-200 rounded-xl shadow-lg z-50 p-1 flex flex-col gap-0.5 animate-in fade-in zoom-in-95 duration-150">
+        <div
+          className={`absolute right-0 w-36 bg-white border border-slate-200 rounded-xl shadow-lg z-50 p-1 flex flex-col gap-0.5 animate-in fade-in zoom-in-95 duration-150 ${
+            openUpward ? "bottom-full mb-1" : "top-full mt-1"
+          }`}
+        >
           {onViewDetail && (
             <button
               type="button"

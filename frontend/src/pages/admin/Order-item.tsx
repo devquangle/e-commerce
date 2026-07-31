@@ -1,22 +1,25 @@
+import { useState } from "react";
 import { useSearchParams, useLocation, useNavigate } from "react-router-dom";
 import {
   useOrderDetail,
   useUpdateOrderStatus,
-  useCancelOrder,
 } from "@/modules/admin/order/hooks/useOrder";
 import OrderItemHeader from "@/modules/admin/order-item/components/OrderItemHeader";
 import OrderInfoCards from "@/modules/admin/order-item/components/OrderInfoCards";
 import OrderNoteCards from "@/modules/admin/order-item/components/OrderNoteCards";
 import OrderSummaryFooter from "@/modules/admin/order-item/components/OrderSummaryFooter";
-import OrderDetailSkeleton from "@/modules/admin/order-item/components/OrderDetailSkeleton";
+
+import { CancelOrderModal } from "@/modules/admin/order/components/CancelOrderModal";
 import Button from "@/components/common/Button";
 import { ArrowLeft } from "lucide-react";
 import { OrderItemCard } from "@/modules/admin/order-item/components/OrderItemCard";
+import OrderDetailSkeleton from "@/modules/admin/order-item/components/OrderDetailSkeleton";
 
 export default function OrderItem() {
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
 
   const orderCodeParam = searchParams.get("orderCode");
   const stateOrder = location.state?.order;
@@ -30,7 +33,6 @@ export default function OrderItem() {
   } = useOrderDetail(orderCode);
 
   const updateStatusMutation = useUpdateOrderStatus();
-  const cancelOrderMutation = useCancelOrder();
 
   if (isLoading) {
     return <OrderDetailSkeleton />;
@@ -62,7 +64,7 @@ export default function OrderItem() {
   };
 
   const handleCancel = () => {
-    cancelOrderMutation.mutate({ id: orderInfo.id });
+    setIsCancelModalOpen(true);
   };
 
   const handleBack = () => {
@@ -107,6 +109,13 @@ export default function OrderItem() {
         {/* Card Footer: Tóm tắt đơn hàng */}
         <OrderSummaryFooter orderInfo={orderInfo} items={items} />
       </div>
+
+      {/* CANCEL ORDER MODAL */}
+      <CancelOrderModal
+        isOpen={isCancelModalOpen}
+        onClose={() => setIsCancelModalOpen(false)}
+        order={orderInfo}
+      />
     </div>
   );
 }

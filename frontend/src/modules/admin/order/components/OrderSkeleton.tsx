@@ -5,27 +5,30 @@ export default function OrderSkeleton() {
       <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead className="bg-slate-50">
-            <tr>
-              <th className="py-3 px-4 w-12">
-                <div className="h-4 w-6 bg-slate-200 rounded animate-pulse" />
+            <tr className="text-slate-500">
+              <th className="py-3 px-4 font-semibold text-sm uppercase tracking-wider">
+                STT
               </th>
-              <th className="py-3 px-4 w-28">
-                <div className="h-4 w-20 bg-slate-200 rounded animate-pulse" />
+              <th className="py-3 px-4 font-semibold text-sm uppercase tracking-wider">
+                Mã đơn hàng
               </th>
-              <th className="py-3 px-4">
-                <div className="h-4 w-28 bg-slate-200 rounded animate-pulse" />
+              <th className="py-3 px-4 font-semibold text-sm uppercase tracking-wider">
+                Khách hàng
               </th>
-              <th className="py-3 px-4 w-32">
-                <div className="h-4 w-24 bg-slate-200 rounded animate-pulse" />
+              <th className="py-3 px-4 font-semibold text-sm uppercase tracking-wider">
+                Thanh toán
               </th>
-              <th className="py-3 px-4 w-28">
-                <div className="h-4 w-20 bg-slate-200 rounded animate-pulse" />
+              <th className="py-3 px-4 font-semibold text-sm uppercase tracking-wider text-right">
+                Tổng tiền
               </th>
-              <th className="py-3 px-4 w-28">
-                <div className="h-4 w-20 bg-slate-200 rounded animate-pulse" />
+              <th className="py-3 px-4 font-semibold text-sm uppercase tracking-wider">
+                Trạng thái
               </th>
-              <th className="py-3 px-4 w-24">
-                <div className="h-4 w-16 bg-slate-200 rounded animate-pulse" />
+              <th className="py-3 px-4 font-semibold text-sm uppercase tracking-wider">
+                Ngày tạo
+              </th>
+              <th className="py-3 px-4 font-semibold text-sm uppercase tracking-wider text-right">
+                Thao tác
               </th>
             </tr>
           </thead>
@@ -56,8 +59,8 @@ export default function OrderSkeleton() {
                   </div>
                 </td>
                 {/* Total */}
-                <td className="py-4 px-4">
-                  <div className="h-4 w-24 bg-slate-200 rounded animate-pulse" />
+                <td className="py-4 px-4 text-right">
+                  <div className="h-4 w-24 bg-slate-200 rounded ml-auto animate-pulse" />
                 </td>
                 {/* Status Badge */}
                 <td className="py-4 px-4">
@@ -66,6 +69,10 @@ export default function OrderSkeleton() {
                 {/* Created At */}
                 <td className="py-4 px-4">
                   <div className="h-3.5 w-20 bg-slate-200 rounded animate-pulse" />
+                </td>
+                {/* Actions */}
+                <td className="py-4 px-4 text-right">
+                  <div className="h-6 w-6 bg-slate-200 rounded ml-auto animate-pulse" />
                 </td>
               </tr>
             ))}

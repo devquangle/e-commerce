@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Download } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Button from "@/components/common/Button";
@@ -9,13 +10,15 @@ import { useOrderFilter } from "@/modules/admin/order/hooks/useOrderFilter";
 import {
   useFilterOrder,
   useUpdateOrderStatus,
-  useCancelOrder,
 } from "@/modules/admin/order/hooks/useOrder";
 import OrderSkeleton from "@/modules/admin/order/components/OrderSkeleton";
+import { CancelOrderModal } from "@/modules/admin/order/components/CancelOrderModal";
 import type { OrderResponse } from "@/modules/admin/order/types/order.type";
+import Spinner from "@/components/common/Spinner";
 
 export default function Order() {
   const navigate = useNavigate();
+  const [cancelModalOrder, setCancelModalOrder] = useState<OrderResponse | null>(null);
 
   const {
     keyword,
@@ -36,7 +39,6 @@ export default function Order() {
 
   const { data: orderData, isPending } = useFilterOrder(filterParams);
   const updateStatusMutation = useUpdateOrderStatus();
-  const cancelOrderMutation = useCancelOrder();
 
   const orders = orderData?.items || [];
 
@@ -45,7 +47,7 @@ export default function Order() {
   };
 
   const handleCancelOrder = (order: OrderResponse) => {
-    cancelOrderMutation.mutate({ id: order.id });
+    setCancelModalOrder(order);
   };
 
   const handleViewDetail = (order: OrderResponse) => {
@@ -53,6 +55,7 @@ export default function Order() {
       state: { orderCode: order.orderCode, order },
     });
   };
+
 
   return (
     <section className="flex-1 flex flex-col gap-4">
@@ -119,6 +122,13 @@ export default function Order() {
           </>
         )}
       </div>
+
+      {/* CANCEL ORDER MODAL */}
+      <CancelOrderModal
+        isOpen={!!cancelModalOrder}
+        onClose={() => setCancelModalOrder(null)}
+        order={cancelModalOrder}
+      />
     </section>
   );
 }
