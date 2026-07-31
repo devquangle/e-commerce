@@ -18,7 +18,6 @@ import com.dev.backend.entity.CartItem;
 import com.dev.backend.entity.OrderItem;
 import com.dev.backend.entity.Promotion;
 import com.dev.backend.entity.PromotionProduct;
-import com.dev.backend.exception.BadRequestException;
 import com.dev.backend.repository.PromotionProductRepository;
 import com.dev.backend.service.ProductService;
 import com.dev.backend.service.PromotionProductService;
@@ -196,16 +195,12 @@ public class PromotionProductServiceImpl implements PromotionProductService {
     }
 
     @Override
-    public void confirmPromotions(List<OrderItem> orderItems) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
     @Transactional
-    public void releasePromotions(List<OrderItem> orderItems) {
+    public void confirmPromotions(List<OrderItem> orderItems) {
+
         List<Integer> productIds = orderItems.stream()
                 .map(item -> item.getProduct().getId())
+                .distinct()
                 .toList();
 
         List<PromotionProduct> promotionProducts = promotionProductRepository.findActivePromotionProducts(productIds);
@@ -233,12 +228,68 @@ public class PromotionProductServiceImpl implements PromotionProductService {
                 continue;
             }
 
-            int reservedQuantity = promotionProduct.getReservedQuantity() == null
-                    ? 0
-                    : promotionProduct.getReservedQuantity();
+            int quantity = orderItem.getQuantity();
+
+            int reserved = Optional.ofNullable(
+                    promotionProduct.getReservedQuantity()).orElse(0);
+
+            int sold = Optional.ofNullable(
+                    promotionProduct.getSoldQuantity()).orElse(0);
 
             promotionProduct.setReservedQuantity(
-                    Math.max(0, reservedQuantity - orderItem.getQuantity()));
+                    Math.max(0, reserved - quantity));
+
+            promotionProduct.setSoldQuantity(
+                    sold + quantity);
+
+            updates.add(promotionProduct);
+        }
+
+        if (!updates.isEmpty()) {
+            promotionProductRepository.saveAll(updates);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void releasePromotions(List<OrderItem> orderItems) {
+
+        List<Integer> productIds = orderItems.stream()
+                .map(item -> item.getProduct().getId())
+                .distinct()
+                .toList();
+
+        List<PromotionProduct> promotionProducts = promotionProductRepository.findActivePromotionProducts(productIds);
+
+        Map<Integer, PromotionProduct> promotionMap = promotionProducts.stream()
+                .collect(Collectors.toMap(
+                        pp -> pp.getProduct().getId(),
+                        Function.identity()));
+
+        List<PromotionProduct> updates = new ArrayList<>();
+
+        for (OrderItem orderItem : orderItems) {
+
+            // Chỉ release nếu OrderItem đã mua với giá khuyến mãi
+            boolean isPromotion = orderItem.getOriginalPrice() != null
+                    && orderItem.getPrice() != null
+                    && orderItem.getOriginalPrice() > orderItem.getPrice();
+
+            if (!isPromotion) {
+                continue;
+            }
+
+            PromotionProduct promotionProduct = promotionMap.get(orderItem.getProduct().getId());
+
+            if (promotionProduct == null) {
+                continue;
+            }
+
+            int reserved = Optional.ofNullable(
+                    promotionProduct.getReservedQuantity()).orElse(0);
+
+            promotionProduct.setReservedQuantity(
+                    Math.max(0, reserved - orderItem.getQuantity()));
 
             updates.add(promotionProduct);
         }
